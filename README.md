@@ -9,20 +9,18 @@
 [![Gitter][badge-gitter]][link-gitter]
 
 [//]: # (Remove this line for the first release)
-The package is under pre-alpha development. First Alpha release target mid-April 2022.
+_The package is under pre-alpha development. First Alpha release target mid-April 2022._
 
 </div>
 
 ---
 
-Python software for analysis and computing framework for Mind-in-Vitro(MiV) project. 
+Python software for analysis and computing framework for Mind-in-Vitro(MiV) project.
 
-Example Data Files (.dat) https://drive.google.com/drive/folders/1VSE9fjmmYDMx569JYtDtIuWfw1X7aRb6?usp=sharing
-
-## Installation 
+## Installation
 [![PyPI version][badge-pypi]][link-pypi]
 
-MiV-OS is compatible with Python 3.8+. The easiest way to install is using python installation package (PIP) 
+MiV-OS is compatible with Python 3.8+. The easiest way to install is using python installation package (PIP)
 
 ~~~bash
 $ pip install MiV-OS
@@ -70,20 +68,19 @@ _Names arranged alphabetically_
 [//]: # (Collection of URLs.)
 
 [link-lab-website]: http://mattia-lab.com/
-[link-pypi]: 
-[link-travis]: 
-[link-CI]: 
-[link-docs-status]: 
-[link-pepy-download-count]: 
-[link-codecov]: 
+[link-pypi]:
+[link-travis]:
+[link-CI]:
+[link-docs-status]:
+[link-pepy-download-count]:
+[link-codecov]:
 
 [//]: # (Collection of Badges)
 
-[badge-pypi]: 
-[badge-travis]: 
-[badge-CI]: 
-[badge-docs-status]: 
-[badge-pepy-download-count]: 
-[badge-codecov]: 
-[badge-gitter]: 
-
+[badge-pypi]:
+[badge-travis]:
+[badge-CI]:
+[badge-docs-status]:
+[badge-pepy-download-count]:
+[badge-codecov]:
+[badge-gitter]:
