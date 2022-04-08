@@ -71,7 +71,7 @@ _Names arranged alphabetically_
 [link-pypi]:
 [link-travis]:
 [link-CI]:
-[link-docs-status]:
+[link-docs-status]: https://miv-os.readthedocs.io/en/latest/?badge=latest
 [link-pepy-download-count]:
 [link-codecov]:
 
@@ -80,7 +80,7 @@ _Names arranged alphabetically_
 [badge-pypi]:
 [badge-travis]:
 [badge-CI]:
-[badge-docs-status]:
+[badge-docs-status]: https://readthedocs.org/projects/miv-os/badge/?version=latest
 [badge-pepy-download-count]:
 [badge-codecov]:
 [badge-gitter]:
