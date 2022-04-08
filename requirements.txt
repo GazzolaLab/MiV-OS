@@ -1,0 +1,14 @@
+matplotlib
+matplotlib>=3.3.2
+McsPyDataTools
+numba>=0.51.0
+numpy>=1.19.2
+omegaconf
+pandas
+Pillow
+quantities
+scikit-learn
+scipy>=1.5.2
+seaborn
+sklearn
+tqdm>=4.61.1
