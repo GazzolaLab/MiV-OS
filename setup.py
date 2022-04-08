@@ -38,7 +38,20 @@ REQUIRED = [
 ]
 
 # What packages are optional?
-EXTRAS = {"dev": ["black", "pre-commit", "pytest", "flake8"], "build": ["twine"]}
+EXTRAS = {
+    "dev": ["black", "pre-commit", "pytest", "flake8"],
+    "build": ["twine"],
+    "docs": [
+        "sphinx==4.4.0",
+        "sphinx_rtd_theme==1.0.0",
+        "sphinx-book-theme",
+        "readthedocs-sphinx-search==0.1.1",
+        "sphinx-autodoc-typehints",
+        "myst-parser",
+        "numpydoc",
+        "docutils",
+    ],
+}
 
 here = os.path.abspath(os.path.dirname(__file__))
 
