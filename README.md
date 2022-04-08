@@ -68,19 +68,19 @@ _Names arranged alphabetically_
 [//]: # (Collection of URLs.)
 
 [link-lab-website]: http://mattia-lab.com/
+[link-docs-status]: https://miv-os.readthedocs.io/en/latest/?badge=latest
 [link-pypi]:
 [link-travis]:
 [link-CI]:
-[link-docs-status]: https://miv-os.readthedocs.io/en/latest/?badge=latest
 [link-pepy-download-count]:
 [link-codecov]:
 
 [//]: # (Collection of Badges)
 
+[badge-docs-status]: https://readthedocs.org/projects/miv-os/badge/?version=latest
 [badge-pypi]:
 [badge-travis]:
 [badge-CI]:
-[badge-docs-status]: https://readthedocs.org/projects/miv-os/badge/?version=latest
 [badge-pepy-download-count]:
 [badge-codecov]:
 [badge-gitter]:
