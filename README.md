@@ -15,7 +15,7 @@ _The package is under pre-alpha development. First Alpha release target mid-Apri
 
 ---
 
-Python software for analysis and computing framework for Mind-in-Vitro(MiV) project.
+Python analysis and computing framework developed for Mind-in-Vitro(MiV) project.
 
 ## Installation
 [![PyPI version][badge-pypi]][link-pypi]
