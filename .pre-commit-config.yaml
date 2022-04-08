@@ -11,7 +11,8 @@ repos:
   rev: 21.12b0
   hooks:
   - id: black
-    args: [--line-length=120]
+    additional_dependencies: ['click==8.0.4']
+    # args: [--line-length=120]
 - repo: https://github.com/pycqa/flake8
   rev: 4.0.0
   hooks:
