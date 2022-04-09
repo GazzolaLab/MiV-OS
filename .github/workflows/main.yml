@@ -92,7 +92,6 @@ jobs:
       - name: Set environment variables for coverage test
         run: |
           if [[ "${{ matrix.python-version }}" == "3.8" ]]; then 
-            echo "NUMBA_DISABLE_JIT=1" >> $GITHUB_ENV
             echo "CODECOV_TOKEN=4e35faf2-dc6b-442c-99f3-90d088ccd9f6" >> $GITHUB_ENV
           fi
         
