@@ -36,6 +36,7 @@ You can also download the source code from `GitHub <https://github.com/GazzolaLa
 
    api/io
    api/signal
+   api/statistics
 
 
 Indices and tables
