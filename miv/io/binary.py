@@ -1,4 +1,7 @@
 __doc__ = """
+
+We expect the data structure to follow the default format exported from OpenEphys system: `format <https://open-ephys.atlassian.net/wiki/spaces/OEW/pages/491632/Data+format>`_.
+
 Original Author
 
 - open-ephys/analysis-tools/Python3/Binary.py (commit: 871e003)
