@@ -30,6 +30,13 @@ You can also download the source code from `GitHub <https://github.com/GazzolaLa
 
    guide/spike_processing
 
+.. toctree::
+   :maxdepth: 2
+   :caption: API
+
+   api/io
+   api/signal
+
 
 Indices and tables
 ==================
