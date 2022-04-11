@@ -75,16 +75,16 @@ jobs:
     
       # Runs a single command using the runners shell
       - name: Welcome message
-        run: echo Hello, world! Welcome PyElastica Build, lets start testing!
+        run: echo Hello, world! Welcome MiV-OS Build, lets start testing!
       
       # Formatting test with black and flake8
       - name: Black and Flake8 formatting tests
         run: |
           if [[ "${{ matrix.python-version }}" == "3.8" ]]; then 
             black --version
-            black --check elastica tests
+            black --check miv tests
             flake8 --version
-            flake8 elastica tests 
+            flake8 miv tests 
           fi
           
       # Set environment variables for coverage test. Coverage test is done using python 3.6
@@ -95,11 +95,11 @@ jobs:
             echo "CODECOV_TOKEN=4e35faf2-dc6b-442c-99f3-90d088ccd9f6" >> $GITHUB_ENV
           fi
         
-      # Test Pyelastica using pytest
-      - name: Test PyElastica using pytest
+      # Test MiV-OS using pytest
+      - name: Test MiV-OS using pytest
         run: |
           if [[ "${{ matrix.python-version }}" == "3.8" ]]; then 
-            python3 -m pytest --cov=elastica --cov-report=xml
+            python3 -m pytest --cov=MiV-OS --cov-report=xml
             codecov
           else
             python3 -m pytest
