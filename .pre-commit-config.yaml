@@ -1,0 +1,19 @@
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v2.3.0
+  hooks:
+  - id: trailing-whitespace
+  - id: check-json
+  - id: end-of-file-fixer
+  - id: name-tests-test
+  - id: requirements-txt-fixer
+- repo: https://github.com/psf/black
+  rev: 21.12b0
+  hooks:
+  - id: black
+    additional_dependencies: ['click==8.0.4']
+    # args: [--line-length=120]
+- repo: https://github.com/pycqa/flake8
+  rev: 4.0.0
+  hooks:
+  - id: flake8
