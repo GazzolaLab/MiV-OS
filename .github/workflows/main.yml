@@ -69,9 +69,9 @@ jobs:
           echo update pip
           python -m pip install --upgrade pip
           echo update requirments
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install -r requirements.txt
           echo update test requirements
-          if [ -f tests/requirements.txt ]; then pip install -r tests/requirements.txt; fi
+          pip install -r tests/requirements.txt
     
       # Runs a single command using the runners shell
       - name: Welcome message
