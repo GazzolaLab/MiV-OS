@@ -41,6 +41,7 @@ extensions = [
     "sphinx_autodoc_typehints",
     #'sphinx.ext.napoleon',
     "sphinx.ext.viewcode",
+    "sphinx_togglebutton",
     "sphinx_rtd_theme",
     "sphinx.ext.mathjax",
     "numpydoc",
