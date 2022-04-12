@@ -2,7 +2,7 @@
 <h1> MiV-OS: Spike Analysis and Computing Framework </h1>
 
 [![License][badge-LICENSE]][link-LICENSE]
-[![Release Version][badge-version]][link-version]
+[![Release pypi][badge-pypi]][link-pypi]
 [![Build Status][badge-CI]][link-CI]
 [![Documentation Status][badge-docs-status]][link-docs-status]
 [![codecov][badge-codecov]][link-codecov]
@@ -67,15 +67,11 @@ _Names arranged alphabetically_
 
 [//]: # (Collection of URLs.)
 
-
-  <a href="https://github.com/skim0119/gym-softrobot"><img src="https://img.shields.io/github/release/skim0119/gym-softrobot.svg?style=flat"></a>
-    <img src="https://github.com/skim0119/gym-softrobot/actions/workflows/main.yml/badge.svg?style=flat">
-
 [link-lab-website]: http://mattia-lab.com/
 [link-docs-status]: https://miv-os.readthedocs.io/en/latest/?badge=latest
 [link-CI]: https://github.com/GazzolaLab/MiV-OS/actions
 [link-LICENSE]: https://github.com/GazzolaLab/MiV-OS/blob/main/LICENSE
-[link-pypi]:
+[link-pypi]: https://badge.fury.io/py/MiV-OS
 [link-pepy-download-count]:
 [link-codecov]:
 
@@ -84,6 +80,6 @@ _Names arranged alphabetically_
 [badge-docs-status]: https://readthedocs.org/projects/miv-os/badge/?version=latest
 [badge-CI]: https://github.com/GazzolaLab/MiV-OS/workflows/CI/badge.svg
 [badge-LICENSE]: https://img.shields.io/apm/l/atomic-design-ui.svg?style=flat
-[badge-pypi]:
+[badge-pypi]: https://badge.fury.io/py/MiV-OS.svg
 [badge-pepy-download-count]:
 [badge-codecov]:
