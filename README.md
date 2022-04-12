@@ -29,7 +29,7 @@ $ pip install MiV-OS
 ## Documentation
 [![Documentation Status][badge-docs-status]][link-docs-status]
 
-Documentation of the package is available [here][link-docs-website]
+Documentation of the package is available [here][link-docs-status]
 
 ## Contribution
 
