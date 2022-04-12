@@ -37,13 +37,13 @@ def BitsToVolts(Data, ChInfo, Unit):
     if Unit.lower() == "uv":
         U = 1
     elif Unit.lower() == "mv":
-        U = 10 ** -3
+        U = 10**-3
 
     for R in Data.keys():
         for C in range(len(ChInfo)):
             Data[R][:, C] = Data[R][:, C] * ChInfo[C]["bit_volts"] * U
             if "ADC" in ChInfo[C]["channel_name"]:
-                Data[R][:, C] *= 10 ** 6
+                Data[R][:, C] *= 10**6
 
     return Data
 
