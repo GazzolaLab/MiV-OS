@@ -6,6 +6,7 @@ repos:
   - id: check-json
   - id: end-of-file-fixer
   - id: name-tests-test
+    args: ['--django']
   - id: requirements-txt-fixer
 - repo: https://github.com/psf/black
   rev: 21.12b0
