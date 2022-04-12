@@ -44,7 +44,7 @@ extensions = [
     "sphinx_rtd_theme",
     "sphinx.ext.mathjax",
     "numpydoc",
-    "myst_parser",
+    # "myst_parser", # Moving onto jupyter-notebook style
     "myst_nb",
 ]
 
@@ -53,7 +53,7 @@ myst_enable_extensions = [
     "colon_fence",
     "deflist",
     "dollarmath",
-    "fieldlist",
+    # "fieldlist",
     "html_admonition",
     "html_image",
 ]
@@ -77,7 +77,12 @@ autodoc_default_flags = [
 autosectionlabel_prefix_document = True
 
 source_parsers = {}
-source_suffix = [".rst", ".md"]
+source_suffix = {
+    ".rst": "restructuredtext",
+    ".md": "myst-nb",
+    ".myst": "myst-nb",
+    ".ipynb": "myst-nb",
+}
 
 master_doc = "index"
 # -- Options for HTML output -------------------------------------------------
