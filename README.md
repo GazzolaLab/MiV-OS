@@ -5,8 +5,8 @@
 [![Release pypi][badge-pypi]][link-pypi]
 [![Build Status][badge-CI]][link-CI]
 [![Documentation Status][badge-docs-status]][link-docs-status]
-[![codecov][badge-codecov]][link-codecov]
 [![Downloads][badge-pepy-download-count]][link-pepy-download-count]
+[![codecov][badge-codecov]][link-codecov]
 
 [//]: # (Remove this line for the first release)
 _The package is under pre-alpha development. First Alpha release target mid-April 2022._
@@ -72,7 +72,7 @@ _Names arranged alphabetically_
 [link-CI]: https://github.com/GazzolaLab/MiV-OS/actions
 [link-LICENSE]: https://github.com/GazzolaLab/MiV-OS/blob/main/LICENSE
 [link-pypi]: https://badge.fury.io/py/MiV-OS
-[link-pepy-download-count]:
+[link-pepy-download-count]: https://pepy.tech/project/MiV-OS
 [link-codecov]:
 
 [//]: # (Collection of Badges)
@@ -81,5 +81,5 @@ _Names arranged alphabetically_
 [badge-CI]: https://github.com/GazzolaLab/MiV-OS/workflows/CI/badge.svg
 [badge-LICENSE]: https://img.shields.io/apm/l/atomic-design-ui.svg?style=flat
 [badge-pypi]: https://badge.fury.io/py/MiV-OS.svg
-[badge-pepy-download-count]:
+[badge-pepy-download-count]: https://pepy.tech/badge/MiV-OS
 [badge-codecov]:
