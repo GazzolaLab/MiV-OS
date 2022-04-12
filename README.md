@@ -73,7 +73,7 @@ _Names arranged alphabetically_
 [link-LICENSE]: https://github.com/GazzolaLab/MiV-OS/blob/main/LICENSE
 [link-pypi]: https://badge.fury.io/py/MiV-OS
 [link-pepy-download-count]: https://pepy.tech/project/MiV-OS
-[link-codecov]:
+[link-codecov]: https://codecov.io/gh/GazzolaLab/MiV-OS
 
 [//]: # (Collection of Badges)
 
@@ -82,4 +82,4 @@ _Names arranged alphabetically_
 [badge-LICENSE]: https://img.shields.io/apm/l/atomic-design-ui.svg?style=flat
 [badge-pypi]: https://badge.fury.io/py/MiV-OS.svg
 [badge-pepy-download-count]: https://pepy.tech/badge/MiV-OS
-[badge-codecov]:
+[badge-codecov]: https://codecov.io/gh/GazzolaLab/MiV-OS/branch/main/graph/badge.svg?token=OM5LYWF5KP
