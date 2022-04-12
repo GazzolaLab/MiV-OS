@@ -45,6 +45,7 @@ extensions = [
     "sphinx.ext.mathjax",
     "numpydoc",
     "myst_parser",
+    "myst_nb",
 ]
 
 myst_enable_extensions = [
