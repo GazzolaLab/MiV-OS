@@ -2,6 +2,7 @@
 
 -r ../requirements.txt
 docutils
+myst-nb
 myst-parser
 numpydoc
 readthedocs-sphinx-search==0.1.1
