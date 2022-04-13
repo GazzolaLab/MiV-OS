@@ -26,7 +26,7 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
-      
+
       # Ref: https://docs.github.com/en/free-pro-team@latest/actions/guides/building-and-testing-python
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
@@ -36,9 +36,9 @@ jobs:
       # You can test your matrix by printing the current Python version
       - name: Display Python version
         run: python -c "import sys; print(sys.version)"
-      
+
       # Cache the pip requirmenets for other tests. If requirements cached use them to speed up the build.
-      # Ref: https://github.com/actions/cache/blob/main/examples.md#python---pip 
+      # Ref: https://github.com/actions/cache/blob/main/examples.md#python---pip
       - name: Cache pip Linux
         uses: actions/cache@v2
         if: startsWith(runner.os, 'Linux')
@@ -55,7 +55,7 @@ jobs:
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
-            
+
       - name: Cache pip Windows
         uses: actions/cache@v2
         if: startsWith(runner.os, 'Windows')
@@ -72,33 +72,33 @@ jobs:
           pip install -r requirements.txt
           echo update test requirements
           pip install -r tests/requirements.txt
-    
+
       # Runs a single command using the runners shell
       - name: Welcome message
         run: echo Hello, world! Welcome MiV-OS Build, lets start testing!
-      
+
       # Formatting test with black and flake8
       - name: Black and Flake8 formatting tests
         if: startsWith(runner.os, 'macOS')
         run: |
-          if [[ "${{ matrix.python-version }}" == "3.8" ]]; then 
+          if [[ "${{ matrix.python-version }}" == "3.8" ]]; then
             black --version
             black --check miv tests
             flake8 --version
-            flake8 miv tests 
+            flake8 miv tests
           fi
-          
+
       # General PyTest for all matrix strategy
-      - name: PyTest
+      - name: PyTest and MyPy
         run: |
-          pytest
-          
+          make ci
+
       # Set environment variables for coverage test. Coverage test is done using python 3.8
       # Test MiV-OS using pytest
       - name: Test MiV-OS using pytest
         if: startsWith(runner.os, 'macOS')
         run: |
-          if [[ "${{ matrix.python-version }}" == "3.8" ]]; then 
+          if [[ "${{ matrix.python-version }}" == "3.8" ]]; then
             echo "CODECOV_TOKEN=4e35faf2-dc6b-442c-99f3-90d088ccd9f6" >> $GITHUB_ENV
             python3 -m pytest --cov=MiV-OS --cov-report=xml
             codecov

@@ -61,7 +61,7 @@ def align_to_minimum(signal, fs, threshold_crossings, search_range):
 
 
 def compute_spike_threshold(
-    signal: np.array, cutoff: float = 5.0, use_mad: bool = True
+    signal: np.ndarray, cutoff: float = 5.0, use_mad: bool = True
 ):
     """
     Returns the threshold for the spike detection given an array of signal.
