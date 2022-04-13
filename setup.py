@@ -39,7 +39,7 @@ REQUIRED = [
 
 # What packages are optional?
 EXTRAS = {
-    "dev": ["black", "pre-commit", "pytest", "flake8"],
+    "dev": ["black", "pre-commit", "pytest", "flake8", "mypy"],
     "build": ["twine"],
     "docs": [
         "sphinx==4.4.0",
