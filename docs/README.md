@@ -6,6 +6,12 @@ In addition, we utilize the following extensions to enhance the documentation :c
 - `numpydoc`: We favor [numpy documentation style](https://numpydoc.readthedocs.io/en/latest/format.html) for API documentation.
 - `myst_parser`: We like to write documentation and guidelines in `markdown` format.
 
+## Key things to remember
+
+- Please DON'T IGNORE any `errors` or `warnings` during the compilation stage.
+- If you are uploading any `ipynb` or notebook-style, make sure you excluded the input-output cells.
+    - Currently, we don't use the `runnable` notebook directly on the documentation. If you think otherwise, please leave an issue so that we can discuss.
+
 ## Build documentation
 
 The `sphinx` is already initialized in `docs` directory. In order to build the documentation, you will need additional packages listed in `docs/requirements.txt`.
