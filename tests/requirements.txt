@@ -1,6 +1,6 @@
+black
+codecov
+flake8==3.8.3
+pylint
 pytest
 pytest-cov
-flake8==3.8.3
-codecov
-black
-pylint
