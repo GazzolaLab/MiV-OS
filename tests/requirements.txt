@@ -1,4 +1,4 @@
-black
+black==21.12b0
 codecov
 flake8==3.8.3
 mypy
