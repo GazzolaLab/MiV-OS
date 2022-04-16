@@ -100,6 +100,6 @@ jobs:
         run: |
           if [[ "${{ matrix.python-version }}" == "3.8" ]]; then
             echo "CODECOV_TOKEN=4e35faf2-dc6b-442c-99f3-90d088ccd9f6" >> $GITHUB_ENV
-            python3 -m pytest --cov=MiV-OS --cov-report=xml
+            python3 -m pytest --cov=miv --cov-report=xml
             codecov
           fi
