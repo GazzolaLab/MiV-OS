@@ -1,6 +1,7 @@
 black
 codecov
 flake8==3.8.3
+mypy
 pylint
 pytest
 pytest-cov
