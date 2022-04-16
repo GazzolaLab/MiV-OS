@@ -2,7 +2,7 @@ test:
 	@python -m pytest
 
 mypy:
-	@mypy --ignore-missing-imports miv tests
+	@mypy --ignore-missing-imports miv
 
 coverage:
 	@pytest --cov=miv tests/
