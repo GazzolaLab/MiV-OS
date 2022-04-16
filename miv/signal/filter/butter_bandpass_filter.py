@@ -37,6 +37,17 @@ class ButterBandpass:
         y = sps.lfilter(b, a, signal)
         return y
 
+    def __post_init__(self):
+        assert (
+            self.lowcut < self.highcut
+        ), f"{self.lowcut=} should be lower than {self.highcut=}."
+        assert self.order > 0 and isinstance(
+            self.order, int
+        ), f"Filter {self.order} must be an nonnegative integer."
+        assert (
+            min(self.lowcut, self.highcut) > 0
+        ), "Filter critical frequencies must be greater than 0"
+
     def _butter_bandpass(self, sampling_rate: float):
         nyq = 0.5 * sampling_rate
         low = self.lowcut / nyq

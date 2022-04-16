@@ -14,6 +14,8 @@ from miv.typing import SignalType
 class FilterProtocol(Protocol):
     """Behavior definition of all filter operator."""
 
+    tag: str = ""
+
     def __call__(self, array: SignalType, sampling_rate: float, **kwargs) -> SignalType:
         """User can apply the filter by directly calling.
         Parameters
@@ -21,8 +23,4 @@ class FilterProtocol(Protocol):
         array : SignalType {"numpy.ndarray", "neo.core.AnalogSignal"}
         samping_rate : float
         """
-        ...
-
-    @property
-    def tag(self) -> str:
         ...
