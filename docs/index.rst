@@ -28,7 +28,7 @@ You can also download the source code from `GitHub <https://github.com/GazzolaLa
    :maxdepth: 2
    :caption: User Guide
 
-   guide/spike_processing
+   guide/signal_processing
 
 .. toctree::
    :maxdepth: 2
@@ -37,6 +37,12 @@ You can also download the source code from `GitHub <https://github.com/GazzolaLa
    api/io
    api/signal
    api/statistics
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Example Scripts
+
+   examples/spike_detection
 
 
 Indices and tables

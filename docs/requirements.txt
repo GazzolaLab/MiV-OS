@@ -9,5 +9,6 @@ readthedocs-sphinx-search==0.1.1
 sphinx==4.4.0
 sphinx-autodoc-typehints
 sphinx-book-theme
+sphinx-copybutton
 sphinx-togglebutton
 sphinx_rtd_theme==1.0.0
