@@ -1,6 +1,4 @@
-__doc__ = """
-Butter bandpass filter implementation.
-"""
+__doc__ = ""
 __all__ = ["ButterBandpass"]
 
 from dataclasses import dataclass

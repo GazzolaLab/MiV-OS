@@ -1,18 +1,17 @@
-__doc__ = """
-Filter collection.
-"""
+__doc__ = ""
 __all__ = ["FilterCollection"]
 
-from typing import Union
+from typing import Union, List
 import numpy as np
 import numpy.typing as npt
 
-from collections.abc import Callable, MutableSequence
+from collections.abc import MutableSequence
 
 from miv.typing import SignalType
+from miv.signal.filter import FilterProtocol
 
 
-class FilterCollection(MutableSequence, Callable):
+class FilterCollection(MutableSequence):
     """Create sequence of multiple filters.
 
     Each appended filters are expected to abide the FilterProtocol.
@@ -22,21 +21,33 @@ class FilterCollection(MutableSequence, Callable):
         tag : str
             Tag for the collection of filter.
 
+        See Also
+        --------
+        miv.signal.filter.ButterBandpass : butterworth filter
+
         Examples
         --------
-
+        >>> custom_filter = (
+        ...     FilterCollection(tag="custom filter 1")
+        ...       .append(ButterBandpass(lowcut=300, highcut=3000, order=3))
+        ...       .append(ButterBandpass(lowcut=300, highcut=2500))
+        ... )
+        >>> custom_filter
+        Collection of filters(self.tag='custom filter 1', id(self)=140410408570736)
+          0: ButterBandpass(lowcut=300, highcut=3000, order=3, tag='')
+          1: ButterBandpass(lowcut=300, highcut=2500, order=5, tag='')
+        >>> filtered_signal = custom_filter(signal=signal, sampling_rate=30_000)
 
     """
 
     def __init__(self, tag: str = ""):
-        self.filters = []
-        self.tag = tag
+        self.filters: List[FilterProtocol] = []
+        self.tag: str = tag
 
-    # Callable abstract methods
-    def __call__(self, signal: SignalType) -> SignalType:
+    def __call__(self, signal: SignalType, sampling_rate: float) -> SignalType:
         for filter in self.filters:
-            signal = filter(signal)
-        return signal
+            y: SignalType = filter(signal, sampling_rate)
+        return y
 
     # MutableSequence abstract methods
     def __len__(self):
@@ -52,10 +63,43 @@ class FilterCollection(MutableSequence, Callable):
         self.filters[idx] = system
 
     def insert(self, idx, system):
+        """
+
+        Parameters
+        ----------
+        idx : int
+        system : FilterProtocol
+
+        Returns
+        -------
+        self : FilterCollection
+            User can chain multiple insert/append to build sequence of filter.
+            Check the example above.
+
+        """
+
         self.filters.insert(idx, system)
+        return self
+
+    def append(self, system):
+        """
+
+        Parameters
+        ----------
+        system : FilterProtocol
+
+        Returns
+        -------
+        self : FilterCollection
+            User can chain multiple insert/append to build sequence of filter.
+            Check the example above.
+
+        """
+        self.filters.append(system)
+        return self
 
     def __repr__(self):
         s = f"Collection of filters({self.tag=}, {id(self)=})\n"
-        for filter in self.filters:
-            s += "  " + filter.__repr__() + "\n"
+        for idx, filter in enumerate(self.filters):
+            s += f"  {idx}: {filter}\n"
         return s
