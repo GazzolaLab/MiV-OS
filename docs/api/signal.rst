@@ -1,13 +1,14 @@
-************************
-Signal Processing Module
-************************
+*************************
+Signal Processing Modules
+*************************
 
-.. automodule:: miv.signal.filter.continuous_signal_filter
-   :members:
+.. automodule:: miv.signal.filter
 
-***********************
-Spike Detection Modules
-***********************
+Spike Detection
+###############
 
 .. automodule:: miv.signal.spike.detection
    :members:
+
+Spike Sorting
+#############

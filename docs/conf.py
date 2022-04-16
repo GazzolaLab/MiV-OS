@@ -42,6 +42,7 @@ extensions = [
     #'sphinx.ext.napoleon',
     "sphinx.ext.viewcode",
     "sphinx_togglebutton",
+    "sphinx_copybutton",
     "sphinx_rtd_theme",
     "sphinx.ext.mathjax",
     "numpydoc",
@@ -69,13 +70,16 @@ exclude_patterns = [
     "README.md",  # File reserved to explain how documentationing works.
 ]
 
-autodoc_default_flags = [
-    "members",
-    "private-members",
-    "special-members",
-    "show-inheritance",
-]
+autodoc_default_options = {
+    "members": True,
+    "member-order": "bysource",
+    "special-members": "__init__",
+    "exclude-members": "__weakref__",
+    "show-inheritance": True,
+}
 autosectionlabel_prefix_document = True
+autosummary_generate = True
+autosummary_generate_overwrite = False
 
 source_parsers = {}
 source_suffix = {
@@ -108,3 +112,6 @@ html_css_files = ["css/*", "css/logo.css"]
 
 # -- Options for numpydoc ---------------------------------------------------
 numpydoc_show_class_members = False
+
+# -- Options for myst-nb ---------------------------------------------------
+jupyter_execute_notebooks = "off"
