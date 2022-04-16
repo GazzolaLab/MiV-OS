@@ -1,42 +1,47 @@
 __doc__ = """
-Collection of modules to filter continuous signal input.
+Butter bandpass filter implementation.
 """
 __all__ = ["ButterBandpass"]
+
+from dataclasses import dataclass
 
 import numpy as np
 import numpy.typing as npt
 
 import scipy.signal as sps
 
+from miv.typing import SignalType
 
+
+@dataclass(frozen=True)
 class ButterBandpass:
-    """Classical bandpass filter using `scipy` butterworth filter."""
+    """Classical bandpass filter using `scipy` butterworth filter
 
-    def __init__(self, lowcut, highcut, order):
-        """
+    Parameters
+    ----------
+    lowcut : float
+        low-pass frequency
+    highcut : float
+        high-pass frequency
+    order : int
+        The order of the filter. (default=5)
+    tag : str
+        Tag for the collection of filter.
+    """
 
-        Parameters
-        ----------
-        lowcut :
-            lowcut
-        highcut :
-            highcut
-        order :
-            order
-        """
-        pass
+    lowcut: float
+    highcut: float
+    order: int = 5
+    tag: str = ""
 
-    def __call__(self, array: npt.ArrayLike) -> np.ndarray:
-        pass
-
-    def butter_bandpass(self, lowcut, highcut, fs, order=5):
-        nyq = 0.5 * fs
-        low = lowcut / nyq
-        high = highcut / nyq
-        b, a = sps.butter(order, [low, high], btype="band")
-        return b, a
-
-    def butter_bandpass_filter(self, data, lowcut, highcut, fs, order=5):
-        b, a = self.butter_bandpass(lowcut, highcut, fs, order=order)
-        y = sps.lfilter(b, a, data)
+    def __call__(self, signal: SignalType, sampling_rate: float) -> SignalType:
+        b, a = self._butter_bandpass(sampling_rate)
+        y = sps.lfilter(b, a, signal)
         return y
+
+    def _butter_bandpass(self, sampling_rate: float):
+        nyq = 0.5 * sampling_rate
+        low = self.lowcut / nyq
+        high = self.highcut / nyq
+        b, a = sps.butter(self.order, [low, high], btype="band")
+        return b, a

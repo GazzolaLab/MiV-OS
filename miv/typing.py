@@ -1,10 +1,10 @@
-from typing import TypeAlias
-from typing import Union, Tuples
+# from typing import TypeAlias
+from typing import Union
 
 import numpy as np
 import numpy.typing as npt
 
 import neo
 
-SignalType: TypeAlias = Union[npt.ArrayLike, np.ndarray, neo.core.AnalogSignal]
-TimestampsType: TypeAlias = npt.ArrayLike
+SignalType = Union[npt.ArrayLike, np.ndarray]
+TimestampsType = npt.ArrayLike
