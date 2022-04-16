@@ -2,7 +2,19 @@
 Signal Processing Modules
 *************************
 
+
+Filter
+######
+
 .. automodule:: miv.signal.filter
+
+.. autosummary::
+   :nosignatures:
+   :toctree: _toctree/FilterAPI
+
+   FilterProtocol
+   ButterBandpass
+   FilterCollection
 
 Spike Detection
 ###############
