@@ -6,15 +6,17 @@ Signal Processing Modules
 Filter
 ######
 
+.. currentmodule:: miv.signal.filter
+
 .. automodule:: miv.signal.filter
 
-.. autosummary::
-   :nosignatures:
-   :toctree: _toctree/FilterAPI
+    .. autosummary::
+       :nosignatures:
+       :toctree: _toctree/FilterAPI
 
-   FilterProtocol
-   ButterBandpass
-   FilterCollection
+       FilterProtocol
+       ButterBandpass
+       FilterCollection
 
 Spike Detection
 ###############

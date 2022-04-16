@@ -37,6 +37,7 @@ release = VERSION
 # ones.
 extensions = [
     "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
     "sphinx.ext.autosectionlabel",
     "sphinx_autodoc_typehints",
     #'sphinx.ext.napoleon',
