@@ -89,9 +89,9 @@ jobs:
           fi
 
       # General PyTest for all matrix strategy
-      - name: PyTest
+      - name: PyTest and MyPy
         run: |
-          pytest
+          make ci
 
       # Set environment variables for coverage test. Coverage test is done using python 3.8
       # Test MiV-OS using pytest

@@ -1,4 +1,11 @@
 test:
 	@python -m pytest
 
-all:test
+mypy:
+	@mypy --ignore-missing-imports miv
+
+coverage:
+	@pytest --cov=miv tests/
+
+all:test mypy
+ci: test mypy
