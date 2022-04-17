@@ -6,5 +6,8 @@ import numpy.typing as npt
 
 import neo
 
-SignalType = Union[npt.ArrayLike, np.ndarray]
+SignalType = Union[
+    npt.ArrayLike, np.ndarray
+]  # Shape should be [n_channel, signal_length]
 TimestampsType = npt.ArrayLike
+SpikestampsType = Union[npt.ArrayLike, neo.core.SpikeTrain]
