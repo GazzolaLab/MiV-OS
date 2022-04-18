@@ -72,9 +72,9 @@ exclude_patterns = [
 ]
 
 autodoc_default_options = {
-    "members": True,
+    # "members": False,
     "member-order": "bysource",
-    "special-members": "__init__",
+    "special-members": "",
     "exclude-members": "__weakref__",
     "show-inheritance": True,
 }
