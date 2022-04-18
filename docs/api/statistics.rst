@@ -10,7 +10,7 @@ Spikestamps
 
 .. currentmodule:: miv.statistics
 
-.. automodule:: miv.statistics.spike_analysis
+.. automodule:: miv.statistics.summarizer
 
    .. autosummary::
       :nosignatures:
