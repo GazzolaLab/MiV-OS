@@ -10,7 +10,7 @@ Filter
 
 .. automodule:: miv.signal.filter
 
-    .. autosummary::
+   .. autosummary::
        :nosignatures:
        :toctree: _toctree/FilterAPI
 
@@ -21,8 +21,14 @@ Filter
 Spike Detection
 ###############
 
-.. automodule:: miv.signal.spike.detection
-   :members:
+.. automodule:: miv.signal.spike
+
+   .. autosummary::
+       :nosignatures:
+       :toctree: _toctree/DetectionAPI
+
+       SpikeDetectionProtocol
+       ThresholdCutoff
 
 Spike Sorting
 #############
