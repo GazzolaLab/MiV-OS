@@ -62,17 +62,17 @@ class ThresholdCutoff:
         """
         # Spike detection for each channel
         spiketrain_list = []
-        num_channels: int = len(signal)
+        num_channels = len(signal)  # type: ignore
         for channel in range(num_channels):
+            array = signal[channel]  # type: ignore
+
             # Spike Detection: get spikestamp
-            spike_threshold = self.compute_spike_threshold(
-                signal[channel], use_mad=use_mad
-            )
+            spike_threshold = self.compute_spike_threshold(array, use_mad=use_mad)
             crossings = self.detect_threshold_crossings(
-                signal[channel], sampling_rate, spike_threshold, self.dead_time
+                array, sampling_rate, spike_threshold, self.dead_time
             )
             spikes = self.align_to_minimum(
-                signal[channel], sampling_rate, crossings, self.search_range
+                array, sampling_rate, crossings, self.search_range
             )
             spikestamp = spikes / sampling_rate
             # Convert spikestamp to neo.SpikeTrain (for plotting)
@@ -81,7 +81,7 @@ class ThresholdCutoff:
         return spiketrain_list
 
     def compute_spike_threshold(
-        self, signal: np.ndarray, cutoff: float = 5.0, use_mad: bool = True
+        self, signal: SignalType, cutoff: float = 5.0, use_mad: bool = True
     ) -> float:
         """
         Returns the threshold for the spike detection given an array of signal.
