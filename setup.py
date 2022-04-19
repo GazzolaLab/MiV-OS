@@ -39,7 +39,7 @@ REQUIRED = [
 
 # What packages are optional?
 EXTRAS = {
-    "dev": ["black", "pre-commit", "pytest", "flake8"],
+    "dev": ["black", "pre-commit", "pytest", "flake8", "mypy"],
     "build": ["twine"],
     "docs": [
         "sphinx==4.4.0",
@@ -128,7 +128,7 @@ setup(
         # Trove classifiers
         # Full list: https://pypi.python.org/pypi?%3Aaction=list_classifiers
         "License :: OSI Approved :: MIT License",
-        "Development Status :: 3 - Pre-Alpha",
+        "Development Status :: 3 - Alpha",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3.8",
         "Intended Audience :: Science/Research",

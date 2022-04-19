@@ -14,7 +14,3 @@ def test_version_regex_match():
     assert (
         lead_zero_stripped_version == VERSION
     ), "Version numbers should not have leading zeros."
-
-
-def test_miv_modules_import():
-    import miv
