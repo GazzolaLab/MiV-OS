@@ -29,6 +29,7 @@ You can also download the source code from `GitHub <https://github.com/GazzolaLa
    :caption: User Guide
 
    guide/signal_processing
+   guide/spike_cutout
 
 .. toctree::
    :maxdepth: 2
@@ -43,7 +44,6 @@ You can also download the source code from `GitHub <https://github.com/GazzolaLa
    :caption: Example Scripts
 
    examples/spike_detection
-   examples/spike_cutout
 
 
 Indices and tables
