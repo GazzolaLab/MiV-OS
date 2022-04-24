@@ -43,6 +43,7 @@ You can also download the source code from `GitHub <https://github.com/GazzolaLa
    :caption: Example Scripts
 
    examples/spike_detection
+   examples/spike_cutout
 
 
 Indices and tables
