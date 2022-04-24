@@ -17,16 +17,23 @@ class ThresholdCutoff:
     """ThresholdCutoff
     Spike sorting step by step guide is well documented `here <http://www.scholarpedia.org/article/Spike_sorting>`_.
 
-        Parameters
+        Attributes
         ----------
         dead_time : float
             (default=0.003)
-        search_range : floatfloatfloatfloat
+        search_range : float
             (default=0.002)
+        cutoff : Union[float, np.ndarray]
+            (default=5.0)
+        use_mad : bool
+            (default=False)
+        tag : str
     """
 
     dead_time: float = 0.003
     search_range: float = 0.002
+    cutoff: Union[float, np.ndarray] = 5.0
+    use_mad: bool = True
     tag: str = "Threshold Cutoff Spike Detection"
 
     def __call__(
@@ -35,8 +42,6 @@ class ThresholdCutoff:
         timestamps: TimestampsType,
         sampling_rate: float,
         units: Union[str, pq.UnitTime] = "sec",
-        cutoff: Union[float, np.ndarray] = 5.0,
-        use_mad: bool = True,
     ) -> List[SpikestampsType]:
         """Execute threshold-cutoff method and return spike stamps
 
@@ -50,10 +55,6 @@ class ThresholdCutoff:
             sampling_rate
         units : Union[str, pq.UnitTime]
             (default='sec')
-        cutoff : Union[float, np.ndarray]
-            (default=5.0)
-        use_mad : bool
-            (default=False)
 
         Returns
         -------
@@ -67,7 +68,9 @@ class ThresholdCutoff:
             array = signal[channel]  # type: ignore
 
             # Spike Detection: get spikestamp
-            spike_threshold = self.compute_spike_threshold(array, use_mad=use_mad)
+            spike_threshold = self.compute_spike_threshold(
+                array, cutoff=self.cutoff, use_mad=self.use_mad
+            )
             crossings = self.detect_threshold_crossings(
                 array, sampling_rate, spike_threshold, self.dead_time
             )
