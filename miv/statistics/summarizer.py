@@ -1,7 +1,7 @@
 __doc__ = ""
-__all__ = ["StatisticsSummary"]
+__all__ = ["spikestamps_statistics"]
 
-from typing import Any, Optional, Iterable, Union
+from typing import Any, Optional, Iterable, Union, Dict
 import numpy as np
 import matplotlib.pyplot as plt
 import datetime
@@ -12,25 +12,35 @@ import neo
 import elephant.statistics
 
 
-class StatisticsSummary:
-    """StatisticsSummary."""
+# FIXME: For now, we provide the free function for simple usage. For more
+# advanced statistical analysis, we should have a module wrapper.
+def spikestamps_statistics(
+    spikestamps: Union[np.ndarray, Iterable[float], Iterable[neo.core.SpikeTrain]],
+    t_start: Optional[float] = None,
+    t_stop: Optional[float] = None,
+) -> Dict[str, Any]:
+    """
+    Process basic spikestamps statistics: rates, mean, variance.
 
-    def __init__(self):
-        pass
+    Parameters
+    ----------
+    spikestamps : Iterable[neo.core.SpikeTrain]
+    t_start : Optional[float]
+    t_stop : Optional[float]
 
-    def spikestamps_summary(
-        self,
-        spikestamps: Iterable[neo.core.SpikeTrain],
-        t_start: Optional[float] = None,
-        t_stop: Optional[float] = None,
-    ) -> Iterable[Any]:
-        rates = elephant.statistics.mean_firing_rate(
-            spikestamps, t_start, t_stop, axis=0
-        )
-        rates_mean_over_channel = np.mean(rates)
-        rates_variance_over_channel = np.var(rates)
-        return {
-            "rates": rates,
-            "mean": rates_mean_over_channel,
-            "variance": rates_variance_over_channel,
-        }
+    Returns
+    -------
+    Iterable[Any]
+
+    """
+    rates = [
+        elephant.statistics.mean_firing_rate(spikestamp, t_start, t_stop, axis=0)
+        for spikestamp in spikestamps
+    ]
+    rates_mean_over_channel = np.mean(rates)
+    rates_variance_over_channel = np.var(rates)
+    return {
+        "rates": rates,
+        "mean": rates_mean_over_channel,
+        "variance": rates_variance_over_channel,
+    }

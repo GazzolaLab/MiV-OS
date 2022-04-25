@@ -16,10 +16,12 @@ Spikestamps
       :nosignatures:
       :toctree: _toctree/StatisticsAPI
 
-      StatisticsSummary
+      spikestamps_statistics
 
 Useful External Packages
 ########################
+
+Here are few external `python` packages that can be used for further statistical analysis.
 
 scipy statistics
 ================
