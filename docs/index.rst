@@ -38,6 +38,7 @@ You can also download the source code from `GitHub <https://github.com/GazzolaLa
    api/io
    api/signal
    api/statistics
+   api/visualization
 
 .. toctree::
    :maxdepth: 2
