@@ -49,7 +49,7 @@ def test_butterworth_filter_analytical(lowcut, highcut, order, tag, sig, rate, r
 
 
 @pytest.mark.parametrize("lowcut, highcut, order, tag", ParameterSet)
-def test_butterworth_repr_string_test(lowcut, highcut, order, tag):
+def test_butterworth_repr_string(lowcut, highcut, order, tag):
     filt = ButterBandpass(lowcut, highcut, order, tag)
     for v in [lowcut, highcut, order, tag]:
         assert str(v) in repr(filt)
