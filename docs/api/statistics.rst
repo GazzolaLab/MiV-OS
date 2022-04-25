@@ -21,6 +21,8 @@ Spikestamps
 Useful External Packages
 ########################
 
+Here are few external `python` packages that can be used for further statistical analysis.
+
 scipy statistics
 ================
 

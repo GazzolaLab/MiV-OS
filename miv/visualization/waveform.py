@@ -3,7 +3,7 @@ Module for extracting each spike waveform and visualize.
 """
 __all__ = ["extract_waveforms", "plot_waveforms"]
 
-from typing import Any, Optional, Union, Tuples, Dict
+from typing import Any, Optional, Union, Tuple, Dict
 
 import os
 import numpy as np
@@ -28,7 +28,7 @@ def extract_waveforms(
     pre: float = 0.001,
     post: float = 0.002,
     return_spikes_idx: bool = False,
-) -> Union[np.ndarray, Tuples[np.ndarray, np.ndarray]]:
+) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
     """
     Extract spike waveforms as signal cutouts around each spike index as a spikes x samples numpy array
 
