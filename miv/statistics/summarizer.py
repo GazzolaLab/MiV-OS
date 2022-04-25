@@ -18,7 +18,7 @@ def spikestamps_statistics(
     spikestamps: Union[np.ndarray, Iterable[float], Iterable[neo.core.SpikeTrain]],
     t_start: Optional[float] = None,
     t_stop: Optional[float] = None,
-) -> Dict[str, float]:
+) -> Dict[str, Any]:
     """
     Process basic spikestamps statistics: rates, mean, variance.
 

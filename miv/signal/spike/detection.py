@@ -32,7 +32,7 @@ class ThresholdCutoff:
 
     dead_time: float = 0.003
     search_range: float = 0.002
-    cutoff: Union[float, np.ndarray] = 5.0
+    cutoff: float = 5.0
     use_mad: bool = True
     tag: str = "Threshold Cutoff Spike Detection"
 
@@ -85,7 +85,7 @@ class ThresholdCutoff:
 
     def compute_spike_threshold(
         self, signal: SignalType, cutoff: float = 5.0, use_mad: bool = True
-    ) -> float:
+    ) -> float:  # TODO: make this function compatible to array of cutoffs (for each channel)
         """
         Returns the threshold for the spike detection given an array of signal.
 

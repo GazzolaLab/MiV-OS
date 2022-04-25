@@ -46,7 +46,7 @@ class FilterCollection(MutableSequence):
 
     def __call__(self, signal: SignalType, sampling_rate: float) -> SignalType:
         for filter in self.filters:
-            signal: SignalType = filter(signal, sampling_rate)
+            signal = filter(signal, sampling_rate)
         return signal
 
     # MutableSequence abstract methods
