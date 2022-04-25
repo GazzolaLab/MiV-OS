@@ -16,7 +16,7 @@ Spikestamps
       :nosignatures:
       :toctree: _toctree/StatisticsAPI
 
-      StatisticsSummary
+      spikestamps_statistics
 
 Useful External Packages
 ########################
