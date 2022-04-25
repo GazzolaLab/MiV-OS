@@ -88,6 +88,7 @@ class Dataset(MutableSequence):
         channels: int,
         sampling_rate: float = 30000,
         timestamps_npy: Optional[str] = "",
+        device="",
     ):
         self.data_folder_path = data_folder_path
 
@@ -142,3 +143,19 @@ class Dataset(MutableSequence):
 
     # def apply_spike_detection(self, method: DetectionProtocol):
     #     raise NotImplementedError("Wait until we make it")
+
+    # MutableSequence abstract methods
+    def __len__(self):
+        return len(self.data_list)
+
+    def __getitem__(self, idx):
+        return self.data_list[idx]
+
+    def __delitem__(self, idx):
+        del self.data_list[idx]
+
+    def __setitem__(self, idx, system):
+        self.data_list[idx] = system
+
+    def __call__(self, *args, **kwargs):
+        pass
