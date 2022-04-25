@@ -46,8 +46,8 @@ class FilterCollection(MutableSequence):
 
     def __call__(self, signal: SignalType, sampling_rate: float) -> SignalType:
         for filter in self.filters:
-            y: SignalType = filter(signal, sampling_rate)
-        return y
+            signal: SignalType = filter(signal, sampling_rate)
+        return signal
 
     # MutableSequence abstract methods
     def __len__(self):
