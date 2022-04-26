@@ -8,6 +8,8 @@ from typing import Any, Optional, Union, Tuple, Dict
 import os
 import numpy as np
 
+import quantities as pq
+
 from sklearn.mixture import GaussianMixture
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
@@ -16,6 +18,7 @@ from scipy.signal import lfilter, savgol_filter
 
 import matplotlib.pyplot as plt
 
+import neo
 from miv.typing import SignalType, SpikestampsType
 
 # TODO: Modularize the entire process.
@@ -23,11 +26,11 @@ from miv.typing import SignalType, SpikestampsType
 
 def extract_waveforms(
     signal: SignalType,
-    spikes_idx: SpikestampsType,
+    spikestamps: SpikestampsType,
+    channel: int,
     sampling_rate: float,
-    pre: float = 0.001,
-    post: float = 0.002,
-    return_spikes_idx: bool = False,
+    pre: pq.Quantity = 0.001 * pq.s,
+    post: pq.Quantity = 0.002 * pq.s,
 ) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
     """
     Extract spike waveforms as signal cutouts around each spike index as a spikes x samples numpy array
@@ -36,44 +39,42 @@ def extract_waveforms(
     ----------
     signal : SignalType
         The signal as a 1-dimensional numpy array
-    spikes_idx : SpikestampsType
+    spikestamps : SpikestampsType
         The sample index of all spikes as a 1-dim numpy array
+    channel : int
+        Interested channel
     sampling_rate : float
         The sampling frequency in Hz
-    pre : float
-        The duration of the cutout before the spike in seconds
-    post : float
-        The duration of the cutout after the spike in seconds
-    return_spikes_idx : bool
-        If set to True, return spike index that correspond to each cutout. If the spike is
-        located at the outer edge of the array, they are not included in this extraction.
-        (default=False)
+    pre : pq.Quantity
+        The duration of the cutout before the spike in seconds. (default=0.001 s)
+    post : pq.Quantity
+        The duration of the cutout after the spike in seconds. (default=0.002 s)
 
     Returns
     -------
-    Stack of spike cutout: np.ndarray or Tuples[np.ndarray, np.ndarray]
+    Stack of spike cutout: np.ndarray
         Return stacks of spike cutout; shape(n_spikes, width).
-        If return_spikes_idx is set to True, return a tuple of spike cutout and spike index.
 
     """
+    # TODO: Refactor this part
+    signal = signal[:, channel]
+    spikestamps = spikestamps[channel]
+
     cutouts = []
     pre_idx = int(pre * sampling_rate)
     post_idx = int(post * sampling_rate)
-    for index in spikes_idx:
-        if index - pre_idx >= 0 and index + post_idx <= signal.shape[0]:
-            cutout = signal[(index - pre_idx) : (index + post_idx)]
-            cutouts.append(cutout)
-    if return_spikes_idx:
-        return (
-            np.stack(cutouts),
-            spikes_idx[
-                np.logical_and(
-                    spikes_idx - pre_idx >= 0, spikes_idx + post_idx <= signal.shape[0]
-                )
-            ],
-        )
-    else:
-        return np.stack(cutouts)
+
+    # Padding signal
+    signal = np.pad(signal, ((pre_idx, post_idx),), constant_values=0)
+    for time in spikestamps:
+        index = int(round(time * sampling_rate))
+        # if index - pre_idx >= 0 and index + post_idx <= signal.shape[0]:
+        #    cutout = signal[(index - pre_idx) : (index + post_idx)]
+        #    cutouts.append(cutout)
+        cutout = signal[index : (index + post_idx + pre_idx)]
+        cutouts.append(cutout)
+
+    return np.stack(cutouts)
 
 
 def plot_waveforms(
