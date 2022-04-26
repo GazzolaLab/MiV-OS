@@ -19,12 +19,12 @@ Spikestamps
       spikestamps_statistics
 
 Useful External Packages
-########################
+========================
 
 Here are few external `python` packages that can be used for further statistical analysis.
 
 scipy statistics
-================
+----------------
 
 `scipy <https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.describe.html>`_
 
@@ -33,7 +33,7 @@ scipy statistics
    scipy.stats.describe
 
 elephant.statistics
-===================
+-------------------
 
 `elephant documentation: <https://elephant.readthedocs.io/en/latest/reference/statistics.html>`_
 
