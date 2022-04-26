@@ -2,6 +2,9 @@
 Visualization Tools
 *******************
 
+Plotting Tools
+==============
+
 DFT Plot
 --------
 
@@ -30,12 +33,12 @@ Spike Waveform Overlap
       plot_waveforms
 
 Useful External Packages
-########################
+========================
 
 Here are few external `python` packages that can also be used for visualization.
 
 Viziphant
-=========
+---------
 
 `viziphant (elephant) documentation: <https://viziphant.readthedocs.io/en/latest/modules.html>`_
 
