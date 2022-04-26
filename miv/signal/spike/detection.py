@@ -6,6 +6,8 @@ from typing import Union, List, Iterable
 import numpy as np
 import quantities as pq
 
+from tqdm import tqdm
+
 from dataclasses import dataclass
 from miv.typing import SignalType, TimestampsType, SpikestampsType
 
@@ -42,6 +44,7 @@ class ThresholdCutoff:
         timestamps: TimestampsType,
         sampling_rate: float,
         units: Union[str, pq.UnitTime] = "sec",
+        progress_bar: bool = True,
     ) -> List[SpikestampsType]:
         """Execute threshold-cutoff method and return spike stamps
 
@@ -55,6 +58,8 @@ class ThresholdCutoff:
             sampling_rate
         units : Union[str, pq.UnitTime]
             (default='sec')
+        progress_bar : bool
+            Toggle progress bar (default=True)
 
         Returns
         -------
@@ -63,9 +68,9 @@ class ThresholdCutoff:
         """
         # Spike detection for each channel
         spiketrain_list = []
-        num_channels = len(signal)  # type: ignore
-        for channel in range(num_channels):
-            array = signal[channel]  # type: ignore
+        num_channels = signal.shape[1]  # type: ignore
+        for channel in tqdm(range(num_channels), disable=not progress_bar):
+            array = signal[:, channel]  # type: ignore
 
             # Spike Detection: get spikestamp
             spike_threshold = self.compute_spike_threshold(
@@ -79,7 +84,9 @@ class ThresholdCutoff:
             )
             spikestamp = spikes / sampling_rate
             # Convert spikestamp to neo.SpikeTrain (for plotting)
-            spiketrain = neo.SpikeTrain(spikestamp, units=units)
+            spiketrain = neo.SpikeTrain(
+                spikestamp, units=units, t_stop=timestamps.max()
+            )
             spiketrain_list.append(spiketrain)
         return spiketrain_list
 
