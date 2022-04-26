@@ -16,6 +16,8 @@ import numpy as np
 from ast import literal_eval
 from glob import glob
 
+from miv.typing import SignalType, TimestampsType
+
 
 def ApplyChannelMap(Data, ChannelMap):
     print("Retrieving channels according to ChannelMap... ", end="")
@@ -177,38 +179,26 @@ def load_data():
     raise NotImplementedError
 
 
-def load_continuous_data_file(
-    data_file: str,
-    channels: int,
-    timestamps_npy: Optional[str] = "",
-    sampling_rate: float = 30000,
-):
+def load_continuous_data_file(data_file: str, num_channels: int, sampling_rate: float):
     """
     Describe function
 
     Parameters
     ----------
         data_file: continuous.dat file from Open_Ethys recording
-        channels: number of recording channels recorded from
+        num_channels: number of recording channels recorded from
 
     Returns
     -------
-        raw_data:
-        timestamps:
+        timestamps: TimestampsType
+        raw_data: SignalType
 
     """
 
     raw_data: np.ndarray = np.memmap(data_file, dtype="int16")
-    length = raw_data.size // channels
-    raw_data = np.reshape(raw_data, (length, channels))
+    length = raw_data.size // num_channels
+    raw_data = np.reshape(raw_data, (length, num_channels))
 
-    timestamps_zeroed = np.array(range(0, length)) / sampling_rate
-    if timestamps_npy == "":
-        timestamps = timestamps_zeroed
-    else:
-        timestamps = np.load(timestamps_npy) / sampling_rate
+    timestamps = np.array(range(0, length)) / sampling_rate
 
-    # only take first 32 channels
-    raw_data = raw_data[:, 0:32]
-
-    return np.array(timestamps), np.array(raw_data)
+    return timestamps, raw_data
