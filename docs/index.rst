@@ -30,6 +30,7 @@ You can also download the source code from `GitHub <https://github.com/GazzolaLa
 
    guide/signal_processing
    guide/spike_cutout
+   guide/spike_sorting
 
 .. toctree::
    :maxdepth: 2
@@ -37,6 +38,7 @@ You can also download the source code from `GitHub <https://github.com/GazzolaLa
 
    api/io
    api/signal
+   api/sorting
    api/statistics
    api/visualization
 
