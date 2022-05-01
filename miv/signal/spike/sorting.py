@@ -1,5 +1,15 @@
 __doc__ = """
 
+Typical spike-sorting procedure can be described in three steps: (1) spike detection, (2) feature decomposition, and (3) clustering.
+We provide separate module to perform spike-detection; see :ref:`here <api/signal:Spike Detection>`.
+
+We provide `SpikeSorting` module that composes *feature-decomposition* method and *unsupervised-clustering* method.
+A commonly used feature-decomposition method includes PCA or wavelet decomposition.
+For clustering method, one implemented few commonly appearing methods from the literatures (listed below).
+Additionally, one can use out-of-the-box clustering modules from `sklearn`.
+
+.. note:: Depending on the method of clustering, there might be an additional step to find optimum number of cluster.
+
 .. autoclass:: SpikeSorting
    :members:
 
@@ -23,14 +33,14 @@ Unsupervised Clustering
 Other external tools
 --------------------
 
-Following clustering modules can also be used for the spike sorting.
+Following external modules can also be used for the spike sorting.
 
-.. currentmodule:: sklearn.cluster
-
+Sklearn Clustering
+~~~~~~~~~~~~~~~~~~
 .. autosummary::
 
-   MeanShift
-   KMeans
+   sklearn.cluster.MeanShift
+   sklearn.cluster.KMeans
 
 """
 __all__ = [
@@ -72,7 +82,7 @@ class SpikeSorting:
     --------
     >>> spike_sorting = SpikeSorting(
     ...    feature_extractor=WaveletDecomposition(),
-    ...    clsutering_method=sklearn.cluster.MeanShift()
+    ...    clustering_method=sklearn.cluster.MeanShift()
     ... )
     >>> label, index = spike_sorting(cutouts, return_index=True)
 
@@ -126,7 +136,11 @@ class PCADecomposition:
 class WaveletDecomposition:
     """
     Wavelet Decomposition for spike sorting.
-    The implementation is heavily inspired from [1]_ and [2]_.
+    The implementation is heavily inspired from [1]_ and [2]_;
+    their MatLab implementation (wave_clus) can be found `here <https://github.com/csn-le/wave_clus>`_.
+
+    The default setting uses four-level multiresolution decomposition with Haar wavelets.
+    To learn about possible choice of wavelet, check `PyWavelets module <https://pywavelets.readthedocs.io/en/latest/#>`_.
 
     Other studies that use wavelet decomposition: [3]_
 
