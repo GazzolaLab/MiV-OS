@@ -10,6 +10,8 @@ Additionally, one can use out-of-the-box clustering modules from `sklearn`.
 
 .. note:: Depending on the method of clustering, there might be an additional step to find optimum number of cluster.
 
+.. currentmodule:: miv.signal.spike
+
 .. autoclass:: SpikeSorting
    :members:
 
@@ -19,6 +21,7 @@ Available Feature Extractor
 .. autosummary::
    :toctree: _toctree/SpikeSortingAPI
 
+   SpikeFeatureExtractionProtocol
    WaveletDecomposition
    PCADecomposition
 
@@ -28,6 +31,7 @@ Unsupervised Clustering
 .. autosummary::
    :toctree: _toctree/SpikeSortingAPI
 
+   UnsupervisedFeatureClusteringProtocol
    SuperParamagneticClustering
 
 Other external tools
@@ -130,7 +134,11 @@ class PCADecomposition:
 
     """
 
-    pass
+    def __init__(self):
+        pass
+
+    def project(self, n_features):
+        pass
 
 
 class WaveletDecomposition:
@@ -150,7 +158,10 @@ class WaveletDecomposition:
 
     """
 
-    def __call__(self):
+    def __init__(self):
+        pass
+
+    def project(self, n_features):
         ## Wavelet Decomposition
         number_of_spikes = 400
         data_length = 100

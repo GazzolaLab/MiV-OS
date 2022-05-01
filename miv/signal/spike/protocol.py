@@ -1,4 +1,8 @@
-__all__ = ["SpikeDetectionProtocol"]
+__all__ = [
+    "SpikeDetectionProtocol",
+    "SpikeFeatureExtractionProtocol",
+    "UnsupervisedFeatureClusteringProtocol",
+]
 
 from typing import Protocol, Union, Any, Iterable
 
