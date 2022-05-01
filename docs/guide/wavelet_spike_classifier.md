@@ -24,6 +24,8 @@ kernelspec:
 
 import os, sys
 import numpy as np
+import scipy
+import scipy.special
 import quantities as pq
 import matplotlib.pyplot as plt
 import pywt
@@ -112,123 +114,120 @@ plt.legend(custom_lines, [f"component {i}" for i in range(n_components)])
 ```{code-cell} ipython3
 spikes_l = cutouts[0]
 coeffs = pywt.wavedec(cutouts, 'haar', level=4)
-features = np.concatenate(coeffs, axis=1)b
+features = np.concatenate(coeffs, axis=1)
 ```
 
 ```{code-cell} ipython3
-# Kalmogorov S Test
-function [KSmax] = test_ks(x)
-%
-% Calculates the CDF (expcdf)
-%[y_expcdf,x_expcdf]=cdfcalc(x);
+def test_ks(x):
+    # Calculates CDF
 
-yCDF = [];
-xCDF = [];
-x = x(~isnan(x));
-n = length(x);
-x = sort(x(:));
-% Get cumulative sums
-yCDF = (1:n)' / n;
-% Remove duplicates; only need final one with total count
-notdup = ([diff(x(:)); 1] > 0);
-x_expcdf = x(notdup);
-y_expcdf = [0; yCDF(notdup)];
+    xCDF, yCDF = [], []
+    x = x[~np.isnan(x)]
+    n = x.shape[0]
+    x.sort()
 
-%
-% The theoretical CDF (theocdf) is assumed to be normal
-% with unknown mean and sigma
+    # Get cumulative sums
+    yCDF = (np.arange(n)+1) / n
 
-zScores  =  (x_expcdf - mean(x))./std(x);
+    # Remove duplicates; only need final one with total count
+    notdup = np.concatenate([np.diff(x), [1]]) > 0
+    x_expcdf = x[notdup]
+    y_expcdf = np.concatenate([[0], yCDF[notdup]])
 
-%theocdf  =  normcdf(zScores , 0 , 1);
-mu = 0;
-sigma = 1;
-theocdf = 0.5 * erfc(-(zScores-mu)./(sqrt(2)*sigma));
+    # The theoretical CDF (theocdf) is assumed to ben ormal
+    # with unknown mean and sigma
+    zScore = (x_expcdf - x.mean()) / x.std()
+    # theocdf = normcdf(zScore, 0, 1)
 
+    mu = 0
+    sigma = 1
+    theocdf = 0.5 * scipy.special.erfc(-(zScore-mu)/(np.sqrt(2)*sigma))
 
-%
-% Compute the Maximum distance: max|S(x) - theocdf(x)|.
-%
+    # Compute the Maximum distance: max|S(x) - theocdf(x)|.
 
-delta1    =  y_expcdf(1:end-1) - theocdf;   % Vertical difference at jumps approaching from the LEFT.
-delta2    =  y_expcdf(2:end)   - theocdf;   % Vertical difference at jumps approaching from the RIGHT.
-deltacdf  =  abs([delta1 ; delta2]);
+    delta1 =  y_expcdf[ :-1] - theocdf  # Vertical difference at jumps approaching from the LEFT.
+    delta2 =  y_expcdf[1:  ] - theocdf  # Vertical difference at jumps approaching from the RIGHT.
+    deltacdf = np.abs(np.concatenate([delta1, delta2]))
 
-KSmax =  max(deltacdf);
+    KSmax = deltacdf.max()
+    return KSmax
 ```
 
 ```{code-cell} ipython3
 ks = []
-for idx, feature in enumerate(features.rollaxis(1)):
-    std_feature = np.std(feature)b
+for idx, feature in enumerate(np.moveaxis(features, 1, 0)):
+    std_feature = np.std(feature)
     mean_feature = np.mean(feature)
     thr_dist = std_feature * 3;
     thr_dist_min = mean_feature - thr_dist;
     thr_dist_max = mean_feature + thr_dist;
     aux = feature[np.logical_and(feature>thr_dist_min, feature<thr_dist_max)];
 
-    if length(aux) > 10:
+    if aux.shape[0] > 10:
         ks.append(test_ks(aux))
     else:
         ks.append(0)
 ```
 
 ```{code-cell} ipython3
-[A,ind] = sort(ks);
-A = A(length(A)-par.max_inputs+1:end);
-ncoeff = length(A);
-maxA = max(A);
-nd = 10;
-d = (A(nd:end)-A(1:end-nd+1))/maxA*ncoeff/nd;
-all_above1 = find(d>=1);
-if numel(all_above1) >=2
-    %temp_bla = smooth(diff(all_above1),3);
-    aux2 = diff(all_above1);
-    temp_bla = conv(aux2(:),[1 1 1]/3);
-    temp_bla = temp_bla(2:end-1);
-    temp_bla(1) = aux2(1);
-    temp_bla(end) = aux2(end);
+max_inputs = 0.75
+min_inputs = 10
 
-    thr_knee_diff = all_above1(find(temp_bla(2:end)==1,1))+(nd/2); %ask to be above 1 for 3 consecutive coefficients
-    inputs = par.max_inputs-thr_knee_diff+1;
-else
-    inputs = par.min_inputs;
-end
+#if all:
+#max_inputs = features.shape[1]
+if max_inputs < 1:
+    max_inputs = np.ceil(max_inputs * features.shape[1]).astype(int)
 
+ind = np.argsort(ks)
+A = np.array(ks)[ind]
+A = A[A.shape[0] - max_inputs:]  # Cutoff coeffs
 
-if  isfield(par,'plot_feature_stats') && par.plot_feature_stats
-    [path,name,ext] = fileparts(par.filename);
-    if isempty(path)
-        path='.';
-    end
-    fig = figure('visible','off');
-    stairs(sort(ks))
-    hold on
-    ylabel('ks_stat','interpreter','none')
-    xlabel('#features')
-            if ~isempty(inputs)
-                line([numel(ks)-inputs+1 numel(ks)-inputs+1],ylim,'color','r')
-            end
-    line([numel(ks)-par.max_inputs numel(ks)-par.max_inputs],ylim,'LineStyle','--','color','k')
-    title(sprintf('%s \n number of spikes = %d.  inputs_selected = %d.',name,number_of_spikes,inputs),'interpreter','none');
-    print(fig,'-dpng',[path filesep 'feature_select_' name '.png'])
-    close(fig)
-end
+ncoeff = A.shape[0]
+maxA = A.max()
+nd = 10
+d = (A[nd-1:] - A[:-nd+1]) / maxA * ncoeff / nd
+all_above1 = d[np.nonzero(d>=1)]
+if all_above1.shape[0] >= 2:
+    # temp_bla = smooth(diff(all_above1),3)
+    aux2 = np.diff(all_above1)
+    temp_bla = np.convolve(aux, np.ones(3)/3)
+    temp_bla = temp_bla[1:-1]
+    temp_bla[0] = aux2[0]
+    temp_bla[-1] = aux2[-1]
+    # ask to be above 1 for 3 consecutive coefficients
+    thr_knee_diff = all_above1[np.nonzero(temp_bla[1:] == 1)[:1]] + nd/2
+    inputs = max_inputs - thr_knee_diff + 1
+else:
+    inputs = min_inputs
+```
 
-if inputs > par.max_inputs
-    inputs = par.max_inputs;
-elseif isempty(inputs) || inputs < par.min_inputs
-    inputs = par.min_inputs;
-end
-
-coeff(1:inputs)=ind(lengths:-1:lengths-inputs+1);
+```{code-cell} ipython3
+plot_feature_stats = True
+if plot_feature_stats:
+    fig = plt.figure()
+    plt.stairs(np.sort(ks))
+    plt.plot([len(ks)-inputs+1, len(ks)-inputs+1], fig.axes[0].get_ylim(), 'r')
+    plt.plot([len(ks)-max_inputs, len(ks)-max_inputs], fig.axes[0].get_ylim(), '--k')
+    plt.ylabel('ks_stat')
+    plt.xlabel('# features')
+    plt.title(f"number of spikes = {number_of_spikes}, inputs_selected = {inputs}")
 
 
-%CREATES INPUT MATRIX FOR SPC
-input_for_spc  =zeros(number_of_spikes,inputs);
-for i=1:number_of_spikes
-    for j=1:inputs
-        input_for_spc(i,j)=features(i,coeff(j));
-    end
-end
+```
+
+```{code-cell} ipython3
+if inputs > max_inputs:
+    inputs = max_inputs
+elif inputs.size == 0 or inputs < min_inputs:
+    inputs = min_inputs
+```
+
+```{code-cell} ipython3
+coeff = ind[-inputs:];
+# CRATES INPUT MATRIX FOR SPC
+input_for_spc = np.zeros((number_of_spikes, inputs))
+
+for i in range(number_of_spikes):
+    for j in range(inputs):
+        input_for_spc[i,j] = features[i, coeff[j]]
 ```
