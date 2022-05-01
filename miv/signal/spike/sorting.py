@@ -92,8 +92,10 @@ class SpikeSorting:
 
 class SuperParamagneticClustering:
     """Super-Paramagnetic Clustering (SPC)
+    The implementation is heavily inspired from [1]_ and [2]_.
 
-    .. [1] Fernando J. Chaure, Hernan G. Rey, and Rodrigo Quian Quiroga. A novel and fully automatic spike-sorting implementation with variable number of features. Journal of Neurophysiology 2018 120:4, 1859-1871. https://doi.org/10.1152/jn.00339.2018
+    .. [1] Quiroga RQ, Nadasdy Z, Ben-Shaul Y. Unsupervised spike detection and sorting with wavelets and superparamagnetic clustering. Neural Comput. 2004 Aug;16(8):1661-87. doi: 10.1162/089976604774201631. PMID: 15228749.
+    .. [2] Fernando J. Chaure, Hernan G. Rey, and Rodrigo Quian Quiroga. A novel and fully automatic spike-sorting implementation with variable number of features. Journal of Neurophysiology 2018 120:4, 1859-1871. https://doi.org/10.1152/jn.00339.2018
     """
 
     pass
@@ -101,6 +103,8 @@ class SuperParamagneticClustering:
 
 class PCADecomposition:
     """PCA Decomposition
+
+    Other studies that use PCA decomposition: [1]_, [2]_
 
     .. [1] G. Hilgen, M. Sorbaro, S. Pirmoradian, J.-O. Muthmann, I. Kepiro, S. Ullo, C. Juarez Ramirez, A. Puente Encinas, A. Maccione, L. Berdondini, V. Murino, D. Sona, F. Cella Zanacchi, E. Sernagor, M.H. Hennig (2016). Unsupervised spike sorting for large scale, high density multielectrode arrays. Cell Reports 18, 2521–2532. bioRxiv: http://dx.doi.org/10.1101/048645.
     .. [2] Yger P, Spampinato GL, Esposito E, Lefebvre B, Deny S, Gardella C, Stimberg M, Jetter F, Zeck G, Picaud S, Duebel J, Marre O. A spike sorting toolbox for up to thousands of electrodes validated with ground truth recordings in vitro and in vivo. Elife. 2018 Mar 20;7:e34518. doi: 10.7554/eLife.34518. PMID: 29557782; PMCID: PMC5897014.
@@ -112,7 +116,10 @@ class PCADecomposition:
 
 class WaveletDecomposition:
     """
-    Wavelet Decomposition for spike sorting [1]_, [2]_.
+    Wavelet Decomposition for spike sorting.
+    The implementation is heavily inspired from [1]_ and [2]_.
+
+    Other studies that use wavelet decomposition: [3]_
 
     .. [1] Letelier JC, Weber PP. Spike sorting based on discrete wavelet transform coefficients. J Neurosci Methods. 2000 Sep 15;101(2):93-106. doi: 10.1016/s0165-0270(00)00250-8. PMID: 10996370.
     .. [2] Quiroga RQ, Nadasdy Z, Ben-Shaul Y. Unsupervised spike detection and sorting with wavelets and superparamagnetic clustering. Neural Comput. 2004 Aug;16(8):1661-87. doi: 10.1162/089976604774201631. PMID: 15228749.
