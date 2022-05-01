@@ -67,16 +67,21 @@ class SpikeSorting:
     User can specify the method for feature extraction (e.g. WaveletDecomposition, PCADecomposition, etc)
     and the method for clustering (e.g. MeanShift, KMeans, SuperParamagneticClustering, etc).
 
-        spike_sorting = SpikeSorting(
-            feature_extractor=WaveletDecomposition(),
-            clsutering_method=sklearn.cluster.MeanShift()
-        )
-        label, index = spike_sorting(cutouts, return_index=True)
 
-        Parameters
-        ----------
-        feature_extractor : SpikeFeatureExtractionProtocol
-        clustering_method : UnsupervisedFeatureClusteringProtocol
+    Examples
+    --------
+    >>> spike_sorting = SpikeSorting(
+    ...    feature_extractor=WaveletDecomposition(),
+    ...    clsutering_method=sklearn.cluster.MeanShift()
+    ... )
+    >>> label, index = spike_sorting(cutouts, return_index=True)
+
+
+    Parameters
+    ----------
+    feature_extractor : SpikeFeatureExtractionProtocol
+    clustering_method : UnsupervisedFeatureClusteringProtocol
+
     """
 
     def __init__(
@@ -90,12 +95,16 @@ class SpikeSorting:
         pass
 
 
+# UnsupervisedFeatureClusteringProtocol
 class SuperParamagneticClustering:
     """Super-Paramagnetic Clustering (SPC)
+
     The implementation is heavily inspired from [1]_ and [2]_.
+
 
     .. [1] Quiroga RQ, Nadasdy Z, Ben-Shaul Y. Unsupervised spike detection and sorting with wavelets and superparamagnetic clustering. Neural Comput. 2004 Aug;16(8):1661-87. doi: 10.1162/089976604774201631. PMID: 15228749.
     .. [2] Fernando J. Chaure, Hernan G. Rey, and Rodrigo Quian Quiroga. A novel and fully automatic spike-sorting implementation with variable number of features. Journal of Neurophysiology 2018 120:4, 1859-1871. https://doi.org/10.1152/jn.00339.2018
+
     """
 
     pass
