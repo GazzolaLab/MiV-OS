@@ -67,6 +67,10 @@ import pywt
 
 import matplotlib.pyplot as plt
 
+from sklearn.mixture import GaussianMixture
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+
 import neo
 from miv.typing import SignalType, TimestampsType, SpikestampsType
 from miv.signal.spike.protocol import (
@@ -137,8 +141,62 @@ class PCADecomposition:
     def __init__(self):
         pass
 
-    def project(self, n_features):
-        pass
+    def project(self, n_features, cutouts):
+        scaler = StandardScaler()
+        scaled_cutouts = scaler.fit_transform(cutouts)
+
+        pca = PCA()
+        pca.fit(scaled_cutouts)
+        # print(pca.explained_variance_ratio_)
+
+        pca.n_components = 2
+        transformed = pca.fit_transform(scaled_cutouts)
+
+        # Clustering
+        n_components = 3  # Number of clustering components
+        gmm = GaussianMixture(n_components=n_components, n_init=10)
+        labels = gmm.fit_predict(transformed)
+        return labels
+
+        """
+        tmp_list = []
+        for i in range(n_components):
+            idx = labels == i
+            tmp_list.append(timestamps[idx])
+            spikestamps_clustered.append(tmp_list)
+
+        _ = plt.figure(figsize=(8, 8))
+        for i in range(n_components):
+            idx = labels == i
+            _ = plt.plot(transformed[idx, 0], transformed[idx, 1], ".")
+            _ = plt.title("Cluster assignments by a GMM")
+            _ = plt.xlabel("Principal Component 1")
+            _ = plt.ylabel("Principal Component 2")
+            _ = plt.legend([0, 1, 2])
+            _ = plt.axis("tight")
+
+        _ = plt.figure(figsize=(8, 8))
+        for i in range(n_components):
+            idx = labels == i
+            color = plt.rcParams["axes.prop_cycle"].by_key()["color"][i]
+            plot_waveforms(
+                cutouts[idx, :],
+                rate,
+                n_spikes=100,
+                color=color,
+            )
+        # custom legend
+        custom_lines = [
+            plt.Line2D(
+                [0],
+                [0],
+                color=plt.rcParams["axes.prop_cycle"].by_key()["color"][i],
+                lw=4,
+            )
+            for i in range(n_components)
+        ]
+        plt.legend(custom_lines, [f"component {i}" for i in range(n_components)])
+        """
 
 
 class WaveletDecomposition:
