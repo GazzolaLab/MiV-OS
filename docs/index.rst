@@ -23,6 +23,8 @@ You can also download the source code from `GitHub <https://github.com/GazzolaLa
    :caption: Contents:
 
    overview/about
+   overview/dependencies
+   overview/references
 
 .. toctree::
    :maxdepth: 2
@@ -48,6 +50,11 @@ You can also download the source code from `GitHub <https://github.com/GazzolaLa
 
    examples/spike_detection
 
+.. toctree::
+   :maxdepth: 2
+   :caption: Site
+
+   Gazzola Lab <https://mattia-lab.com/>
 
 Indices and tables
 ==================
