@@ -104,7 +104,7 @@ from miv.signal.filter import FilterCollection, ButterBandpass
 
 [Here](../api/signal.html#filter) is the list of provided filters.
 All filters are `Callable`, taking `signal` and `sampling_rate` as parameters.
-To define a multiple filters together, we provide [`FilterCollection`](../api/_toctree/FilterAPI/miv.signal.filter.FilterCollection) that execute multiple filters in a series.
+To define a multiple filters together, we provide [`FilterCollection`](miv.signal.filter.FilterCollection) that execute multiple filters in a series.
 
 ```{code-cell} ipython3
 # Butter bandpass filter
