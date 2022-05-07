@@ -1,4 +1,20 @@
-__doc__ = ""
+__doc__ = """
+
+Spike Detection
+###############
+
+<detection doc string>
+
+.. currentmodule:: miv.signal.spike
+
+.. autosummary::
+   :nosignatures:
+   :toctree: _toctree/DetectionAPI
+
+   SpikeDetectionProtocol
+   ThresholdCutoff
+
+"""
 __all__ = ["ThresholdCutoff"]
 
 from typing import Union, List, Iterable
