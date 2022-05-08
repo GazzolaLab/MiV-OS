@@ -30,6 +30,7 @@ You can also download the source code from `GitHub <https://github.com/GazzolaLa
    :maxdepth: 2
    :caption: User Guide
 
+   guide/data_management
    guide/signal_processing
    guide/spike_cutout
    guide/spike_sorting
