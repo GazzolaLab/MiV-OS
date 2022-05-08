@@ -7,5 +7,5 @@ mypy:
 coverage:
 	@pytest --cov=miv tests/
 
-all:test mypy
+all:test mypy coverage
 ci: test mypy
