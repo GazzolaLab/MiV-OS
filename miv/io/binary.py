@@ -187,7 +187,8 @@ def load_continuous_data(
     start_at_zero: bool = True,
 ):
     """
-    Describe function
+    Load single continous data file and return timestamps and raw data in numpy array.
+    Typical `data_path` from OpenEphys has a name `continuous.dat`.
 
     Parameters
     ----------
@@ -208,8 +209,8 @@ def load_continuous_data(
 
     Returns
     -------
-    timestamps: TimestampsType
-    raw_data: SignalType
+    timestamps: TimestampsType, numpy array
+    raw_data: SignalType, numpy array
 
     Raises
     ------
