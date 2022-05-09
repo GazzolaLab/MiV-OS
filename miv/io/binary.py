@@ -12,8 +12,10 @@ Original Author
 - last modified by: skim449
   - date: 2022-04-11
 """
-__all__ = ["Load", "load_data", "load_continuous_data_file"]
+__all__ = ["load_continuous_data"]
 from typing import Optional
+
+import os
 import numpy as np
 from ast import literal_eval
 from glob import glob
@@ -177,30 +179,67 @@ def Load(
     return (Data, Rate)
 
 
-def load_data():
-    raise NotImplementedError
-
-
-def load_continuous_data_file(data_file: str, num_channels: int, sampling_rate: float):
+def load_continuous_data(
+    data_path: str,
+    num_channels: int,
+    sampling_rate: float,
+    timestamps_path: Optional[str] = None,
+    start_at_zero: bool = True,
+):
     """
     Describe function
 
     Parameters
     ----------
-        data_file: continuous.dat file from Open_Ethys recording
-        num_channels: number of recording channels recorded from
+    data_path : str
+        continuous.dat file path from Open_Ethys recording.
+    num_channels : int
+        number of recording channels recorded. Note, this method will not throw an error
+        if you don't provide the correct number of channels.
+    sampling_rate : float
+        data sampling rate.
+    timestamps_path : Optional[str]
+        If None, first check if the file "timestamps.npy" exists on the same directory.
+        If the file doesn't exist, we deduce the timestamps based on the sampling rate
+        and the length of the data.
+    start_at_zero : bool
+        If True, the timestamps is adjusted to start at zero.
+        Note, recorded timestamps might not start at zero for some reason.
 
     Returns
     -------
-        timestamps: TimestampsType
-        raw_data: SignalType
+    timestamps: TimestampsType
+    raw_data: SignalType
+
+    Raises
+    ------
+    FileNotFoundError
+        If data_path is invalid.
+    ValueError
+        If the error message shows the array cannot be reshaped due to shape,
+        make sure the num_channels is set accurately.
 
     """
 
-    raw_data: np.ndarray = np.memmap(data_file, dtype="int16")
+    # Read raw data signal
+    raw_data: np.ndarray = np.memmap(data_path, dtype="int16")
     length = raw_data.size // num_channels
     raw_data = np.reshape(raw_data, (length, num_channels))
 
-    timestamps = np.array(range(0, length)) / sampling_rate
+    # Get timestamps_path
+    if timestamps_path is None:
+        dirname = os.path.dirname(data_path)
+        timestamps_path = os.path.join(dirname, "timestamps.npy")
+
+    # Get timestamps
+    if os.path.exists(timestamps_path):
+        timestamps = np.load(timestamps_path)
+        timestamps /= sampling_rate
+    else:  # If timestamps_path doesn't exist, deduce the stamps
+        timestamps = np.array(range(0, length)) / sampling_rate
+
+    # Adjust timestamps to start from zero
+    if start_at_zero and not np.isclose(timestamps[0], 0.0):
+        timestamps -= timestamps[0]
 
     return timestamps, raw_data
