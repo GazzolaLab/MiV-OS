@@ -1,7 +1,27 @@
+__doc__ = """
+
+Data Manager
+############
+
+.. currentmodule:: miv.io.data
+
+.. autoclass:: Data
+   :members:
+
+.. autoclass:: DataManager
+   :members:
+
+"""
+__all__ = ["Data", "DataManager"]
+
+from typing import Any, Optional, Iterable, Callable
+
 from collections.abc import MutableSequence
-from typing import Optional
+
 import os
+import glob
 import numpy as np
+
 from miv.signal.filter import FilterProtocol
 from miv.typing import SignalType
 
@@ -32,13 +52,13 @@ class Data:
 
         Parameters
         ----------
-            data_file: continuous.dat file from Open_Ethys recording
-            channels: number of recording channels recorded from
+        data_file: continuous.dat file from Open_Ethys recording
+        channels: number of recording channels recorded from
 
         Returns
         -------
-            raw_data:
-            timestamps:
+        raw_data:
+        timestamps:
 
         """
 
@@ -81,12 +101,12 @@ class Data:
             )
 
 
-class Dataset(MutableSequence):
+class DataManager(MutableSequence):
     def __init__(
         self,
         data_folder_path: str,
         channels: int,
-        sampling_rate: float = 30000,
+        sampling_rate: float,
         timestamps_npy: Optional[str] = "",
         device="",
     ):
@@ -159,3 +179,23 @@ class Dataset(MutableSequence):
 
     def __call__(self, *args, **kwargs):
         pass
+
+
+def get_experiments_recordings(data_paths: str) -> Iterable[str]:
+    # fmt: off
+    list_of_experiments_to_process = []
+    for path in data_paths:
+        path_list = [path for path in glob.glob(os.path.join(path, "*", "*", "*")) if "Record Node" in path and "recording" in path and os.path.isdir(path)]
+        list_of_experiments_to_process.extend(path_list)
+    # fmt: on
+    return list_of_experiments_to_process
+
+
+def get_analysis_paths(data_paths: str, output_folder_name: str) -> Iterable[str]:
+    # fmt: off
+    list_of_analysis_paths = []
+    for path in data_paths:
+        path_list = [path for path in glob.glob(os.path.join(path, "*", "*", "*", "*")) if ("Record Node" in path) and ("recording" in path) and (output_folder_name in path) and os.path.isdir(path)]
+        list_of_analysis_paths.extend(path_list)
+    # fmt: on
+    return list_of_analysis_paths
