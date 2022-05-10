@@ -4,7 +4,7 @@ Thanks for your interest in contributing MiV-OS project.
 
 The following is a set of guidelines how to contributes. These are mostly guidelines, not rules. Use your best judgment, and feel free to propose changes to this document in a pull request.
 
-#### Table Of Contents
+**Table Of Contents**
 
 [TLTR! I need three-line summary!!](#three-line-summary)
 
@@ -36,10 +36,15 @@ The following is a set of guidelines how to contributes. These are mostly guidel
 ### Installation and packages
 
 First **create the fork repository and clone** to your local machine.
-We provide [requirements.txt](requirements.txt) to include all the dependencies.
+We provide [requirements.txt](https://github.com/GazzolaLab/MiV-OS/blob/main/requirements.txt) to include all the dependencies that is required to develop. You can either install using `pip install -r requirements.txt` or
 ```bash
-$ pip install -r requirements.txt
+$ pip install miv-os[dev]
 ```
+If you are more interested in working for documentation, use
+```bash
+$ pip install miv-os[docs]
+```
+More details are included [here](https://github.com/GazzolaLab/MiV-OS/blob/main/docs/README.md).
 
 ### Pre-Commit
 
