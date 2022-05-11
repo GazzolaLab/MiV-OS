@@ -1,5 +1,11 @@
 __doc__ = """
 
+.. Note::
+    For simple experiments, you may prefer to use :ref:`api/io:Raw Data Loader`.
+    However, we generally recommend to use ``Data`` or ``DataManager`` for
+    handling data, especially when you want to avoid storing raw signal in
+    the memory space.
+
 Data Manager
 ############
 
@@ -19,33 +25,84 @@ from typing import Any, Optional, Iterable, Callable
 from collections.abc import MutableSequence
 
 import os
-import glob
+from glob import glob
 import numpy as np
+from contextlib import contextmanager
 
+from miv.io.binary import load_continuous_data
 from miv.signal.filter import FilterProtocol
 from miv.typing import SignalType
 
 
 class Data:
-    """
-    For each continues.dat file, there will be one Data object
+    """Single data unit handler.
+
+    Each data unit that contains single recording. This class provides useful tools,
+    such as masking channel, export data, interface with other packages, etc.
+    If you have multiple recordings you would like to handle at the same time, use
+    `DataManager` instead.
+
+    By default, the following directory structure is expected in ``data_path``::
+
+        recording1                              # <- recording data_path
+        ├── continuous
+        │   └── Rhythm_FPGA-100.0
+        │       ├── continuous.dat
+        │       ├── synchronized_timestamps.npy
+        │       └── timestamps.npy
+        ├── events
+        │   ├── Message_Center-904.0
+        │   │   └── TEXT_group_1
+        │   │       ├── channels.npy
+        │   │       ├── text.npy
+        │   │       └── timestamps.npy
+        │   └── Rhythm_FPGA-100.0
+        │       └── TTL_1
+        │           ├── channel_states.npy
+        │           ├── channels.npy
+        │           ├── full_words.npy
+        │           └── timestamps.npy
+        ├── structure.oebin
+        ├── sync_messages.txt
+        ├── structure.oebin
+        └── analysis                            # <- post-processing result
+            ├── spike_data.npz
+            ├── plot
+            ├── spike
+            └── mea_overlay
+
+
+        Parameters
+        ----------
+        data_path : str
     """
 
     def __init__(
         self,
         data_path: str,
-        channels: int,
-        sampling_rate: float = 30000,
-        timestamps_npy: Optional[str] = "",
     ):
         self.data_path = data_path
-        self.channels = channels
-        self.sampling_rate = sampling_rate
-        self.timestamps_npy = timestamps_npy
 
-    def load(
-        self,
-    ):
+    @contextmanager
+    def load_data(self):
+        """
+        Context manager for loading data instantly.
+
+        Examples
+        --------
+            >>> data = Data(data_path)
+            >>> with data.load() as (timestamps, raw_signal):
+            ...     ...
+
+        """
+        try:
+            pass
+            # yield data
+        finally:
+            pass
+            # del data
+
+    def load(self):
 
         """
         Describe function
@@ -77,12 +134,6 @@ class Data:
 
         # TODO: do we want timestaps a member of the class?
         return np.array(timestamps), np.array(raw_data)
-
-    def unload(
-        self,
-    ):
-        # TODO: remove the data from memory
-        pass
 
     def save(self, tag: str, format: str):
         assert tag == "continuous", "You cannot alter raw data, change the data tag"
