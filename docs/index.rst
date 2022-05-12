@@ -27,7 +27,6 @@ If you are interested in contributing to this project, we prepared contribution 
    :caption: Overview
 
    overview/about
-   overview/dependencies
    overview/references
    overview/contribution
 
