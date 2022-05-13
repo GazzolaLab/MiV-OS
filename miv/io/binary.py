@@ -16,31 +16,58 @@ Raw Data Loader
 ###############
 
 """
-__all__ = ["load_continuous_data"]
-from typing import Optional
+__all__ = ["load_continuous_data", "load_recording", "oebin_read", "apply_channel_mask"]
+
+from typing import Any, Dict, Optional, Union, List
 
 import os
 import numpy as np
 from ast import literal_eval
 from glob import glob
+import quantities as pq
+import neo
 
 from miv.typing import SignalType, TimestampsType
 
 
-def ApplyChannelMap(Data, ChannelMap):
-    print("Retrieving channels according to ChannelMap... ", end="")
-    for R, Rec in Data.items():
-        if Rec.shape[1] < len(ChannelMap) or max(ChannelMap) > Rec.shape[1] - 1:
+def apply_channel_mask(signal: np.ndarray, channel_mask: List[int]):
+    """Apply channel mask on the given signal.
+
+    Parameters
+    ----------
+    signal : np.ndarray
+        Shape of the signal is expected to be (num_data_point, num_channels).
+    channel_mask : List[int]
+
+    Returns
+    -------
+    output signal : SignalType
+
+    """
+    print("Retrieving channels according to channel_mask... ", end="")
+    for R, Rec in signal.items():
+        if Rec.shape[1] < len(channel_mask) or max(channel_mask) > Rec.shape[1] - 1:
             print("")
             print("Not enough channels in data to apply channel map. Skipping...")
             continue
 
-        Data[R] = Data[R][:, ChannelMap]
+        signal[R] = signal[R][:, channel_mask]
 
     return Data
 
 
-def BitsToVolts(Data, ChInfo, Unit):
+    signal, timestamps = load_continuous_data(file_path, num_channels, sampling_rate)
+    if channel_mask is not None:
+        signal = apply_channel_mask(signal, channel_mask)
+
+    # TODO in the future: check inside the channel_info,
+    #       and convert mismatch unit (mV->uV)
+
+    signal = neo.core.AnalogSignal(signal.T, unit=unit, sampling_rate=sampling_rate)
+    return signal, timestamps, sampling_rate
+
+
+def _bitsToVolts(Data, ChInfo, Unit):  # TODO: need refactor
     print("Converting to uV... ", end="")
     Data = {R: Rec.astype("float32") for R, Rec in Data.items()}
 
