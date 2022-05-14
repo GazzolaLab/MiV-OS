@@ -1,13 +1,17 @@
 __doc__ = """
 
 .. Note::
+    We expect the data structure to follow the default format
+    exported from OpenEphys system:
+    `format <https://open-ephys.atlassian.net/wiki/spaces/OEW/pages/491632/Data+format>`_.
+
+.. Note::
     For simple experiments, you may prefer to use :ref:`api/io:Raw Data Loader`.
     However, we generally recommend to use ``Data`` or ``DataManager`` for
-    handling data, especially when you want to avoid storing raw signal in
-    the memory space.
+    handling data, especially when the size of the raw data is large.
 
-Data Manager
-############
+Module
+######
 
 .. currentmodule:: miv.io.data
 
@@ -20,16 +24,17 @@ Data Manager
 """
 __all__ = ["Data", "DataManager"]
 
-from typing import Any, Optional, Iterable, Callable
+from typing import Any, Optional, Iterable, Callable, List
 
 from collections.abc import MutableSequence
+import logging
 
 import os
 from glob import glob
 import numpy as np
 from contextlib import contextmanager
 
-from miv.io.binary import load_continuous_data
+from miv.io.binary import load_continuous_data, load_recording
 from miv.signal.filter import FilterProtocol
 from miv.typing import SignalType
 
@@ -42,7 +47,7 @@ class Data:
     If you have multiple recordings you would like to handle at the same time, use
     `DataManager` instead.
 
-    By default, the following directory structure is expected in ``data_path``::
+    By default recording setup, the following directory structure is expected in ``data_path``::
 
         recording1                              # <- recording data_path
         ├── continuous
@@ -62,7 +67,6 @@ class Data:
         │           ├── channels.npy
         │           ├── full_words.npy
         │           └── timestamps.npy
-        ├── structure.oebin
         ├── sync_messages.txt
         ├── structure.oebin
         └── analysis                            # <- post-processing result
@@ -82,9 +86,10 @@ class Data:
         data_path: str,
     ):
         self.data_path = data_path
+        self.channel_mask = []
 
     @contextmanager
-    def load_data(self):
+    def load(self):
         """
         Context manager for loading data instantly.
 
@@ -94,46 +99,48 @@ class Data:
             >>> with data.load() as (timestamps, raw_signal):
             ...     ...
 
+        Returns
+        -------
+        signal : SignalType, neo.core.AnalogSignal
+        timestamps : TimestampsType, numpy array
+        sampling_rate : float
+
         """
+        # TODO: Not sure this is safe implementation
         try:
-            pass
-            # yield data
+            signal, timestamps, sampling_rate = load_recording(
+                self.data_path, self.masking_channel_list
+            )
+            yield signal, timestamps, sampling_rate
+        except FileNotFoundError as e:
+            logging.error(
+                f"The file could not be loaded because the file {self.data_path} does not exist."
+            )
+            logging.error(e.strerror)
+        except ValueError as e:
+            logging.error(
+                "The data size does not match the number of channel. Check if oebin or continuous.dat file is corrupted."
+            )
+            logging.error(e.strerror)
         finally:
-            pass
-            # del data
+            del timestamps
+            del signal
 
-    def load(self):
-
+    def set_channel_mask(self, channel_id: List[int]):
         """
-        Describe function
+
+        Set the channel masking.
+
+        Notes
+        -----
+        If the index exceed the number of channels, it will be ignored.
 
         Parameters
         ----------
-        data_file: continuous.dat file from Open_Ethys recording
-        channels: number of recording channels recorded from
-
-        Returns
-        -------
-        raw_data:
-        timestamps:
-
+        channel_id : List[int]
+            List of channel id that will be ignored.
         """
-
-        raw_data: np.ndarray = np.memmap(self.data_path, dtype="int16")
-        length = raw_data.size // self.channels
-        raw_data = np.reshape(raw_data, (length, self.channels))
-
-        timestamps_zeroed = np.array(range(0, length)) / self.sampling_rate
-        if self.timestamps_npy == "":
-            timestamps = timestamps_zeroed
-        else:
-            timestamps = np.load(self.timestamps_npy) / self.sampling_rate
-
-        # only take first 32 channels
-        raw_data = raw_data[:, 0 : self.channels]
-
-        # TODO: do we want timestaps a member of the class?
-        return np.array(timestamps), np.array(raw_data)
+        self.masking_channel_list = channel_id
 
     def save(self, tag: str, format: str):
         assert tag == "continuous", "You cannot alter raw data, change the data tag"
