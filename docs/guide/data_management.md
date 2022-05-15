@@ -13,6 +13,10 @@ kernelspec:
 
 # Data Management
 
+- Data
+- DataManager
+- load_continuous_data (raw)
+
 ```{code-cell} ipython3
 :tags: [hide-cell]
 
@@ -20,17 +24,21 @@ import os
 import numpy as np
 import quantities as pq
 import matplotlib.pyplot as plt
+from glob import glob
+from miv.io import *
+```
 
+```{code-cell} ipython3
+datapath = './2022-03-10_16-19-09'
+os.path.exists(datapath)
+```
+
+```{code-cell} ipython3
+filepath = './2022-03-10_16-19-09/Record Node 104/experiment1/recording1/continuous/Rhythm_FPGA-100.0/continuous.dat'
+os.path.exists(filepath)
 ```
 
 ## 1. Data Load
-
-```{code-cell} ipython3
-:tags: [hide-cell]
-
-from miv.io import load_data
-from miv.io.data import Data, Dataset
-```
 
 ```{code-cell} ipython3
 # Load dataset from OpenEphys recording
