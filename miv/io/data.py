@@ -86,7 +86,7 @@ class Data:
         data_path: str,
     ):
         self.data_path = data_path
-        self.channel_mask = []
+        self.masking_channel_set = set()
 
     @contextmanager
     def load(self):
@@ -109,7 +109,7 @@ class Data:
         # TODO: Not sure this is safe implementation
         try:
             signal, timestamps, sampling_rate = load_recording(
-                self.data_path, self.masking_channel_list
+                self.data_path, self.masking_channel_set
             )
             yield signal, timestamps, sampling_rate
         except FileNotFoundError as e:
@@ -126,21 +126,26 @@ class Data:
             del timestamps
             del signal
 
-    def set_channel_mask(self, channel_id: List[int]):
+    def set_channel_mask(self, channel_id: Iterable[int]):
         """
-
         Set the channel masking.
+
+        Parameters
+        ----------
+        channel_id : Iterable[int], list
+            List of channel id that will be ignored.
 
         Notes
         -----
         If the index exceed the number of channels, it will be ignored.
 
-        Parameters
-        ----------
-        channel_id : List[int]
-            List of channel id that will be ignored.
+        Examples
+        --------
+        >>> data = Data(data_path)
+        >>> data.set_channel_mask(range(12,23))
+
         """
-        self.masking_channel_list = channel_id
+        self.masking_channel_set.update(channel_id)
 
     def save(self, tag: str, format: str):
         assert tag == "continuous", "You cannot alter raw data, change the data tag"
