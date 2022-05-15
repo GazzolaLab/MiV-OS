@@ -8,7 +8,7 @@ Raw Data Loader
 """
 __all__ = ["load_continuous_data", "load_recording", "oebin_read", "apply_channel_mask"]
 
-from typing import Any, Dict, Optional, Union, List
+from typing import Any, Dict, Optional, Union, List, Set
 
 import os
 import numpy as np
@@ -20,29 +20,25 @@ import neo
 from miv.typing import SignalType, TimestampsType
 
 
-def apply_channel_mask(signal: np.ndarray, channel_mask: List[int]):
+def apply_channel_mask(signal: np.ndarray, channel_mask: Set[int]):
     """Apply channel mask on the given signal.
 
     Parameters
     ----------
     signal : np.ndarray
         Shape of the signal is expected to be (num_data_point, num_channels).
-    channel_mask : List[int]
+    channel_mask : Set[int]
 
     Returns
     -------
     output signal : SignalType
 
     """
-    print("Retrieving channels according to channel_mask... ", end="")
-    for R, Rec in signal.items():
-        if Rec.shape[1] < len(channel_mask) or max(channel_mask) > Rec.shape[1] - 1:
-            print("")
-            print("Not enough channels in data to apply channel map. Skipping...")
-            continue
 
-        signal[R] = signal[R][:, channel_mask]
-
+    num_channels = signal.shape[1]
+    channel_index = set(range(num_channels)) - channel_mask
+    channel_index = np.array(np.sort(list(channel_index)))
+    signal = signal[:, channel_index]
     return signal
 
 
@@ -67,7 +63,7 @@ def oebin_read(file_path: str):
 
 def load_recording(
     folder: str,
-    channel_mask: Optional[List[int]] = None,
+    channel_mask: Optional[Set[int]] = None,
     unit: Union[str, pq.Quantity] = "uV",
 ):
     """
@@ -82,7 +78,7 @@ def load_recording(
     ----------
     folder: str
         folder containing at least the subfolder 'experiment1'.
-    channel_mask: List[int], optional
+    channel_mask: Set[int], optional
         Channel index list to ignore in import (default=None)
     unit: str or pq.Quantity
         Unit to return the data, either 'uV' or 'mV', case insensitive. (Default='uV')
@@ -113,7 +109,7 @@ def load_recording(
     # TODO in the future: check inside the channel_info,
     #       and convert mismatch unit (mV->uV)
 
-    signal = neo.core.AnalogSignal(signal.T, unit=unit, sampling_rate=sampling_rate)
+    signal = neo.core.AnalogSignal(signal, unit=unit, sampling_rate=sampling_rate)
     return signal, timestamps, sampling_rate
 
 
