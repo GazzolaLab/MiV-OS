@@ -1,34 +1,7 @@
-*************************
-Signal Processing Modules
-*************************
+*********************
+Signal Pre-Processing
+*********************
 
+.. automodule:: miv.signal.filter.filter_collection
 
-Filter
-######
-
-.. currentmodule:: miv.signal.filter
-
-.. automodule:: miv.signal.filter
-
-   .. autosummary::
-       :nosignatures:
-       :toctree: _toctree/FilterAPI
-
-       FilterProtocol
-       ButterBandpass
-       FilterCollection
-
-Spike Detection
-###############
-
-.. automodule:: miv.signal.spike
-
-   .. autosummary::
-       :nosignatures:
-       :toctree: _toctree/DetectionAPI
-
-       SpikeDetectionProtocol
-       ThresholdCutoff
-
-Spike Sorting
-#############
+.. automodule:: miv.signal.spike.detection

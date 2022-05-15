@@ -32,7 +32,9 @@ class ButterBandpass:
     order: int = 5
     tag: str = ""
 
-    def __call__(self, signal: SignalType, sampling_rate: float) -> SignalType:
+    def __call__(
+        self, signal: SignalType, sampling_rate: float, **kwargs
+    ) -> SignalType:
         b, a = self._butter_bandpass(sampling_rate)
         y = sps.lfilter(b, a, signal)
         return y

@@ -1,4 +1,23 @@
-__doc__ = ""
+__doc__ = """
+
+Signal Filter
+#############
+
+<filter doc string>
+
+.. currentmodule:: miv.signal.filter
+
+.. autoclass:: FilterCollection
+   :members: append, insert
+
+.. autosummary::
+   :nosignatures:
+   :toctree: _toctree/FilterAPI
+
+   FilterProtocol
+   ButterBandpass
+
+"""
 __all__ = ["FilterCollection"]
 
 from typing import Union, List
