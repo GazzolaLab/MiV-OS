@@ -43,8 +43,8 @@ def apply_channel_mask(signal: np.ndarray, channel_mask: Set[int]):
     """
 
     num_channels = signal.shape[1]
-    channel_index = set(range(num_channels)) - channel_mask
-    channel_index = np.array(np.sort(list(channel_index)))
+    channel_index_set = set(range(num_channels)) - channel_mask
+    channel_index = np.array(np.sort(list(channel_index_set)))
     signal = signal[:, channel_index]
     return signal
 
@@ -102,7 +102,7 @@ def load_recording(
 
     """
 
-    file_path: str = glob(os.path.join(folder, "**", "*.dat"), recursive=True)
+    file_path: List[str] = glob(os.path.join(folder, "**", "*.dat"), recursive=True)
     assert (
         len(file_path) == 1
     ), f"There should be only one 'continuous.dat' file. (There exists {file_path})"
@@ -114,7 +114,8 @@ def load_recording(
     sampling_rate: float = info["continuous"][0]["sample_rate"]
     # channel_info: Dict[str, Any] = info["continuous"][0]["channels"]
 
-    signal, timestamps = load_continuous_data(file_path, num_channels, sampling_rate)
+    # TODO: maybe need to support multiple continuous.dat files
+    signal, timestamps = load_continuous_data(file_path[0], num_channels, sampling_rate)
     if channel_mask is not None:
         signal = apply_channel_mask(signal, channel_mask)
 
