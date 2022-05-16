@@ -24,7 +24,7 @@ Module
 """
 __all__ = ["Data", "DataManager"]
 
-from typing import Any, Optional, Iterable, Callable, List
+from typing import Any, Optional, Iterable, Callable, List, Set
 
 from collections.abc import MutableSequence
 import logging
@@ -85,8 +85,8 @@ class Data:
         self,
         data_path: str,
     ):
-        self.data_path = data_path
-        self.masking_channel_set = set()
+        self.data_path: str = data_path
+        self.masking_channel_set: Set[int] = set()
 
     @contextmanager
     def load(self):
@@ -248,7 +248,7 @@ def get_experiments_recordings(data_paths: str) -> Iterable[str]:
     # fmt: off
     list_of_experiments_to_process = []
     for path in data_paths:
-        path_list = [path for path in glob.glob(os.path.join(path, "*", "*", "*")) if "Record Node" in path and "recording" in path and os.path.isdir(path)]
+        path_list = [path for path in glob(os.path.join(path, "*", "*", "*")) if "Record Node" in path and "recording" in path and os.path.isdir(path)]
         list_of_experiments_to_process.extend(path_list)
     # fmt: on
     return list_of_experiments_to_process
@@ -258,7 +258,7 @@ def get_analysis_paths(data_paths: str, output_folder_name: str) -> Iterable[str
     # fmt: off
     list_of_analysis_paths = []
     for path in data_paths:
-        path_list = [path for path in glob.glob(os.path.join(path, "*", "*", "*", "*")) if ("Record Node" in path) and ("recording" in path) and (output_folder_name in path) and os.path.isdir(path)]
+        path_list = [path for path in glob(os.path.join(path, "*", "*", "*", "*")) if ("Record Node" in path) and ("recording" in path) and (output_folder_name in path) and os.path.isdir(path)]
         list_of_analysis_paths.extend(path_list)
     # fmt: on
     return list_of_analysis_paths
