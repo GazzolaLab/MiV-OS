@@ -9,7 +9,7 @@
 [![codecov][badge-codecov]][link-codecov]
 
 [//]: # (Remove this line for the first release)
-_The package is under pre-alpha development. First Alpha release target mid-April 2022._
+_The package is under pre-alpha development. First Alpha release target mid-May 2022._
 
 </div>
 
