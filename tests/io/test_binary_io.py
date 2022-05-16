@@ -44,7 +44,7 @@ def test_apply_channel_mask_functionality(signal, mask, solution):
 
 def test_oebin_read_functionality():
     a = {"a": 1, "b": "string data", "c": True}
-    with tempfile.NamedTemporaryFile("w+t") as fp:
+    with tempfile.NamedTemporaryFile("w+t", delete=False) as fp:
         fp.writelines(str(a))
         fp.seek(0)
         b = oebin_read(fp.name)
