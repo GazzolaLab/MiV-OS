@@ -33,11 +33,18 @@ def apply_channel_mask(signal: np.ndarray, channel_mask: Set[int]):
     -------
     output signal : SignalType
 
+    Raises
+    ------
+    IndexError
+        Typically raise index error when the dimension of the signal is less than 2.
+    AttributeError
+        If signal is non numpy array type.
+
     """
 
     num_channels = signal.shape[1]
-    channel_index = set(range(num_channels)) - channel_mask
-    channel_index = np.array(np.sort(list(channel_index)))
+    channel_index_set = set(range(num_channels)) - channel_mask
+    channel_index = np.array(np.sort(list(channel_index_set)))
     signal = signal[:, channel_index]
     return signal
 
@@ -88,12 +95,17 @@ def load_recording(
     signal : SignalType, neo.core.AnalogSignal
     sampling_rate : float
 
+    Raises
+    ------
+    AssertionError
+        If more than one "continuous.dat" file exist in the directory.
+
     """
 
-    file_path: str = glob(os.path.join(folder, "**", "*.dat", recursive=True))
+    file_path: List[str] = glob(os.path.join(folder, "**", "*.dat"), recursive=True)
     assert (
         len(file_path) == 1
-    ), f"There should be only one 'continuous.dat' file. (There exists {file_path}"
+    ), f"There should be only one 'continuous.dat' file. (There exists {file_path})"
 
     # load structure information dictionary
     info_file: str = os.path.join(folder, "structure.oebin")
@@ -102,7 +114,8 @@ def load_recording(
     sampling_rate: float = info["continuous"][0]["sample_rate"]
     # channel_info: Dict[str, Any] = info["continuous"][0]["channels"]
 
-    signal, timestamps = load_continuous_data(file_path, num_channels, sampling_rate)
+    # TODO: maybe need to support multiple continuous.dat files
+    signal, timestamps = load_continuous_data(file_path[0], num_channels, sampling_rate)
     if channel_mask is not None:
         signal = apply_channel_mask(signal, channel_mask)
 
@@ -111,155 +124,6 @@ def load_recording(
 
     signal = neo.core.AnalogSignal(signal, unit=unit, sampling_rate=sampling_rate)
     return signal, timestamps, sampling_rate
-
-
-def _bitsToVolts(Data, ChInfo, Unit):  # TODO: need refactor
-    print("Converting to uV... ", end="")
-    Data = {R: Rec.astype("float32") for R, Rec in Data.items()}
-
-    if Unit.lower() == "uv":
-        U = 1
-    elif Unit.lower() == "mv":
-        U = 10 ** -3
-
-    for R in Data.keys():
-        for C in range(len(ChInfo)):
-            Data[R][:, C] = Data[R][:, C] * ChInfo[C]["bit_volts"] * U
-            if "ADC" in ChInfo[C]["channel_name"]:
-                Data[R][:, C] *= 10 ** 6
-
-    return Data
-
-
-def _load(  # TODO: Need refactor
-    folder, processor=None, experiment=None, recording=None, unit="uV", channel_map=[]
-):
-    """
-    Loads data recorded by Open Ephys in Binary format as numpy memmap.
-
-    Here is example usage::
-
-        from miv.io.Binary import load
-
-        folder = '/home/user/<PathToData>/2019-07-27_00-00-00'
-        Data, Rate = load(folder)
-
-        channel_map = [0,15,1,14]
-        recording = 3
-        Data2, Rate2 = load(folder, recording=recording, channel_map=channel_map, unit='Bits')
-
-    Original Author:
-
-    - open-ephys/analysis-tools/Python3/Binary.py (commit: 871e003)
-    - original author: malfatti
-        - date: 2019-07-27
-    - last modified by: skim449
-        - date: 2022-04-11
-
-    Parameters
-    ----------
-    folder: str
-        folder containing at least the subfolder 'experiment1'.
-
-    processor: str or None, optional
-        Processor number to load, according to subsubsubfolders under
-        folder>experimentX/recordingY/continuous . The number used is the one
-        after the processor name. For example, to load data from the folder
-        'Channel_Map-109_100.0' the value used should be '109'.
-        If not set, load all processors.
-
-    experiment: int or None, optional
-        Experiment number to load, according to subfolders under folder.
-        If not set, load all experiments.
-
-    recording: int or None, optional
-        Recording number to load, according to subsubfolders under folder>experimentX .
-        If not set, load all recordings.
-
-    unit: str or None, optional
-        Unit to return the data, either 'uV' or 'mV' (case insensitive). In
-        both cases, return data in float32. Defaults to 'uV'.
-        If anything else, return data in int16.
-
-    channel_map: list, optional
-        If empty (default), load all channels.
-        If not empty, return only channels in channel_map, in the provided order.
-        CHANNELS ARE COUNTED STARTING AT 0.
-
-    Returns
-    -------
-    Data: dict
-        Dictionary with data in the structure Data[processor][experiment][recording].
-    Rate: dict
-        Dictionary with sampling rates in the structure Rate[processor][experiment].
-
-
-    """
-
-    files = sorted(glob(folder + "/**/*.dat", recursive=True))
-    info_file = sorted(glob(folder + "/*/*/structure.oebin"))
-
-    Data, Rate = {}, {}
-    for F, File in enumerate(files):
-        File = File.replace("\\", "/")  # Replace windows file delims
-        Exp, Rec, _, Proc = File.split("/")[-5:-1]
-        Exp = str(int(Exp[10:]) - 1)
-        Rec = str(int(Rec[9:]) - 1)
-        Proc = Proc.split(".")[0].split("-")[-1]
-        if "_" in Proc:
-            Proc = Proc.split("_")[0]
-
-        if Proc not in Data.keys():
-            Data[Proc], Rate[Proc] = {}, {}
-
-        if experiment:
-            if int(Exp) != experiment - 1:
-                continue
-
-        if recording:
-            if int(Rec) != recording - 1:
-                continue
-
-        if processor:
-            if Proc != processor:
-                continue
-
-        print("Loading recording", int(Rec) + 1, "...")
-        if Exp not in Data[Proc]:
-            Data[Proc][Exp] = {}
-        Data[Proc][Exp][Rec] = np.memmap(File, dtype="int16", mode="c")
-
-        Info = literal_eval(open(info_file[F]).read())
-        ProcIndex = [
-            Info["continuous"].index(_)
-            for _ in Info["continuous"]
-            if str(_["source_processor_id"]) == Proc
-        ][
-            0
-        ]  # Changed to source_processor_id from recorded_processor_id
-
-        ChNo = Info["continuous"][ProcIndex]["num_channels"]
-        if Data[Proc][Exp][Rec].shape[0] % ChNo:
-            print("Rec", Rec, "is broken")
-            del Data[Proc][Exp][Rec]
-            continue
-
-        SamplesPerCh = Data[Proc][Exp][Rec].shape[0] // ChNo
-        Data[Proc][Exp][Rec] = Data[Proc][Exp][Rec].reshape((SamplesPerCh, ChNo))
-        Rate[Proc][Exp] = Info["continuous"][ProcIndex]["sample_rate"]
-
-    for Proc in Data.keys():
-        for Exp in Data[Proc].keys():
-            if unit.lower() in ["uv", "mv"]:
-                ChInfo = Info["continuous"][ProcIndex]["channels"]
-                Data[Proc][Exp] = _bitsToVolts(Data[Proc][Exp], ChInfo, unit)
-
-            if channel_map:
-                Data[Proc][Exp] = apply_channel_mask(Data[Proc][Exp], channel_map)
-
-    print("Done.")
-
-    return Data, Rate
 
 
 def load_continuous_data(
@@ -326,4 +190,4 @@ def load_continuous_data(
     if start_at_zero and not np.isclose(timestamps[0], 0.0):
         timestamps -= timestamps[0]
 
-    return timestamps, raw_data
+    return timestamps, np.array(raw_data)
