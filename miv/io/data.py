@@ -107,6 +107,7 @@ class Data:
 
         """
         # TODO: Not sure this is safe implementation
+        self.check_path_validity()
         try:
             signal, timestamps, sampling_rate = load_recording(
                 self.data_path, self.masking_channel_set
@@ -147,7 +148,7 @@ class Data:
         """
         self.masking_channel_set.update(channel_id)
 
-    def save(self, tag: str, format: str):
+    def save(self, tag: str, format: str):  # TODO
         assert tag == "continuous", "You cannot alter raw data, change the data tag"
         # save_path = os.path.join(self.data_path, tag)
 
@@ -162,6 +163,31 @@ class Data:
                 "Format type " + format + " is not implemented.\n",
                 "Please choose  one of the supported formats: dat, npz, neo",
             )
+
+    def check_path_validity(self):
+        """
+        Check if necessary files exist in the directory.
+
+        - Check `continious.dat` exists. (only one)
+        - Check `structure.oebin` exists.
+
+        Returns
+        -------
+        bool
+            Return true if all necessary files exist in the directory.
+
+        """
+
+        continuous_dat_paths = glob(
+            os.path.join(self.data_path, "**", "continuous.dat"), recursive=True
+        )
+        assert (
+            len(continuous_dat_paths) == 1
+        ), f"One and only one continuous.dat file can exist in the data path. Found: {continuous_dat_paths}"
+        assert os.path.exists(
+            os.path.join(self.data_path, "structure.oebin")
+        ), "Missing structure.oebin in the data path."
+        return True
 
 
 class DataManager(MutableSequence):
