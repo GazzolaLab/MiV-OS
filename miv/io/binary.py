@@ -114,15 +114,17 @@ def load_recording(
     sampling_rate: float = info["continuous"][0]["sample_rate"]
     # channel_info: Dict[str, Any] = info["continuous"][0]["channels"]
 
-    # TODO: maybe need to support multiple continuous.dat files
+    # TODO: maybe need to support multiple continuous.dat files in the future
     signal, timestamps = load_continuous_data(file_path[0], num_channels, sampling_rate)
-    if channel_mask is not None:
+
+    if channel_mask:
         signal = apply_channel_mask(signal, channel_mask)
 
     # TODO in the future: check inside the channel_info,
     #       and convert mismatch unit (mV->uV)
-
-    signal = neo.core.AnalogSignal(signal, unit=unit, sampling_rate=sampling_rate)
+    signal = neo.core.AnalogSignal(
+        signal, units=unit, sampling_rate=sampling_rate * pq.Hz
+    )
     return signal, timestamps, sampling_rate
 
 
@@ -181,8 +183,8 @@ def load_continuous_data(
 
     # Get timestamps
     if os.path.exists(timestamps_path):
-        timestamps = np.load(timestamps_path)
-        timestamps /= sampling_rate
+        timestamps = np.array(np.load(timestamps_path), dtype=np.float64)
+        timestamps /= float(sampling_rate)
     else:  # If timestamps_path doesn't exist, deduce the stamps
         timestamps = np.array(range(0, length)) / sampling_rate
 
