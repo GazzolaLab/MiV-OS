@@ -4,7 +4,8 @@ import numpy as np
 
 from miv.typing import SignalType
 
-def signal_to_noise(a:SignalType, axis:int=1, ddof:int=0):
+
+def signal_to_noise(signal: SignalType, axis: int = 1, ddof: int = 0):
     """signal_to_noise.
 
     Parameters
@@ -17,4 +18,4 @@ def signal_to_noise(a:SignalType, axis:int=1, ddof:int=0):
     signal_np = np.asanyarray(signal)
     m = signal_np.mean(axis)
     sd = signal_np.std(axis=axis, ddof=ddof)
-    return np.where(sd==0, 0, m/sd)
+    return np.where(sd == 0, 0, m / sd)
