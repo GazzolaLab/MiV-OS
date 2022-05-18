@@ -7,6 +7,7 @@ import numpy as np
 import numpy.typing as npt
 
 import scipy.signal as sps
+import matplotlib.pyplot as plt
 
 from miv.typing import SignalType
 
@@ -33,11 +34,37 @@ class ButterBandpass:
     tag: str = ""
 
     def __call__(
-        self, signal: SignalType, sampling_rate: float, **kwargs
+        self,
+        signal: SignalType,
+        sampling_rate: float,
+        plot_frequency_response: bool = False,
+        **kwargs,
     ) -> SignalType:
+        """__call__.
+
+        Parameters
+        ----------
+        signal : SignalType
+            signal
+        sampling_rate : float
+            sampling_rate
+        plot_frequency_response : bool
+            plot_frequency_response
+        kwargs :
+            kwargs
+
+        Returns
+        -------
+        SignalType
+
+        """
         b, a = self._butter_bandpass(sampling_rate)
         y = sps.lfilter(b, a, signal)
-        return y
+        if plot_frequency_response:
+            fig = self.plot_frequency_response(a, b)
+            return y, fig
+        else:
+            return y
 
     def __post_init__(self):
         assert (
@@ -56,3 +83,14 @@ class ButterBandpass:
         high = self.highcut / nyq
         b, a = sps.butter(self.order, [low, high], btype="band")
         return b, a
+
+    def plot_frequency_response(self, a, b):
+        w, h = sps.freqs(b, a)
+        fig = plt.figure()
+        plt.semilogx(w, 20 * np.log10(abs(h)))
+        plt.title(
+            f"Butterworth filter (order{self.order}) frequency response [{self.lowcut},{self.highcut}]"
+        )
+        plt.xlabel("Frequency")
+        plt.ylabel("Amplitude")
+        return fig
