@@ -49,6 +49,34 @@ def apply_channel_mask(signal: np.ndarray, channel_mask: Set[int]):
     return signal
 
 
+def bits_to_voltage(signal: SignalType, channel_info: Dict[str, Dict[str, Any]]):
+    """
+    Convert binary bit data to voltage (microVolts)
+
+    Parameters
+    ----------
+    signal : SignalType, numpy array
+    channel_info : Dict[str, Dict[str, Any]]
+        Channel information dictionary. Typically located in `structure.oebin` file.
+        channel information includes bit-volts conversion ration and units (uV or mV).
+
+    Returns
+    -------
+    signal : numpy array
+        Output signal is in microVolts unit.
+
+    """
+    resultant_unit = pq.Quantity(1, "uV")  # Final Unit
+    for channel in range(len(channel_info)):
+        bit_to_volt_conversion = channel_info[channel]["bit_volts"]
+        recorded_unit = pq.Quantity([1], channel_info[channel]["units"])
+        unit_conversion = (recorded_unit / resultant_unit).simplified
+        signal[:, channel] *= bit_to_volt_conversion * unit_conversion
+        if "ADC" in channel_info[channel]["channel_name"]:
+            signal[:, channel] *= 10 ** 6
+    return signal
+
+
 def oebin_read(file_path: str):
     """
     Oebin file reader in dictionary form
@@ -71,7 +99,6 @@ def oebin_read(file_path: str):
 def load_recording(
     folder: str,
     channel_mask: Optional[Set[int]] = None,
-    unit: Union[str, pq.Quantity] = "uV",
 ):
     """
     Loads data recorded by Open Ephys in Binary format as numpy memmap.
@@ -87,8 +114,6 @@ def load_recording(
         folder containing at least the subfolder 'experiment1'.
     channel_mask: Set[int], optional
         Channel index list to ignore in import (default=None)
-    unit: str or pq.Quantity
-        Unit to return the data, either 'uV' or 'mV', case insensitive. (Default='uV')
 
     Returns
     -------
@@ -111,7 +136,7 @@ def load_recording(
     info_file: str = os.path.join(folder, "structure.oebin")
     info: Dict[str, Any] = oebin_read(info_file)
     num_channels: int = info["continuous"][0]["num_channels"]
-    sampling_rate: float = info["continuous"][0]["sample_rate"]
+    sampling_rate: float = float(info["continuous"][0]["sample_rate"])
     # channel_info: Dict[str, Any] = info["continuous"][0]["channels"]
 
     # TODO: maybe need to support multiple continuous.dat files in the future
@@ -120,11 +145,11 @@ def load_recording(
     if channel_mask:
         signal = apply_channel_mask(signal, channel_mask)
 
-    # TODO in the future: check inside the channel_info,
-    #       and convert mismatch unit (mV->uV)
-    signal = neo.core.AnalogSignal(
-        signal, units=unit, sampling_rate=sampling_rate * pq.Hz
-    )
+    # To Voltage
+    signal = bits_to_voltage(signal, info["continuous"][0]["channels"])
+    # signal = neo.core.AnalogSignal(
+    #    signal*pq.uV, sampling_rate=sampling_rate * pq.Hz
+    # )
     return signal, timestamps, sampling_rate
 
 
@@ -138,6 +163,11 @@ def load_continuous_data(
     """
     Load single continous data file and return timestamps and raw data in numpy array.
     Typical `data_path` from OpenEphys has a name `continuous.dat`.
+
+    .. note::
+        The output data is raw-data without unit conversion. In order to convert the unit
+        to voltage, you need to multiply by `bit_volts` conversion ratio. This ratio and
+        units are typially saved in `structure.oebin` file.
 
     Parameters
     ----------
@@ -158,8 +188,8 @@ def load_continuous_data(
 
     Returns
     -------
-    timestamps: TimestampsType, numpy array
     raw_data: SignalType, numpy array
+    timestamps: TimestampsType, numpy array
 
     Raises
     ------
@@ -172,9 +202,9 @@ def load_continuous_data(
     """
 
     # Read raw data signal
-    raw_data: np.ndarray = np.memmap(data_path, dtype="int16")
+    raw_data: np.ndarray = np.memmap(data_path, dtype="int16", mode="c")
     length = raw_data.size // num_channels
-    raw_data = np.reshape(raw_data, (length, num_channels))
+    raw_data = np.reshape(raw_data, (length, num_channels)).astype("float32")
 
     # Get timestamps_path
     if timestamps_path is None:
@@ -192,4 +222,4 @@ def load_continuous_data(
     if start_at_zero and not np.isclose(timestamps[0], 0.0):
         timestamps -= timestamps[0]
 
-    return timestamps, np.array(raw_data)
+    return np.array(raw_data), timestamps
