@@ -61,7 +61,7 @@ def test_load_continuous_data_temp_file_without_timestamps(num_channels, signal_
     fp[:] = signal[:]
     fp.flush()
 
-    timestamps, raw_data = load_continuous_data(fp.filename, num_channels, 1)
+    raw_data, timestamps = load_continuous_data(fp.filename, num_channels, 1)
     np.testing.assert_allclose(timestamps, np.arange(signal_length))
     np.testing.assert_allclose(raw_data, signal)
 
@@ -87,14 +87,14 @@ def test_load_continuous_data_temp_file_with_timestamps_shift(
     np.save(timestamps_filename, timestamps)
 
     # With shift
-    out_timestamps, raw_data = load_continuous_data(
+    raw_data, out_timestamps = load_continuous_data(
         fp.filename, num_channels, freq, start_at_zero=False
     )
     np.testing.assert_allclose(out_timestamps, timestamps / freq)
     np.testing.assert_allclose(raw_data, signal)
 
     # Without shift
-    out_timestamps, raw_data = load_continuous_data(
+    raw_data, out_timestamps = load_continuous_data(
         fp.filename, num_channels, freq, start_at_zero=True
     )
     np.testing.assert_allclose(out_timestamps, (timestamps - np.pi) / freq)
@@ -122,7 +122,7 @@ def test_load_continuous_data_temp_file_timestamps_path_test(
     np.save(timestamps_filename, timestamps)
 
     # With shift
-    out_timestamps, raw_data = load_continuous_data(
+    raw_data, out_timestamps = load_continuous_data(
         fp.filename, num_channels, freq, "a.npy"
     )
     np.testing.assert_allclose(out_timestamps, timestamps / freq)
