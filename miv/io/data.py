@@ -108,9 +108,15 @@ class Data:
         timestamps : TimestampsType, numpy array
         sampling_rate : float
 
+        Raises
+        ------
+        FileNotFoundError
+            If some key files are missing.
+
         """
         # TODO: Not sure this is safe implementation
-        self.check_path_validity()
+        if not self.check_path_validity():
+            raise FileNotFoundError("Data directory does not have all necessary files.")
         try:
             signal, timestamps, sampling_rate = load_recording(
                 self.data_path, self.masking_channel_set
@@ -184,12 +190,14 @@ class Data:
         continuous_dat_paths = glob(
             os.path.join(self.data_path, "**", "continuous.dat"), recursive=True
         )
-        assert (
-            len(continuous_dat_paths) == 1
-        ), f"One and only one continuous.dat file can exist in the data path. Found: {continuous_dat_paths}"
-        assert os.path.exists(
-            os.path.join(self.data_path, "structure.oebin")
-        ), "Missing structure.oebin in the data path."
+        if len(continuous_dat_paths) != 1:
+            logging.warning(
+                f"One and only one continuous.dat file can exist in the data path. Found: {continuous_dat_paths}"
+            )
+            return False
+        if not os.path.exists(os.path.join(self.data_path, "structure.oebin")):
+            logging.warning("Missing structure.oebin in the data path.")
+            return False
         return True
 
 
@@ -222,10 +230,45 @@ class DataManager(MutableSequence):
 
     def __init__(self, data_collection_path: str):
         self.data_collection_path = data_collection_path
-        self.data_list = []
+        self.data_list: Iterable[Data] = []
 
         # From the path get data paths and create data objects
         self._load_data_paths()
+
+    @property
+    def data_path_list(self) -> Iterable[str]:
+        return [data.data_path for data in self.data_list]
+
+    def tree(self) -> str:
+        """
+        Pretty-print available recordings in DataManager in tree format.
+
+        Examples
+        --------
+        >>> data_collection = DataManager("2022-05-15_13-51-36")
+        >>> data_collection.tree()
+        2022-05-15_14-51-36
+            0: <miv.io.data.Data object at 0x7f8960660cd0>
+               └── Record Node 103/experiment3_std2_pt_ESC/recording1
+            1: <miv.io.data.Data object at 0x7f89671c8400>
+               └── Record Node 103/experiment2_std1_pt_ESC/recording1
+            2: <miv.io.data.Data object at 0x7f896199e7c0>
+               └── Record Node 103/experiment1_cont_ESC/recording1
+
+        """
+        if not self.data_list:
+            print(
+                "Data list is empty. Check if data_collection_path exists and correct"
+            )
+            return
+        print(self.data_collection_path)
+        for idx, data in enumerate(self.data_list):
+            print(" " * 4 + f"{idx}: {data}")
+            print(
+                " " * 4
+                + "   └── "
+                + data.data_path[len(self.data_collection_path) + 1 :]
+            )
 
     def _load_data_paths(self):
         """
@@ -269,20 +312,17 @@ class DataManager(MutableSequence):
         return path_list
 
     def save(self, tag: str, format: str):
-        raise NotImplementedError
+        raise NotImplementedError  # TODO
         for data in self.data_list:
             data.save(tag, format)
 
     def apply_filter(self, filter: FilterProtocol):
-        raise NotImplementedError
+        raise NotImplementedError  # TODO
         for data in self.data_list:
             data.load()
             data = filter(data, sampling_rate=0)
             data.save(tag="filter", format="npz")
             data.unload()
-
-    # def apply_spike_detection(self, method: DetectionProtocol):
-    #     raise NotImplementedError("Wait until we make it")
 
     # MutableSequence abstract methods
     def __len__(self):
@@ -294,5 +334,14 @@ class DataManager(MutableSequence):
     def __delitem__(self, idx):
         del self.data_list[idx]
 
-    def __setitem__(self, idx, system):
-        self.data_list[idx] = system
+    def __setitem__(self, idx, data: Data):
+        if data.check_path_validity():
+            self.data_list[idx] = data
+        else:
+            logging.warning("Invalid data cannot be loaded to the DataManager.")
+
+    def insert(self, idx, data: Data):
+        if data.check_path_validity():
+            self.data_list.insert(idx, data)
+        else:
+            logging.warning("Invalid data cannot be loaded to the DataManager.")
