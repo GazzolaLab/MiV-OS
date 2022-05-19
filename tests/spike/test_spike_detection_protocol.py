@@ -1,12 +1,11 @@
-from typing import runtime_checkable
-from typing import Protocol, Any
+from typing import Any, Protocol, runtime_checkable
 
 import pytest
 
 from miv.signal.spike import SpikeDetectionProtocol
 from tests.spike.mock_spike_detection import (
-    mock_spike_detection_list,
     mock_nonspike_detection_list,
+    mock_spike_detection_list,
 )
 
 

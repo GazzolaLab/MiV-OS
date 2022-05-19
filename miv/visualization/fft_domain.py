@@ -1,12 +1,11 @@
 __all__ = ["plot_frequency_domain"]
 
 import os
-import numpy as np
-
-from scipy import fftpack
-from scipy.signal import welch
 
 import matplotlib.pyplot as plt
+import numpy as np
+from scipy import fftpack
+from scipy.signal import welch
 
 from miv.typing import SignalType
 

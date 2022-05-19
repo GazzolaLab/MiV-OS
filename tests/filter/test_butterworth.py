@@ -1,8 +1,7 @@
+import numpy as np
 import pytest
 
-import numpy as np
 from miv.signal.filter import ButterBandpass
-
 from tests.filter.test_filter_protocol import RuntimeFilterProtocol
 
 ParameterSet = [

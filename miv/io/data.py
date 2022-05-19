@@ -26,18 +26,18 @@ Module
 """
 __all__ = ["Data", "DataManager"]
 
-from typing import Any, Optional, Iterable, Callable, List, Set
+from typing import Any, Callable, Iterable, List, Optional, Set
 
-from collections.abc import MutableSequence
 import logging
-
 import os
-from glob import glob
-import numpy as np
+from collections.abc import MutableSequence
 from contextlib import contextmanager
+from glob import glob
+
+import numpy as np
 
 from miv.io.binary import load_continuous_data, load_recording
-from miv.signal.filter import FilterProtocol
+from miv.signal.filter.protocol import FilterProtocol
 from miv.typing import SignalType
 
 

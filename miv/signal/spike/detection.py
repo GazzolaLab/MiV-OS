@@ -17,17 +17,16 @@ Spike Detection
 """
 __all__ = ["ThresholdCutoff"]
 
-from typing import Union, List, Iterable
-
-import numpy as np
-import quantities as pq
-
-from tqdm import tqdm
+from typing import Iterable, List, Union
 
 from dataclasses import dataclass
-from miv.typing import SignalType, TimestampsType, SpikestampsType
 
 import neo
+import numpy as np
+import quantities as pq
+from tqdm import tqdm
+
+from miv.typing import SignalType, SpikestampsType, TimestampsType
 
 
 @dataclass

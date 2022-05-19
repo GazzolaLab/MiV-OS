@@ -1,10 +1,9 @@
-import pytest
-
 import numpy as np
+import pytest
+import quantities as pq
+from neo.core import SpikeTrain
 
 from miv.statistics import spikestamps_statistics
-from neo.core import SpikeTrain
-import quantities as pq
 
 SpikestampsTestSet = [
     [[1, 2, 3]],
