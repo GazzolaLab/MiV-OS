@@ -18,6 +18,8 @@ Module
 .. autoclass:: Data
    :members:
 
+----------------------
+
 .. autoclass:: DataManager
    :members:
 
@@ -86,6 +88,7 @@ class Data:
         data_path: str,
     ):
         self.data_path: str = data_path
+        self.analysis_path: str = os.path.join(data_path, "analysis")
         self.masking_channel_set: Set[int] = set()
 
     @contextmanager
@@ -105,8 +108,15 @@ class Data:
         timestamps : TimestampsType, numpy array
         sampling_rate : float
 
+        Raises
+        ------
+        FileNotFoundError
+            If some key files are missing.
+
         """
         # TODO: Not sure this is safe implementation
+        if not self.check_path_validity():
+            raise FileNotFoundError("Data directory does not have all necessary files.")
         try:
             signal, timestamps, sampling_rate = load_recording(
                 self.data_path, self.masking_channel_set
@@ -147,7 +157,7 @@ class Data:
         """
         self.masking_channel_set.update(channel_id)
 
-    def save(self, tag: str, format: str):
+    def save(self, tag: str, format: str):  # TODO
         assert tag == "continuous", "You cannot alter raw data, change the data tag"
         # save_path = os.path.join(self.data_path, tag)
 
@@ -163,69 +173,157 @@ class Data:
                 "Please choose  one of the supported formats: dat, npz, neo",
             )
 
-
-class DataManager(MutableSequence):
-    def __init__(
-        self,
-        data_folder_path: str,
-        channels: int,
-        sampling_rate: float,
-        timestamps_npy: Optional[str] = "",
-        device="",
-    ):
-        self.data_folder_path = data_folder_path
-
-        # From the path get data paths and create data objects
-        self.load_data_sets(channels, sampling_rate, timestamps_npy)
-
-    def load_data_sets(self, channels, sampling_rate, timestamps_npy):
+    def check_path_validity(self):
         """
-        Create data objects from the data three.
+        Check if necessary files exist in the directory.
 
-        Parameters
-        ----------
-        path
+        - Check `continious.dat` exists. (only one)
+        - Check `structure.oebin` exists.
 
         Returns
         -------
+        bool
+            Return true if all necessary files exist in the directory.
 
         """
-        # From the path get the data path list
-        self.data_path_list = self._get_data_path_from_tree()
 
-        # Create an object for each continues.dat and store them in data list to manipulate later.
-        self.data_list = []
-        for data_path in self.data_path_list:
-            self.data_list.append(
-                Data(data_path, channels, sampling_rate, timestamps_npy)
+        continuous_dat_paths = glob(
+            os.path.join(self.data_path, "**", "continuous.dat"), recursive=True
+        )
+        if len(continuous_dat_paths) != 1:
+            logging.warning(
+                f"One and only one continuous.dat file can exist in the data path. Found: {continuous_dat_paths}"
+            )
+            return False
+        if not os.path.exists(os.path.join(self.data_path, "structure.oebin")):
+            logging.warning("Missing structure.oebin in the data path.")
+            return False
+        return True
+
+
+class DataManager(MutableSequence):
+    """
+    Data collection manager.
+
+    By default recording setup, the directory is named after the date and time
+    of the recording. The structure of ``data_collection_path`` typically look
+    like below::
+
+        2022-03-10_16-19-09         <- data_collection_path
+        └── Record Node 104
+            └── experiment1
+                └── recording1      <- data_path (Data module)
+            ├── experiment2
+            ├── experiment3
+            ├── experiment4
+            ├── spontaneous
+            ├── settings.xml
+            ├── settings_2.xml
+            └── settings_3.xml
+
+        Parameters
+        ----------
+        data_collection_path : str
+            Path for data collection.
+
+    """
+
+    def __init__(self, data_collection_path: str):
+        self.data_collection_path = data_collection_path
+        self.data_list: Iterable[Data] = []
+
+        # From the path get data paths and create data objects
+        self._load_data_paths()
+
+    @property
+    def data_path_list(self) -> Iterable[str]:
+        return [data.data_path for data in self.data_list]
+
+    def tree(self):
+        """
+        Pretty-print available recordings in DataManager in tree format.
+
+        Examples
+        --------
+        >>> data_collection = DataManager("2022-05-15_13-51-36")
+        >>> data_collection.tree()
+        2022-05-15_14-51-36
+            0: <miv.io.data.Data object at 0x7f8960660cd0>
+               └── Record Node 103/experiment3_std2_pt_ESC/recording1
+            1: <miv.io.data.Data object at 0x7f89671c8400>
+               └── Record Node 103/experiment2_std1_pt_ESC/recording1
+            2: <miv.io.data.Data object at 0x7f896199e7c0>
+               └── Record Node 103/experiment1_cont_ESC/recording1
+
+        """
+        # TODO: Either use logging or other str stream
+        if not self.data_list:
+            print(
+                "Data list is empty. Check if data_collection_path exists and correct"
+            )
+            return
+        print(self.data_collection_path)
+        for idx, data in enumerate(self.data_list):
+            print(" " * 4 + f"{idx}: {data}")
+            print(
+                " " * 4
+                + "   └── "
+                + data.data_path[len(self.data_collection_path) + 1 :]
             )
 
-    def _get_data_path_from_tree(self):
+    def _load_data_paths(self):
         """
-        This function gets the data for each continues.dat file inside the data folder.
+        Create data objects from the data three.
+        """
+        # From the path get the data path list
+        data_path_list = self._get_experiment_paths()
+
+        # Create data object
+        self.data_list = []
+        invalid_count = 0
+        for path in data_path_list:
+            data = Data(path)
+            if data.check_path_validity():
+                self.data_list.append(data)
+            else:
+                invalid_count += 1
+        logging.info(
+            f"Total {len(data_path_list)} recording found. There are {invalid_count} invalid paths."
+        )
+
+    def _get_experiment_paths(self) -> Iterable[str]:
+        """
+        Get experiment paths.
+
         Returns
         -------
         data_path_list : list
         """
-        # TODO: implement algorithm to get paths of all continues.dat files.
-        # Use self.data_folder_path
-        raise NotImplementedError("Loading data tree not implemented yet")
-        data_path_list = []
-        return data_path_list
+        # Use self.data_collection_path
+        path_list = []
+        for path in glob(
+            os.path.join(self.data_collection_path, "*", "experiment*", "recording*")
+        ):
+            if (
+                ("Record Node" in path)
+                and ("experiment" in path)
+                and os.path.isdir(path)
+            ):
+                path_list.append(path)
+        return path_list
 
     def save(self, tag: str, format: str):
+        raise NotImplementedError  # TODO
         for data in self.data_list:
             data.save(tag, format)
 
     def apply_filter(self, filter: FilterProtocol):
+        raise NotImplementedError  # TODO
         for data in self.data_list:
             data.load()
             data = filter(data, sampling_rate=0)
             data.save(tag="filter", format="npz")
             data.unload()
-
-    # def apply_spike_detection(self, method: DetectionProtocol):
-    #     raise NotImplementedError("Wait until we make it")
 
     # MutableSequence abstract methods
     def __len__(self):
@@ -237,28 +335,14 @@ class DataManager(MutableSequence):
     def __delitem__(self, idx):
         del self.data_list[idx]
 
-    def __setitem__(self, idx, system):
-        self.data_list[idx] = system
+    def __setitem__(self, idx, data):
+        if data.check_path_validity():
+            self.data_list[idx] = data
+        else:
+            logging.warning("Invalid data cannot be loaded to the DataManager.")
 
-    def __call__(self, *args, **kwargs):
-        pass
-
-
-def get_experiments_recordings(data_paths: str) -> Iterable[str]:
-    # fmt: off
-    list_of_experiments_to_process = []
-    for path in data_paths:
-        path_list = [path for path in glob(os.path.join(path, "*", "*", "*")) if "Record Node" in path and "recording" in path and os.path.isdir(path)]
-        list_of_experiments_to_process.extend(path_list)
-    # fmt: on
-    return list_of_experiments_to_process
-
-
-def get_analysis_paths(data_paths: str, output_folder_name: str) -> Iterable[str]:
-    # fmt: off
-    list_of_analysis_paths = []
-    for path in data_paths:
-        path_list = [path for path in glob(os.path.join(path, "*", "*", "*", "*")) if ("Record Node" in path) and ("recording" in path) and (output_folder_name in path) and os.path.isdir(path)]
-        list_of_analysis_paths.extend(path_list)
-    # fmt: on
-    return list_of_analysis_paths
+    def insert(self, idx, data):
+        if data.check_path_validity():
+            self.data_list.insert(idx, data)
+        else:
+            logging.warning("Invalid data cannot be loaded to the DataManager.")
