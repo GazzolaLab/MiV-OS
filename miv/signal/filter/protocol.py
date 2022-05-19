@@ -24,3 +24,7 @@ class FilterProtocol(Protocol):
         samping_rate : float
         """
         ...
+
+    def __repr__(self) -> str:
+        """String representation for interactive debugging."""
+        ...

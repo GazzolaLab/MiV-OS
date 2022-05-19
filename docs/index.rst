@@ -1,7 +1,5 @@
 .. MiV-OS documentation master file, created by
    sphinx-quickstart on Thu Mar 24 23:35:49 2022.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
 
 MiV-OS documentation!
 =====================
@@ -17,18 +15,29 @@ Installation Instruction
 
 You can also download the source code from `GitHub <https://github.com/GazzolaLab/MiV-OS>`_ directly.
 
+Contribution
+------------
+
+Any contribution to this project is welcome! If you are interested or have any questions, please don't hesitate to contact us.
+If you are interested in contributing to this project, we prepared contribution guideline :ref:`here <overview/contribution:Contributing to MiV-OS>`.
+
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Overview
 
    overview/about
+   overview/references
+   overview/contribution
 
 .. toctree::
    :maxdepth: 2
    :caption: User Guide
 
+   guide/data_management
    guide/signal_processing
+   guide/spike_cutout
+   guide/spike_sorting
 
 .. toctree::
    :maxdepth: 2
@@ -36,7 +45,9 @@ You can also download the source code from `GitHub <https://github.com/GazzolaLa
 
    api/io
    api/signal
+   api/sorting
    api/statistics
+   api/visualization
 
 .. toctree::
    :maxdepth: 2
@@ -44,6 +55,11 @@ You can also download the source code from `GitHub <https://github.com/GazzolaLa
 
    examples/spike_detection
 
+.. toctree::
+   :maxdepth: 2
+   :caption: Site
+
+   Gazzola Lab <https://mattia-lab.com/>
 
 Indices and tables
 ==================

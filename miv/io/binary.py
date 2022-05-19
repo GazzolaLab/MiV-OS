@@ -1,214 +1,225 @@
 __doc__ = """
 
-We expect the data structure to follow the default format exported from OpenEphys system: `format <https://open-ephys.atlassian.net/wiki/spaces/OEW/pages/491632/Data+format>`_.
+-------------------------------------
 
-Original Author
+Raw Data Loader
+###############
 
-- open-ephys/analysis-tools/Python3/Binary.py (commit: 871e003)
-- original author: malfatti
-  - date: 2019-07-27
-- last modified by: skim449
-  - date: 2022-04-11
 """
-__all__ = ["Load", "load_data", "load_continuous_data_file"]
-from typing import Optional
+__all__ = ["load_continuous_data", "load_recording", "oebin_read", "apply_channel_mask"]
+
+from typing import Any, Dict, Optional, Union, List, Set, Sequence
+
+import os
 import numpy as np
 from ast import literal_eval
 from glob import glob
+import quantities as pq
+import neo
+
+from miv.typing import SignalType, TimestampsType
 
 
-def ApplyChannelMap(Data, ChannelMap):
-    print("Retrieving channels according to ChannelMap... ", end="")
-    for R, Rec in Data.items():
-        if Rec.shape[1] < len(ChannelMap) or max(ChannelMap) > Rec.shape[1] - 1:
-            print("")
-            print("Not enough channels in data to apply channel map. Skipping...")
-            continue
+def apply_channel_mask(signal: np.ndarray, channel_mask: Set[int]):
+    """Apply channel mask on the given signal.
 
-        Data[R] = Data[R][:, ChannelMap]
+    Parameters
+    ----------
+    signal : np.ndarray
+        Shape of the signal is expected to be (num_data_point, num_channels).
+    channel_mask : Set[int]
 
-    return Data
+    Returns
+    -------
+    output signal : SignalType
 
+    Raises
+    ------
+    IndexError
+        Typically raise index error when the dimension of the signal is less than 2.
+    AttributeError
+        If signal is non numpy array type.
 
-def BitsToVolts(Data, ChInfo, Unit):
-    print("Converting to uV... ", end="")
-    Data = {R: Rec.astype("float32") for R, Rec in Data.items()}
+    """
 
-    if Unit.lower() == "uv":
-        U = 1
-    elif Unit.lower() == "mv":
-        U = 10 ** -3
-
-    for R in Data.keys():
-        for C in range(len(ChInfo)):
-            Data[R][:, C] = Data[R][:, C] * ChInfo[C]["bit_volts"] * U
-            if "ADC" in ChInfo[C]["channel_name"]:
-                Data[R][:, C] *= 10 ** 6
-
-    return Data
+    num_channels = signal.shape[1]
+    channel_index_set = set(range(num_channels)) - channel_mask
+    channel_index = np.array(np.sort(list(channel_index_set)))
+    signal = signal[:, channel_index]
+    return signal
 
 
-def Load(
-    Folder, Processor=None, Experiment=None, Recording=None, Unit="uV", ChannelMap=[]
+def bits_to_voltage(signal: SignalType, channel_info: Sequence[Dict[str, Any]]):
+    """
+    Convert binary bit data to voltage (microVolts)
+
+    Parameters
+    ----------
+    signal : SignalType, numpy array
+    channel_info : Dict[str, Dict[str, Any]]
+        Channel information dictionary. Typically located in `structure.oebin` file.
+        channel information includes bit-volts conversion ration and units (uV or mV).
+
+    Returns
+    -------
+    signal : numpy array
+        Output signal is in microVolts unit.
+
+    """
+    resultant_unit = pq.Quantity(1, "uV")  # Final Unit
+    for channel in range(len(channel_info)):
+        bit_to_volt_conversion = channel_info[channel]["bit_volts"]
+        recorded_unit = pq.Quantity([1], channel_info[channel]["units"])
+        unit_conversion = (recorded_unit / resultant_unit).simplified
+        signal[:, channel] *= bit_to_volt_conversion * unit_conversion
+        if "ADC" in channel_info[channel]["channel_name"]:
+            signal[:, channel] *= 10 ** 6
+    return signal
+
+
+def oebin_read(file_path: str):
+    """
+    Oebin file reader in dictionary form
+
+    Parameters
+    ----------
+    file_path : str
+
+    Returns
+    -------
+    info : Dict[str, any]
+        recording information stored in oebin file.
+    """
+    # TODO: may need fix for multiple continuous data.
+    # TODO: may need to include processor name/id
+    info = literal_eval(open(file_path).read())
+    return info
+
+
+def load_recording(
+    folder: str,
+    channel_mask: Optional[Set[int]] = None,
 ):
     """
     Loads data recorded by Open Ephys in Binary format as numpy memmap.
+    The path should contain
 
-        Load(Folder, Processor=None, Experiment=None, Recording=None, Unit='uV', ChannelMap=[])
+    - continuous/<processor name>/continuous.dat: signal (cannot have multiple file)
+    - continuous/<processor name>/timestamps.dat: timestamps
+    - structure.oebin: number of channels and sampling rate.
 
     Parameters
     ----------
-        Folder: str
-            Folder containing at least the subfolder 'experiment1'.
-
-        Processor: str or None, optional
-            Processor number to load, according to subsubsubfolders under
-            Folder>experimentX/recordingY/continuous . The number used is the one
-            after the processor name. For example, to load data from the folder
-            'Channel_Map-109_100.0' the value used should be '109'.
-            If not set, load all processors.
-
-        Experiment: int or None, optional
-            Experiment number to load, according to subfolders under Folder.
-            If not set, load all experiments.
-
-        Recording: int or None, optional
-            Recording number to load, according to subsubfolders under Folder>experimentX .
-            If not set, load all recordings.
-
-        Unit: str or None, optional
-            Unit to return the data, either 'uV' or 'mV' (case insensitive). In
-            both cases, return data in float32. Defaults to 'uV'.
-            If anything else, return data in int16.
-
-        ChannelMap: list, optional
-            If empty (default), load all channels.
-            If not empty, return only channels in ChannelMap, in the provided order.
-            CHANNELS ARE COUNTED STARTING AT 0.
+    folder: str
+        folder containing at least the subfolder 'experiment1'.
+    channel_mask: Set[int], optional
+        Channel index list to ignore in import (default=None)
 
     Returns
     -------
-        Data: dict
-            Dictionary with data in the structure Data[Processor][Experiment][Recording].
+    signal : SignalType, neo.core.AnalogSignal
+    sampling_rate : float
 
-        Rate: dict
-            Dictionary with sampling rates in the structure Rate[Processor][Experiment].
+    Raises
+    ------
+    AssertionError
+        If more than one "continuous.dat" file exist in the directory.
 
-
-    Example
-    -------
-        import Binary
-
-        Folder = '/home/user/PathToData/2019-07-27_00-00-00'
-        Data, Rate = Binary.Load(Folder)
-
-        ChannelMap = [0,15,1,14]
-        Recording = 3
-        Data2, Rate2 = Binary.Load(Folder, Recording=Recording, ChannelMap=ChannelMap, Unit='Bits')
     """
 
-    Files = sorted(glob(Folder + "/**/*.dat", recursive=True))
-    InfoFiles = sorted(glob(Folder + "/*/*/structure.oebin"))
+    file_path: List[str] = glob(os.path.join(folder, "**", "*.dat"), recursive=True)
+    assert (
+        len(file_path) == 1
+    ), f"There should be only one 'continuous.dat' file. (There exists {file_path})"
 
-    Data, Rate = {}, {}
-    for F, File in enumerate(Files):
-        File = File.replace("\\", "/")  # Replace windows file delims
-        Exp, Rec, _, Proc = File.split("/")[-5:-1]
-        Exp = str(int(Exp[10:]) - 1)
-        Rec = str(int(Rec[9:]) - 1)
-        Proc = Proc.split(".")[0].split("-")[-1]
-        if "_" in Proc:
-            Proc = Proc.split("_")[0]
+    # load structure information dictionary
+    info_file: str = os.path.join(folder, "structure.oebin")
+    info: Dict[str, Any] = oebin_read(info_file)
+    num_channels: int = info["continuous"][0]["num_channels"]
+    sampling_rate: float = float(info["continuous"][0]["sample_rate"])
+    # channel_info: Dict[str, Any] = info["continuous"][0]["channels"]
 
-        if Proc not in Data.keys():
-            Data[Proc], Rate[Proc] = {}, {}
+    # TODO: maybe need to support multiple continuous.dat files in the future
+    signal, timestamps = load_continuous_data(file_path[0], num_channels, sampling_rate)
 
-        if Experiment:
-            if int(Exp) != Experiment - 1:
-                continue
+    if channel_mask:
+        signal = apply_channel_mask(signal, channel_mask)
 
-        if Recording:
-            if int(Rec) != Recording - 1:
-                continue
-
-        if Processor:
-            if Proc != Processor:
-                continue
-
-        print("Loading recording", int(Rec) + 1, "...")
-        if Exp not in Data[Proc]:
-            Data[Proc][Exp] = {}
-        Data[Proc][Exp][Rec] = np.memmap(File, dtype="int16", mode="c")
-
-        Info = literal_eval(open(InfoFiles[F]).read())
-        ProcIndex = [
-            Info["continuous"].index(_)
-            for _ in Info["continuous"]
-            if str(_["source_processor_id"]) == Proc
-        ][
-            0
-        ]  # Changed to source_processor_id from recorded_processor_id
-
-        ChNo = Info["continuous"][ProcIndex]["num_channels"]
-        if Data[Proc][Exp][Rec].shape[0] % ChNo:
-            print("Rec", Rec, "is broken")
-            del Data[Proc][Exp][Rec]
-            continue
-
-        SamplesPerCh = Data[Proc][Exp][Rec].shape[0] // ChNo
-        Data[Proc][Exp][Rec] = Data[Proc][Exp][Rec].reshape((SamplesPerCh, ChNo))
-        Rate[Proc][Exp] = Info["continuous"][ProcIndex]["sample_rate"]
-
-    for Proc in Data.keys():
-        for Exp in Data[Proc].keys():
-            if Unit.lower() in ["uv", "mv"]:
-                ChInfo = Info["continuous"][ProcIndex]["channels"]
-                Data[Proc][Exp] = BitsToVolts(Data[Proc][Exp], ChInfo, Unit)
-
-            if ChannelMap:
-                Data[Proc][Exp] = ApplyChannelMap(Data[Proc][Exp], ChannelMap)
-
-    print("Done.")
-
-    return (Data, Rate)
+    # To Voltage
+    signal = bits_to_voltage(signal, info["continuous"][0]["channels"])
+    # signal = neo.core.AnalogSignal(
+    #    signal*pq.uV, sampling_rate=sampling_rate * pq.Hz
+    # )
+    return signal, timestamps, sampling_rate
 
 
-def load_data():
-    raise NotImplementedError
-
-
-def load_continuous_data_file(
-    data_file: str,
-    channels: int,
-    timestamps_npy: Optional[str] = "",
-    sampling_rate: float = 30000,
+def load_continuous_data(
+    data_path: str,
+    num_channels: int,
+    sampling_rate: float,
+    timestamps_path: Optional[str] = None,
+    start_at_zero: bool = True,
 ):
     """
-    Describe function
+    Load single continous data file and return timestamps and raw data in numpy array.
+    Typical `data_path` from OpenEphys has a name `continuous.dat`.
+
+    .. note::
+        The output data is raw-data without unit conversion. In order to convert the unit
+        to voltage, you need to multiply by `bit_volts` conversion ratio. This ratio and
+        units are typially saved in `structure.oebin` file.
 
     Parameters
     ----------
-        data_file: continuous.dat file from Open_Ethys recording
-        channels: number of recording channels recorded from
+    data_path : str
+        continuous.dat file path from Open_Ethys recording.
+    num_channels : int
+        number of recording channels recorded. Note, this method will not throw an error
+        if you don't provide the correct number of channels.
+    sampling_rate : float
+        data sampling rate.
+    timestamps_path : Optional[str]
+        If None, first check if the file "timestamps.npy" exists on the same directory.
+        If the file doesn't exist, we deduce the timestamps based on the sampling rate
+        and the length of the data.
+    start_at_zero : bool
+        If True, the timestamps is adjusted to start at zero.
+        Note, recorded timestamps might not start at zero for some reason.
 
     Returns
     -------
-        raw_data:
-        timestamps:
+    raw_data: SignalType, numpy array
+    timestamps: TimestampsType, numpy array
+
+    Raises
+    ------
+    FileNotFoundError
+        If data_path is invalid.
+    ValueError
+        If the error message shows the array cannot be reshaped due to shape,
+        make sure the num_channels is set accurately.
 
     """
 
-    raw_data: np.ndarray = np.memmap(data_file, dtype="int16")
-    length = raw_data.size // channels
-    raw_data = np.reshape(raw_data, (length, channels))
+    # Read raw data signal
+    raw_data: np.ndarray = np.memmap(data_path, dtype="int16", mode="c")
+    length = raw_data.size // num_channels
+    raw_data = np.reshape(raw_data, (length, num_channels)).astype("float32")
 
-    timestamps_zeroed = np.array(range(0, length)) / sampling_rate
-    if timestamps_npy == "":
-        timestamps = timestamps_zeroed
-    else:
-        timestamps = np.load(timestamps_npy) / sampling_rate
+    # Get timestamps_path
+    if timestamps_path is None:
+        dirname = os.path.dirname(data_path)
+        timestamps_path = os.path.join(dirname, "timestamps.npy")
 
-    # only take first 32 channels
-    raw_data = raw_data[:, 0:32]
+    # Get timestamps
+    if os.path.exists(timestamps_path):
+        timestamps = np.array(np.load(timestamps_path), dtype=np.float64)
+        timestamps /= float(sampling_rate)
+    else:  # If timestamps_path doesn't exist, deduce the stamps
+        timestamps = np.array(range(0, length)) / sampling_rate
 
-    return np.array(timestamps), np.array(raw_data)
+    # Adjust timestamps to start from zero
+    if start_at_zero and not np.isclose(timestamps[0], 0.0):
+        timestamps -= timestamps[0]
+
+    return np.array(raw_data), timestamps

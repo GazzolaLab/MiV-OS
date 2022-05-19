@@ -1,4 +1,23 @@
-__doc__ = ""
+__doc__ = """
+
+Signal Filter
+#############
+
+<filter doc string>
+
+.. currentmodule:: miv.signal.filter
+
+.. autoclass:: FilterCollection
+   :members: append, insert
+
+.. autosummary::
+   :nosignatures:
+   :toctree: _toctree/FilterAPI
+
+   FilterProtocol
+   ButterBandpass
+
+"""
 __all__ = ["FilterCollection"]
 
 from typing import Union, List
@@ -46,8 +65,8 @@ class FilterCollection(MutableSequence):
 
     def __call__(self, signal: SignalType, sampling_rate: float) -> SignalType:
         for filter in self.filters:
-            y: SignalType = filter(signal, sampling_rate)
-        return y
+            signal = filter(signal, sampling_rate)
+        return signal
 
     # MutableSequence abstract methods
     def __len__(self):
