@@ -239,7 +239,7 @@ class DataManager(MutableSequence):
     def data_path_list(self) -> Iterable[str]:
         return [data.data_path for data in self.data_list]
 
-    def tree(self) -> str:
+    def tree(self):
         """
         Pretty-print available recordings in DataManager in tree format.
 
@@ -256,6 +256,7 @@ class DataManager(MutableSequence):
                └── Record Node 103/experiment1_cont_ESC/recording1
 
         """
+        # TODO: Either use logging or other str stream
         if not self.data_list:
             print(
                 "Data list is empty. Check if data_collection_path exists and correct"
@@ -334,13 +335,13 @@ class DataManager(MutableSequence):
     def __delitem__(self, idx):
         del self.data_list[idx]
 
-    def __setitem__(self, idx, data: Data):
+    def __setitem__(self, idx, data):
         if data.check_path_validity():
             self.data_list[idx] = data
         else:
             logging.warning("Invalid data cannot be loaded to the DataManager.")
 
-    def insert(self, idx, data: Data):
+    def insert(self, idx, data):
         if data.check_path_validity():
             self.data_list.insert(idx, data)
         else:

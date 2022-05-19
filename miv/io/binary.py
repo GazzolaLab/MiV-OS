@@ -8,7 +8,7 @@ Raw Data Loader
 """
 __all__ = ["load_continuous_data", "load_recording", "oebin_read", "apply_channel_mask"]
 
-from typing import Any, Dict, Optional, Union, List, Set
+from typing import Any, Dict, Optional, Union, List, Set, Sequence
 
 import os
 import numpy as np
@@ -49,7 +49,7 @@ def apply_channel_mask(signal: np.ndarray, channel_mask: Set[int]):
     return signal
 
 
-def bits_to_voltage(signal: SignalType, channel_info: Dict[str, Dict[str, Any]]):
+def bits_to_voltage(signal: SignalType, channel_info: Sequence[Dict[str, Any]]):
     """
     Convert binary bit data to voltage (microVolts)
 
