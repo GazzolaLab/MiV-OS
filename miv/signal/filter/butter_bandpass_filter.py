@@ -55,8 +55,15 @@ class ButterBandpass:
         """
         b, a = self._butter_bandpass(sampling_rate)
         y = signal.copy()
-        for ch in range(signal.shape[1]):
-            y[:, ch] = sps.lfilter(b, a, signal[:, ch])
+        if len(signal.shape) == 1:
+            y = sps.lfilter(b, a, signal)
+        elif len(signal.shape) == 2:
+            for ch in range(signal.shape[1]):
+                y[:, ch] = sps.lfilter(b, a, signal[:, ch])
+        else:
+            raise ValueError(
+                "This filter can be only applied to 1D (signal) or 2D array (signal, channel)"
+            )
         return y
 
     def __post_init__(self):
