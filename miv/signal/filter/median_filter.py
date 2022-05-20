@@ -8,8 +8,6 @@ import logging
 import numpy as np
 import numpy.typing as npt
 
-import scipy.signal as sps
-
 from miv.typing import SignalType
 
 
@@ -68,7 +66,7 @@ class MedianFilter:
         for i, ch in zip(outlier_i, outlier_ch):
             low_bound = np.max((0, i - k[0]))
             up_bound = np.min((i + k[1], signal.shape[0])) + 1
-            y[i, ch] = np.median(signal[low_bound:up_bound, ch])
+            y[low_bound:up_bound, ch] = np.median(signal[low_bound:up_bound, ch])
         return y
 
     def __post_init__(self):
