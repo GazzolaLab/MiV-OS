@@ -55,18 +55,16 @@ import scipy.signal
 # FIXME: For now, we provide the free function for simple usage. For more
 # advanced statistical analysis, we should have a module wrapper.
 def spikestamps_statistics(
-    spikestamps: Union[np.ndarray, Iterable[float], Iterable[neo.core.SpikeTrain]],
-    t_start: Optional[float] = None,
-    t_stop: Optional[float] = None,
+    spiketrains: Union[np.ndarray, Iterable[float], Iterable[neo.core.SpikeTrain]],
+    # t_start: Optional[float] = None,
+    # t_stop: Optional[float] = None,
 ) -> Dict[str, Any]:
     """
-    Process basic spikestamps statistics: rates, mean, variance.
+    Process basic spiketrains statistics: rates, mean, variance.
 
     Parameters
     ----------
-    spikestamps : Iterable[neo.core.SpikeTrain]
-    t_start : Optional[float]
-    t_stop : Optional[float]
+    spiketrains : Iterable[neo.core.SpikeTrain]
 
     Returns
     -------
@@ -74,8 +72,8 @@ def spikestamps_statistics(
 
     """
     rates = [
-        elephant.statistics.mean_firing_rate(spikestamp, t_start, t_stop, axis=0)
-        for spikestamp in spikestamps
+        float(elephant.statistics.mean_firing_rate(spikestamp).magnitude)
+        for spikestamp in spiketrains
     ]
     rates_mean_over_channel = np.mean(rates)
     rates_variance_over_channel = np.var(rates)
