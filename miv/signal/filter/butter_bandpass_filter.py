@@ -36,7 +36,6 @@ class ButterBandpass:
         self,
         signal: SignalType,
         sampling_rate: float,
-        plot_frequency_response: bool = False,
         **kwargs,
     ) -> SignalType:
         """__call__.
@@ -47,10 +46,6 @@ class ButterBandpass:
             signal
         sampling_rate : float
             sampling_rate
-        plot_frequency_response : bool
-            plot_frequency_response
-        kwargs :
-            kwargs
 
         Returns
         -------
@@ -58,12 +53,17 @@ class ButterBandpass:
 
         """
         b, a = self._butter_bandpass(sampling_rate)
-        y = sps.lfilter(b, a, signal)
-        if plot_frequency_response:
-            fig = self.plot_frequency_response(a, b)
-            return y, fig
+        y = signal.copy()
+        if len(signal.shape) == 1:
+            y = sps.lfilter(b, a, signal)
+        elif len(signal.shape) == 2:
+            for ch in range(signal.shape[1]):
+                y[:, ch] = sps.lfilter(b, a, signal[:, ch])
         else:
-            return y
+            raise ValueError(
+                "This filter can be only applied to 1D (signal) or 2D array (signal, channel)"
+            )
+        return y
 
     def __post_init__(self):
         assert (
@@ -83,7 +83,18 @@ class ButterBandpass:
         b, a = sps.butter(self.order, [low, high], btype="band")
         return b, a
 
-    def plot_frequency_response(self, a, b):
+    def plot_frequency_response(self, sampling_rate: float):
+        """plot_frequency_response
+
+        Parameters
+        ----------
+        sampling_rate : float
+
+        Returns
+        -------
+        plt.Figure
+        """
+        b, a = self._butter_bandpass(sampling_rate)
         w, h = sps.freqs(b, a)
         fig = plt.figure()
         plt.semilogx(w, 20 * np.log10(abs(h)))
