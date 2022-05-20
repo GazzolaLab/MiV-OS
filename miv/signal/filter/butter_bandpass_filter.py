@@ -36,7 +36,6 @@ class ButterBandpass:
         self,
         signal: SignalType,
         sampling_rate: float,
-        plot_frequency_response: bool = False,
         **kwargs,
     ) -> SignalType:
         """__call__.
@@ -47,8 +46,6 @@ class ButterBandpass:
             signal
         sampling_rate : float
             sampling_rate
-        plot_frequency_response : bool
-            plot_frequency_response
         kwargs :
             kwargs
 
@@ -59,11 +56,7 @@ class ButterBandpass:
         """
         b, a = self._butter_bandpass(sampling_rate)
         y = sps.lfilter(b, a, signal)
-        if plot_frequency_response:
-            fig = self.plot_frequency_response(a, b)
-            return y, fig
-        else:
-            return y
+        return y
 
     def __post_init__(self):
         assert (
