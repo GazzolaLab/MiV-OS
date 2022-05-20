@@ -16,6 +16,7 @@ Signal Filter
 
    FilterProtocol
    ButterBandpass
+   MedianFilter
 
 """
 __all__ = ["FilterCollection"]
@@ -43,18 +44,19 @@ class FilterCollection(MutableSequence):
         See Also
         --------
         miv.signal.filter.ButterBandpass : butterworth filter
+        miv.signal.filter.MedianFilter : median filter with threshold
 
         Examples
         --------
         >>> custom_filter = (
         ...     FilterCollection(tag="custom filter 1")
         ...       .append(ButterBandpass(lowcut=300, highcut=3000, order=3))
-        ...       .append(ButterBandpass(lowcut=300, highcut=2500))
+        ...       .append(MedianFilter(threshold=50, k=50))
         ... )
         >>> custom_filter
         Collection of filters(self.tag='custom filter 1', id(self)=140410408570736)
           0: ButterBandpass(lowcut=300, highcut=3000, order=3, tag='')
-          1: ButterBandpass(lowcut=300, highcut=2500, order=5, tag='')
+          1: MedianFilter(threshold=50, k=50, tag='')
         >>> filtered_signal = custom_filter(signal=signal, sampling_rate=30_000)
 
     """
@@ -64,8 +66,8 @@ class FilterCollection(MutableSequence):
         self.tag: str = tag
 
     def __call__(self, signal: SignalType, sampling_rate: float) -> SignalType:
-        for filter in self.filters:
-            signal = filter(signal, sampling_rate)
+        for filt in self.filters:
+            signal = filt(signal, sampling_rate)
         return signal
 
     # MutableSequence abstract methods
