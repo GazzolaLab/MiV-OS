@@ -131,7 +131,7 @@ class Data:
             logging.error(
                 "The data size does not match the number of channel. Check if oebin or continuous.dat file is corrupted."
             )
-            logging.error(e.strerror)
+            logging.error(e)
         finally:
             del timestamps
             del signal
