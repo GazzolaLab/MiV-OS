@@ -99,7 +99,7 @@ class Data:
         Examples
         --------
             >>> data = Data(data_path)
-            >>> with data.load() as (timestamps, raw_signal):
+            >>> with data.load() as (signal, timestamps, sampling_rate):
             ...     ...
 
         Returns
