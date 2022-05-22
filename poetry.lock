@@ -774,6 +774,22 @@ docs = ["proselint (>=0.10.2)", "sphinx (>=3)", "sphinx-argparse (>=0.2.5)", "sp
 testing = ["coverage (>=4)", "coverage-enable-subprocess (>=1)", "flaky (>=3)", "pytest (>=4)", "pytest-env (>=0.6.2)", "pytest-freezegun (>=0.4.1)", "pytest-mock (>=2)", "pytest-randomly (>=1)", "pytest-timeout (>=1)", "packaging (>=20.0)"]
 
 [[package]]
+name = "viziphant"
+version = "0.2.0"
+description = "Viziphant is a package for the visualization of the analysisresults of electrophysiology data in Python"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+elephant = ">=0.9.0"
+matplotlib = ">=3.3.2"
+neo = ">=0.9.0"
+numpy = ">=1.18.1"
+quantities = ">=0.12.1"
+seaborn = ">=0.9.0"
+
+[[package]]
 name = "wrapt"
 version = "1.14.1"
 description = "Module for decorators, wrappers and monkey patching."
@@ -787,7 +803,7 @@ docs = []
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8,<3.11"
-content-hash = "96738e198b561363256ae9a828d260b8ed56bef83e552dd92e75fffbd05134ce"
+content-hash = "da8c1b7845a4671184efbf0e3276934c48a950b79e3fe418199aeed0d2e7afcb"
 
 [metadata.files]
 astroid = [
@@ -1415,6 +1431,9 @@ typing-extensions = [
 virtualenv = [
     {file = "virtualenv-20.14.1-py2.py3-none-any.whl", hash = "sha256:e617f16e25b42eb4f6e74096b9c9e37713cf10bf30168fb4a739f3fa8f898a3a"},
     {file = "virtualenv-20.14.1.tar.gz", hash = "sha256:ef589a79795589aada0c1c5b319486797c03b67ac3984c48c669c0e4f50df3a5"},
+]
+viziphant = [
+    {file = "viziphant-0.2.0.tar.gz", hash = "sha256:044b5c92de169dfafd9665efe2c310e917d2c21980bcc9f560d5c727161f9bd8"},
 ]
 wrapt = [
     {file = "wrapt-1.14.1-cp27-cp27m-macosx_10_9_x86_64.whl", hash = "sha256:1b376b3f4896e7930f1f772ac4b064ac12598d1c38d04907e696cc4d794b43d3"},
