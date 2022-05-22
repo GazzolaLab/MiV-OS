@@ -239,6 +239,11 @@ class DataManager(MutableSequence):
     def data_path_list(self) -> Iterable[str]:
         return [data.data_path for data in self.data_list]
 
+    # Queries
+    def query_path_name(self, query_path) -> Iterable[Data]:
+        return list(filter(lambda d: query_path in d.data_path, self.data_list))
+
+    # DataManager Representation
     def tree(self):
         """
         Pretty-print available recordings in DataManager in tree format.
