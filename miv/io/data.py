@@ -26,7 +26,7 @@ Module
 """
 __all__ = ["Data", "DataManager"]
 
-from typing import Any, Optional, Iterable, Callable, List, Set
+from typing import Any, Optional, Iterable, Callable, List, Set, Dict
 
 from collections.abc import MutableSequence
 import logging
@@ -35,6 +35,8 @@ import os
 from glob import glob
 import numpy as np
 from contextlib import contextmanager
+
+import matplotlib.pyplot as plt
 
 from miv.io.binary import load_continuous_data, load_recording
 from miv.signal.filter import FilterProtocol
@@ -90,6 +92,33 @@ class Data:
         self.data_path: str = data_path
         self.analysis_path: str = os.path.join(data_path, "analysis")
         self.masking_channel_set: Set[int] = set()
+
+        os.makedirs(self.analysis_path, exist_ok=True)
+
+    def save_figure(
+        self,
+        figure: plt.Figure,
+        group: str,
+        filename: str,
+        savefig_kwargs: Optional[Dict[Any, Any]] = None,
+    ):
+        """Save figure in analysis sub-directory
+
+        Parameters
+        ----------
+        figure : plt.Figure
+        group : str
+        filename : str
+        """
+        if savefig_kwargs is None:
+            savefig_kwargs = {}
+
+        dirpath = os.path.join(self.analysis_path, group)
+        os.makedirs(dirpath, exist_ok=True)
+
+        filepath = os.path.join(dirpath, filename)
+        plt.figure(figure)
+        plt.savefig(filepath, **savefig_kwargs)
 
     @contextmanager
     def load(self):
