@@ -48,6 +48,7 @@ import elephant.statistics
 import matplotlib.pyplot as plt
 import neo
 import numpy as np
+import quantities as pq
 import scipy
 import scipy.signal
 
@@ -55,7 +56,7 @@ import scipy.signal
 # FIXME: For now, we provide the free function for simple usage. For more
 # advanced statistical analysis, we should have a module wrapper.
 def spikestamps_statistics(
-    spiketrains: Union[np.ndarray, Iterable[float], Iterable[neo.core.SpikeTrain]],
+    spiketrains: Union[pq.Quantity, Iterable[neo.core.SpikeTrain]],
     # t_start: Optional[float] = None,
     # t_stop: Optional[float] = None,
 ) -> Dict[str, Any]:
