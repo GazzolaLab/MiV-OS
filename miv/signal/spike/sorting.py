@@ -138,7 +138,7 @@ class PCADecomposition:
     def __init__(self):
         pass
 
-    def project(self, n_features, cutouts):
+    def project(self, n_components, cutouts):
         scaler = StandardScaler()
         scaled_cutouts = scaler.fit_transform(cutouts)
 
@@ -150,10 +150,9 @@ class PCADecomposition:
         transformed = pca.fit_transform(scaled_cutouts)
 
         # Clustering
-        n_components = 3  # Number of clustering components
         gmm = GaussianMixture(n_components=n_components, n_init=10)
         labels = gmm.fit_predict(transformed)
-        return labels
+        return labels, transformed
 
         """
         tmp_list = []

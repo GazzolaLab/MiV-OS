@@ -26,7 +26,7 @@ Module
 """
 __all__ = ["Data", "DataManager"]
 
-from typing import Any, Callable, Iterable, List, Optional, Set
+from typing import Any, Callable, Dict, Iterable, List, Optional, Set
 
 import logging
 import os
@@ -34,6 +34,7 @@ from collections.abc import MutableSequence
 from contextlib import contextmanager
 from glob import glob
 
+import matplotlib.pyplot as plt
 import numpy as np
 
 from miv.io.binary import load_continuous_data, load_recording
@@ -91,6 +92,33 @@ class Data:
         self.analysis_path: str = os.path.join(data_path, "analysis")
         self.masking_channel_set: Set[int] = set()
 
+        os.makedirs(self.analysis_path, exist_ok=True)
+
+    def save_figure(
+        self,
+        figure: plt.Figure,
+        group: str,
+        filename: str,
+        savefig_kwargs: Optional[Dict[Any, Any]] = None,
+    ):
+        """Save figure in analysis sub-directory
+
+        Parameters
+        ----------
+        figure : plt.Figure
+        group : str
+        filename : str
+        """
+        if savefig_kwargs is None:
+            savefig_kwargs = {}
+
+        dirpath = os.path.join(self.analysis_path, group)
+        os.makedirs(dirpath, exist_ok=True)
+
+        filepath = os.path.join(dirpath, filename)
+        plt.figure(figure)
+        plt.savefig(filepath, **savefig_kwargs)
+
     @contextmanager
     def load(self):
         """
@@ -131,7 +159,7 @@ class Data:
             logging.error(
                 "The data size does not match the number of channel. Check if oebin or continuous.dat file is corrupted."
             )
-            logging.error(e.strerror)
+            logging.error(e)
         finally:
             del timestamps
             del signal
@@ -239,6 +267,11 @@ class DataManager(MutableSequence):
     def data_path_list(self) -> Iterable[str]:
         return [data.data_path for data in self.data_list]
 
+    # Queries
+    def query_path_name(self, query_path) -> Iterable[Data]:
+        return list(filter(lambda d: query_path in d.data_path, self.data_list))
+
+    # DataManager Representation
     def tree(self):
         """
         Pretty-print available recordings in DataManager in tree format.
