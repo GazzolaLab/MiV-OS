@@ -67,7 +67,14 @@ jobs:
         if: startsWith(runner.os, 'macOS')
         run: |
           if [[ "${{ matrix.python-version }}" == "3.8" ]]; then
-            echo "CODECOV_TOKEN=4e35faf2-dc6b-442c-99f3-90d088ccd9f6" >> $GITHUB_ENV
             poetry run pytest -c pyproject.toml --cov=miv --cov-report=xml
-            codecov
           fi
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          env_vars: OS,PYTHON
+          fail_ci_if_error: true
+          flags: unittests
+          name: codecov-umbrella
+          verbose: true
