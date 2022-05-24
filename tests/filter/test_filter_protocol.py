@@ -1,5 +1,4 @@
-from typing import runtime_checkable
-from typing import Protocol, Any
+from typing import Any, Protocol, runtime_checkable
 
 import pytest
 

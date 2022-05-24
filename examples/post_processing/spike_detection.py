@@ -1,15 +1,14 @@
 import os
+
+import matplotlib.pyplot as plt
+import neo
 import numpy as np
 import quantities as pq
+from viziphant.rasterplot import rasterplot_rates
 
 from miv.io import Data, DataManager
 from miv.signal.filter import ButterBandpass
 from miv.signal.spike import ThresholdCutoff
-
-import neo
-from viziphant.rasterplot import rasterplot_rates
-
-import matplotlib.pyplot as plt
 
 
 def main():

@@ -3,22 +3,19 @@ Module for extracting each spike waveform and visualize.
 """
 __all__ = ["extract_waveforms", "plot_waveforms"]
 
-from typing import Any, Optional, Union, Tuple, Dict
+from typing import Any, Dict, Optional, Tuple, Union
 
 import os
-import numpy as np
-
-import quantities as pq
-
-from sklearn.mixture import GaussianMixture
-from sklearn.decomposition import PCA
-from sklearn.preprocessing import StandardScaler
-
-from scipy.signal import lfilter, savgol_filter
 
 import matplotlib.pyplot as plt
-
 import neo
+import numpy as np
+import quantities as pq
+from scipy.signal import lfilter, savgol_filter
+from sklearn.decomposition import PCA
+from sklearn.mixture import GaussianMixture
+from sklearn.preprocessing import StandardScaler
+
 from miv.typing import SignalType, SpikestampsType
 
 # TODO: Modularize the entire process.
@@ -125,7 +122,7 @@ def plot_waveforms(
             color,
             linewidth=1,
             alpha=0.3,
-            **plot_kwargs
+            **plot_kwargs,
         )
         plt.xlabel("Time (ms)")
         plt.ylabel("Voltage (uV)")

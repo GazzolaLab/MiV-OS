@@ -40,21 +40,23 @@ elephant.statistics
 """
 __all__ = ["spikestamps_statistics"]
 
-from typing import Any, Optional, Iterable, Union, Dict
-import numpy as np
-import matplotlib.pyplot as plt
+from typing import Any, Dict, Iterable, Optional, Union
+
 import datetime
+
+import elephant.statistics
+import matplotlib.pyplot as plt
+import neo
+import numpy as np
+import quantities as pq
 import scipy
 import scipy.signal
-
-import neo
-import elephant.statistics
 
 
 # FIXME: For now, we provide the free function for simple usage. For more
 # advanced statistical analysis, we should have a module wrapper.
 def spikestamps_statistics(
-    spiketrains: Union[np.ndarray, Iterable[float], Iterable[neo.core.SpikeTrain]],
+    spiketrains: Union[pq.Quantity, Iterable[neo.core.SpikeTrain]],
     # t_start: Optional[float] = None,
     # t_stop: Optional[float] = None,
 ) -> Dict[str, Any]:
