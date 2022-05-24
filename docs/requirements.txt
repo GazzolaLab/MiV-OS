@@ -1,6 +1,5 @@
 # File: docs/requirements.txt
 
--r ../requirements.txt
 docutils
 myst-nb
 myst-parser
