@@ -11,10 +11,11 @@ build:
   tools: {python: "3.8"}
   jobs:
     pre_install:
-      - cd ..
+      - pwd
       - make poetry-download
+      - export PATH="$PATH:$(pwd)/.local/bin"
+      - poetry --version
       - make install
-      - cd docs
 
 # Build documentation in the docs/ directory with Sphinx
 sphinx:
