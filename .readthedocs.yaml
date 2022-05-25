@@ -13,8 +13,7 @@ build:
     pre_install:
       - pwd
       - make poetry-download
-      - export PATH="$PATH:$(pwd)/.local/bin"; echo $PATH
-      - ls "$(pwd)/.local/bin"
+      - export PATH="/home/docs/.local/bin:$PATH"
       - poetry --version
       - make install
 
