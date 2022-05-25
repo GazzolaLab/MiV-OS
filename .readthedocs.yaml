@@ -6,26 +6,28 @@
 version: 2
 
 # Set the version of Python and other tools you might need
-build:
-  os: ubuntu-20.04
-  tools: {python: "3.8"}
-  jobs:
-    pre_install:
-      - pwd
-      - make poetry-download
-      - export PATH="/home/docs/.local/bin:$PATH"
-      - poetry --version
-      - make install
-
-# Build documentation in the docs/ directory with Sphinx
-sphinx:
-   configuration: docs/conf.py
-
-# If using Sphinx, optionally build your docs in additional formats such as PDF
-# formats:
-#    - pdf
+#build:
+#  os: ubuntu-20.04
+#  tools: {python: "3.8"}
+#  jobs:
+#    pre_install:
+#      - pwd
+#      - pip install --user poetry
+#t        #- make poetry-download
+#      - poetry --version
+#      - make install
 
 # Optionally declare the Python requirements required to build your docs
+sphinx:
+  builder: html
+  configuration: docs/conf.py
+  fail_on_warning: true
+
 python:
-   install:
-   - requirements: docs/requirements.txt
+  version: 3.8
+  install:
+    # - requirements: docs/requirements.txt
+    - method: pip
+      path: .
+      extra_requirements:
+        - docs
