@@ -13,6 +13,7 @@ build:
     pre_install:
       - pwd
       - pip install poetry #- make poetry-download
+      - pip install -r docs/requirements.txt
       - poetry --version
       - make install
 
