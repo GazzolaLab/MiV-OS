@@ -1,4 +1,4 @@
-from typing import Any, Protocol, runtime_checkable
+from typing import Any, Protocol, Type, runtime_checkable
 
 import numpy as np
 import pytest
@@ -16,9 +16,9 @@ def test_empty_filter_protocol_abide():
 @pytest.mark.parametrize("MockFilter1", mock_filter_list)
 @pytest.mark.parametrize("MockFilter2", mock_filter_list)
 def test_mock_filter_collection_protocol_abide(
-    MockFilter1: FilterProtocol, MockFilter2: FilterProtocol
+    MockFilter1: Type[FilterProtocol], MockFilter2: Type[FilterProtocol]
 ):
-    filter_collection = FilterCollection().append(MockFilter1()).append(MockFilter2())
+    filter_collection = FilterCollection().append(MockFilter1).append(MockFilter2())
     assert isinstance(filter_collection, RuntimeFilterProtocol)
 
     filter_collection = FilterCollection().append(MockFilter1()).append(MockFilter1())

@@ -114,24 +114,24 @@ pretty = true
 show_traceback = true
 color_output = true
 
-allow_redefinition = false
-check_untyped_defs = true
-disallow_any_generics = true
-disallow_incomplete_defs = true
+# allow_redefinition = false
+# check_untyped_defs = false  # TODO: Disabled cuz it might be to harsh condition, but open to discussion.
+# disallow_any_generics = false
+# disallow_incomplete_defs = true
 ignore_missing_imports = true
-implicit_reexport = false
-no_implicit_optional = true
+# implicit_reexport = false
+# no_implicit_optional = true
 show_column_numbers = true
 show_error_codes = true
 show_error_context = true
-strict_equality = true
-strict_optional = true
-warn_no_return = true
-warn_redundant_casts = true
-warn_return_any = true
-warn_unreachable = true
-warn_unused_configs = true
-warn_unused_ignores = true
+# strict_equality = true
+# strict_optional = true
+# warn_no_return = true
+# warn_redundant_casts = true
+# warn_return_any = true
+# warn_unreachable = false  # TODO: open to discussion
+# warn_unused_configs = true
+# warn_unused_ignores = true
 
 
 [tool.pytest.ini_options]

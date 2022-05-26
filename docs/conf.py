@@ -11,6 +11,8 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 
+from typing import Any, Dict
+
 import os
 import sys
 
@@ -81,7 +83,7 @@ autosectionlabel_prefix_document = True
 autosummary_generate = True
 autosummary_generate_overwrite = False
 
-source_parsers = {}
+source_parsers: Dict[str, str] = {}
 source_suffix = {
     ".rst": "restructuredtext",
     ".md": "myst-nb",
