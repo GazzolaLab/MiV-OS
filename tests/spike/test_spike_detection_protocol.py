@@ -1,4 +1,4 @@
-from typing import Any, Protocol, runtime_checkable
+from typing import Any, Protocol, Type, runtime_checkable
 
 import pytest
 
@@ -17,8 +17,8 @@ class RuntimeSpikeDetectionProtocol(SpikeDetectionProtocol, Protocol):
 
 
 @pytest.mark.parametrize("MockSpikeDetection", mock_spike_detection_list)
-def test_protocol_abide(MockSpikeDetection: SpikeDetectionProtocol):
-    spike_detection: SpikeDetectionProtocol = MockSpikeDetection()
+def test_protocol_abide(MockSpikeDetection):
+    spike_detection = MockSpikeDetection()
     assert isinstance(spike_detection, RuntimeSpikeDetectionProtocol)
 
 
