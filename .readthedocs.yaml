@@ -15,6 +15,7 @@ build:
       - pip install poetry #- make poetry-download
       - pip install -r docs/requirements.txt
       - poetry --version
+      - poetry env use /home/docs/checkouts/readthedocs.org/user_builds/miv-os/envs/doc_patch/bin/python # $(which python)
       - make install
 
 #Optionally declare the Python requirements required to build your docs
