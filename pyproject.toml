@@ -70,6 +70,10 @@ docs = [
   "myst-parser",
   "numpydoc",
   "docutils",
+  "myst-nb",
+  "numpydoc",
+  "sphinx-togglebutton",
+  "sphinx-copybutton"
 ]
 
 

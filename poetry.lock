@@ -803,7 +803,7 @@ docs = []
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8,<3.11"
-content-hash = "da8c1b7845a4671184efbf0e3276934c48a950b79e3fe418199aeed0d2e7afcb"
+content-hash = "00576c0f22b76a5b2be7c7905f20ee635fc3df373449b7fac2b625ffda1f8895"
 
 [metadata.files]
 astroid = [
