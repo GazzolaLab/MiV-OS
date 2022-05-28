@@ -1,24 +1,20 @@
 # .readthedocs.yaml
-# Read the Docs configuration file
-# See https://docs.readthedocs.io/en/stable/config-file/v2.html for details
-
-# Required
 version: 2
 
 # Set the version of Python and other tools you might need
 build:
   os: ubuntu-20.04
-  tools: {python: "3.8"}
+  tools: {python: "3.10"}
   jobs:
-    pre_install:
-      - pwd
-      - pip install poetry #- make poetry-download
-      - pip install -r docs/requirements.txt
-      - poetry --version
-      - poetry env use /home/docs/checkouts/readthedocs.org/user_builds/miv-os/envs/doc_patch/bin/python # $(which python)
-      - make install
+    pre_create_environment:
+      - asdf plugin add poetry
+      - asdf install poetry latest
+      - asdf global poetry latest
+      - poetry config virtualenvs.create false  # Key
+    post_install:
+      - poetry install -E docs
 
-#Optionally declare the Python requirements required to build your docs
+# Build documentation in the docs/ directory with Sphinx
 sphinx:
   builder: html
   configuration: docs/conf.py
