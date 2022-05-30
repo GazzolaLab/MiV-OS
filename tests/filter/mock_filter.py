@@ -44,12 +44,4 @@ class NonFilter2:
         return a
 
 
-class NonFilter3:
-    # Without proper typing
-    tag = "test tag"
-
-    def __call__(self, a: int, b: float):
-        return a
-
-
-mock_nonfilter_list = [NonFilter1, NonFilter2, NonFilter3]
+mock_nonfilter_list = [NonFilter1, NonFilter2]

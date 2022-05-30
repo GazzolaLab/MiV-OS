@@ -22,5 +22,4 @@ def test_protocol_abide(MockFilter):
 @pytest.mark.parametrize("NonFilter", mock_nonfilter_list)
 def test_non_protocol_filter(NonFilter):
     none_mock_filter = NonFilter()
-    with pytest.raises(TypeError):
-        isinstance(none_mock_filter, RuntimeFilterProtocol)
+    assert not isinstance(none_mock_filter, RuntimeFilterProtocol)
