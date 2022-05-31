@@ -436,6 +436,3 @@ class DataManager(MutableSequence):
                         noSpikeChannelList.append(channel)
                 
                 data.add_channel_mask(noSpikeChannelList)
-
-
-        self.masking_channel_set.update(self.masking_channel_set)
