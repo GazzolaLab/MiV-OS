@@ -411,30 +411,32 @@ class DataManager(MutableSequence):
             logging.warning("Invalid data cannot be loaded to the DataManager.")
 
 
-    def auto_channel_mask(self, spike_rate_threshold: float = 2):
+    def auto_channel_mask_baseline(self, no_spike_threshold: float = 1, constant_spike_threshold: float = 20):
         """
         Perform automatic channel masking.
 
         Parameters
         ----------
-        spike_rate_threshold : float
+        no_spike_threshold : float
             spike rate threshold (spike per sec) for filtering channels with no spikes
+        constant_spike_threshold : float
+            spike rate threshold (spike per sec) for filtering channels with constant spikes
         
         """
         # 1. Channels with no spikes should be masked
-        # Using experiment 1 (spontaneous) for spike detection parameter
+        # 2. Channels with constant spikes shoudl be masked
 
         detector = ThresholdCutoff()
         for data in self.data_list:
             with data.load() as (sig, times, samp):
-                noSpikeChannelList = []
+                noSpikeChannelList : list[int] = []
                 spiketrains = detector(sig, times, samp)
                 spiketrainsStats = spikestamps_statistics(spiketrains)
                 
                 for channel in range(len(spiketrainsStats['rates'])):
                     channelSpikeRate = spiketrainsStats['rates'][channel]
 
-                    if channelSpikeRate < spike_rate_threshold:
+                    if channelSpikeRate < no_spike_threshold or channelSpikeRate > constant_spike_threshold:
                         noSpikeChannelList.append(channel)
                 
                 data.add_channel_mask(noSpikeChannelList)
