@@ -143,14 +143,15 @@ def load_recording(
     # TODO: maybe need to support multiple continuous.dat files in the future
     signal, timestamps = load_continuous_data(file_path[0], num_channels, sampling_rate)
 
-    if channel_mask:
-        signal = apply_channel_mask(signal, channel_mask)
-
     # To Voltage
     signal = bits_to_voltage(signal, info["continuous"][0]["channels"])
     # signal = neo.core.AnalogSignal(
     #    signal*pq.uV, sampling_rate=sampling_rate * pq.Hz
     # )
+    
+    if channel_mask:
+        signal = apply_channel_mask(signal, channel_mask)
+
     return signal, timestamps, sampling_rate
 
 
