@@ -116,4 +116,4 @@ html_css_files = ["css/*", "css/logo.css"]
 numpydoc_show_class_members = False
 
 # -- Options for myst-nb ---------------------------------------------------
-jupyter_execute_notebooks = "off"
+nb_execution_mode = "off"
