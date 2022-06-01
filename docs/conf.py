@@ -18,8 +18,7 @@ import sys
 
 sys.path.insert(0, os.path.abspath("../"))
 
-from miv.version import VERSION
-
+from miv import get_version
 
 # -- Project information -----------------------------------------------------
 
@@ -28,7 +27,7 @@ copyright = "2022, GazzolaLab"
 author = "Gazzola Lab"
 
 # The full version, including alpha/beta/rc tags
-release = VERSION
+release = get_version()
 
 # -- General configuration ---------------------------------------------------
 

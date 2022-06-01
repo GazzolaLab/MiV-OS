@@ -8,14 +8,15 @@ Raw Data Loader
 """
 __all__ = ["load_continuous_data", "load_recording", "oebin_read", "apply_channel_mask"]
 
-from typing import Any, Dict, Optional, Union, List, Set, Sequence
+from typing import Any, Dict, List, Optional, Sequence, Set, Union
 
 import os
-import numpy as np
 from ast import literal_eval
 from glob import glob
-import quantities as pq
+
 import neo
+import numpy as np
+import quantities as pq
 
 from miv.typing import SignalType, TimestampsType
 
@@ -73,7 +74,7 @@ def bits_to_voltage(signal: SignalType, channel_info: Sequence[Dict[str, Any]]):
         unit_conversion = (recorded_unit / resultant_unit).simplified
         signal[:, channel] *= bit_to_volt_conversion * unit_conversion
         if "ADC" in channel_info[channel]["channel_name"]:
-            signal[:, channel] *= 10 ** 6
+            signal[:, channel] *= 10**6
     return signal
 
 

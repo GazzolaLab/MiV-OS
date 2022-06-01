@@ -1,10 +1,9 @@
 # from typing import TypeAlias
 from typing import Union
 
+import neo
 import numpy as np
 import numpy.typing as npt
-
-import neo
 
 SignalType = Union[
     np.ndarray,

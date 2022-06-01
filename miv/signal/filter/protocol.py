@@ -2,8 +2,7 @@ __doc__ = ""
 __all__ = ["FilterProtocol"]
 
 import typing
-from typing import Union, Callable, Optional
-from typing import Protocol
+from typing import Callable, Optional, Protocol, Union
 
 import numpy as np
 import numpy.typing as npt
