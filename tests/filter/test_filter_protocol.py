@@ -1,4 +1,4 @@
-from typing import Any, Protocol, runtime_checkable
+from typing import Any, Protocol, Type, runtime_checkable
 
 import pytest
 
@@ -14,13 +14,12 @@ class RuntimeFilterProtocol(FilterProtocol, Protocol):
 
 
 @pytest.mark.parametrize("MockFilter", mock_filter_list)
-def test_protocol_abide(MockFilter: FilterProtocol):
-    mock_filter: FilterProtocol = MockFilter()
+def test_protocol_abide(MockFilter):
+    mock_filter = MockFilter()
     assert isinstance(mock_filter, RuntimeFilterProtocol)
 
 
 @pytest.mark.parametrize("NonFilter", mock_nonfilter_list)
-def test_non_protocol_filter(NonFilter: Any):
-    none_mock_filter: Any = NonFilter()
-    with pytest.raises(TypeError):
-        issubclass(none_mock_filter, RuntimeFilterProtocol)
+def test_non_protocol_filter(NonFilter):
+    none_mock_filter = NonFilter()
+    assert not isinstance(none_mock_filter, RuntimeFilterProtocol)
