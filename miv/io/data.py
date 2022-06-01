@@ -467,37 +467,37 @@ class DataManager(MutableSequence):
         Parameters
         ----------
         no_spike_threshold : float
-            spike rate threshold (spike per sec) for filtering channels with no spikes
+            Spike rate threshold (spike per sec) for filtering channels with no spikes
         isiThreshold : float
-            inter-spike-interval threshold (seconds) for filtering channels with constant spikes
+            Inter-spike-interval threshold (seconds) for filtering channels with constant spikes.
+            Channels with ISI median less than this value will be masked.
         
         """
         # 1. Channels with no spikes should be masked
-        # 2. Channels with constant spikes shoudl be maske
+        # 2. Channels with constant spikes should be masked
 
         detector = ThresholdCutoff()
         for data in self.data_list:
             
             with data.load() as (sig, times, samp):
-                constantSpikeChannelList : list[int] = []
-                noSpikeChannelList : list[int] = []
-
+                maskList : list[int] = []
                 spiketrains = detector(sig, times, samp)
-                spiketrainsStats = spikestamps_statistics(spiketrains)
 
-                for channel in range(len(spiketrainsStats['rates'])):
+                for channel in range(len(spiketrains)):
+                    channelISI = elephant.statistics.isi(spiketrains[channel]).__array__()
                     
                     # determining channels with no spikes
-                    channelSpikeRate = spiketrainsStats['rates'][channel]
-                    if channelSpikeRate < no_spike_threshold:
-                        noSpikeChannelList.append(channel)
+                    numSpikesThreshold = no_spike_threshold*(len(times)/samp)
+                    if (len(channelISI) < numSpikesThreshold):
+                        maskList.append(channel)
 
                     # determining channels with constant spikes
-                    channelISI = elephant.statistics.isi(spiketrains[channel]).__array__()
-                    if statistics.harmonic_mean(channelISI) < isiThreshold:
-                        constantSpikeChannelList.append(channel)
+                    else:
+                        if np.median(channelISI) < isiThreshold:
+                            maskList.append(channel)
                 
-                data.add_channel_mask(constantSpikeChannelList)
-                data.add_channel_mask(noSpikeChannelList)
+                data.add_channel_mask(maskList)
+                print(maskList)
+                print(numSpikesThreshold)
 
         
