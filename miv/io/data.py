@@ -28,6 +28,7 @@ __all__ = ["Data", "DataManager"]
 
 from asyncio.windows_events import NULL
 from sqlite3 import Timestamp
+import statistics
 from typing import Any, Callable, Dict, Iterable, List, Optional, Set
 
 import logging
@@ -45,6 +46,7 @@ from miv.signal.spike import ThresholdCutoff
 from miv.statistics import spikestamps_statistics
 from miv.typing import SignalType
 
+import elephant
 import neo
 
 class Data:
@@ -440,3 +442,45 @@ class DataManager(MutableSequence):
                         noSpikeChannelList.append(channel)
                 
                 data.add_channel_mask(noSpikeChannelList)
+
+    def auto_channel_mask_v1(self, no_spike_threshold: float = 1, isiThreshold: float = 0.1):
+        """
+        Perform automatic channel masking.
+
+        Parameters
+        ----------
+        no_spike_threshold : float
+            spike rate threshold (spike per sec) for filtering channels with no spikes
+        isiThreshold : float
+            inter-spike-interval threshold (seconds) for filtering channels with constant spikes
+        
+        """
+        # 1. Channels with no spikes should be masked
+        # 2. Channels with constant spikes shoudl be maske
+
+        detector = ThresholdCutoff()
+        for data in self.data_list:
+            
+            with data.load() as (sig, times, samp):
+                constantSpikeChannelList : list[int] = []
+                noSpikeChannelList : list[int] = []
+
+                spiketrains = detector(sig, times, samp)
+                spiketrainsStats = spikestamps_statistics(spiketrains)
+
+                for channel in range(len(spiketrainsStats['rates'])):
+                    
+                    # determining channels with no spikes
+                    channelSpikeRate = spiketrainsStats['rates'][channel]
+                    if channelSpikeRate < no_spike_threshold:
+                        noSpikeChannelList.append(channel)
+
+                    # determining channels with constant spikes
+                    channelISI = elephant.statistics.isi(spiketrains[channel]).__array__()
+                    if statistics.harmonic_mean(channelISI) < isiThreshold:
+                        constantSpikeChannelList.append(channel)
+                
+                data.add_channel_mask(constantSpikeChannelList)
+                data.add_channel_mask(noSpikeChannelList)
+
+        
