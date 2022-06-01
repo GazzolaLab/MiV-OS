@@ -102,7 +102,7 @@ from miv.signal.filter import FilterCollection, ButterBandpass
 
 ### 2.1 Filter Collection
 
-[Here](../api/signal.html#filter) is the list of provided filters.
+[Here](api/signal:signal filter) is the list of provided filters.
 All filters are `Callable`, taking `signal` and `sampling_rate` as parameters.
 To define a multiple filters together, we provide [`FilterCollection`](miv.signal.filter.FilterCollection) that execute multiple filters in a series.
 
@@ -125,9 +125,9 @@ pre_filter = (
 There are two way to apply the filter on the signal.
 - If the signal is stored in `numpy array` format, you can directly call the filter `prefilter(signal, sampling_rate)`.
 - If you want to apply the filter to all signals in the `dataset`, `dataset` provide `.apply_filter` method that takes any `filter` (any filter that abide [`filter protocol`](../api/_toctree/FilterAPI/miv.signal.filter.FilterProtocol)).
-  - You can select [subset of `dataset`](../api/dataset.html#data-subset) and [mask-out channels](../api/dataset.html#mask-channel) before applying the filter.
+  - You can select [subset of `dataset`](miv.io.data.DataManager) and [mask-out channels](miv.io.data.Data) before applying the filter.
 
-You can check the list of all provided filters [here](../api/signal.html#filter).
+You can check the list of all provided filters [here](api/signal:signal filter).
 
 ```{code-cell} ipython3
 # Apply filter to entire dataset
@@ -145,7 +145,7 @@ filtered_signal = pre_filter(data, sampling_rate=rate)
 
 ## 3. Spike Detection
 
-You can check the available method [here](../api/signal.html#spike-detection).
+You can check the available method [here](api/signal:spike detection).
 
 Most simple example of spike-detection method is using `ThresholdCutoff`.
 
