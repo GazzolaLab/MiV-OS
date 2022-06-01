@@ -62,6 +62,7 @@ _Names arranged alphabetically_
 - Arman Tekinalp
 - Andrew Dou
 - Austin Ellis-Mohr
+- [Frithjof Gressmann](https://github.com/frthjf)
 - Gaurav Upadhyay
 - [Seung Hyun Kim](https://github.com/skim0119)
 
