@@ -19,7 +19,7 @@ Contribution
 ------------
 
 Any contribution to this project is welcome! If you are interested or have any questions, please don't hesitate to contact us.
-If you are interested in contributing to this project, we prepared contribution guideline :ref:`here <overview/contribution:Contributing to MiV-OS>`.
+If you are interested in contributing to this project, we prepared contribution guideline `here <https://github.com/GazzolaLab/MiV-OS/blob/main/CONTRIBUTING.md>`_.
 
 
 .. toctree::
@@ -28,7 +28,7 @@ If you are interested in contributing to this project, we prepared contribution 
 
    overview/about
    overview/references
-   overview/contribution
+   contribution <https://github.com/GazzolaLab/MiV-OS/blob/main/CONTRIBUTING.md>
 
 .. toctree::
    :maxdepth: 2
