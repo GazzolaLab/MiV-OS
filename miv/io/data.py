@@ -507,11 +507,12 @@ class DataManager(MutableSequence):
                 
                 for channel in range(len(sig)):
                     channelDFT = fft(sig[channel])
-                    cutoffCoef = np.percentile(abs(channelDFT), 100*(1-compressionPercentage))
+                    channelDFTAbs = abs(channelDFT)
+                    cutoffCoef = np.percentile(channelDFTAbs, 100*(1-compressionPercentage))
                     
                     # Zero out the smaller coefficient terms
                     for i in range(len(channelDFT)):
-                        if (abs(channelDFT[i]) < cutoffCoef):
+                        if (channelDFTAbs[i] < cutoffCoef):
                             channelDFT[i] = 0
 
                     compressedSignals.append(np.absolute(ifft(channelDFT)))
