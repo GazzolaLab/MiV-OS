@@ -52,8 +52,10 @@ import os
 from collections.abc import MutableSequence
 from contextlib import contextmanager
 from glob import glob
+from charset_normalizer import detect
 
 import numpy as np
+from scipy.fft import fft, ifft
 
 import matplotlib.pyplot as plt
 
@@ -501,3 +503,65 @@ class DataManager(MutableSequence):
                 data.add_channel_mask(maskList)
                 print(maskList)
                 print(numSpikesThreshold)
+
+
+    def auto_channel_mask_v2(self, compressionPercentage: float = 0.008):
+        """
+        Perform automatic channel masking.
+        First uses FFT to compress the signal, then statistically pick out noisy channels
+
+        Parameters
+        ----------
+        compressionPrecentage : float
+            Compression factor for FFT
+        """
+
+        for data in self.data_list:
+
+            with data.load() as (sig, times, samp):
+                sig = sig.transpose()
+                compressedSignals = []
+                
+                for channel in range(len(sig)):
+                    channelDFT = fft(sig[channel])
+                    cutoffCoef = np.percentile(abs(channelDFT), 100*(1-compressionPercentage))
+                    
+                    # Zero out the smaller coefficient terms
+                    for i in range(len(channelDFT)):
+                        if (abs(channelDFT[i]) < cutoffCoef):
+                            channelDFT[i] = 0
+
+                    compressedSignals.append(np.absolute(ifft(channelDFT)))
+
+
+    def auto_channel_mask_v3(self, comparisonThreshold: float = 3, cleanBenchmark: int = 1):
+        """
+        This version aims to compare the signals from the spontaneous experiment
+        with another recordeing to determine which channels to mask.
+
+        Parameters
+        ----------
+        comparisonThreshold : float
+            The threshold for comparison for the firing rate in each channel between the two experiments
+
+        cleanBenchmark : int
+            The index of the comparison experiment
+        """
+
+        detector = ThresholdCutoff()
+        maskList = []
+
+        with self.data_list[0].load() as (sig, times, samp):
+            spiketrains = detector(sig, times, samp)
+            spontaneousRates = spikestamps_statistics(spiketrains)['rates']
+
+        with self.data_list[cleanBenchmark].load() as (sig, times, samp):
+            spiketrains = detector(sig, times, samp)
+            benchmarkRates = spikestamps_statistics(spiketrains)['rates']
+        
+        for channel in range(len(spontaneousRates)):
+            if (benchmarkRates < comparisonThreshold*spontaneousRates[channel]):
+                maskList.append(channel)
+        
+        for data in self.data_list:
+            data.add_channel_mask(maskList)
