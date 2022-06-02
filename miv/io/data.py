@@ -442,8 +442,9 @@ class DataManager(MutableSequence):
                         noSpikeChannelList.append(channel)
                 
                 data.add_channel_mask(noSpikeChannelList)
+                
 
-    def auto_channel_mask_v1(self, no_spike_threshold: float = 1, isiThreshold: float = 0.1):
+    def auto_channel_mask_v1(self, no_spike_threshold: float = 0.01, isiThreshold: float = 0.1):
         """
         Perform automatic channel masking.
 
@@ -451,6 +452,7 @@ class DataManager(MutableSequence):
         ----------
         no_spike_threshold : float
             Spike rate threshold (spike per sec) for filtering channels with no spikes
+
         isiThreshold : float
             Inter-spike-interval threshold (seconds) for filtering channels with constant spikes.
             Channels with ISI median less than this value will be masked.
@@ -482,5 +484,6 @@ class DataManager(MutableSequence):
                 data.add_channel_mask(maskList)
                 print(maskList)
                 print(numSpikesThreshold)
+
 
         
