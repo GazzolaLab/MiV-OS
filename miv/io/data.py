@@ -459,7 +459,7 @@ class DataManager(MutableSequence):
                         noSpikeChannelList.append(channel)
                 
                 data.add_channel_mask(noSpikeChannelList)
-                
+
 
     def auto_channel_mask_v1(self, no_spike_threshold: float = 0.01, isiThreshold: float = 0.1):
         """
@@ -501,6 +501,3 @@ class DataManager(MutableSequence):
                 data.add_channel_mask(maskList)
                 print(maskList)
                 print(numSpikesThreshold)
-
-
-        
