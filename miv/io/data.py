@@ -64,6 +64,7 @@ from miv.signal.filter.protocol import FilterProtocol
 from miv.signal.spike import ThresholdCutoff
 from miv.statistics import spikestamps_statistics
 from miv.typing import SignalType
+from miv.signal.filter import ButterBandpass
 
 import elephant
 import neo
@@ -566,3 +567,72 @@ class DataManager(MutableSequence):
         
         for data in self.data_list:
             data.add_channel_mask(maskList)
+
+    
+    def auto_channel_mask_v4(self, lowcut : float = 300,
+                             highcut : float = 300,
+                             order : int = 5,
+                             oneOverBinSize : float = 10000):
+        """
+        This version attempts to use SVD to figure out how significant each channel is, compared
+        to the spontaneous experiment.
+        ** Experiment 1 is the spontaneous one **
+        
+        Parameters
+        ----------
+        lowcut : float
+            The lowcut threshold for Butterworth filter
+            
+        highcut : float
+            The highcut threshold for Butterworth filter
+
+        order : int
+            The order of the Butterworth filter
+        
+        oneOverBinSize : float
+            The number of bins = number of data points * bin size
+            oneOverBinSize = number of data points / number of bins
+        """
+        detector = ThresholdCutoff()
+        butterFilter = ButterBandpass(lowcut, highcut, order)
+
+        # This section obtains the first half of the matrix used for SVD
+        # Each column is a channel in the spontaneous experiment
+        # Each row is number of spikes for each bin
+        spontaneousBinned = []
+        with self.data_list[0].load() as (sig, times, samp):
+            filteredSig = butterFilter(sig, samp)
+            spontaneousSpiketrains = detector(filteredSig, times, samp)
+            numBins = int(len(times)/oneOverBinSize)
+            bins = np.arange(start=0, stop=times[-1], step=times[-1]/numBins)
+
+            for chan in range(len(spontaneousSpiketrains)):
+                spikeCounts = np.zeros(shape=[int(numBins)+1], dtype=int)
+                binIndices = np.digitize(spontaneousSpiketrains[chan], bins)
+                
+                for i in range(len(binIndices)):
+                    spikeCounts[binIndices[i]] += 1
+                spontaneousBinned.append(spikeCounts)
+        spontaneousBinned = np.transpose(spontaneousBinned)
+
+        # This section iterates through each other experiment and performs SVD
+        for iExp in range(1, len(self.data_list)):
+            experimentBinned = []
+            maskList = []
+
+            with self.data_list[iExp].load() as (sig, times, samp):
+                filteredSig = butterFilter(sig, samp)
+                experimentSpiketrains = detector(filteredSig, times, samp)
+
+                for chan in range(len(spontaneousSpiketrains)):
+                    spikeCounts = np.zeros(shape=[int(numBins)+1], dtype=int)
+                    binIndices = np.digitize(experimentSpiketrains[chan], bins)
+
+                    for i in range(len(binIndices)):
+                        spikeCounts[binIndices[i]] += 1
+                    experimentBinned.append(spikeCounts)
+            experimentBinned = np.transpose(experimentBinned)
+
+            # SVD here
+
+            self.data_list[iExp].add_channel_mask(maskList)
