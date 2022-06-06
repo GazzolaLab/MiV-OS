@@ -553,7 +553,7 @@ class DataManager(MutableSequence):
 
     
     def auto_channel_mask_v4(self, lowcut : float = 300,
-                             highcut : float = 300,
+                             highcut : float = 3000,
                              order : int = 5,
                              oneOverBinSize : float = 10000):
         """
@@ -609,6 +609,10 @@ class DataManager(MutableSequence):
                 experimentSpiketrains = detector(filteredSig, times, samp)
 
                 for chan in range(numChannels):
+                    # filter out empty channels
+                    if (len(experimentSpiketrains) == 0):
+                        maskList.append(chan)
+
                     spikeCounts = np.zeros(shape=[int(numBins)+1], dtype=int)
                     binIndices = np.digitize(experimentSpiketrains[chan], bins)
 
@@ -618,7 +622,7 @@ class DataManager(MutableSequence):
             experimentBinned = np.transpose(experimentBinned)
 
             # correlation matrix
-            correlationMatrix = np.concatenate((spontaneousBinned, experimentBinned))
+            correlationMatrix = np.concatenate((spontaneousBinned, experimentBinned), axis=1)
             correlationMatrix = np.matmul(np.transpose(correlationMatrix), correlationMatrix)
             for chan in range(numChannels):
                 if(correlationMatrix[chan][chan+numChannels] > 10):
