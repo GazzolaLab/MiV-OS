@@ -624,8 +624,12 @@ class DataManager(MutableSequence):
             # correlation matrix
             correlationMatrix = np.concatenate((spontaneousBinned, experimentBinned), axis=1)
             correlationMatrix = np.matmul(np.transpose(correlationMatrix), correlationMatrix)
+            dotProducts = []
             for chan in range(numChannels):
-                if(correlationMatrix[chan][chan+numChannels] > 10):
+                dotProducts.append(correlationMatrix[chan][chan+numChannels])
+            mean = np.mean(dotProducts)
+            for chan in range(len(dotProducts)):
+                if (dotProducts[chan] > mean):
                     maskList.append(chan)
 
             self.data_list[iExp].add_channel_mask(maskList)
