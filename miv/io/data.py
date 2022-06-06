@@ -574,8 +574,8 @@ class DataManager(MutableSequence):
                              order : int = 5,
                              oneOverBinSize : float = 10000):
         """
-        This version attempts to use SVD to figure out how significant each channel is, compared
-        to the spontaneous experiment.
+        This version attempts to use a correlation matrix to figure out how significant
+        each channel is, compared to the spontaneous experiment.
         ** Experiment 1 is the spontaneous one **
         
         Parameters
@@ -596,7 +596,7 @@ class DataManager(MutableSequence):
         detector = ThresholdCutoff()
         butterFilter = ButterBandpass(lowcut, highcut, order)
 
-        # This section obtains the first half of the matrix used for SVD
+        # This section obtains the first half of the matrix used for the correlation matrix
         # Each column is a channel in the spontaneous experiment
         # Each row is number of spikes for each bin
         spontaneousBinned = []
@@ -605,8 +605,9 @@ class DataManager(MutableSequence):
             spontaneousSpiketrains = detector(filteredSig, times, samp)
             numBins = int(len(times)/oneOverBinSize)
             bins = np.arange(start=0, stop=times[-1], step=times[-1]/numBins)
+            numChannels = len(spontaneousSpiketrains)
 
-            for chan in range(len(spontaneousSpiketrains)):
+            for chan in range(numChannels):
                 spikeCounts = np.zeros(shape=[int(numBins)+1], dtype=int)
                 binIndices = np.digitize(spontaneousSpiketrains[chan], bins)
                 
@@ -615,7 +616,7 @@ class DataManager(MutableSequence):
                 spontaneousBinned.append(spikeCounts)
         spontaneousBinned = np.transpose(spontaneousBinned)
 
-        # This section iterates through each other experiment and performs SVD
+        # This section iterates through each other experiment and calculates correlation matrix
         for iExp in range(1, len(self.data_list)):
             experimentBinned = []
             maskList = []
@@ -624,7 +625,7 @@ class DataManager(MutableSequence):
                 filteredSig = butterFilter(sig, samp)
                 experimentSpiketrains = detector(filteredSig, times, samp)
 
-                for chan in range(len(spontaneousSpiketrains)):
+                for chan in range(numChannels):
                     spikeCounts = np.zeros(shape=[int(numBins)+1], dtype=int)
                     binIndices = np.digitize(experimentSpiketrains[chan], bins)
 
@@ -633,6 +634,11 @@ class DataManager(MutableSequence):
                     experimentBinned.append(spikeCounts)
             experimentBinned = np.transpose(experimentBinned)
 
-            # SVD here
+            # correlation matrix
+            correlationMatrix = np.concatenate((spontaneousBinned, experimentBinned))
+            correlationMatrix = np.matmul(np.transpose(correlationMatrix), correlationMatrix)
+            for chan in range(numChannels):
+                if(correlationMatrix[chan][chan+numChannels] > 10):
+                    maskList.append(chan)
 
             self.data_list[iExp].add_channel_mask(maskList)
