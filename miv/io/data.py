@@ -50,6 +50,8 @@ from miv.signal.filter import ButterBandpass
 import elephant
 import neo
 
+from tqdm import tqdm
+
 class Data:
     """Single data unit handler.
 
@@ -552,7 +554,7 @@ class DataManager(MutableSequence):
     def auto_channel_mask_v4(self, 
                              filter: FilterProtocol, 
                              detector: SpikeDetectionProtocol, 
-                             bins_per_second: float = 1000):
+                             bins_per_second: float = 100):
         """
         This version attempts to use a correlation matrix to figure out how significant
         each channel is, compared to the spontaneous experiment.
@@ -565,10 +567,12 @@ class DataManager(MutableSequence):
         detector : SpikeDetectionProtocol
             Spike detector that is used to extract spikes from the filtered signal. 
         bins_per_second : float
-            Parameter for binning spikes with respect to time.
+            Optional parameter for binning spikes with respect to time.
             The spikes are binned for comparison between the spontaneous recording and 
             the other experiments. This value should be adjusted based on the firing rate.
             A high value reduces type I error; a low value reduces type II error.
+            As long as this value is within a reasonable range, it should negligibly affect
+            the result (see jupyter notebook demo).
         """
 
 
@@ -592,7 +596,8 @@ class DataManager(MutableSequence):
                 spontaneous_binned.append(spike_counts)
         spontaneous_binned = np.transpose(spontaneous_binned)
 
-        # This section iterates through each other experiment and calculates correlation matrix
+        # This section iterates through each other experiment,
+        # calculates the correlation matrix, then applies mask
         for exp in range(1, len(self.data_list)):
             experiment_binned = []
             mask_list = []
@@ -600,16 +605,17 @@ class DataManager(MutableSequence):
             with self.data_list[exp].load() as (sig, times, samp):
                 filtered_sig = filter(sig, samp)
                 experiment_spiketrains = detector(filtered_sig, times, samp)
+                firing_rates = spikestamps_statistics(experiment_spiketrains)['rates']
 
                 for chan in range(num_channels):
                     # filter out empty channels
-                    if (len(experiment_spiketrains) == 0):
-                        mask_list.append(chan)
+                    # if (firing_rates[chan] == 0):
+                    #     mask_list.append(chan)
 
                     spike_counts = np.zeros(shape=[int(num_bins)+1], dtype=int)
                     bin_indices = np.digitize(experiment_spiketrains[chan], bins)
 
-                    for i in range(len(bin_indices)):
+                    for i in tqdm(range(len(bin_indices))):
                         spike_counts[bin_indices[i]] += 1
                     experiment_binned.append(spike_counts)
             experiment_binned = np.transpose(experiment_binned)
@@ -624,5 +630,5 @@ class DataManager(MutableSequence):
             for chan in range(len(dot_products)):
                 if (dot_products[chan] > mean):
                     mask_list.append(chan)
-
+            
             self.data_list[exp].add_channel_mask(mask_list)
