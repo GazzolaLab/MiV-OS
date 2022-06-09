@@ -440,140 +440,46 @@ class DataManager(MutableSequence):
             logging.warning("Invalid data cannot be loaded to the DataManager.")
 
 
-    def auto_channel_mask_baseline(self, no_spike_threshold: float = 1, constant_spike_threshold: float = 20):
+    def auto_channel_mask_baseline(self,
+                                   filter: FilterProtocol,
+                                   detector: SpikeDetectionProtocol,
+                                   no_spike_threshold: float = 1, 
+                                   constant_spike_threshold: float = 20):
         """
         Perform automatic channel masking.
+        This method simply applies a Butterworth filter, extract spikes, and filter out
+        the channels that contain either no spikes or too many spikes.
 
         Parameters
         ----------
+        filter : FilterProtocol
+            Filter that is applied to the signals before detecting spikes.
+        detector : SpikeDetectionProtocol
+            Spike detector that is used to extract spikes from the filtered signal. 
         no_spike_threshold : float
-            spike rate threshold (spike per sec) for filtering channels with no spikes
+            Spike rate threshold (spike per sec) for filtering channels with no spikes
         constant_spike_threshold : float
-            spike rate threshold (spike per sec) for filtering channels with constant spikes
+            Spike rate threshold (spike per sec) for filtering channels with constant spikes
         
         """
         # 1. Channels with no spikes should be masked
         # 2. Channels with constant spikes shoudl be masked
 
-        detector = ThresholdCutoff()
         for data in self.data_list:
             with data.load() as (sig, times, samp):
-                noSpikeChannelList : list[int] = []
-                spiketrains = detector(sig, times, samp)
-                spiketrainsStats = spikestamps_statistics(spiketrains)
+                mask_list : list[int] = []
+
+                filtered_signal = filter(sig, samp)
+                spiketrains = detector(filtered_signal, times, samp)
+                spiketrains_stats = spikestamps_statistics(spiketrains)
                 
-                for channel in range(len(spiketrainsStats['rates'])):
-                    channelSpikeRate = spiketrainsStats['rates'][channel]
+                for channel in range(len(spiketrains_stats['rates'])):
+                    spike_rate = spiketrains_stats['rates'][channel]
 
-                    if channelSpikeRate < no_spike_threshold or channelSpikeRate > constant_spike_threshold:
-                        noSpikeChannelList.append(channel)
+                    if spike_rate < no_spike_threshold or spike_rate > constant_spike_threshold:
+                        mask_list.append(channel)
                 
-                data.add_channel_mask(noSpikeChannelList)
-
-
-    def auto_channel_mask_v1(self, no_spike_threshold: float = 0.01, isiThreshold: float = 0.1):
-        """
-        Perform automatic channel masking.
-
-        Parameters
-        ----------
-        no_spike_threshold : float
-            Spike rate threshold (spike per sec) for filtering channels with no spikes
-
-        isiThreshold : float
-            Inter-spike-interval threshold (seconds) for filtering channels with constant spikes.
-            Channels with ISI median less than this value will be masked.
-        
-        """
-        # 1. Channels with no spikes should be masked
-        # 2. Channels with constant spikes should be masked
-
-        detector = ThresholdCutoff()
-        for data in self.data_list:
-            
-            with data.load() as (sig, times, samp):
-                maskList : list[int] = []
-                spiketrains = detector(sig, times, samp)
-
-                for channel in range(len(spiketrains)):
-                    channelISI = elephant.statistics.isi(spiketrains[channel]).__array__()
-                    
-                    # determining channels with no spikes
-                    numSpikesThreshold = no_spike_threshold*(len(times)/samp)
-                    if (len(channelISI) < numSpikesThreshold):
-                        maskList.append(channel)
-
-                    # determining channels with constant spikes
-                    else:
-                        if np.median(channelISI) < isiThreshold:
-                            maskList.append(channel)
-                
-                data.add_channel_mask(maskList)
-                print(maskList)
-                print(numSpikesThreshold)
-
-
-    def auto_channel_mask_v2(self, compressionPercentage: float = 0.008):
-        """
-        Perform automatic channel masking.
-        First uses FFT to compress the signal, then statistically pick out noisy channels
-
-        Parameters
-        ----------
-        compressionPrecentage : float
-            Compression factor for FFT
-        """
-
-        for data in self.data_list:
-
-            with data.load() as (sig, times, samp):
-                sig = sig.transpose()
-                compressedSignals = []
-                
-                for channel in range(len(sig)):
-                    channelDFT = fft(sig[channel])
-                    channelDFTAbs = abs(channelDFT)
-                    cutoffCoef = np.percentile(channelDFTAbs, 100*(1-compressionPercentage))
-                    
-                    # Zero out the smaller coefficient terms
-                    for i in range(len(channelDFT)):
-                        if (channelDFTAbs[i] < cutoffCoef):
-                            channelDFT[i] = 0
-
-                    compressedSignals.append(np.absolute(ifft(channelDFT)))
-
-
-    def auto_channel_mask_v3(self, comparisonThreshold: float = 3, cleanBenchmark: int = 1):
-        """
-        This version aims to compare the signals from the spontaneous experiment
-        with another recordeing to determine which channels to mask.
-
-        Parameters
-        ----------
-        comparisonThreshold : float
-            The threshold for comparison for the firing rate in each channel between the two experiments
-
-        cleanBenchmark : int
-            The index of the comparison experiment
-        """
-
-        detector = ThresholdCutoff()
-        maskList = []
-
-        with self.data_list[0].load() as (sig, times, samp):
-            spiketrains = detector(sig, times, samp)
-            spontaneousRates = spikestamps_statistics(spiketrains)['rates']
-
-        with self.data_list[cleanBenchmark].load() as (sig, times, samp):
-            spiketrains = detector(sig, times, samp)
-            benchmarkRates = spikestamps_statistics(spiketrains)['rates']
-        
-        for channel in range(len(spontaneousRates)):
-            if (benchmarkRates < comparisonThreshold*spontaneousRates[channel]):
-                maskList.append(channel)
-        
-        for data in self.data_list:
-            data.add_channel_mask(maskList)
+                data.add_channel_mask(mask_list)
 
     
     def auto_channel_mask_v4(self, 
@@ -599,7 +505,6 @@ class DataManager(MutableSequence):
             As long as this value is within a reasonable range, it should negligibly affect
             the result (see jupyter notebook demo).
         """
-
 
         # This section obtains the first half of the matrix used for the correlation matrix
         # Each column is a channel in the spontaneous experiment
@@ -640,7 +545,7 @@ class DataManager(MutableSequence):
                     spike_counts = np.zeros(shape=[int(num_bins)+1], dtype=int)
                     bin_indices = np.digitize(experiment_spiketrains[chan], bins)
 
-                    for i in tqdm(range(len(bin_indices))):
+                    for i in range(len(bin_indices)):
                         spike_counts[bin_indices[i]] += 1
                     experiment_binned.append(spike_counts)
             experiment_binned = np.transpose(experiment_binned)
