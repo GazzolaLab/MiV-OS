@@ -27,8 +27,6 @@ Module
 __all__ = ["Data", "DataManager"]
 
 from asyncio.windows_events import NULL
-from sqlite3 import Timestamp
-import statistics
 from typing import Any, Callable, Dict, Iterable, List, Optional, Set
 
 import logging
@@ -36,7 +34,6 @@ import os
 from collections.abc import MutableSequence
 from contextlib import contextmanager
 from glob import glob
-from charset_normalizer import detect
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -44,6 +41,7 @@ from scipy.fft import fft, ifft
 
 from miv.io.binary import load_continuous_data, load_recording
 from miv.signal.filter.protocol import FilterProtocol
+from miv.signal.spike.protocol import SpikeDetectionProtocol
 from miv.signal.spike import ThresholdCutoff
 from miv.statistics import spikestamps_statistics
 from miv.typing import SignalType
@@ -101,7 +99,6 @@ class Data:
         self.data_path: str = data_path
         self.analysis_path: str = os.path.join(data_path, "analysis")
         self.masking_channel_set: Set[int] = set()
-        self.spiketrains: list[neo.SpikestampsType] = NULL
 
         os.makedirs(self.analysis_path, exist_ok=True)
 
@@ -552,10 +549,10 @@ class DataManager(MutableSequence):
             data.add_channel_mask(maskList)
 
     
-    def auto_channel_mask_v4(self, lowcut : float = 300,
-                             highcut : float = 3000,
-                             order : int = 5,
-                             oneOverBinSize : float = 10000):
+    def auto_channel_mask_v4(self, 
+                             filter: FilterProtocol, 
+                             detector: SpikeDetectionProtocol, 
+                             bins_per_second: float = 1000):
         """
         This version attempts to use a correlation matrix to figure out how significant
         each channel is, compared to the spontaneous experiment.
@@ -563,73 +560,69 @@ class DataManager(MutableSequence):
         
         Parameters
         ----------
-        lowcut : float
-            The lowcut threshold for Butterworth filter
-            
-        highcut : float
-            The highcut threshold for Butterworth filter
-
-        order : int
-            The order of the Butterworth filter
-        
-        oneOverBinSize : float
-            The number of bins = number of data points * bin size
-            oneOverBinSize = number of data points / number of bins
+        filter : FilterProtocol
+            Filter that is applied to the signals before detecting spikes.
+        detector : SpikeDetectionProtocol
+            Spike detector that is used to extract spikes from the filtered signal. 
+        bins_per_second : float
+            Parameter for binning spikes with respect to time.
+            The spikes are binned for comparison between the spontaneous recording and 
+            the other experiments. This value should be adjusted based on the firing rate.
+            A high value reduces type I error; a low value reduces type II error.
         """
-        detector = ThresholdCutoff()
-        butterFilter = ButterBandpass(lowcut, highcut, order)
+
 
         # This section obtains the first half of the matrix used for the correlation matrix
         # Each column is a channel in the spontaneous experiment
         # Each row is number of spikes for each bin
-        spontaneousBinned = []
+        spontaneous_binned = []
         with self.data_list[0].load() as (sig, times, samp):
-            filteredSig = butterFilter(sig, samp)
-            spontaneousSpiketrains = detector(filteredSig, times, samp)
-            numBins = int(len(times)/oneOverBinSize)
-            bins = np.arange(start=0, stop=times[-1], step=times[-1]/numBins)
-            numChannels = len(spontaneousSpiketrains)
+            filtered_sig = filter(sig, samp)
+            spontaneous_spiketrains = detector(filtered_sig, times, samp)
+            num_bins = int(bins_per_second * (times[-1] - times[0]))
+            bins = np.arange(start=0, stop=times[-1], step=1/(bins_per_second/num_bins))
+            num_channels = len(spontaneous_spiketrains)
 
-            for chan in range(numChannels):
-                spikeCounts = np.zeros(shape=[int(numBins)+1], dtype=int)
-                binIndices = np.digitize(spontaneousSpiketrains[chan], bins)
+            for chan in range(num_channels):
+                spike_counts = np.zeros(shape=[int(num_bins)+1], dtype=int)
+                bin_indices = np.digitize(spontaneous_spiketrains[chan], bins)
                 
-                for i in range(len(binIndices)):
-                    spikeCounts[binIndices[i]] += 1
-                spontaneousBinned.append(spikeCounts)
-        spontaneousBinned = np.transpose(spontaneousBinned)
+                for spike_index in range(len(bin_indices)):
+                    spike_counts[bin_indices[spike_index]] += 1
+                spontaneous_binned.append(spike_counts)
+        spontaneous_binned = np.transpose(spontaneous_binned)
 
         # This section iterates through each other experiment and calculates correlation matrix
-        for iExp in range(1, len(self.data_list)):
-            experimentBinned = []
-            maskList = []
+        for exp in range(1, len(self.data_list)):
+            experiment_binned = []
+            mask_list = []
 
-            with self.data_list[iExp].load() as (sig, times, samp):
-                filteredSig = butterFilter(sig, samp)
-                experimentSpiketrains = detector(filteredSig, times, samp)
+            with self.data_list[exp].load() as (sig, times, samp):
+                filtered_sig = filter(sig, samp)
+                experiment_spiketrains = detector(filtered_sig, times, samp)
 
-                for chan in range(numChannels):
+                for chan in range(num_channels):
                     # filter out empty channels
-                    if (len(experimentSpiketrains) == 0):
-                        maskList.append(chan)
+                    if (len(experiment_spiketrains) == 0):
+                        mask_list.append(chan)
 
-                    spikeCounts = np.zeros(shape=[int(numBins)+1], dtype=int)
-                    binIndices = np.digitize(experimentSpiketrains[chan], bins)
+                    spike_counts = np.zeros(shape=[int(num_bins)+1], dtype=int)
+                    bin_indices = np.digitize(experiment_spiketrains[chan], bins)
 
-                    for i in range(len(binIndices)):
-                        spikeCounts[binIndices[i]] += 1
-                    experimentBinned.append(spikeCounts)
-            experimentBinned = np.transpose(experimentBinned)
+                    for i in range(len(bin_indices)):
+                        spike_counts[bin_indices[i]] += 1
+                    experiment_binned.append(spike_counts)
+            experiment_binned = np.transpose(experiment_binned)
 
             # correlation matrix
-            correlationMatrix = np.concatenate((spontaneousBinned, experimentBinned), axis=1)
-            correlationMatrix = np.matmul(np.transpose(correlationMatrix), correlationMatrix)
-            dotProducts = []
-            for chan in range(numChannels):
-                dotProducts.append(correlationMatrix[chan][chan+numChannels])
-            mean = np.mean(dotProducts)
-            for chan in range(len(dotProducts)):
-                if (dotProducts[chan] > mean):
-                    maskList.append(chan)
+            correlation_matrix = np.concatenate((spontaneous_binned, experiment_binned), axis=1)
+            correlation_matrix = np.matmul(np.transpose(correlation_matrix), correlation_matrix)
+            dot_products = []
+            for chan in range(num_channels):
+                dot_products.append(correlation_matrix[chan][chan+num_channels])
+            mean = np.mean(dot_products)
+            for chan in range(len(dot_products)):
+                if (dot_products[chan] > mean):
+                    mask_list.append(chan)
 
-            self.data_list[iExp].add_channel_mask(maskList)
+            self.data_list[exp].add_channel_mask(mask_list)
