@@ -27,6 +27,7 @@ Module
 __all__ = ["Data", "DataManager"]
 
 from asyncio.windows_events import NULL
+from copy import copy
 from typing import Any, Callable, Dict, Iterable, List, Optional, Set
 
 import logging
@@ -34,6 +35,7 @@ import os
 from collections.abc import MutableSequence
 from contextlib import contextmanager
 from glob import glob
+from unittest import result
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -216,6 +218,119 @@ class Data:
         self.masking_channel_set.update(self.masking_channel_set.union(channel_id))
 
 
+    def auto_channel_mask(self,
+                          spontaneous_binned,
+                          filter: FilterProtocol,
+                          detector: ThresholdCutoff,
+                          offset: float = 0,
+                          bins_per_second: float = 100):
+        """
+        Automatically apply mask.
+
+        Parameters
+        ----------
+        spontaneous_binned : [Iterable[Iterable[int]], int]
+            [0]: 2D matrix with each column being the binned number of spikes from each channel.
+            [1]: number of bins from spontaneous recording binned matrix
+        filter : FilterProtocol
+            Filter that is applied to the signal before masking.
+        detector : ThresholdCutoff
+            Spike detector that extracts spikes from the signals.
+        offset : float
+            The trimmed time in seconds at the front of the signal (default = 0).
+        bins_per_second : float
+            Optional parameter for binning spikes with respect to time.
+            The spikes are binned for comparison between the spontaneous recording and 
+            the other experiments. This value should be adjusted based on the firing rate.
+            A high value reduces type I error; a low value reduces type II error.
+            As long as this value is within a reasonable range, it should negligibly affect
+            the result (see jupyter notebook demo).
+        """
+
+        exp_binned = self.get_binned_matrix(filter, detector, offset, bins_per_second)
+
+        # if experiment is longer than spontaneous recording, it gets trunkated
+        if (exp_binned[1] > spontaneous_binned[1]):
+            spontaneous_binned_copy = spontaneous_binned
+            exp_binned[0] = exp_binned[0][:spontaneous_binned[1]+1]
+        
+        # if spontaneous is longer than experiment recording
+        elif (exp_binned[1] < spontaneous_binned[1]):
+            spontaneous_binned_copy = copy(spontaneous_binned)
+            spontaneous_binned_copy[0] = spontaneous_binned_copy[0][:exp_binned[1]+1]
+
+        num_channels = len(exp_binned[0][0])
+        correlation_matrix = np.concatenate((spontaneous_binned_copy[0], exp_binned[0]), axis=1)
+        correlation_matrix = np.matmul(np.transpose(correlation_matrix), correlation_matrix)
+        dot_products = []
+
+        for chan in range(num_channels):
+            dot_products.append(correlation_matrix[chan][chan+num_channels])
+        mean = np.mean(dot_products)
+
+        mask_list = []
+        for chan in range(len(dot_products)):
+            if (dot_products[chan] > mean):
+                mask_list.append(chan)
+        self.add_channel_mask(mask_list)
+
+    
+    def get_binned_matrix(self, 
+                          filter: FilterProtocol, 
+                          detector: ThresholdCutoff, 
+                          offset: float = 0,
+                          bins_per_second: float = 100):
+        """
+        Performs spike detection and return a binned 2D matrix with columns being the
+        binned number of spikes from each channel.
+
+        Parameters
+        ----------
+        filter : FilterProtocol
+            Filter that is applied to the signal before masking.
+        detector : ThresholdCutoff
+            Spike detector that extracts spikes from the signals.
+        offset : float
+            The time in seconds to be trimmed in front (default = 0).
+        bins_per_second : float
+            Optional parameter for binning spikes with respect to time.
+            The spikes are binned for comparison between the spontaneous recording and 
+            the other experiments. This value should be adjusted based on the firing rate.
+            A high value reduces type I error; a low value reduces type II error.
+            As long as this value is within a reasonable range, it should negligibly affect
+            the result (see jupyter notebook demo).
+
+        Returns
+        -------
+        (binned_matrix, num_bins)
+        *binned_matrix* has columns as channels
+        """
+        
+        result = []
+        with self.load() as (sig, times, samp):
+            start_time = times[0] + offset 
+
+            starting_index = int(offset*samp)
+
+            trimmed_signal = sig[starting_index:]
+            trimmed_times = times[starting_index:]
+
+            filtered_sig = filter(trimmed_signal, samp)
+            spiketrains = detector(filtered_sig, trimmed_times, samp)
+
+            bins_array = np.arange(start=start_time, stop=trimmed_times[-1], step=1/bins_per_second)
+            num_bins = len(bins_array)
+
+            num_channels = len(spiketrains)
+            for chan in range(num_channels):
+                spike_counts = np.zeros(shape=num_bins+1, dtype=int)
+
+                digitized_indices = np.digitize(spiketrains[chan], bins_array)
+                for bin_index in digitized_indices:
+                    spike_counts[bin_index] += 1
+
+                result.append(spike_counts)
+        return [np.transpose(result), num_bins]
 
 
 
@@ -418,8 +533,7 @@ class DataManager(MutableSequence):
     def auto_channel_mask_baseline(self,
                                    filter: FilterProtocol,
                                    detector: SpikeDetectionProtocol,
-                                   no_spike_threshold: float = 1, 
-                                   constant_spike_threshold: float = 20):
+                                   no_spike_threshold: float = 1):
         """
         Perform automatic channel masking.
         This method simply applies a Butterworth filter, extract spikes, and filter out
@@ -432,13 +546,10 @@ class DataManager(MutableSequence):
         detector : SpikeDetectionProtocol
             Spike detector that is used to extract spikes from the filtered signal. 
         no_spike_threshold : float
-            Spike rate threshold (spike per sec) for filtering channels with no spikes
-        constant_spike_threshold : float
-            Spike rate threshold (spike per sec) for filtering channels with constant spikes
+            Spike rate threshold (spike per sec) for filtering channels with no spikes. 
+            (default = 1)
         
         """
-        # 1. Channels with no spikes should be masked
-        # 2. Channels with constant spikes shoudl be masked
 
         for data in self.data_list:
             with data.load() as (sig, times, samp):
@@ -451,27 +562,43 @@ class DataManager(MutableSequence):
                 for channel in range(len(spiketrains_stats['rates'])):
                     spike_rate = spiketrains_stats['rates'][channel]
 
-                    if spike_rate < no_spike_threshold or spike_rate > constant_spike_threshold:
+                    if spike_rate <= no_spike_threshold:
                         mask_list.append(channel)
                 
                 data.add_channel_mask(mask_list)
 
     
-    def auto_channel_mask_v4(self, 
-                             filter: FilterProtocol, 
-                             detector: SpikeDetectionProtocol, 
-                             bins_per_second: float = 100):
+        
+    def auto_channel_mask(self,
+                          spontaneous_data: Data,
+                          filter: FilterProtocol, 
+                          detector: SpikeDetectionProtocol, 
+                          omit_experiments: Iterable[int] = [],
+                          spontaneous_offset: float = 0,
+                          exp_offsets: Iterable[float] = NULL,
+                          bins_per_second: float = 100):
         """
-        This version attempts to use a correlation matrix to figure out how significant
-        each channel is, compared to the spontaneous experiment.
-        ** Experiment 1 is the spontaneous one **
+        This masking method uses a correlation matrix between a spontaneous recording and
+        the experiment recordings to decide which channels to mask out.
+        **Sample rate and number of channels for all recordings must be the same**
+        
         
         Parameters
         ----------
+        spontaneous_data : Data
+            Data from spontaneous recording that is used for comparison.
         filter : FilterProtocol
             Filter that is applied to the signals before detecting spikes.
         detector : SpikeDetectionProtocol
             Spike detector that is used to extract spikes from the filtered signal. 
+        omit_experiments: Iterable[int]
+            Integer array of experiment indices (0-based) to omit.
+        spontaneous_offset: float
+            Postive time offset for the spontaneous experiment (default = 0).
+            A negative value will be converted to 0.
+        exp_offsets: Iterable[float]
+            Positive float array of time offsets for each experiment (default = 0).
+            Negative values will be converted to 0.
         bins_per_second : float
             Optional parameter for binning spikes with respect to time.
             The spikes are binned for comparison between the spontaneous recording and 
@@ -480,60 +607,22 @@ class DataManager(MutableSequence):
             As long as this value is within a reasonable range, it should negligibly affect
             the result (see jupyter notebook demo).
         """
+        if spontaneous_offset < 0:
+            spontaneous_offset = 0
 
-        # This section obtains the first half of the matrix used for the correlation matrix
-        # Each column is a channel in the spontaneous experiment
-        # Each row is number of spikes for each bin
-        spontaneous_binned = []
-        with self.data_list[0].load() as (sig, times, samp):
-            filtered_sig = filter(sig, samp)
-            spontaneous_spiketrains = detector(filtered_sig, times, samp)
-            num_bins = int(bins_per_second * (times[-1] - times[0]))
-            bins = np.arange(start=0, stop=times[-1], step=1/(bins_per_second/num_bins))
-            num_channels = len(spontaneous_spiketrains)
+        if (exp_offsets == NULL):
+            exp_offsets = np.zeros(self.__len__())
+        else:
+            for exp in range(len(exp_offsets)):
+                if (exp_offsets[exp] < 0):
+                    exp_offsets[exp] = 0
+        
+        spontaneous_binned = spontaneous_data.get_binned_matrix(filter, detector,
+                                        spontaneous_offset, bins_per_second)
+        
 
-            for chan in range(num_channels):
-                spike_counts = np.zeros(shape=[int(num_bins)+1], dtype=int)
-                bin_indices = np.digitize(spontaneous_spiketrains[chan], bins)
-                
-                for spike_index in range(len(bin_indices)):
-                    spike_counts[bin_indices[spike_index]] += 1
-                spontaneous_binned.append(spike_counts)
-        spontaneous_binned = np.transpose(spontaneous_binned)
+        for exp_index in range(len(self.data_list)):
+            if (exp_index not in omit_experiments):
+                self.data_list[exp_index].auto_channel_mask(spontaneous_binned, 
+                            filter, detector, exp_offsets[exp_index], bins_per_second)
 
-        # This section iterates through each other experiment,
-        # calculates the correlation matrix, then applies mask
-        for exp in range(1, len(self.data_list)):
-            experiment_binned = []
-            mask_list = []
-
-            with self.data_list[exp].load() as (sig, times, samp):
-                filtered_sig = filter(sig, samp)
-                experiment_spiketrains = detector(filtered_sig, times, samp)
-                firing_rates = spikestamps_statistics(experiment_spiketrains)['rates']
-
-                for chan in range(num_channels):
-                    # filter out empty channels
-                    # if (firing_rates[chan] == 0):
-                    #     mask_list.append(chan)
-
-                    spike_counts = np.zeros(shape=[int(num_bins)+1], dtype=int)
-                    bin_indices = np.digitize(experiment_spiketrains[chan], bins)
-
-                    for i in range(len(bin_indices)):
-                        spike_counts[bin_indices[i]] += 1
-                    experiment_binned.append(spike_counts)
-            experiment_binned = np.transpose(experiment_binned)
-
-            # correlation matrix
-            correlation_matrix = np.concatenate((spontaneous_binned, experiment_binned), axis=1)
-            correlation_matrix = np.matmul(np.transpose(correlation_matrix), correlation_matrix)
-            dot_products = []
-            for chan in range(num_channels):
-                dot_products.append(correlation_matrix[chan][chan+num_channels])
-            mean = np.mean(dot_products)
-            for chan in range(len(dot_products)):
-                if (dot_products[chan] > mean):
-                    mask_list.append(chan)
-            
-            self.data_list[exp].add_channel_mask(mask_list)
