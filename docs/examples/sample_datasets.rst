@@ -15,3 +15,6 @@ Raw Recording Samples
 
 MiV Dataset Samples
 +++++++++++++++++++
+
+.. automodule:: miv.datasets.criticality
+   :members:
