@@ -7,11 +7,14 @@ import os
 import numpy as np
 
 from miv.datasets.utils import get_file
+from miv.io import DataManager
 
 
 def load_data():
     """
-    Loads the sample optogenetic experiment data
+    Loads the sample optogenetic experiment data.
+
+    Total size: 600.5 MB (compressed)
 
     Notes
     -----
@@ -63,7 +66,7 @@ def load_data():
     subdir = "optogenetic"
     base_url = "https://uofi.box.com/shared/static/9llg11ods9iejdt2omjwjosbsxb5ui10.zip"
     file = "2022-03-10_16-19-09.zip"
-    file_hash = "8d04cc6c1d5bf23ad27532c5a2ec10a1d6c079750200adf4e41355802fd411a5"
+    file_hash = "5deadc1b2a20501b5f6ee8828fa9c85df0b7890bd6ac4eaa8dca768d3b8b5f83"
 
     path = get_file(
         file_url=base_url,
@@ -72,4 +75,6 @@ def load_data():
         file_hash=file_hash,
         archive_format="zip",
     )
-    return path
+    experiment = DataManager(path)
+    experiment.tree()
+    return experiment
