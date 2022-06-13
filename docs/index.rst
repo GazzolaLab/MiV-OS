@@ -28,7 +28,7 @@ If you are interested in contributing to this project, we prepared contribution 
 
    overview/about
    overview/references
-   contribution <https://github.com/GazzolaLab/MiV-OS/blob/main/CONTRIBUTING.md>
+   Contribution <https://github.com/GazzolaLab/MiV-OS/blob/main/CONTRIBUTING.md>
 
 .. toctree::
    :maxdepth: 2
@@ -54,7 +54,7 @@ If you are interested in contributing to this project, we prepared contribution 
    :caption: Example Scripts
 
    examples/sample_datasets
-   examples/spike_detection
+.. examples/spike_detection
 
 .. toctree::
    :maxdepth: 2
