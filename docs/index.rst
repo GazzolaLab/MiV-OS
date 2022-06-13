@@ -53,7 +53,7 @@ If you are interested in contributing to this project, we prepared contribution 
    :caption: Example Scripts
 
    examples/sample_datasets
-   examples/spike_detection
+.. examples/spike_detection
 
 .. toctree::
    :maxdepth: 2
