@@ -34,7 +34,6 @@ If you are interested in contributing to this project, we prepared contribution 
    :maxdepth: 2
    :caption: User Guide
 
-   guide/data_management
    guide/signal_processing
    guide/spike_cutout
    guide/spike_sorting
