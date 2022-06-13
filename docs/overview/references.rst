@@ -29,6 +29,10 @@ Hardware
 
 - `Open Ephys <https://open-ephys.org/>`_
 
+Tutorial / Reads
+################
+
+- `Neural Data Analysis - Mark Kramer <https://mark-kramer.github.io/Case-Studies-Python/intro.html>`_
 
 ---------------
 
