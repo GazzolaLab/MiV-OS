@@ -37,6 +37,7 @@ If you are interested in contributing to this project, we prepared contribution 
    guide/signal_processing
    guide/spike_cutout
    guide/spike_sorting
+   guide/channel_correlation
 
 .. toctree::
    :maxdepth: 2
