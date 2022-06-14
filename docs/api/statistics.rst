@@ -24,7 +24,8 @@ Spikestamps Statistics
   :toctree: _toctree/StatisticsAPI
 
   firing_rates
-  inter_spike_intervals
+  interspike_intervals
+  coefficient_variation
 
 Useful External Packages
 ========================
