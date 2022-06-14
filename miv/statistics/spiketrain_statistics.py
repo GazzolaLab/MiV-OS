@@ -1,4 +1,4 @@
-__all__ = ["firing_rates", "inter_spike_intervals"]
+__all__ = ["firing_rates", "interspike_intervals", "coefficient_variation"]
 
 from typing import Any, Dict, Iterable, Optional, Union
 
@@ -47,28 +47,56 @@ def firing_rates(
     }
 
 
-def inter_spike_intervals(spikes):
+def interspike_intervals(spikes: SpikestampsType):
     """
     Compute the inter-spike intervals of the given spike train.
 
     Examples
     --------
 
-    How to draw Inter-spike interval histogram (ISIH)
+    How to draw Inter-spike interval histogram (ISIH):
 
         >>> from miv.statistics import inter_spike_intervals
         >>> import matplotlib.pyplot as plt
-        >>> interval = inter_spike_intervals(spikestamps)
-        >>> plt.hist(interval)
+        >>> interspike_interval = interspike_intervals(spikestamp)
+        >>> plt.hist(interspike_interval)
+
+    If one wants to get the bin-count, you can use `numpy.digitize` and `numpy.bincount`:
+
+        >>> import numpy as np
+        >>> max_time = spikestamps.max()
+        >>> num_bins = 20
+        >>> time_interval = np.linspace(0, max_time, num_bins)
+        >>> digitized = np.digitize(interspike_interval, time_interval)
+        >>> bin_counts = np.bincount(digitized)
 
     Parameters
     ----------
     spikes : SpikestampsType
+        Single spike-stamps
 
     Returns
     -------
-        numpy.ndarray
+        interval: numpy.ndarray
 
     """
 
-    return np.diff(spikes)
+    spike_interval = np.diff(spikes)
+    return spike_interval
+
+
+def coefficient_variation(self, spikes: SpikestampsType):
+    """
+    The Coefficient of variation: ratio of interspike standard deviation over mean.
+
+    Parameters
+    ----------
+    spikes : SpikestampsType
+        Single spike-stamps
+
+    Returns
+    -------
+        coefficient variation : float
+    """
+    interspike = self.interspike_intervals()
+    return np.std(interspike) / np.mean(interspike)
