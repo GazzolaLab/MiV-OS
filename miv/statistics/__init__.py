@@ -1,2 +1,2 @@
-from miv.statistics.summarizer import *
-from miv.statistics.utility import *
+from miv.statistics.signal_statistics import *
+from miv.statistics.spiketrain_statistics import *
