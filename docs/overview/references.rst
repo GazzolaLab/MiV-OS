@@ -2,8 +2,19 @@
 References
 **********
 
-Neural Ensemble
-###############
+We highly encourage users to explore and integrate other external libraries in
+their project.
+This documentation also contains series of tutorials and guidelines of how to
+use other libraries with `MiV-OS` tools.
+If you are having trouble in integrating tools or data structure from other
+packages, feel free to make a suggestion on our `GitHub-issue <https://github.com/GazzolaLab/MiV-OS/issues>`_.
+
+Below are the list of external libraries that provides wide support for advanced
+spike processing.
+Some of the packages are essential dependencies for our project as well.
+
+`Neural Ensemble <https://neuralensemble.org/>`_
+################################################
 
 - Python-Neo [1]_
 - Elephant/Viziphant [2]_
@@ -12,6 +23,16 @@ Algorithm
 #########
 
 - PyWavelets [3]_
+
+Hardware
+########
+
+- `Open Ephys <https://open-ephys.org/>`_
+
+Tutorial / Reads
+################
+
+- `Neural Data Analysis - Mark Kramer <https://mark-kramer.github.io/Case-Studies-Python/intro.html>`_
 
 ---------------
 

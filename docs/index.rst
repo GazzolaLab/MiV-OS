@@ -28,16 +28,16 @@ If you are interested in contributing to this project, we prepared contribution 
 
    overview/about
    overview/references
-   contribution <https://github.com/GazzolaLab/MiV-OS/blob/main/CONTRIBUTING.md>
+   Contribution <https://github.com/GazzolaLab/MiV-OS/blob/main/CONTRIBUTING.md>
 
 .. toctree::
    :maxdepth: 2
    :caption: User Guide
 
-   guide/data_management
    guide/signal_processing
    guide/spike_cutout
    guide/spike_sorting
+   guide/channel_correlation
 
 .. toctree::
    :maxdepth: 2
@@ -53,7 +53,8 @@ If you are interested in contributing to this project, we prepared contribution 
    :maxdepth: 2
    :caption: Example Scripts
 
-   examples/spike_detection
+   examples/sample_datasets
+.. examples/spike_detection
 
 .. toctree::
    :maxdepth: 2
