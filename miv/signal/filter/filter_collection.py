@@ -3,9 +3,9 @@ __doc__ = """
 Signal Filter
 #############
 
-<filter doc string>
-
 .. currentmodule:: miv.signal.filter
+
+A sequence of filter can be composed using the module `FilterCollection`.
 
 .. autoclass:: FilterCollection
    :members: append, insert
