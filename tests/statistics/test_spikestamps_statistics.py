@@ -3,7 +3,7 @@ import pytest
 import quantities as pq
 from neo.core import SpikeTrain
 
-from miv.statistics import spikestamps_statistics
+from miv.statistics import firing_rates
 
 SpikestampsTestSet = [
     [pq.Quantity([1, 2, 3], "s")],
@@ -15,7 +15,7 @@ TrueRates = [1, [1, 1.0 / 3], 1.0 / 40]
 
 @pytest.mark.parametrize("spikestamps, true_rate", zip(SpikestampsTestSet, TrueRates))
 def test_spikestamps_statistics_base_function(spikestamps, true_rate):
-    result = spikestamps_statistics(spikestamps)
+    result = firing_rates(spikestamps)
     np.testing.assert_allclose(result["rates"], true_rate)
     assert np.isclose(result["mean"], np.mean(true_rate))
     assert np.isclose(result["variance"], np.var(true_rate))
