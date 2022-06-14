@@ -10,7 +10,7 @@ SpikeTrainStatistics
 
 """
 
-__all__ =["inter_spike_intervals"]
+__all__ = ["inter_spike_intervals"]
 import numpy as np
 
 
@@ -27,6 +27,5 @@ def inter_spike_intervals(spikes):
         numpy.ndarray
 
     """
-
 
     return np.diff(spikes)
