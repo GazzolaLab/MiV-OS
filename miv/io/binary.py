@@ -148,7 +148,7 @@ def load_recording(
     # signal = neo.core.AnalogSignal(
     #    signal*pq.uV, sampling_rate=sampling_rate * pq.Hz
     # )
-    
+
     if channel_mask:
         signal = apply_channel_mask(signal, channel_mask)
 
