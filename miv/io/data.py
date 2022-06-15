@@ -28,6 +28,7 @@ __all__ = ["Data", "DataManager"]
 
 from asyncio.windows_events import NULL
 from copy import copy
+import statistics
 from typing import Any, Callable, Dict, Iterable, List, Optional, Set
 
 import logging
@@ -260,19 +261,21 @@ class Data:
             spontaneous_binned_copy[0] = spontaneous_binned_copy[0][:exp_binned[1]+1]
 
         num_channels = len(exp_binned[0][0])
-        correlation_matrix = np.concatenate((spontaneous_binned_copy[0], exp_binned[0]), axis=1)
-        correlation_matrix = np.matmul(np.transpose(correlation_matrix), correlation_matrix)
-        dot_products = []
+        exp_binned[0] = np.transpose(exp_binned[0])
+        spontaneous_binned_copy[0] = np.transpose(spontaneous_binned_copy[0])
 
+        dot_products = []
         for chan in range(num_channels):
-            dot_products.append(correlation_matrix[chan][chan+num_channels])
+            dot_products.append(np.dot(spontaneous_binned_copy[0][chan], exp_binned[0][chan]))
+
         mean = np.mean(dot_products)
+        threshold = mean + statistics.stdev(dot_products)
 
         mask_list = []
-        for chan in range(len(dot_products)):
-            if (dot_products[chan] > mean):
+        for chan in range(num_channels):
+            if (dot_products[chan] > threshold):
                 mask_list.append(chan)
-        self.add_channel_mask(mask_list)
+        self.add_channel_mask(np.concatenate((mask_list, exp_binned[2])))
 
     
     def get_binned_matrix(self, 
@@ -302,8 +305,9 @@ class Data:
 
         Returns
         -------
-        (binned_matrix, num_bins)
+        [binned_matrix, num_bins, empty_channels]
         *binned_matrix* has columns as channels
+        *empty_channels* is an array of indices of empty channels
         """
         
         result = []
@@ -322,7 +326,10 @@ class Data:
             num_bins = len(bins_array)
 
             num_channels = len(spiketrains)
+            empty_channels = []
             for chan in range(num_channels):
+                if (len(spiketrains[chan]) == 0):
+                    empty_channels.append(chan)
                 spike_counts = np.zeros(shape=num_bins+1, dtype=int)
 
                 digitized_indices = np.digitize(spiketrains[chan], bins_array)
@@ -330,7 +337,7 @@ class Data:
                     spike_counts[bin_index] += 1
 
                 result.append(spike_counts)
-        return [np.transpose(result), num_bins]
+        return [np.transpose(result), num_bins, empty_channels]
 
 
 
