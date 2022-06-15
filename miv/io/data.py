@@ -86,7 +86,7 @@ from miv.io.binary import load_continuous_data, load_recording
 from miv.signal.filter.protocol import FilterProtocol
 from miv.signal.spike.protocol import SpikeDetectionProtocol
 from miv.signal.spike import ThresholdCutoff
-from miv.statistics import spikestamps_statistics
+from miv.statistics import firing_rates
 from miv.typing import SignalType
 from miv.signal.filter import ButterBandpass
 
@@ -598,12 +598,10 @@ class DataManager(MutableSequence):
 
                 filtered_signal = filter(sig, samp)
                 spiketrains = detector(filtered_signal, times, samp)
-                spiketrains_stats = spikestamps_statistics(spiketrains)
+                spike_stats = firing_rates(spiketrains)
                 
-                for channel in range(len(spiketrains_stats['rates'])):
-                    spike_rate = spiketrains_stats['rates'][channel]
-
-                    if spike_rate <= no_spike_threshold:
+                for channel in range(len(spike_stats['rates'])):
+                    if spike_stats['rates'][channel] <= no_spike_threshold:
                         mask_list.append(channel)
                 
                 data.add_channel_mask(mask_list)
