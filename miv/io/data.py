@@ -233,6 +233,7 @@ class Data:
         spontaneous_binned : [Iterable[Iterable[int]], int]
             [0]: 2D matrix with each column being the binned number of spikes from each channel.
             [1]: number of bins from spontaneous recording binned matrix
+            [2]: array of indices of empty channels
         filter : FilterProtocol
             Filter that is applied to the signal before masking.
         detector : ThresholdCutoff
@@ -336,8 +337,7 @@ class Data:
                 for bin_index in digitized_indices:
                     spike_counts[bin_index] += 1
 
-                result.append(spike_counts)
-        return [np.transpose(result), num_bins, empty_channels]
+        return [np.transpose(spike_counts), num_bins, empty_channels]
 
 
 
