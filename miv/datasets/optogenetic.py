@@ -12,7 +12,7 @@ from miv.io import DataManager
 
 def load_data():
     """
-    Loads the sample optogenetic experiment data. [Direct Download](https://uofi.box.com/shared/static/9llg11ods9iejdt2omjwjosbsxb5ui10.zip)
+    Loads the sample optogenetic experiment data. `Direct Download <https://uofi.box.com/shared/static/9llg11ods9iejdt2omjwjosbsxb5ui10.zip>`_
 
     Total size: 600.5 MB (compressed)
 
