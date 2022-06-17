@@ -26,11 +26,11 @@ Module
 """
 __all__ = ["Data", "DataManager"]
 
-import statistics
 from typing import Any, Callable, Dict, Iterable, List, Optional, Set
 
 import logging
 import os
+import statistics
 from collections.abc import MutableSequence
 from contextlib import contextmanager
 from glob import glob
