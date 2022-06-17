@@ -129,13 +129,11 @@ If you are interested in hearing more, please contact one of our the maintainer.
 Please follow these steps to have your contribution considered by the maintainers:
 
 1. Follow the [styleguides](#styleguides)
-2. Before you submit your pull request run [pytests](https://pypi.org/project/pytest/) and make sure that all tests pass.
+2. Before you submit your pull request run [pytests](https://pypi.org/project/pytest/) and make sure that all tests pass. In order to run pytest, run the following line from the top directory:
 
-	In order to run pytest, run the following line from the top directory:
-
-	`
-	python3 -m pytest
-	`
+```bash
+make test
+```
 
 3. After you submit your pull request, verify that all status checks are passing <details><summary>What if the status checks are failing?</summary>If a status check is failing, and you believe that the failure is unrelated to your change, please leave a comment on the pull request explaining why you believe the failure is unrelated. A maintainer will re-run the status check for you. If we conclude that the failure was a false positive, then we will open an issue to track that problem with our status check suite.</details>
 
@@ -151,23 +149,13 @@ Ask any question about **how to use MiV-OS and detail implementation** in the **
 
 * Limit the first line to 72 characters or less
 * Reference issues and pull requests liberally after the first line
-* When only changing documentation, include `[ci skip]` in the commit title
+<!-- * When only changing documentation, include `[ci skip]` in the commit title -->
 
 ### Formatting and styleguide
 
-We use [flake8](https://pypi.org/project/flake8/) and [Black](https://pypi.org/project/black/) for python style.
-
-You can install flake8 using pip:
-
-`pip install flake8==3.8.3`
-
-You can install black using pip:
-
-`pip install black`
-
 In order to format the code:
 
-`make all`
+`make formatting`
 
 > **Note:** Format/refactoring patches that are not anything substantial to the context or functionality will likely be rejected.
 
