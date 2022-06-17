@@ -240,6 +240,7 @@ class Data:
         """
 
         exp_binned = self.get_binned_matrix(filter, detector, offset, bins_per_second)
+        num_channels = np.shape(exp_binned[0])[1]
 
         # if experiment is longer than spontaneous recording, it gets trunkated
         if (exp_binned[1] > spontaneous_binned[1]):
@@ -248,16 +249,15 @@ class Data:
         
         # if spontaneous is longer than experiment recording
         elif (exp_binned[1] < spontaneous_binned[1]):
-            spontaneous_binned_copy = copy(spontaneous_binned)
+            spontaneous_binned_copy = spontaneous_binned.copy()
             spontaneous_binned_copy[0] = spontaneous_binned_copy[0][:exp_binned[1]+1]
 
-        num_channels = len(exp_binned[0][0])
-        exp_binned[0] = np.transpose(exp_binned[0])
-        spontaneous_binned_copy[0] = np.transpose(spontaneous_binned_copy[0])
+        exp_binned_channel_rows = np.transpose(exp_binned[0])
+        spontaneous_binned_channel_rows = np.transpose(spontaneous_binned_copy[0])
 
         dot_products = []
         for chan in range(num_channels):
-            dot_products.append(np.dot(spontaneous_binned_copy[0][chan], exp_binned[0][chan]))
+            dot_products.append(np.dot(spontaneous_binned_channel_rows[chan], exp_binned_channel_rows[chan]))
 
         mean = np.mean(dot_products)
         threshold = mean + statistics.stdev(dot_products)
@@ -271,7 +271,7 @@ class Data:
     
     def get_binned_matrix(self, 
                           filter: FilterProtocol, 
-                          detector: ThresholdCutoff, 
+                          detector: SpikeDetectionProtocol, 
                           offset: float = 0,
                           bins_per_second: float = 100):
         """
@@ -282,7 +282,7 @@ class Data:
         ----------
         filter : FilterProtocol
             Filter that is applied to the signal before masking.
-        detector : ThresholdCutoff
+        detector : SpikeDetectionProtocol
             Spike detector that extracts spikes from the signals.
         offset : float
             The time in seconds to be trimmed in front (default = 0).
@@ -304,7 +304,6 @@ class Data:
         result = []
         with self.load() as (sig, times, samp):
             start_time = times[0] + offset 
-
             starting_index = int(offset*samp)
 
             trimmed_signal = sig[starting_index:]
@@ -315,19 +314,20 @@ class Data:
 
             bins_array = np.arange(start=start_time, stop=trimmed_times[-1], step=1/bins_per_second)
             num_bins = len(bins_array)
-
             num_channels = len(spiketrains)
             empty_channels = []
+
             for chan in range(num_channels):
                 if (len(spiketrains[chan]) == 0):
                     empty_channels.append(chan)
-                spike_counts = np.zeros(shape=num_bins+1, dtype=int)
 
+                spike_counts = np.zeros(shape=num_bins+1, dtype=int)
                 digitized_indices = np.digitize(spiketrains[chan], bins_array)
                 for bin_index in digitized_indices:
                     spike_counts[bin_index] += 1
+                result.append(spike_counts)
 
-        return [np.transpose(spike_counts), num_bins, empty_channels]
+        return [np.transpose(result), num_bins, empty_channels]
 
 
 
@@ -570,7 +570,7 @@ class DataManager(MutableSequence):
                           detector: SpikeDetectionProtocol, 
                           omit_experiments: Iterable[int] = [],
                           spontaneous_offset: float = 0,
-                          exp_offsets: Iterable[float] = NULL,
+                          exp_offsets: Iterable[float] = [],
                           bins_per_second: float = 100):
         """
         This masking method uses a correlation matrix between a spontaneous recording and
@@ -605,19 +605,19 @@ class DataManager(MutableSequence):
         if spontaneous_offset < 0:
             spontaneous_offset = 0
 
-        if (exp_offsets == NULL):
-            exp_offsets = np.zeros(self.__len__())
-        else:
-            for exp in range(len(exp_offsets)):
-                if (exp_offsets[exp] < 0):
-                    exp_offsets[exp] = 0
-        
+        for i in range(len(exp_offsets)):
+            if exp_offsets[i] < 0:
+                exp_offsets[i] = 0
+
+        if (len(exp_offsets) < len(self.data_list)):
+            exp_offsets = np.concatenate((exp_offsets, np.zeros(len(self.data_list) - len(exp_offsets))))
+
         spontaneous_binned = spontaneous_data.get_binned_matrix(filter, detector,
                                         spontaneous_offset, bins_per_second)
         
 
         for exp_index in range(len(self.data_list)):
-            if (exp_index not in omit_experiments):
+            if (not (exp_index in omit_experiments)):
                 self.data_list[exp_index].auto_channel_mask(spontaneous_binned, 
                             filter, detector, exp_offsets[exp_index], bins_per_second)
 
