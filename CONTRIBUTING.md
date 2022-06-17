@@ -31,29 +31,40 @@ The following is a set of guidelines how to contributes. These are mostly guidel
 2. I'm struggling in using MiV-OS for my project! - Please open the issue with the label `help wanted` and explain the details of the problem and issue. We would gladly reach you to assist.
 3. How can I contribute!? - If you already wrote the patch, you can open a `pull request` with the changes to the `update_<version>` branch. Ensure the code passes the [formatting and styles](#formatting-and-styleguide). The PR should clearly describe the problem and solution. Include all relevant issue numbers if applicable.
 
-## Before I get started
+## Before I get started contributing,
 
-### Installation and packages
+Below are steps of how to setup developing environment. We mainly use `poetry` to manage the project, although most of the important commands will be provided in `Makefile`.
+
+1. Clone!
 
 First **create the fork repository and clone** to your local machine.
-We provide [requirements.txt](https://github.com/GazzolaLab/MiV-OS/blob/main/requirements.txt) to include all the dependencies that is required to develop. You can either install using `pip install -r requirements.txt` or
-```bash
-$ pip install miv-os[dev]
-```
-If you are more interested in working for documentation, use
-```bash
-$ pip install miv-os[docs]
-```
-More details are included [here](https://github.com/GazzolaLab/MiV-OS/blob/main/docs/README.md).
 
-### Pre-Commit
+2. Virtual python workspace: `conda`, `pyenv`, or `venv`.
 
-To keep the code organized, we use **pre-commit** hook that automatically checks `black` and `flake8`.
+We recommend using python version above 3.8.0.
+
+```bash
+conda create --name miv-dev
+conda activate miv-dev
+conda install python==3.8
+```
+
+3. Setup [`poetry`](https://python-poetry.org) and `dependencies`!
+
+```bash
+make poetry-download
+make install
+make pre-commit-install
+```
+
+If you are planning to contribute on documentation, extra dependencies can be installed using `poetry install -E docs`. The detail instruction is included [here](https://github.com/GazzolaLab/MiV-OS/blob/main/docs/README.md).
+
+4. Now your working environment is set!
 
 ### Project workflow
 
 We will create an `update_<version>` branch every couple of months, and will release the branch once all related issues are resolved.
-Every patch will be merged into the update branch only to organize major changes.
+Every `patch` will be merged into the update branch only to organize major changes.
 Each version will have an associated collection of issues as `Milestones`.
 
 If you have a patch, make a `pull request` to the `update_<version>` branch.
