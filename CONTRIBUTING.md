@@ -8,8 +8,7 @@ The following is a set of guidelines how to contributes. These are mostly guidel
 
 [TLTR! I need three-line summary!!](#three-line-summary)
 
-[Before I get started?](#before-i-get-started)
-  * [Installation and packages](#installation-and-packages)
+[Before I get started contributing](#before-i-get-start-contributing)
   * [Project workflow](#project-workflow)
 
 [How can I contribute?](#how-can-i-contribute)
@@ -31,7 +30,7 @@ The following is a set of guidelines how to contributes. These are mostly guidel
 2. I'm struggling in using MiV-OS for my project! - Please open the issue with the label `help wanted` and explain the details of the problem and issue. We would gladly reach you to assist.
 3. How can I contribute!? - If you already wrote the patch, you can open a `pull request` with the changes to the `update_<version>` branch. Ensure the code passes the [formatting and styles](#formatting-and-styleguide). The PR should clearly describe the problem and solution. Include all relevant issue numbers if applicable.
 
-## Before I get started contributing,
+## Before I get start contributing
 
 Below are steps of how to setup developing environment. We mainly use `poetry` to manage the project, although most of the important commands will be provided in `Makefile`.
 
