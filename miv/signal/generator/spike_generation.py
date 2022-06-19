@@ -1,11 +1,12 @@
 __all__ = ["generate_spikes"]
 
 from typing import List
-from neo.core import SpikeTrain
-from miv.typing import SpikestampsType
-from quantities import s
 
 import numpy as np
+from neo.core import SpikeTrain
+from quantities import s
+
+from miv.typing import SpikestampsType
 
 
 def generate_spikes(
