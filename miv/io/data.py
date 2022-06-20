@@ -605,7 +605,7 @@ class DataManager(MutableSequence):
 
         for data in self.data_list:
             with data.load() as (sig, times, samp):
-                mask_list: list[int] = []
+                mask_list = []
 
                 filtered_signal = filter(sig, samp)
                 spiketrains = detector(filtered_signal, times, samp)
@@ -622,9 +622,9 @@ class DataManager(MutableSequence):
         spontaneous_data: Data,
         filter: FilterProtocol,
         detector: SpikeDetectionProtocol,
-        omit_experiments: Iterable[int] = [],
+        omit_experiments: list[int] = [],
         spontaneous_offset: float = 0,
-        exp_offsets: Iterable[float] = [],
+        exp_offsets: list[float] = [],
         bins_per_second: float = 100,
     ):
         """
@@ -673,9 +673,9 @@ class DataManager(MutableSequence):
             filter, detector, spontaneous_offset, bins_per_second
         )
 
-        for exp_index in range(len(self.data_list)):
+        for (exp_index, data) in enumerate(self.data_list):
             if not (exp_index in omit_experiments):
-                self.data_list[exp_index]._auto_channel_mask(
+                data._auto_channel_mask(
                     spontaneous_binned,
                     filter,
                     detector,
