@@ -206,7 +206,7 @@ class Data:
         """
         self.masking_channel_set.update(self.masking_channel_set.union(channel_id))
 
-    def auto_channel_mask(
+    def _auto_channel_mask(
         self,
         spontaneous_binned,
         filter: FilterProtocol,
@@ -238,7 +238,7 @@ class Data:
             the result (see jupyter notebook demo).
         """
 
-        exp_binned = self.get_binned_matrix(filter, detector, offset, bins_per_second)
+        exp_binned = self._get_binned_matrix(filter, detector, offset, bins_per_second)
         num_channels = np.shape(exp_binned[0])[1]
 
         # if experiment is longer than spontaneous recording, it gets trunkated
@@ -271,7 +271,7 @@ class Data:
                 mask_list.append(chan)
         self.add_channel_mask(np.concatenate((mask_list, exp_binned[2])))
 
-    def get_binned_matrix(
+    def _get_binned_matrix(
         self,
         filter: FilterProtocol,
         detector: SpikeDetectionProtocol,
@@ -619,13 +619,13 @@ class DataManager(MutableSequence):
                 (exp_offsets, np.zeros(len(self.data_list) - len(exp_offsets)))
             )
 
-        spontaneous_binned = spontaneous_data.get_binned_matrix(
+        spontaneous_binned = spontaneous_data._get_binned_matrix(
             filter, detector, spontaneous_offset, bins_per_second
         )
 
         for exp_index in range(len(self.data_list)):
             if not (exp_index in omit_experiments):
-                self.data_list[exp_index].auto_channel_mask(
+                self.data_list[exp_index]._auto_channel_mask(
                     spontaneous_binned,
                     filter,
                     detector,
