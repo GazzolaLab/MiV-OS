@@ -192,7 +192,7 @@ class Data:
         Clears all present channel masks.
         """
 
-        self.masking_channel_set.update([])
+        self.masking_channel_set = set()
 
 
     def _auto_channel_mask(
