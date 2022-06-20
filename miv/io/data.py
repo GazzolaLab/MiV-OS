@@ -30,7 +30,6 @@ from typing import Any, Callable, Dict, Iterable, List, Optional, Set
 
 import logging
 import os
-import statistics
 from collections.abc import MutableSequence
 from contextlib import contextmanager
 from glob import glob
@@ -263,7 +262,7 @@ class Data:
             )
 
         mean = np.mean(dot_products)
-        threshold = mean + statistics.stdev(dot_products)
+        threshold = mean + np.std(dot_products)
 
         mask_list = []
         for chan in range(num_channels):
