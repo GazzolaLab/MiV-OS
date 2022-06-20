@@ -48,14 +48,14 @@ def generate_spikes(
     for chan in range(num_channels):
         # Step one: generate true spikes
         if random_spike_strength:
-            spike_strength = np.random.rand(1)
+            spike_strength = int(np.random.rand()*10)
         channel_spikes = np.repeat(
             np.arange(start=0, stop=duration, step=1 / spikes_per_second),
             spike_strength,
         )
         # Step two: add noise
         if random_noise_multiplier:
-            noise_multiplier = 10 ** (np.random.rand(1) * 2)
+            noise_multiplier = 10 ** (np.random.rand() * 2)
         noise_count = int(spikes_per_second * duration * noise_multiplier)
         channel_spikes = np.concatenate(
             (channel_spikes, np.random.rand(noise_count) * duration)
