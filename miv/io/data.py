@@ -359,9 +359,12 @@ class Data:
 
         Returns
         -------
-        [binned_matrix, num_bins, empty_channels]
-        *binned_matrix* has columns as channels
-        *empty_channels* is an array of indices of empty channels
+        binned_matrix : 
+            2D list with columns as channels.
+        num_bins : int
+            The number of bins.
+        empty_channels : List[int]
+            List of indices of empty channels
         """
 
         result = []
