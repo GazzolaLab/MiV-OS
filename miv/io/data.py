@@ -277,7 +277,7 @@ class Data:
 
         Parameters
         ----------
-        spontaneous_binned : [Iterable[Iterable[int]], int]
+        spontaneous_binned : Union[Iterable[Iterable[int]], int]
             [0]: 2D matrix with each column being the binned number of spikes from each channel.
             [1]: number of bins from spontaneous recording binned matrix
             [2]: array of indices of empty channels
