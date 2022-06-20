@@ -335,7 +335,7 @@ class Data:
                     spike_counts[bin_index] += 1
                 result.append(spike_counts)
 
-        return [np.transpose(result), num_bins, empty_channels]
+        return np.transpose(result), num_bins, empty_channels
 
     def save(self, tag: str, format: str):  # TODO
         assert tag == "continuous", "You cannot alter raw data, change the data tag"
