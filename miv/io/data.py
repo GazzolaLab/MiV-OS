@@ -194,7 +194,6 @@ class Data:
 
         self.masking_channel_set = set()
 
-
     def _auto_channel_mask(
         self,
         spontaneous_binned,
@@ -289,7 +288,7 @@ class Data:
 
         Returns
         -------
-        binned_matrix : 
+        binned_matrix :
             2D list with columns as channels.
         num_bins : int
             The number of bins.
