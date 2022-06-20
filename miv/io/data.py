@@ -194,16 +194,6 @@ class Data:
 
         self.masking_channel_set.update([])
 
-    def add_channel_mask(self, channel_id: Iterable[int]):
-        """
-        Put mask on more channels.
-
-        Parameters
-        ----------
-        channel_id : Iterable[int], list
-            List of channel id that will be added to the mask
-        """
-        self.masking_channel_set.update(self.masking_channel_set.union(channel_id))
 
     def _auto_channel_mask(
         self,
@@ -268,7 +258,7 @@ class Data:
         for chan in range(num_channels):
             if dot_products[chan] > threshold:
                 mask_list.append(chan)
-        self.add_channel_mask(np.concatenate((mask_list, exp_binned[2])))
+        self.set_channel_mask(np.concatenate((mask_list, exp_binned[2])))
 
     def _get_binned_matrix(
         self,
@@ -567,7 +557,7 @@ class DataManager(MutableSequence):
                     if spike_stats["rates"][channel] <= no_spike_threshold:
                         mask_list.append(channel)
 
-                data.add_channel_mask(mask_list)
+                data.set_channel_mask(mask_list)
 
     def auto_channel_mask(
         self,
