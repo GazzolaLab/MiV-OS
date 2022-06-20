@@ -215,9 +215,9 @@ class Data:
             Filter that is applied to the signal before masking.
         detector : SpikeDetectionProtocol
             Spike detector that extracts spikes from the signals.
-        offset : float
+        offset : float, optional
             The trimmed time in seconds at the front of the signal (default = 0).
-        bins_per_second : float
+        bins_per_second : float, default=100
             Optional parameter for binning spikes with respect to time.
             The spikes are binned for comparison between the spontaneous recording and
             the other experiments. This value should be adjusted based on the firing rate.
@@ -276,9 +276,9 @@ class Data:
             Filter that is applied to the signal before masking.
         detector : SpikeDetectionProtocol
             Spike detector that extracts spikes from the signals.
-        offset : float
+        offset : float, optional
             The time in seconds to be trimmed in front (default = 0).
-        bins_per_second : float
+        bins_per_second : float, default=100
             Optional parameter for binning spikes with respect to time.
             The spikes are binned for comparison between the spontaneous recording and
             the other experiments. This value should be adjusted based on the firing rate.
@@ -538,7 +538,7 @@ class DataManager(MutableSequence):
             Filter that is applied to the signals before detecting spikes.
         detector : SpikeDetectionProtocol
             Spike detector that is used to extract spikes from the filtered signal.
-        no_spike_threshold : float
+        no_spike_threshold : float, default=1
             Spike rate threshold (spike per sec) for filtering channels with no spikes.
             (default = 1)
 
@@ -582,15 +582,15 @@ class DataManager(MutableSequence):
             Filter that is applied to the signals before detecting spikes.
         detector : SpikeDetectionProtocol
             Spike detector that is used to extract spikes from the filtered signal.
-        omit_experiments: Iterable[int]
+        omit_experiments: Iterable[int], optional
             Integer array of experiment indices (0-based) to omit.
-        spontaneous_offset: float
+        spontaneous_offset: float, optional
             Postive time offset for the spontaneous experiment (default = 0).
             A negative value will be converted to 0.
-        exp_offsets: Iterable[float]
+        exp_offsets: Iterable[float], optional
             Positive float array of time offsets for each experiment (default = 0).
             Negative values will be converted to 0.
-        bins_per_second : float
+        bins_per_second : float, default=100
             Optional parameter for binning spikes with respect to time.
             The spikes are binned for comparison between the spontaneous recording and
             the other experiments. This value should be adjusted based on the firing rate.
