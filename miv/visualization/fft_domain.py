@@ -50,7 +50,8 @@ def plot_spectral(
     signal: SignalType, X: float, Y: float, sampling_rate: float, Number_Segments: float
 ):
     """
-    Plots Power Spectral Densities for channels X and Y, Cross Power Spctral Densities and Coherence between them
+    Plots power spectral densities for channels X and Y: cross power spctral densities
+    and coherence between them. [1]_, [2]_
 
     Parameters
     ----------
@@ -69,6 +70,12 @@ def plot_spectral(
     -------
     figure: matplotlib.pyplot.Figure
     axes: matplotlib.Axes
+
+    .. [1] https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.coherence.html
+    .. [2] P. Welch, “The use of the fast Fourier transform for the estimation of power spectra:
+       A method based on time averaging over short, modified periodograms”, IEEE Trans. Audio
+       Electroacoust. vol. 15, pp. 70-73, 1967.
+
     """
     ## Welch PSD for an electrode's Signal
     ## Welch Coherence Estimation between signal X and Y
