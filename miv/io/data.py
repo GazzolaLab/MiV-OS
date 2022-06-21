@@ -26,7 +26,7 @@ Module
 """
 __all__ = ["Data", "DataManager"]
 
-from typing import Any, Callable, Dict, Iterable, List, Optional, Set
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union, Set
 
 import logging
 import os
@@ -196,7 +196,7 @@ class Data:
 
     def _auto_channel_mask(
         self,
-        spontaneous_binned,
+        spontaneous_binned : Tuple[Iterable[Iterable[int]], int, List[int]],
         filter: FilterProtocol,
         detector: SpikeDetectionProtocol,
         offset: float = 0,
@@ -563,9 +563,9 @@ class DataManager(MutableSequence):
         spontaneous_data: Data,
         filter: FilterProtocol,
         detector: SpikeDetectionProtocol,
-        omit_experiments: list[int] = [],
+        omit_experiments: Iterable[int] = [],
         spontaneous_offset: float = 0,
-        exp_offsets: list[float] = [],
+        exp_offsets: Iterable[float] = [],
         bins_per_second: float = 100,
     ):
         """
