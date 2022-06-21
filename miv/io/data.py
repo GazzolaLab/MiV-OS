@@ -298,19 +298,21 @@ class Data:
         """
 
         exp_binned = self._get_binned_matrix(filter, detector, offset, bins_per_second)
-        num_channels = np.shape(exp_binned['matrix'])[1]
+        num_channels = np.shape(exp_binned["matrix"])[1]
 
         # if experiment is longer than spontaneous recording, it gets trunkated
-        if exp_binned['num_bins'] > spontaneous_binned['num_bins']:
-            spontaneous_matrix = spontaneous_binned['matrix'].copy()
-            exp_binned['matrix'] = exp_binned['matrix'][: spontaneous_binned['num_bins'] + 1]
+        if exp_binned["num_bins"] > spontaneous_binned["num_bins"]:
+            spontaneous_matrix = spontaneous_binned["matrix"].copy()
+            exp_binned["matrix"] = exp_binned["matrix"][
+                : spontaneous_binned["num_bins"] + 1
+            ]
 
         # if spontaneous is longer than experiment recording
-        elif exp_binned['num_bins'] < spontaneous_binned['num_bins']:
-            spontaneous_matrix = spontaneous_binned['matrix'].copy()
-            spontaneous_matrix= spontaneous_matrix[: exp_binned['num_bins'] + 1]
+        elif exp_binned["num_bins"] < spontaneous_binned["num_bins"]:
+            spontaneous_matrix = spontaneous_binned["matrix"].copy()
+            spontaneous_matrix = spontaneous_matrix[: exp_binned["num_bins"] + 1]
 
-        exp_binned_channel_rows = np.transpose(exp_binned['matrix'])
+        exp_binned_channel_rows = np.transpose(exp_binned["matrix"])
         spontaneous_binned_channel_rows = np.transpose(spontaneous_matrix)
 
         dot_products = []
@@ -328,7 +330,7 @@ class Data:
         for chan in range(num_channels):
             if dot_products[chan] > threshold:
                 mask_list.append(chan)
-        self.set_channel_mask(np.concatenate((mask_list, exp_binned['empty_channels'])))
+        self.set_channel_mask(np.concatenate((mask_list, exp_binned["empty_channels"])))
 
     def _get_binned_matrix(
         self,
@@ -398,7 +400,7 @@ class Data:
         return {
             "matrix": np.transpose(result),
             "num_bins": num_bins,
-            "empty_channels": empty_channels
+            "empty_channels": empty_channels,
         }
 
     def save(self, tag: str, format: str):  # TODO
@@ -674,7 +676,9 @@ class DataManager(MutableSequence):
             the result (see jupyter notebook demo).
         """
 
-        omit_experiments_list: List[float] = list(omit_experiments) if omit_experiments else []
+        omit_experiments_list: List[float] = (
+            list(omit_experiments) if omit_experiments else []
+        )
         exp_offsets_list: List[float] = list(exp_offsets) if exp_offsets else []
 
         if spontaneous_offset < 0:
@@ -687,7 +691,10 @@ class DataManager(MutableSequence):
 
         if exp_offsets_length < len(self.data_list):
             exp_offsets_list = np.concatenate(
-                (np.array(exp_offsets_list), np.zeros(len(self.data_list) - exp_offsets_length))
+                (
+                    np.array(exp_offsets_list),
+                    np.zeros(len(self.data_list) - exp_offsets_length),
+                )
             )
 
         spontaneous_binned = spontaneous_data._get_binned_matrix(
