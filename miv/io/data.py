@@ -563,9 +563,9 @@ class DataManager(MutableSequence):
         spontaneous_data: Data,
         filter: FilterProtocol,
         detector: SpikeDetectionProtocol,
-        omit_experiments: Iterable[int] = [],
+        omit_experiments: Optional[Iterable[int]] = None,
         spontaneous_offset: float = 0,
-        exp_offsets: List[float] = [],
+        exp_offsets: Optional[List[float]] = None,
         bins_per_second: float = 100,
     ):
         """
