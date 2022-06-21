@@ -267,7 +267,7 @@ class Data:
 
     def _auto_channel_mask(
         self,
-        spontaneous_binned: Dict[str, any],
+        spontaneous_binned: Dict[str, Any],
         filter: FilterProtocol,
         detector: SpikeDetectionProtocol,
         offset: float = 0,
@@ -640,7 +640,7 @@ class DataManager(MutableSequence):
         detector: SpikeDetectionProtocol,
         omit_experiments: Optional[Iterable[int]] = None,
         spontaneous_offset: float = 0,
-        exp_offsets: Optional[List[float]] = None,
+        exp_offsets: Optional[Iterable[float]] = None,
         bins_per_second: float = 100,
     ):
         """
@@ -662,7 +662,7 @@ class DataManager(MutableSequence):
         spontaneous_offset: float, optional
             Postive time offset for the spontaneous experiment (default = 0).
             A negative value will be converted to 0.
-        exp_offsets: Optional[List[float]]
+        exp_offsets: Optional[Iterable[float]]
             Positive float array of time offsets for each experiment (default = 0).
             Negative values will be converted to 0.
         bins_per_second : float, default=100
@@ -676,20 +676,21 @@ class DataManager(MutableSequence):
 
         if omit_experiments == None:
             omit_experiments = []
+
+        if spontaneous_offset < 0:
+            spontaneous_offset = 0
         
         if exp_offsets == None:
             exp_offsets = []
 
-        if spontaneous_offset < 0:
-            spontaneous_offset = 0
-
-        for i in range(len(exp_offsets)):
+        exp_offsets_length = sum(1 for e in exp_offsets)
+        for i in range(exp_offsets_length):
             if exp_offsets[i] < 0:
                 exp_offsets[i] = 0
 
-        if len(exp_offsets) < len(self.data_list):
+        if exp_offsets_length < len(self.data_list):
             exp_offsets = np.concatenate(
-                (exp_offsets, np.zeros(len(self.data_list) - len(exp_offsets)))
+                (exp_offsets, np.zeros(len(self.data_list) - exp_offsets_length))
             )
 
         spontaneous_binned = spontaneous_data._get_binned_matrix(
