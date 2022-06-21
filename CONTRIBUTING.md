@@ -8,8 +8,7 @@ The following is a set of guidelines how to contributes. These are mostly guidel
 
 [TLTR! I need three-line summary!!](#three-line-summary)
 
-[Before I get started?](#before-i-get-started)
-  * [Installation and packages](#installation-and-packages)
+[Before I get started contributing](#before-i-get-start-contributing)
   * [Project workflow](#project-workflow)
 
 [How can I contribute?](#how-can-i-contribute)
@@ -31,29 +30,40 @@ The following is a set of guidelines how to contributes. These are mostly guidel
 2. I'm struggling in using MiV-OS for my project! - Please open the issue with the label `help wanted` and explain the details of the problem and issue. We would gladly reach you to assist.
 3. How can I contribute!? - If you already wrote the patch, you can open a `pull request` with the changes to the `update_<version>` branch. Ensure the code passes the [formatting and styles](#formatting-and-styleguide). The PR should clearly describe the problem and solution. Include all relevant issue numbers if applicable.
 
-## Before I get started
+## Before I get start contributing
 
-### Installation and packages
+Below are steps of how to setup developing environment. We mainly use `poetry` to manage the project, although most of the important commands will be provided in `Makefile`.
+
+1. Clone!
 
 First **create the fork repository and clone** to your local machine.
-We provide [requirements.txt](https://github.com/GazzolaLab/MiV-OS/blob/main/requirements.txt) to include all the dependencies that is required to develop. You can either install using `pip install -r requirements.txt` or
-```bash
-$ pip install miv-os[dev]
-```
-If you are more interested in working for documentation, use
-```bash
-$ pip install miv-os[docs]
-```
-More details are included [here](https://github.com/GazzolaLab/MiV-OS/blob/main/docs/README.md).
 
-### Pre-Commit
+2. Virtual python workspace: `conda`, `pyenv`, or `venv`.
 
-To keep the code organized, we use **pre-commit** hook that automatically checks `black` and `flake8`.
+We recommend using python version above 3.8.0.
+
+```bash
+conda create --name miv-dev
+conda activate miv-dev
+conda install python==3.8
+```
+
+3. Setup [`poetry`](https://python-poetry.org) and `dependencies`!
+
+```bash
+make poetry-download
+make install
+make pre-commit-install
+```
+
+If you are planning to contribute on documentation, extra dependencies can be installed using `poetry install -E docs`. The detail instruction is included [here](https://github.com/GazzolaLab/MiV-OS/blob/main/docs/README.md).
+
+4. Now your working environment is set!
 
 ### Project workflow
 
 We will create an `update_<version>` branch every couple of months, and will release the branch once all related issues are resolved.
-Every patch will be merged into the update branch only to organize major changes.
+Every `patch` will be merged into the update branch only to organize major changes.
 Each version will have an associated collection of issues as `Milestones`.
 
 If you have a patch, make a `pull request` to the `update_<version>` branch.
@@ -118,13 +128,11 @@ If you are interested in hearing more, please contact one of our the maintainer.
 Please follow these steps to have your contribution considered by the maintainers:
 
 1. Follow the [styleguides](#styleguides)
-2. Before you submit your pull request run [pytests](https://pypi.org/project/pytest/) and make sure that all tests pass.
+2. Before you submit your pull request run [pytests](https://pypi.org/project/pytest/) and make sure that all tests pass. In order to run pytest, run the following line from the top directory:
 
-	In order to run pytest, run the following line from the top directory:
-
-	`
-	python3 -m pytest
-	`
+```bash
+make test
+```
 
 3. After you submit your pull request, verify that all status checks are passing <details><summary>What if the status checks are failing?</summary>If a status check is failing, and you believe that the failure is unrelated to your change, please leave a comment on the pull request explaining why you believe the failure is unrelated. A maintainer will re-run the status check for you. If we conclude that the failure was a false positive, then we will open an issue to track that problem with our status check suite.</details>
 
@@ -140,23 +148,13 @@ Ask any question about **how to use MiV-OS and detail implementation** in the **
 
 * Limit the first line to 72 characters or less
 * Reference issues and pull requests liberally after the first line
-* When only changing documentation, include `[ci skip]` in the commit title
+<!-- * When only changing documentation, include `[ci skip]` in the commit title -->
 
 ### Formatting and styleguide
 
-We use [flake8](https://pypi.org/project/flake8/) and [Black](https://pypi.org/project/black/) for python style.
-
-You can install flake8 using pip:
-
-`pip install flake8==3.8.3`
-
-You can install black using pip:
-
-`pip install black`
-
 In order to format the code:
 
-`make all`
+`make formatting`
 
 > **Note:** Format/refactoring patches that are not anything substantial to the context or functionality will likely be rejected.
 

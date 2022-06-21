@@ -1,3 +1,18 @@
+# Release Note (version 0.1.0)
+
+## Developer Note
+
+## What's Changed
+
+* Update: Sample dataset and web-installation utilities by @skim0119 in https://github.com/GazzolaLab/MiV-OS/pull/39
+* Statistics: Inter-spike interval histogram and statistics documentation by @armantekinalp in https://github.com/GazzolaLab/MiV-OS/pull/44
+* Connectivity - documentation on cross correlation and pattern detection using cell assembly by @Gauravu2 in https://github.com/GazzolaLab/MiV-OS/pull/42
+
+## New Contributors
+* @Gauravu2 made their first contribution in https://github.com/GazzolaLab/MiV-OS/pull/42
+
+**Full Changelog**: https://github.com/GazzolaLab/MiV-OS/compare/v0.0.6...v0.1.0
+
 # Release Note (version 0.0.6)
 
 ## Developer Note
