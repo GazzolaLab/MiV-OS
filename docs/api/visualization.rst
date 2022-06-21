@@ -17,6 +17,7 @@ DFT Plot
       :toctree: _toctree/VisualizationAPI
 
       plot_frequency_domain
+      plot_spectral
 
 Spike Waveform Overlap
 ----------------------
@@ -32,6 +33,19 @@ Spike Waveform Overlap
       extract_waveforms
       plot_waveforms
 
+Causality Analysis
+------------------
+
+.. currentmodule:: miv.visualization
+
+.. automodule:: miv.visualization.causality
+
+   .. autosummary::
+      :nosignatures:
+      :toctree: _toctree/VisualizationAPI
+
+      pairwise_causality_plot
+
 Useful External Packages
 ========================
 
@@ -46,3 +60,4 @@ Viziphant
 
    viziphant.rasterplot.rasterplot
    viziphant.rasterplot.rasterplot_rates
+   viziphant.spike_train_correlation.plot_corrcoef
