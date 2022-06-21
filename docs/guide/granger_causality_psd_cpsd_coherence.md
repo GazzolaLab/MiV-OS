@@ -11,7 +11,7 @@ kernelspec:
   name: python3
 ---
 
-# Connectivity Analysis Methods
+# Connectivity Analysis
 
 +++
 
@@ -63,92 +63,20 @@ with data.load() as (signal, timestamps, sampling_rate):
 ## 2. Pairwise Granger Causality
 
 Estimates pairwise Granger causality between two channels
-
-pairwise_causality(signal, start, end):
-
-Parameters
-
-#----------\
-signal : SignalType\
-Input signal\
-start : float\
-starting point from signal\
-end : float\
-End point from signal\
-Returns
-
-#-------\
-C : Causality Matrix containing directional causalities for X -> Y and Y -> X,
-    instantaneous causality between X,Y, and total causality. X and Y represents electrodes
-
+Plots pairwise Granger Causality. Documentation is available [here](miv.visualization.causality.pairwise_causality_plot).
 
 ```{code-cell} ipython3
-#Example
-pairwise_causality(signal, 0, 1000)
-# Estimates the causality between each pair of electrodes for signals strating from 0-1000
-```
-
-## Pairwise Granger Causality Plot
-
-Plots pairwise Granger Causality
-
-pairwise_causality_plot(signal, start, end):
-
-#Parameters\
-#----------\
-#signal : SignalType\
-Input signal\
-start : float\
-starting point from signal\
-end : float\
-End point from signal\
-
-#Returns\
-figure, axes\ 
-Contains subplots for directional causalities for X -> Y and Y -> X,
-instantaneous causality between X,Y, and total causality. X and Y represents electrodes
-
-
-```{code-cell} ipython3
-#Example
-pairwise_causality_plot(signal, 0, 1000)
 # Plots the causality between each pair of electrodes for signals strating from 0-1000
+pairwise_causality_plot(signal, 0, 1000)
 ```
 
-## Welch Coherence 
+## 3. Welch Coherence
 
-Plots Power Spectral Densities for channels X and Y, Cross Power Spctral Densities and Coherence between them using Welch's method\
-
-plot_spectral(signal, X, Y, sampling_rate, Number_Segments)\
-
-
-Parameters\
-#----------
-signal : SignalType\
-    Input signal\
-X : float\
-    First Channel \
-Y : float\
-    Second Channel\
-sampling_rate : float\
-    Sampling frequency\
-Number_Segments: float\
-Number of segments to divide the entire signal\
-
-Returns\
-#-------
-figure: plt.Figure\
-axes\
-
-References:\ 
-
-1) https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.coherence.html
-2) P. Welch, “The use of the fast Fourier transform for the estimation of power spectra: A method based on time averaging over short, modified periodograms”, IEEE Trans. Audio Electroacoust. vol. 15, pp. 70-73, 1967.
+The function is described [here](miv.visualization.fft_domain.plot_spectral)
 
 
 ```{code-cell} ipython3
-#Example 
+#Plots the PSDs, CPSD and Coherence for channel 1 & 43 for a sampling rate of 30000, with signal divided into 10000 segments
 plot_spectral(signal,1,42,30000,10000)
 
-##Plots the PSDs, CPSD and Coherence for channel 1 & 43 for a sampling rate of 30000, with signal divided into 10000 segments
 ```
