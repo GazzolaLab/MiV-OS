@@ -1,6 +1,11 @@
-__all__ = ["firing_rates", "interspike_intervals", "coefficient_variation"]
+__all__ = [
+    "firing_rates",
+    "interspike_intervals",
+    "coefficient_variation",
+    "peri_stimulus_time",
+]
 
-from typing import Any, Dict, Iterable, Optional, Union
+from typing import Any, Dict, Iterable, List, Optional, Union
 
 import datetime
 
@@ -100,3 +105,41 @@ def coefficient_variation(self, spikes: SpikestampsType):
     """
     interspike = self.interspike_intervals()
     return np.std(interspike) / np.mean(interspike)
+
+
+def peri_stimulus_time(spike_list: List[SpikestampsType]):
+    """
+    Compute the peri-stimulus time of the given spike train.
+
+    Examples
+    --------
+
+    How to draw Peri-stimulus time histogram (ISIH):
+
+        >>> from miv.statistics import peri_stimulus_time
+        >>> import matplotlib.pyplot as plt
+        >>> pst = peri_stimulus_time(spikestamp)
+        >>> plt.hist(pst)
+
+    If one wants to get the bin-count, you can use `numpy.digitize` and `numpy.bincount`:
+
+        >>> import numpy as np
+        >>> max_time = spikestamps.max()
+        >>> num_bins = 20
+        >>> time_interval = np.linspace(0, max_time, num_bins)
+        >>> digitized = np.digitize(pst, time_interval)
+        >>> bin_counts = np.bincount(digitized)
+
+    Parameters
+    ----------
+    spikes : SpikestampsType
+        Single spike-stamps
+
+    Returns
+    -------
+        interval: numpy.ndarray
+
+    """
+
+    peri_stimulus_times = np.sum(np.array(spike_list), 0)
+    return peri_stimulus_times
