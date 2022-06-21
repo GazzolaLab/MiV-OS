@@ -196,7 +196,7 @@ class Data:
 
     def _auto_channel_mask(
         self,
-        spontaneous_binned: Tuple[np.ndarray, int, List[int]],
+        spontaneous_binned: Dict[str, any],
         filter: FilterProtocol,
         detector: SpikeDetectionProtocol,
         offset: float = 0,
@@ -227,20 +227,20 @@ class Data:
         """
 
         exp_binned = self._get_binned_matrix(filter, detector, offset, bins_per_second)
-        num_channels = np.shape(exp_binned[0])[1]
+        num_channels = np.shape(exp_binned['matrix'])[1]
 
         # if experiment is longer than spontaneous recording, it gets trunkated
-        if exp_binned[1] > spontaneous_binned[1]:
-            spontaneous_binned_copy = spontaneous_binned
-            exp_binned[0] = exp_binned[0][: spontaneous_binned[1] + 1]
+        if exp_binned['num_bins'] > spontaneous_binned['num_bins']:
+            spontaneous_matrix = spontaneous_binned['matrix'].copy()
+            exp_binned['matrix'] = exp_binned['matrix'][: spontaneous_binned['num_bins'] + 1]
 
         # if spontaneous is longer than experiment recording
-        elif exp_binned[1] < spontaneous_binned[1]:
-            spontaneous_binned_copy = spontaneous_binned.copy()
-            spontaneous_binned_copy[0] = spontaneous_binned_copy[0][: exp_binned[1] + 1]
+        elif exp_binned['num_bins'] < spontaneous_binned['num_bins']:
+            spontaneous_matrix = spontaneous_binned['matrix'].copy()
+            spontaneous_matrix= spontaneous_matrix[: exp_binned['num_bins'] + 1]
 
-        exp_binned_channel_rows = np.transpose(exp_binned[0])
-        spontaneous_binned_channel_rows = np.transpose(spontaneous_binned_copy[0])
+        exp_binned_channel_rows = np.transpose(exp_binned['matrix'])
+        spontaneous_binned_channel_rows = np.transpose(spontaneous_matrix)
 
         dot_products = []
         for chan in range(num_channels):
@@ -257,7 +257,7 @@ class Data:
         for chan in range(num_channels):
             if dot_products[chan] > threshold:
                 mask_list.append(chan)
-        self.set_channel_mask(np.concatenate((mask_list, exp_binned[2])))
+        self.set_channel_mask(np.concatenate((mask_list, exp_binned['empty_channels'])))
 
     def _get_binned_matrix(
         self,
@@ -265,7 +265,7 @@ class Data:
         detector: SpikeDetectionProtocol,
         offset: float = 0,
         bins_per_second: float = 100,
-    ):
+    ) -> Dict[str, Any]:
         """
         Performs spike detection and return a binned 2D matrix with columns being the
         binned number of spikes from each channel.
@@ -288,7 +288,7 @@ class Data:
 
         Returns
         -------
-        binned_matrix :
+        matrix :
             2D list with columns as channels.
         num_bins : int
             The number of bins.
@@ -324,7 +324,11 @@ class Data:
                     spike_counts[bin_index] += 1
                 result.append(spike_counts)
 
-        return np.transpose(result), num_bins, empty_channels
+        return {
+            "matrix": np.transpose(result),
+            "num_bins": num_bins,
+            "empty_channels": empty_channels
+        }
 
     def save(self, tag: str, format: str):  # TODO
         assert tag == "continuous", "You cannot alter raw data, change the data tag"
@@ -598,6 +602,13 @@ class DataManager(MutableSequence):
             As long as this value is within a reasonable range, it should negligibly affect
             the result (see jupyter notebook demo).
         """
+
+        if omit_experiments == None:
+            omit_experiments = []
+        
+        if exp_offsets == None:
+            exp_offsets = []
+
         if spontaneous_offset < 0:
             spontaneous_offset = 0
 
