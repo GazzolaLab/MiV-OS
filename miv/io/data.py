@@ -603,23 +603,20 @@ class DataManager(MutableSequence):
             the result (see jupyter notebook demo).
         """
 
-        if omit_experiments == None:
-            omit_experiments = []
+        omit_experiments_list: List[float] = list(omit_experiments) if omit_experiments else []
+        exp_offsets_list: List[float] = list(exp_offsets) if exp_offsets else []
 
         if spontaneous_offset < 0:
             spontaneous_offset = 0
-        
-        if exp_offsets == None:
-            exp_offsets = []
 
-        exp_offsets_length = sum(1 for e in exp_offsets)
+        exp_offsets_length = sum(1 for e in exp_offsets_list)
         for i in range(exp_offsets_length):
-            if exp_offsets[i] < 0:
-                exp_offsets[i] = 0
+            if exp_offsets_list[i] < 0:
+                exp_offsets_list[i] = 0
 
         if exp_offsets_length < len(self.data_list):
-            exp_offsets = np.concatenate(
-                (exp_offsets, np.zeros(len(self.data_list) - exp_offsets_length))
+            exp_offsets_list = np.concatenate(
+                (np.array(exp_offsets_list), np.zeros(len(self.data_list) - exp_offsets_length))
             )
 
         spontaneous_binned = spontaneous_data._get_binned_matrix(
@@ -627,11 +624,11 @@ class DataManager(MutableSequence):
         )
 
         for (exp_index, data) in enumerate(self.data_list):
-            if not (exp_index in omit_experiments):
+            if not (exp_index in omit_experiments_list):
                 data._auto_channel_mask(
                     spontaneous_binned,
                     filter,
                     detector,
-                    exp_offsets[exp_index],
+                    exp_offsets_list[exp_index],
                     bins_per_second,
                 )
