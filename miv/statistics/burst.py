@@ -76,7 +76,7 @@ def burst(spiketrains: SpikestampsType, channel: float, min_isi: float, min_len:
     else:
         spike = np.array(spiketrains[channel].magnitude)
         start_time = spike[Q[:, 0]]
-        end_time = spike[Q[:, 0] + Q[:, 1]]
+        end_time = spike[Q[:, 0] + Q[:, 1] - 1]
         burst_len = Q[:, 1]
         burst_duration = end_time - start_time
         burst_rate = burst_len / (burst_duration)
