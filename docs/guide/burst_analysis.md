@@ -64,108 +64,21 @@ with data.load() as (signal, timestamps, sampling_rate):
     spiketrains = spike_detection(signal, timestamps, sampling_rate)
 ```
 
-## 2. Burst Estimations
-     
-     Function Call
-    
-     burst(spiketrains: SpikestampsType, channel: float, min_isi: float, min_len: float)
-
-     Calculates parameters critical to characterize bursting phenomenon on a single channel
-
-     Parameters
-     ----------
-     spikes : SpikestampsType
-            Single spike-stamps
-     Channel : float
-        Channel to analyze
-     min_isi : float
-        Minimum Interspike Interval (in seconds) to be considered as bursting [standard = 0.1]
-     min_len : float
-        Minimum number of simultaneous spikes to be considered as bursting [standard = 10]
-
-     Returns
-     -------
-     start_time: float
-     The time instances when a burst starts
-
-     burst_duration: float
-     The time duration of a particular burst
-
-     burst_len: float
-     Number of spikes in a particular burst
-
-     burst_rate: float
-     firing rates corresponding to particular bursts
-    
-
+## 2. Burst Estimations    
+Calculates parameters critical to characterize bursting phenomenon on a single channel. Documentation is available [here](miv.statistics.burst).
 
 ```{code-cell} ipython3
-#Example
-burst(spiketrains,45,0.1,10)
 # Estimates the burst parameters for 45th electrode with bursts defined as more than 10 simultaneous spikes with 0.1 s interspike interval 
+burst(spiketrains,45,0.1,10)
 ```
 
-## 3. Plot bursting events across electrodes
-
-     Function Call:
-     
-     plot_burst(spiketrains: SpikestampsType, min_isi: float, min_len: float)
-     
-     Parameters
-     ----------
-     spikes : SpikestampsType
-            Single spike-stamps
-     min_isi : float
-        Minimum Interspike Interval (in seconds) to be considered as bursting [standard = 0.1]
-     min_len : float
-        Minimum number of simultaneous spikes to be considered as bursting [standard = 10]
-
-     Returns
-     -------
-     figure, axes
-     matplot figure with bursts plotted for all electrodes
-
+## 3. Plotting
+Plots the burst events across the recordings. Documentation is available [here](miv.visualization.plot_burst).
 
 ```{code-cell} ipython3
 #Example
+# plots the burst events with bursts defined as more than 10 simultaneous spikes with 0.1 s interspike interval
 plot_burst(spiketrains,0.1,10)
-# plots the burst events fo with bursts defined as more than 10 simultaneous spikes with 0.1 s interspike interval 
+ 
 ```
 
-## Welch Coherence 
-
-Plots Power Spectral Densities for channels X and Y, Cross Power Spctral Densities and Coherence between them using Welch's method\
-
-plot_spectral(signal, X, Y, sampling_rate, Number_Segments)\
-
-
-Parameters\
-#----------
-signal : SignalType\
-    Input signal\
-X : float\
-    First Channel \
-Y : float\
-    Second Channel\
-sampling_rate : float\
-    Sampling frequency\
-Number_Segments: float\
-Number of segments to divide the entire signal\
-
-Returns\
-#-------
-figure: plt.Figure\
-axes\
-
-References:\ 
-
-1) https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.coherence.html
-2) P. Welch, “The use of the fast Fourier transform for the estimation of power spectra: A method based on time averaging over short, modified periodograms”, IEEE Trans. Audio Electroacoust. vol. 15, pp. 70-73, 1967.
-
-
-```{code-cell} ipython3
-#Example 
-plot_spectral(signal,1,42,30000,10000)
-
-##Plots the PSDs, CPSD and Coherence for channel 1 & 43 for a sampling rate of 30000, with signal divided into 10000 segments
-```
