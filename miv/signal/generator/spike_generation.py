@@ -48,7 +48,7 @@ def generate_spikes(
     for chan in range(num_channels):
         # Step one: generate true spikes
         if random_spike_strength:
-            spike_strength = int(np.random.rand()*10)
+            spike_strength = int(np.random.rand() * 10)
         channel_spikes = np.repeat(
             np.arange(start=0, stop=duration, step=1 / spikes_per_second),
             spike_strength,
