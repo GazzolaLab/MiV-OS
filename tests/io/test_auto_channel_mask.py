@@ -1,5 +1,6 @@
 import unittest
-from unittest.mock import call, mock
+from unittest import mock
+from unittest.mock import call
 
 import pytest
 from mock_data import MockData, MockDataManager
