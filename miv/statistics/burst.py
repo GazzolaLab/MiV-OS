@@ -39,34 +39,35 @@ def burst(spiketrains: SpikestampsType, channel: float, min_isi: float, min_len:
     hippocampal neurons." Journal of neurophysiology 114.2 (2015): 1059-1071.
 
     """
+
     spike_interval = np.diff(
         spiketrains[channel].magnitude
-    )  ## Calculate Inter Spike Interval (ISI)
-    A = np.array(spike_interval)
-    B = np.array(spike_interval)
-    B[A > min_isi] = 0
-    B[A <= min_isi] = 1  ##Only spikes within specified min ISI are 1 otherwise 0
-    PP = np.copy(B)
-
-    Min_Spikes = min_len
-    P = []
+    )  # Calculate Inter Spike Interval (ISI)
+    burst_spike = (spike_interval <= min_isi).astype(
+        np.int32
+    )  # Only spikes within specified min ISI are 1 otherwise 0 and are stored
+    min_spikes = min_len
+    burst = []  # List to store burst parameters
 
     for i in np.arange(
-        len(B) - Min_Spikes
-    ):  ## Loop to check clusters of spikes greater than specified minimum length of burst
+        len(burst_spike) - min_spikes
+    ):  # Loop to check clusters of spikes greater than specified minimum length of burst
         t = 0
-        if np.sum(B[i : i + Min_Spikes]) == Min_Spikes:
+        if np.sum(burst_spike[i : i + min_spikes]) == min_spikes:
             q = 1
-            while q > 0 and i + q + Min_Spikes <= len(B) - 1:
-                if B[i + q + Min_Spikes] == 1:
-                    q += 1
+            while q > 0 and i + q + min_spikes <= len(burst_spike) - 1:
+                if burst_spike[i + q + min_spikes - 1] == 1:
                     t = q
+                    q += 1
                 else:
                     q = 0
-            P.append([i, t + Min_Spikes])
-            B[i : i + t + Min_Spikes] = 0  ## Zeroing counted spikes to avoid recounting
 
-    Q = np.array(P)
+            burst.append([i, t + min_spikes])
+            burst_spike[
+                i : i + t + min_spikes
+            ] = 0  # Zeroing counted spikes to avoid recounting
+    Q = np.array(burst)
+
     if np.sum(Q) == 0:
         start_time = 0
         end_time = 0
@@ -77,7 +78,7 @@ def burst(spiketrains: SpikestampsType, channel: float, min_isi: float, min_len:
         spike = np.array(spiketrains[channel].magnitude)
         start_time = spike[Q[:, 0]]
         end_time = spike[Q[:, 0] + Q[:, 1]]
-        burst_len = Q[:, 1]
+        burst_len = Q[:, 1] + 1
         burst_duration = end_time - start_time
         burst_rate = burst_len / (burst_duration)
 
