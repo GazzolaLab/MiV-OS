@@ -7,7 +7,7 @@ from miv.typing import SpikestampsType
 
 
 def burst(spiketrains: SpikestampsType, channel: float, min_isi: float, min_len: float):
-     """
+    """
      Calculates parameters critical to characterize bursting phenomenon on a single channel
      Bursting is defined as the occurence of a specified number of spikes (usually >10), with a small interspike interval (usually < 100ms) [1]_, [2]_
     
@@ -38,10 +38,8 @@ def burst(spiketrains: SpikestampsType, channel: float, min_isi: float, min_len:
      ..[2] Eisenman, Lawrence N., et al. "Quantification of bursting and synchrony in cultured 
      hippocampal neurons." Journal of neurophysiology 114.2 (2015): 1059-1071.
      
-     """
-    spike_interval = np.diff(
-        spiketrains[channel].magnitude
-    )  ## Calculate Inter Spike Interval (ISI)
+    """
+    spike_interval = np.diff(spiketrains[channel].magnitude)  ## Calculate Inter Spike Interval (ISI)
     A = np.array(spike_interval)
     B = np.array(spike_interval)
     B[A > min_isi] = 0
