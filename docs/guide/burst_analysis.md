@@ -13,13 +13,10 @@ kernelspec:
 
 # Burst Analysis
 
-Bursting is defined as the occurence of a specified number of simultaneuos spikes (usually >10), with a small interspike interval (usually < 100ms) [1,2]
+Bursting is defined as the occurence of a specified number of simultaneuos spikes (usually >10), with a small interspike interval (usually < 100ms) [1][1],[2][2]
 
-References: 
-
-[1] Chiappalone, Michela, et al. "Burst detection algorithms for the analysis of spatio-temporal patterns in cortical networks of neurons." Neurocomputing 65 (2005): 653-662.\
-
-[2] Eisenman, Lawrence N., et al. "Quantification of bursting and synchrony in cultured hippocampal neurons." Journal of neurophysiology 114.2 (2015): 1059-1071.
+[1]: https://www.sciencedirect.com/science/article/abs/pii/S0925231204004874
+[2]: https://journals.physiology.org/doi/full/10.1152/jn.00079.2015?rfr_dat=cr_pub++0pubmed&url_ver=Z39.88-2003&rfr_id=ori%3Arid%3Acrossref.org
 
 +++
 
