@@ -61,21 +61,20 @@ with data.load() as (signal, timestamps, sampling_rate):
     spiketrains = spike_detection(signal, timestamps, sampling_rate)
 ```
 
-## 2. Burst Estimations    
+## 2. Burst Estimations
 Calculates parameters critical to characterize bursting phenomenon on a single channel. Documentation is available [here](miv.statistics.burst).
 
 ```{code-cell} ipython3
-# Estimates the burst parameters for 45th electrode with bursts defined as more than 10 simultaneous spikes with 0.1 s interspike interval 
+# Estimates the burst parameters for 45th electrode with bursts defined as more than 10 simultaneous spikes with 0.1 s interspike interval
 burst(spiketrains,45,0.1,10)
 ```
 
 ## 3. Plotting
-Plots the burst events across the recordings. Documentation is available [here](miv.visualization.plot_burst).
+Plots the burst events across the recordings. Documentation is available [here](miv.visualization.event.plot_burst).
 
 ```{code-cell} ipython3
 #Example
 # plots the burst events with bursts defined as more than 10 simultaneous spikes with 0.1 s interspike interval
 plot_burst(spiketrains,0.1,10)
- 
-```
 
+```

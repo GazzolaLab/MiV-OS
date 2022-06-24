@@ -26,13 +26,9 @@ Spikestamps Statistics
   firing_rates
   interspike_intervals
   coefficient_variation
-  
+
 Burst Analysis
 ------------------
-
-.. currentmodule:: miv.statistics
-
-.. automodule:: miv.statistics.burst
 
 .. autosummary::
   :nosignatures:

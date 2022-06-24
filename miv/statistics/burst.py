@@ -33,9 +33,9 @@ def burst(spiketrains: SpikestampsType, channel: float, min_isi: float, min_len:
     burst_rate: float
             firing rates corresponding to particular bursts
 
-    ..[1] Chiappalone, Michela, et al. "Burst detection algorithms for the analysis of spatio-temporal patterns
+    .. [1] Chiappalone, Michela, et al. "Burst detection algorithms for the analysis of spatio-temporal patterns
     in cortical networks of neurons." Neurocomputing 65 (2005): 653-662.
-    ..[2] Eisenman, Lawrence N., et al. "Quantification of bursting and synchrony in cultured
+    .. [2] Eisenman, Lawrence N., et al. "Quantification of bursting and synchrony in cultured
     hippocampal neurons." Journal of neurophysiology 114.2 (2015): 1059-1071.
 
     """

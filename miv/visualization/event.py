@@ -8,7 +8,6 @@ from miv.typing import SpikestampsType
 
 
 def plot_burst(spiketrains: SpikestampsType, min_isi: float, min_len: float):
-
     """
     Plots burst events across electrodes  to characterize bursting phenomenon on a singl channel
 
@@ -26,6 +25,7 @@ def plot_burst(spiketrains: SpikestampsType, min_isi: float, min_len: float):
     figure, axes
        matplot figure with bursts plotted for all electrodes
     """
+
     fig, ax = plt.subplots()
     start_time = []
     burst_duration = []
