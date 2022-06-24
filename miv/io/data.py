@@ -558,9 +558,9 @@ class DataManager(MutableSequence):
                 spiketrains = detector(filtered_signal, times, samp)
                 spike_stats = firing_rates(spiketrains)
 
-                for channel in range(len(spike_stats["rates"])):
-                    if spike_stats["rates"][channel] <= no_spike_threshold:
-                        mask_list.append(channel)
+                for idx, channel_rate in enumerate(spike_stats["rates"]):
+                    if channel_rate <= no_spike_threshold:
+                        mask_list.append(idx)
 
                 data.set_channel_mask(mask_list)
 
