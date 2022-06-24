@@ -11,7 +11,6 @@ def burst(spiketrains: SpikestampsType, channel: float, min_isi: float, min_len:
     """
     Calculates parameters critical to characterize bursting phenomenon on a single channel
     Bursting is defined as the occurence of a specified number of spikes (usually >10), with a small interspike interval (usually < 100ms) [1]_, [2]_
-
     Parameters
     ----------
     spikes : SpikestampsType
@@ -22,7 +21,6 @@ def burst(spiketrains: SpikestampsType, channel: float, min_isi: float, min_len:
        Minimum Interspike Interval (in seconds) to be considered as bursting [standard = 0.1]
     min_len : float
        Minimum number of simultaneous spikes to be considered as bursting [standard = 10]
-
     Returns
     -------
     start_time: float
@@ -38,10 +36,10 @@ def burst(spiketrains: SpikestampsType, channel: float, min_isi: float, min_len:
     in cortical networks of neurons." Neurocomputing 65 (2005): 653-662.
     .. [2] Eisenman, Lawrence N., et al. "Quantification of bursting and synchrony in cultured
     hippocampal neurons." Journal of neurophysiology 114.2 (2015): 1059-1071.
-
     """
 
     spike_interval = interspike_intervals(spiketrains[channel].magnitude)
+    assert spike_interval.all() > 0, "Inter Spike Interval cannot be zero"
     burst_spike = (spike_interval <= min_isi).astype(
         np.bool_
     )  # Only spikes within specified min ISI are 1 otherwise 0 and are stored
