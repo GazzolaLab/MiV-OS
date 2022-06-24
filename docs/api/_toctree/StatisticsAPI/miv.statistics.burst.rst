@@ -1,6 +1,6 @@
- miv.statistics.burst
- =====================================================
+﻿miv.statistics.burst
+====================
 
- .. currentmodule:: miv.statistics
+.. currentmodule:: miv.statistics
 
- .. autofunction:: burst
+.. autofunction:: burst

@@ -45,13 +45,13 @@ Causality Analysis
       :toctree: _toctree/VisualizationAPI
 
       pairwise_causality_plot
-      
+
 Burst Analysis
 ------------------
 
 .. currentmodule:: miv.visualization
 
-.. automodule:: miv.visualization.plot_burst
+.. automodule:: miv.visualization.event
 
    .. autosummary::
       :nosignatures:
