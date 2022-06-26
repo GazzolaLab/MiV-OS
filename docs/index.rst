@@ -39,6 +39,7 @@ If you are interested in contributing to this project, we prepared contribution 
    guide/spike_sorting
    guide/channel_correlation
    guide/granger_causality_psd_cpsd_coherence
+   guide/burst_analysis
 
 .. toctree::
    :maxdepth: 2
