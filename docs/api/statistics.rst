@@ -27,6 +27,15 @@ Spikestamps Statistics
   interspike_intervals
   coefficient_variation
 
+Burst Analysis
+------------------
+
+.. autosummary::
+  :nosignatures:
+  :toctree: _toctree/StatisticsAPI
+
+  burst
+
 Useful External Packages
 ========================
 
