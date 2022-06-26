@@ -3,6 +3,7 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 
+from miv.statistics.spiketrain_statistics import interspike_intervals
 from miv.typing import SpikestampsType
 
 
@@ -14,7 +15,7 @@ def burst(spiketrains: SpikestampsType, channel: float, min_isi: float, min_len:
     Parameters
     ----------
     spikes : SpikestampsType
-           Single spike-stamps
+       Single spike-stamps
     Channel : float
        Channel to analyze
     min_isi : float
@@ -25,13 +26,13 @@ def burst(spiketrains: SpikestampsType, channel: float, min_isi: float, min_len:
     Returns
     -------
     start_time: float
-           The time instances when a burst starts
+       The time instances when a burst starts
     burst_duration: float
-           The time duration of a particular burst
+       The time duration of a particular burst
     burst_len: float
-            Number of spikes in a particular burst
+       Number of spikes in a particular burst
     burst_rate: float
-            firing rates corresponding to particular bursts
+       firing rates corresponding to particular bursts
 
     .. [1] Chiappalone, Michela, et al. "Burst detection algorithms for the analysis of spatio-temporal patterns
     in cortical networks of neurons." Neurocomputing 65 (2005): 653-662.
@@ -40,32 +41,23 @@ def burst(spiketrains: SpikestampsType, channel: float, min_isi: float, min_len:
 
     """
 
-    spike_interval = np.diff(
-        spiketrains[channel].magnitude
-    )  # Calculate Inter Spike Interval (ISI)
+    spike_interval = interspike_intervals(spiketrains[channel].magnitude)
     burst_spike = (spike_interval <= min_isi).astype(
-        np.int32
+        np.bool_
     )  # Only spikes within specified min ISI are 1 otherwise 0 and are stored
-    min_spikes = min_len
     burst = []  # List to store burst parameters
 
-    for i in np.arange(
-        len(burst_spike) - min_spikes
-    ):  # Loop to check clusters of spikes greater than specified minimum length of burst
-        t = 0
-        if np.sum(burst_spike[i : i + min_spikes]) == min_spikes:
-            q = 1
-            while q > 0 and i + q + min_spikes <= len(burst_spike) - 1:
-                if burst_spike[i + q + min_spikes - 1] == 1:
-                    t = q
-                    q += 1
-                else:
-                    q = 0
-
-            burst.append([i, t + min_spikes])
-            burst_spike[
-                i : i + t + min_spikes
-            ] = 0  # Zeroing counted spikes to avoid recounting
+    flag = False
+    start_idx = -1
+    delta = np.logical_xor(burst_spike[:-1], burst_spike[1:])
+    for idx, dval in enumerate(delta):
+        if dval:
+            flag = ~flag
+            if flag:
+                start_idx = idx + 1
+            else:
+                if idx + 1 - start_idx >= min_len:
+                    burst.append((start_idx, idx + 1))
     Q = np.array(burst)
 
     if np.sum(Q) == 0:
@@ -77,9 +69,20 @@ def burst(spiketrains: SpikestampsType, channel: float, min_isi: float, min_len:
     else:
         spike = np.array(spiketrains[channel].magnitude)
         start_time = spike[Q[:, 0]]
-        end_time = spike[Q[:, 0] + Q[:, 1]]
-        burst_len = Q[:, 1] + 1
+        end_time = spike[Q[:, 1]]
+        burst_len = Q[:, 1] - Q[:, 0] + 1
         burst_duration = end_time - start_time
         burst_rate = burst_len / (burst_duration)
 
     return start_time, burst_duration, burst_len, burst_rate
+
+
+if __name__ == "__main__":
+    import timeit
+
+    from neo.core import SpikeTrain
+
+    arr = np.random.random(10000)
+    arr = np.sort(arr)
+    train0 = [SpikeTrain(times=arr, units="sec", t_stop=arr.max())]
+    o_algorithm = timeit.timeit(lambda: burst(train0, 0, 0.2, 5), number=1000)
