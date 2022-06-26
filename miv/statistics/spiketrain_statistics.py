@@ -3,6 +3,7 @@ __all__ = [
     "interspike_intervals",
     "coefficient_variation",
     "peri_stimulus_time",
+    "binned_spiketrain",
 ]
 
 from typing import Any, Dict, Iterable, List, Optional, Union
@@ -143,3 +144,44 @@ def peri_stimulus_time(spike_list: List[SpikestampsType]):
 
     peri_stimulus_times = np.sum(np.array(spike_list), 0)
     return peri_stimulus_times
+
+
+def binned_spiketrain(
+    spiketrains: SpikestampsType,
+    channel: float,
+    t_start: float,
+    t_end: float,
+    bin_size: float,
+):
+    """
+    Forms a binned spiketrain using the spiketrain
+
+
+    Parameters
+    ----------
+    spiketrains : SpikestampsType
+        Single spike-stamps
+    channel : float
+        electrode/channel
+    t_start : float
+        Binning start time
+    t_end : float
+        Binning end time
+    bin_size : float
+        bin size in seconds
+
+    Returns
+    -------
+        bin_spike: numpy.ndarray
+        binned spiketrain with 1 corresponding to spike and zero otherwise
+
+    """
+
+    n_bins = int((t_end - t_start) / bin_size + 1)
+    time = np.linspace(t_start, bin_size * (n_bins - 1), n_bins)
+    bin_spike = np.zeros(n_bins)
+    spike = spiketrains[channel].magnitude
+    bins = np.digitize(spike, time)
+    bin_spike[bins] = 1
+
+    return bin_spike
