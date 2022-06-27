@@ -16,7 +16,8 @@ class MockData(Data):
         self.sampling_rate = 10000
         self.times = np.arange(start=0, stop=self.duration, step=1 / self.sampling_rate)
         self.signal = []
-        # Channel 0 gives zeroes for signal
+        # Channels 0 and 1 give zeroes for signal
+        self.signal.append(np.zeros(self.duration * self.sampling_rate))
         self.signal.append(np.zeros(self.duration * self.sampling_rate))
         # signal.append(np.random.rand(int(sampling_rate*duration)) * 30 - 15)
         self.signal = np.transpose(self.signal)
