@@ -50,6 +50,28 @@ class MockData(Data):
         yield self.signal, self.times, self.sampling_rate
 
 
+# This MockSpontaneousData class generates signals with 5 channels that all look like
+# channel 3 (all 100's) from MockData
+class MockSpontaneousData(Data):
+    def __init__(self):
+        self.masking_channel_set: Set[int] = set()
+
+        self.duration: float = 1
+        self.sampling_rate = 10000
+        self.times = np.arange(start=0, stop=self.duration, step=1 / self.sampling_rate)
+        self.signal = []
+
+        ones_signal = np.ones(self.duration * self.sampling_rate)
+        for i in range(6):
+            self.signal.append(100 * ones_signal)
+
+        self.signal = np.transpose(self.signal)
+
+    @contextmanager
+    def load(self):
+        yield self.signal, self.times, self.sampling_rate
+
+
 class MockDataManager(DataManager):
     def __init__(self, mock_data: Optional[Data] = None):
         self.data_list = []
