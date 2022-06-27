@@ -29,7 +29,6 @@ class TestAutoChannelMask(unittest.TestCase):
         data_man.auto_channel_mask_baseline(band_filter, detector)
 
         data_man[0].clear_channel_mask()
-        data_man[1].clear_channel_mask()
         assert len(data_man[0].masking_channel_set) == 0
         assert data_man[1].masking_channel_set == {0, 1, 2, 3}
 
@@ -41,10 +40,20 @@ class TestAutoChannelMask(unittest.TestCase):
 
         assert data_man[0]._get_binned_matrix(band_filter, detector)[
             "empty_channels"
-        ] == [0, 1, 2, 3]
+        ] == [0, 1]
         assert data_man[1]._get_binned_matrix(band_filter, detector)[
             "empty_channels"
-        ] == [0, 1, 2, 3]
+        ] == [0, 1]
+
+    def test_get_binned_matrix(self):
+        band_filter = ButterBandpass(300, 3000)
+        detector = ThresholdCutoff()
+        data_man = MockDataManager(None)
+
+        binned = data_man[0]._get_binned_matrix(
+            band_filter, detector, bins_per_second=2
+        )
+        assert np.any(np.transpose(binned["matrix"])[5], where=3)
 
     # def test_auto_channel_mask(self):
     #     band_filter = ButterBandpass(300, 3000)

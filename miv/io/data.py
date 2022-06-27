@@ -634,7 +634,7 @@ class DataManager(MutableSequence):
                 spike_stats = firing_rates(spiketrains)
 
                 for idx, channel_rate in enumerate(spike_stats["rates"]):
-                    if channel_rate <= no_spike_threshold:
+                    if int(channel_rate) <= no_spike_threshold:
                         mask_list.append(idx)
 
                 data.set_channel_mask(mask_list)
