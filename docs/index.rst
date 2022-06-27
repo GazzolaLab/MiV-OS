@@ -38,6 +38,8 @@ If you are interested in contributing to this project, we prepared contribution 
    guide/spike_cutout
    guide/spike_sorting
    guide/channel_correlation
+   guide/granger_causality_psd_cpsd_coherence
+   guide/burst_analysis
 
 .. toctree::
    :maxdepth: 2
@@ -47,6 +49,7 @@ If you are interested in contributing to this project, we prepared contribution 
    api/signal
    api/sorting
    api/statistics
+   api/causality
    api/visualization
 
 .. toctree::
