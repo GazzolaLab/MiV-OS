@@ -23,7 +23,7 @@ import quantities as pq
 import scipy
 import scipy.signal
 
-from miv.statistics import binned_spiketrain
+from miv.statistics.spiketrain_statistics import binned_spiketrain
 from miv.typing import SpikestampsType
 
 
