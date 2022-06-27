@@ -31,7 +31,7 @@ class TestAutoChannelMask(unittest.TestCase):
         data_man[0].clear_channel_mask()
         data_man[1].clear_channel_mask()
         assert len(data_man[0].masking_channel_set) == 0
-        assert len(data_man[1].masking_channel_set) == 0
+        assert data_man[1].masking_channel_set == {0, 1, 2, 3}
 
     def test_get_binned_matrix_empty_channels(self):
         band_filter = ButterBandpass(300, 3000)
