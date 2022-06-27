@@ -312,6 +312,10 @@ class Data:
             spontaneous_matrix = spontaneous_binned["matrix"].copy()
             spontaneous_matrix = spontaneous_matrix[: exp_binned["num_bins"] + 1]
 
+        # they're the same size
+        else:
+            spontaneous_matrix = spontaneous_binned["matrix"].copy()
+
         exp_binned_channel_rows = np.transpose(exp_binned["matrix"])
         spontaneous_binned_channel_rows = np.transpose(spontaneous_matrix)
 
