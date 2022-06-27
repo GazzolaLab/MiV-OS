@@ -6,10 +6,9 @@ from unittest.mock import call, create_autospec
 import numpy as np
 import pytest
 
-from miv.io.data import DataManager
 from miv.signal.filter import ButterBandpass
 from miv.signal.spike import ThresholdCutoff
-from tests.io.mock_data import MockData, MockDataManager
+from tests.io.mock_data import MockData, MockDataManager, MockSpontaneousData
 
 
 class TestAutoChannelMask(unittest.TestCase):
@@ -55,10 +54,14 @@ class TestAutoChannelMask(unittest.TestCase):
         )
         assert np.any(np.transpose(binned["matrix"])[5], where=3)
 
-    # def test_auto_channel_mask(self):
-    #     band_filter = ButterBandpass(300, 3000)
-    #     detector = ThresholdCutoff()
-    #     data_man = MockDataManager(None)
+    def test_auto_channel_mask(self):
+        band_filter = ButterBandpass(300, 3000)
+        detector = ThresholdCutoff()
+        data_man = MockDataManager(None)
 
-    #     data_man.auto_channel_mask(data_man[0], band_filter, detector)
-    #     assert data_man[0].masking_channel_set == {0, 1, 2, 3}
+        spontaneous_data = MockSpontaneousData()
+        data_man.auto_channel_mask(spontaneous_data, band_filter, detector)
+
+        # channels 1 and 2 should be masked because they have no spikes
+        # channel 2 and 3 should be masked as their spikes are itendical to the spontaneous data
+        assert data_man[0].masking_channel_set == {0, 1, 2, 3}
