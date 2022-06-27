@@ -250,11 +250,17 @@ class Data:
 
         dot_products = []
         for chan in range(num_channels):
-            dot_products.append(
-                np.dot(
-                    spontaneous_binned_channel_rows[chan], exp_binned_channel_rows[chan]
+            try:
+                dot_products.append(
+                    np.dot(
+                        spontaneous_binned_channel_rows[chan],
+                        exp_binned_channel_rows[chan],
+                    )
                 )
-            )
+            except Exception:
+                raise Exception(
+                    "Number of channels does not match between this experiment and referenced spontaneous recording."
+                )
 
         mean = np.mean(dot_products)
         threshold = mean + np.std(dot_products)
