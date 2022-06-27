@@ -6,7 +6,8 @@ from miv.typing import SignalType
 
 
 def signal_to_noise(signal: SignalType, axis: int = 0, ddof: int = 0):
-    """signal_to_noise.
+    """
+    Compute signal-to-noise ratio of raw signal.
 
     Parameters
     ----------

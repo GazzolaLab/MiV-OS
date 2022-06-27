@@ -1,23 +1,26 @@
 # Documentation
 
-We use [`Sphinx`](https://www.sphinx-doc.org/en/master/) and [`ReadtheDocs`](https://readthedocs.org/) to organize our [documentation page]().
+We use [`Sphinx`](https://www.sphinx-doc.org/en/master/) and [`ReadtheDocs`](https://readthedocs.org/) to organize our [documentation page](https://miv-os.readthedocs.io/en/latest/).
+Most up-to-date documentation is typically collected in separate branch `doc-patch`, which can be seen [here](https://miv-os.readthedocs.io/en/doc_patch/).
 
-In addition, we utilize the following extensions to enhance the documentation :coffee:
+We utilize the following extensions to enhance the documentation :coffee:
 - `numpydoc`: We favor [numpy documentation style](https://numpydoc.readthedocs.io/en/latest/format.html) for API documentation.
 - `myst_parser`: We like to write documentation and guidelines in `markdown` format.
 
 ## Key things to remember
 
 - Please DON'T IGNORE any `errors` or `warnings` during the compilation stage.
-- If you are uploading any `ipynb` or notebook-style, make sure you excluded the input-output cells.
+- If you have any `.ipynb` format notebook, please change it to `.md` format using `jupytext <notebook>.ipynb --to myst`. (You can install `jupytext` with pip.)
+    - Make sure you excluded the input-output cells.
     - Currently, we don't use the `runnable` notebook directly on the documentation. If you think otherwise, please leave an issue so that we can discuss.
+- If you would like to include images (i.e. result, plot, or visualization), upload the image on cloud (Box or Google Drive) and add the URL link.
 
 ## Build documentation
 
-The `sphinx` is already initialized in `docs` directory. In order to build the documentation, you will need additional packages listed in `docs/requirements.txt`.
+The `sphinx` is already initialized in `docs` directory. In order to build the documentation, you will need additional package listed in extra dependencies.
 
 ```bash
-pip install sphinx sphinx_rtd_theme myst-parser numpydoc
+poetry install -E docs
 cd docs
 make clean
 make html
