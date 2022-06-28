@@ -91,19 +91,19 @@ entropy_rate(spiketrains, 20, 1, 0, 120, 0.002)
 ```
 
 ## 5. Active Information
-Calculates active information for the specified channel. Documentation is available [here](miv.statistics.info_theory.active_info).
+Calculates active information for the specified channel. Documentation is available [here](miv.statistics.info_theory.active_information).
 
 ```{code-cell} ipython3
 # Estimates the active information for channel number 20, with signal taken from 0 to 120 seconds and bin interval of 2ms. The history length is 1
-active_info(spiketrains, 20, 1, 0, 120, 0.002)
+active_information(spiketrains, 20, 1, 0, 120, 0.002)
 ```
 
 ## 6. Mutual Information
-Estimates the mutual information for the pair of electorde recordings (X & Y). Documentation is available [here](miv.statistics.info_theory.mutual_info).
+Estimates the mutual information for the pair of electorde recordings (X & Y). Documentation is available [here](miv.statistics.info_theory.mutual_information).
 
 ```{code-cell} ipython3
 # Estimates the mutual information for channel number 20 and 21, with signal taken from 0 to 120 seconds and bin interval of 2ms.
-mutual_info(spiketrains, 20, 21, 0, 120, 0.002)
+mutual_information(spiketrains, 20, 21, 0, 120, 0.002)
 ```
 
 ## 7. Relative Entropy

@@ -2,8 +2,8 @@ __all__ = [
     "shannon_entropy",
     "block_entropy",
     "entropy_rate",
-    "active_info",
-    "mutual_info",
+    "active_information",
+    "mutual_information",
     "relative_entropy",
     "conditional_entropy",
     "transfer_entropy",
@@ -139,7 +139,7 @@ def entropy_rate(
     return entropy_rate
 
 
-def active_info(
+def active_information(
     spiketrains: SpikestampsType,
     channel: float,
     his: float,
@@ -167,17 +167,17 @@ def active_info(
 
     Returns
     -------
-    active_info: float
+    active_information: float
         Active information for the given channel
 
     """
 
     bin_spike = binned_spiketrain(spiketrains, channel, t_start, t_end, bin_size)
-    active_info = pyinform.activeinfo.active_info(bin_spike, his)
-    return active_info
+    active_information = pyinform.activeinfo.active_info(bin_spike, his)
+    return active_information
 
 
-def mutual_info(
+def mutual_information(
     spiketrains: SpikestampsType,
     channelx: float,
     channely: float,
@@ -205,15 +205,15 @@ def mutual_info(
 
     Returns
     -------
-    mutual_info: float
+    mutual_information: float
         Mutual information for the given pair of electrodes
 
     """
 
     bin_spike_x = binned_spiketrain(spiketrains, channelx, t_start, t_end, bin_size)
     bin_spike_y = binned_spiketrain(spiketrains, channely, t_start, t_end, bin_size)
-    mutual_info = pyinform.mutualinfo.mutual_info(bin_spike_x, bin_spike_y)
-    return mutual_info
+    mutual_information = pyinform.mutualinfo.mutual_info(bin_spike_x, bin_spike_y)
+    return mutual_information
 
 
 def relative_entropy(
