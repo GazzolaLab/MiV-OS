@@ -27,6 +27,7 @@ Spikestamps Statistics
   interspike_intervals
   coefficient_variation 
   binned_spiketrain
+  fano_factor
 
 Burst Analysis
 ------------------
