@@ -1,3 +1,18 @@
+# Release Note (version 0.1.1)
+
+## Developer Note
+
+Minor release with statistics and connectivity modules.
+
+## What's Changed
+* Patch CONTRIBUTING.md guideline by @skim0119 in https://github.com/GazzolaLab/MiV-OS/pull/55
+* Statistics: PSTH implementation by @armantekinalp in https://github.com/GazzolaLab/MiV-OS/pull/57
+* Connectivity guide update by @Gauravu2 in https://github.com/GazzolaLab/MiV-OS/pull/53
+* Burst analysis for a single channel and plotting across channels by @Gauravu2 in https://github.com/GazzolaLab/MiV-OS/pull/60
+* Information Theory Module by @Gauravu2 in https://github.com/GazzolaLab/MiV-OS/pull/63
+
+**Full Changelog**: https://github.com/GazzolaLab/MiV-OS/compare/v0.1.0...v0.1.1
+
 # Release Note (version 0.1.0)
 
 ## Developer Note
