@@ -1,22 +1,27 @@
 __doc__ = """Multi-channel signal plotting for MEA channels"""
 __all__ = ["multi_channel_signal_plot"]
+
+from typing import Any, List, Optional
+
 import matplotlib
 import matplotlib.animation as manimation
 import numpy as np
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 
+from miv.typing import SignalType
+
 matplotlib.use("Agg")  # Must be before importing matplotlib.pyplot or pylab!
 
 
 def multi_channel_signal_plot(
-    signal_list,
+    signal_list: SignalType,
     mea_geometry,
-    start_step,
-    end_step,
-    n_steps_in_window,
-    rendering_fps,
-    video_name,
+    start_step: int,
+    end_step: int,
+    n_steps_in_window: int,
+    rendering_fps: int,
+    video_name: str,
     **kwargs,
 ):
     """
