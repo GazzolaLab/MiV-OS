@@ -15,7 +15,7 @@ kernelspec:
 
 Information theory techniques are being increasingly employed in neuroscience to understand the underlying connectivity and dynamics.[1][1] Current module contains some commonly employed measures applied to binned spiketrains. [2][2]
 
-References: 
+References:
 
 [1]: https://www.eneuro.org/content/5/3/ENEURO.0052-18.2018
 [2]: https://elife-asu.github.io/PyInform/starting.html
@@ -62,7 +62,7 @@ with data.load() as (signal, timestamps, sampling_rate):
     spiketrains = spike_detection(signal, timestamps, sampling_rate)
 ```
 
-## 2. Shannon Entropy 
+## 2. Shannon Entropy
 Calculates Shannon entropy for the specified channel. Documentation is available [here](miv.statistics.info_theory.shannon_entropy).
 
 ```{code-cell} ipython3
@@ -74,7 +74,7 @@ sh_entropy(spiketrains, 20, 0, 120, 0.002)
 Calculates Block entropy for the specified channel. Documentation is available [here](miv.statistics.info_theory.block_entropy).
 
 ```{code-cell} ipython3
-# Estimates the block entropy for channel number 20, with signal taken from 0 to 120 seconds and bin interval of 2ms. The history length is 1 
+# Estimates the block entropy for channel number 20, with signal taken from 0 to 120 seconds and bin interval of 2ms. The history length is 1
 block_entropy(spiketrains, 20, 1, 0, 120, 0.002)
 ```
 
@@ -82,7 +82,7 @@ block_entropy(spiketrains, 20, 1, 0, 120, 0.002)
 Calculates Entropy rate for the specified channel. Documentation is available [here](miv.statistics.info_theory.entropy_rate).
 
 ```{code-cell} ipython3
-# Estimates the entropy rate for channel number 20, with signal taken from 0 to 120 seconds and bin interval of 2ms. The history length is 1 
+# Estimates the entropy rate for channel number 20, with signal taken from 0 to 120 seconds and bin interval of 2ms. The history length is 1
 entropy_rate(spiketrains, 20, 1, 0, 120, 0.002)
 ```
 
@@ -90,7 +90,7 @@ entropy_rate(spiketrains, 20, 1, 0, 120, 0.002)
 Calculates active information for the specified channel. Documentation is available [here](miv.statistics.info_theory.active_info).
 
 ```{code-cell} ipython3
-# Estimates the active information for channel number 20, with signal taken from 0 to 120 seconds and bin interval of 2ms. The history length is 1 
+# Estimates the active information for channel number 20, with signal taken from 0 to 120 seconds and bin interval of 2ms. The history length is 1
 active_info(spiketrains, 20, 1, 0, 120, 0.002)
 ```
 
@@ -122,6 +122,6 @@ conditional_entropy(spiketrains, 20, 21, 0, 120, 0.002)
 Estimates the transfer entropy for the pair of electorde recordings (X & Y) . Documentation is available [here](miv.statistics.info_theory.transfer_entropy).
 
 ```{code-cell} ipython3
-# Estimates the transfer entropy for channel number 20 and 21, with signal taken from 0 to 120 seconds and bin interval of 2ms. The history length is 1 
+# Estimates the transfer entropy for channel number 20 and 21, with signal taken from 0 to 120 seconds and bin interval of 2ms. The history length is 1
 transfer_entropy(spiketrains, 20, 21, 1, 0, 120, 0.002)
 ```
