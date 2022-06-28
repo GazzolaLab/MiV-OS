@@ -37,6 +37,10 @@ formatting: codestyle
 test:
 	PYTHONPATH=$(PYTHONPATH) poetry run pytest -c pyproject.toml --cov-report=html --cov=miv tests/
 
+.PHONY: coverage check
+coverage:
+	PYTHONPATH=$(PYTHONPATH) poetry run pytest -c pyproject.toml --cov=miv tests/
+
 .PHONY: check-codestyle
 check-codestyle:
 	poetry run isort --diff --check-only --settings-path pyproject.toml ./
