@@ -62,6 +62,12 @@ If you are interested in contributing to this project, we prepared contribution 
 
 .. toctree::
    :maxdepth: 2
+   :caption: Advanced/Discussion
+
+   discussion/auto_channel_mask_demo
+
+.. toctree::
+   :maxdepth: 2
    :caption: Site
 
    Gazzola Lab <https://mattia-lab.com/>

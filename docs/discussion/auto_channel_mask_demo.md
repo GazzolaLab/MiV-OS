@@ -19,7 +19,7 @@ The goal of this method is to apply a mask on insignificant channels with no sig
 
 ### Baseline version
 
-The baseline version works by filtering out channels with mean spike rates that are below the *no_spike_threshold* parameter. The spike rate is computed using *firing_rates* in the *statistics* module. 
+The baseline version works by filtering out channels with mean spike rates that are below the *no_spike_threshold* parameter. The spike rate is computed using *firing_rates* in the *statistics* module.
 
 This method is basic and only effective in masking out channels with almost no spikes. Below are some artificial spiketrains that demonstrate this method:
 
@@ -63,15 +63,15 @@ except IndexError:
     print("All channels masked")
 ```
 
-This method is extremely primitive. 
--   The threshold parameter requires manual adjustment for the best result. 
+This method is extremely primitive.
+-   The threshold parameter requires manual adjustment for the best result.
 -   Noise is not taken into consideration. This method would falsely mask out channels that contain only spikes and no noise since the number of noise spikes is usually higher. Vice versa, channels with lots of noise spikes and few neuron spikes will be kept.
 
 +++
 
 In reality, spikes often occur at the same time among the channels. The difference across the channels is not just the number of spikes. Below is an attempt to recreate some artificial spikes:
 
--   Half of the channels contains only noise, the other half contains spikes and noise. 
+-   Half of the channels contains only noise, the other half contains spikes and noise.
 -   When a layer of noise is applied to each channel, the layer is generated with a random array that marks the time for each individual noise spike. The number of noise spikes is also determined randomly.
 -   The real spikes often show up not just as one single spike but a group of spikes within a short duration. It is not sure how long is the duration, so we simply repeat the spike at the same time.
 
