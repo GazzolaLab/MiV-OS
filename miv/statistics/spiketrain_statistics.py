@@ -182,6 +182,6 @@ def binned_spiketrain(
     bin_spike = np.zeros(n_bins)
     spike = spiketrains[channel].magnitude
     bins = np.digitize(spike, time)
-    bin_spike[bins] = 1
+    bin_spike[bins - 1] = 1
 
     return bin_spike
