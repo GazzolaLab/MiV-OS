@@ -15,6 +15,17 @@ kernelspec:
 
 The goal of this method is to apply a mask on insignificant channels with no signal or negligible spikes.
 
+```{code-cell} ipython3
+:tags: [hide-cell]
+
+from quantities import s
+import numpy as np
+from neo.core import SpikeTrain
+from viziphant.rasterplot import rasterplot_rates
+from miv.statistics import firing_rates
+import statistics
+```
+
 +++
 
 ## Baseline version
@@ -23,13 +34,8 @@ The baseline version works by filtering out channels with mean spike rates that 
 
 This method is basic and only effective in masking out channels with almost no spikes. Below are some artificial spiketrains that demonstrate this method:
 
-```{code-cell} ipython3
-from neo.core import SpikeTrain
-from quantities import s
-import numpy as np
-from viziphant.rasterplot import rasterplot_rates
-import statistics
 
+```{code-cell} ipython3
 spiketrains = []
 for i in range(1,11):
     times = np.arange(start=0, stop=1, step=1/(i**2))
@@ -44,7 +50,6 @@ Here, 10 channels with quadratically increasing spike rates are created. The tim
 Below is the baseline auto masking method. Because it is much simpler to create synthetic spiketrains than creating Data objects, this is a simplified version of the baseline method but functions identically. We use the default value 1 for no_spike_threshold. This value can be altered to test this methdod:
 
 ```{code-cell} ipython3
-from miv.statistics import firing_rates
 no_spike_threshold =  1    # Modify this value to test this method
 mask_list = []
 masked_spiketrains = []
