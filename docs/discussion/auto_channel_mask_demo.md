@@ -17,7 +17,7 @@ The goal of this method is to apply a mask on insignificant channels with no sig
 
 +++
 
-### Baseline version
+## Baseline version
 
 The baseline version works by filtering out channels with mean spike rates that are below the *no_spike_threshold* parameter. The spike rate is computed using *firing_rates* in the *statistics* module.
 
@@ -109,7 +109,7 @@ noise_spikes = add_noise([], noise_multiplier*0.5)
 rasterplot_rates(spiketrains, markerargs={'marker':'.', 'markersize':1})
 ```
 
-### "Improved" version
+## "Improved" version
 
 The baseline method has no way of identifying which channel to mask out. Here comes the "improved" method of automatic channel masking.
 
