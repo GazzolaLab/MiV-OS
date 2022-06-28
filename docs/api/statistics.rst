@@ -22,10 +22,11 @@ Spikestamps Statistics
 .. autosummary::
   :nosignatures:
   :toctree: _toctree/StatisticsAPI
-
+  
   firing_rates
   interspike_intervals
-  coefficient_variation
+  coefficient_variation 
+  binned_spiketrain
 
 Burst Analysis
 ------------------
@@ -35,6 +36,23 @@ Burst Analysis
   :toctree: _toctree/StatisticsAPI
 
   burst
+
+Information Theory
+------------------
+
+.. autosummary::
+  :nosignatures:
+  :toctree: _toctree/StatisticsAPI
+
+  shannon_entropy
+  block_entropy
+  entropy_rate
+  active_information
+  mutual_information
+  relative_entropy
+  conditional_entropy
+  transfer_entropy
+
 
 Useful External Packages
 ========================
