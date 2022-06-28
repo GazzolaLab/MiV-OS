@@ -9,6 +9,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 
+from miv.mea.protocol import MEAGeometryProtocol
 from miv.typing import SignalType
 
 matplotlib.use("Agg")  # Must be before importing matplotlib.pyplot or pylab!
@@ -16,7 +17,7 @@ matplotlib.use("Agg")  # Must be before importing matplotlib.pyplot or pylab!
 
 def multi_channel_signal_plot(
     signal_list: SignalType,
-    mea_geometry,
+    mea_geometry: MEAGeometryProtocol,
     start_step: int,
     end_step: int,
     n_steps_in_window: int,
