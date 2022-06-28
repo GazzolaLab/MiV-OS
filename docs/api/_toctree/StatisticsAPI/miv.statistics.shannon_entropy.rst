@@ -3,4 +3,4 @@
 
 .. currentmodule:: miv.statistics
 
-.. autofunction:: sh_entropy
+.. autofunction:: shannon_entropy

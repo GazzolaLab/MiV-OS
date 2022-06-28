@@ -1,5 +1,5 @@
 __all__ = [
-    "sh_entropy",
+    "shannon_entropy",
     "block_entropy",
     "entropy_rate",
     "active_info",
@@ -27,7 +27,7 @@ from miv.statistics.spiketrain_statistics import binned_spiketrain
 from miv.typing import SpikestampsType
 
 
-def sh_entropy(
+def shannon_entropy(
     spiketrains: SpikestampsType,
     channel: float,
     t_start: float,
@@ -52,15 +52,15 @@ def sh_entropy(
 
     Returns
     -------
-        sh_entropy: float
+        shannon_entropy: float
         Shannon entropy for the given channel
 
     """
 
     bin_spike = binned_spiketrain(spiketrains, channel, t_start, t_end, bin_size)
     spike_dist = pyinform.dist.Dist(bin_spike)
-    sh_entropy = pyinform.shannon.entropy(spike_dist)
-    return sh_entropy
+    shannon_entropy = pyinform.shannon.entropy(spike_dist)
+    return shannon_entropy
 
 
 def block_entropy(

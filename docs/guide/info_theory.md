@@ -40,6 +40,10 @@ from miv.typing import SignalType
 ```
 
 ```{code-cell} ipython3
+from miv.statistics import *
+```
+
+```{code-cell} ipython3
 # Experiment name
 experiment_query = "experiment0"
 
@@ -67,7 +71,7 @@ Calculates Shannon entropy for the specified channel. Documentation is available
 
 ```{code-cell} ipython3
 # Estimates the shannon entropy for channel number 20, with signal taken from 0 to 120 seconds and bin interval of 2ms
-sh_entropy(spiketrains, 20, 0, 120, 0.002)
+shannon_entropy(spiketrains, 20, 0, 120, 0.002)
 ```
 
 ## 3. Block Entropy
