@@ -67,7 +67,7 @@ with data.load() as (signal, timestamps, sampling_rate):
 ```
 
 ## 2. Shannon Entropy
-Calculates Shannon entropy for the specified channel. Documentation is available [here](miv.statistics.info_theory.shannon_entropy).
+Calculates Shannon entropy for the specified channel. Documentation is available [here](miv.statistics.shannon_entropy).
 
 ```{code-cell} ipython3
 # Estimates the shannon entropy for channel number 20, with signal taken from 0 to 120 seconds and bin interval of 2ms
@@ -75,7 +75,7 @@ shannon_entropy(spiketrains, 20, 0, 120, 0.002)
 ```
 
 ## 3. Block Entropy
-Calculates Block entropy for the specified channel. Documentation is available [here](miv.statistics.info_theory.block_entropy).
+Calculates Block entropy for the specified channel. Documentation is available [here](miv.statistics.block_entropy).
 
 ```{code-cell} ipython3
 # Estimates the block entropy for channel number 20, with signal taken from 0 to 120 seconds and bin interval of 2ms. The history length is 1
@@ -83,7 +83,7 @@ block_entropy(spiketrains, 20, 1, 0, 120, 0.002)
 ```
 
 ## 4. Entropy Rate
-Calculates Entropy rate for the specified channel. Documentation is available [here](miv.statistics.info_theory.entropy_rate).
+Calculates Entropy rate for the specified channel. Documentation is available [here](miv.statistics.entropy_rate).
 
 ```{code-cell} ipython3
 # Estimates the entropy rate for channel number 20, with signal taken from 0 to 120 seconds and bin interval of 2ms. The history length is 1
@@ -91,7 +91,7 @@ entropy_rate(spiketrains, 20, 1, 0, 120, 0.002)
 ```
 
 ## 5. Active Information
-Calculates active information for the specified channel. Documentation is available [here](miv.statistics.info_theory.active_information).
+Calculates active information for the specified channel. Documentation is available [here](miv.statistics.active_information).
 
 ```{code-cell} ipython3
 # Estimates the active information for channel number 20, with signal taken from 0 to 120 seconds and bin interval of 2ms. The history length is 1
@@ -99,7 +99,7 @@ active_information(spiketrains, 20, 1, 0, 120, 0.002)
 ```
 
 ## 6. Mutual Information
-Estimates the mutual information for the pair of electorde recordings (X & Y). Documentation is available [here](miv.statistics.info_theory.mutual_information).
+Estimates the mutual information for the pair of electorde recordings (X & Y). Documentation is available [here](miv.statistics.mutual_information).
 
 ```{code-cell} ipython3
 # Estimates the mutual information for channel number 20 and 21, with signal taken from 0 to 120 seconds and bin interval of 2ms.
@@ -107,7 +107,7 @@ mutual_information(spiketrains, 20, 21, 0, 120, 0.002)
 ```
 
 ## 7. Relative Entropy
-Estimates the relative entropy for the pair of electorde recordings (X & Y) . Documentation is available [here](miv.statistics.info_theory.relative_entropy).
+Estimates the relative entropy for the pair of electorde recordings (X & Y) . Documentation is available [here](miv.statistics.relative_entropy).
 
 ```{code-cell} ipython3
 # Estimates the relative entropy for channel number 20 and 21, with signal taken from 0 to 120 seconds and bin interval of 2ms.
@@ -115,7 +115,7 @@ relative_entropy(spiketrains, 20, 21, 0, 120, 0.002)
 ```
 
 ## 8. Conditional Entropy
-Estimates the conditional entropy for the pair of electorde recordings (X & Y) . Documentation is available [here](miv.statistics.info_theory.conditional_entropy).
+Estimates the conditional entropy for the pair of electorde recordings (X & Y) . Documentation is available [here](miv.statistics.conditional_entropy).
 
 ```{code-cell} ipython3
 # Estimates the conditional entropy for channel number 20 and 21, with signal taken from 0 to 120 seconds and bin interval of 2ms.
@@ -123,7 +123,7 @@ conditional_entropy(spiketrains, 20, 21, 0, 120, 0.002)
 ```
 
 ## 8. Transfer Entropy
-Estimates the transfer entropy for the pair of electorde recordings (X & Y) . Documentation is available [here](miv.statistics.info_theory.transfer_entropy).
+Estimates the transfer entropy for the pair of electorde recordings (X & Y) . Documentation is available [here](miv.statistics.transfer_entropy).
 
 ```{code-cell} ipython3
 # Estimates the transfer entropy for channel number 20 and 21, with signal taken from 0 to 120 seconds and bin interval of 2ms. The history length is 1

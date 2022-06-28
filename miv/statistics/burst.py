@@ -11,6 +11,7 @@ def burst(spiketrains: SpikestampsType, channel: float, min_isi: float, min_len:
     """
     Calculates parameters critical to characterize bursting phenomenon on a single channel
     Bursting is defined as the occurence of a specified number of spikes (usually >10), with a small interspike interval (usually < 100ms) [1]_, [2]_
+
     Parameters
     ----------
     spikes : SpikestampsType
@@ -21,6 +22,7 @@ def burst(spiketrains: SpikestampsType, channel: float, min_isi: float, min_len:
        Minimum Interspike Interval (in seconds) to be considered as bursting [standard = 0.1]
     min_len : float
        Minimum number of simultaneous spikes to be considered as bursting [standard = 10]
+
     Returns
     -------
     start_time: float

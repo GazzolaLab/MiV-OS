@@ -1,6 +1,6 @@
 ﻿miv.statistics.conditional\_entropy
 ===================================
 
-.. currentmodule:: miv.statistics.
+.. currentmodule:: miv.statistics
 
 .. autofunction:: conditional_entropy
