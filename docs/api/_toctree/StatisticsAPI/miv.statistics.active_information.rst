@@ -1,5 +1,5 @@
 ﻿miv.statistics.active\_information
-====================
+==================================
 
 .. currentmodule:: miv.statistics
 
