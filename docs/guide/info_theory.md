@@ -11,7 +11,7 @@ kernelspec:
   name: python3
 ---
 
-# Information Theory Module
+# Information Theory
 
 Information theory techniques are being increasingly employed in neuroscience to understand the underlying connectivity and dynamics.[1][1] Current module contains some commonly employed measures applied to binned spiketrains. [2][2]
 
