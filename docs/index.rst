@@ -52,6 +52,7 @@ If you are interested in contributing to this project, we prepared contribution 
    api/statistics
    api/causality
    api/visualization
+   api/signal_generator
 
 .. toctree::
    :maxdepth: 2
