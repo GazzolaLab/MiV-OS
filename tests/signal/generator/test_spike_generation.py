@@ -1,10 +1,10 @@
 import unittest
 
-from miv.signal.generator import generate_spikes
+from miv.signal.generator import generate_random_spiketrain
 
 
 def test_no_noise():
-    spiketrains = generate_spikes(
+    spiketrains = generate_random_spiketrain(
         duration=1,
         spikes_per_second=10,
         num_channels=2,
@@ -16,7 +16,7 @@ def test_no_noise():
 
 
 def test_noise():
-    noisy_spiketrains = generate_spikes(
+    noisy_spiketrains = generate_random_spiketrain(
         duration=1,
         spikes_per_second=10,
         num_channels=2,
@@ -28,7 +28,7 @@ def test_noise():
 
 
 def test_noise_multiplier():
-    spiketrains = generate_spikes(
+    spiketrains = generate_random_spiketrain(
         duration=1,
         spikes_per_second=10,
         num_channels=2,
