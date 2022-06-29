@@ -265,7 +265,7 @@ class Data:
 
         self.masking_channel_set = set()
 
-    def _auto_channel_mask(
+    def _auto_channel_mask_with_correlation_matrix(
         self,
         spontaneous_binned: Dict[str, Any],
         filter: FilterProtocol,
@@ -608,7 +608,7 @@ class DataManager(MutableSequence):
         else:
             logging.warning("Invalid data cannot be loaded to the DataManager.")
 
-    def auto_channel_mask_baseline(
+    def auto_channel_mask_with_firing_rate(
         self,
         filter: FilterProtocol,
         detector: SpikeDetectionProtocol,
@@ -645,7 +645,7 @@ class DataManager(MutableSequence):
 
                 data.set_channel_mask(mask_list)
 
-    def auto_channel_mask(
+    def auto_channel_mask_with_correlation_matrix(
         self,
         spontaneous_data: Data,
         filter: FilterProtocol,
@@ -658,8 +658,10 @@ class DataManager(MutableSequence):
         """
         This masking method uses a correlation matrix between a spontaneous recording and
         the experiment recordings to decide which channels to mask out.
-        **Sample rate and number of channels for all recordings must be the same**
 
+        Notes
+        -----
+            Sample rate and number of channels for all recordings must be the same
 
         Parameters
         ----------
@@ -713,7 +715,7 @@ class DataManager(MutableSequence):
 
         for (exp_index, data) in enumerate(self.data_list):
             if not (exp_index in omit_experiments_list):
-                data._auto_channel_mask(
+                data._auto_channel_mask_with_correlation_matrix(
                     spontaneous_binned,
                     filter,
                     detector,
