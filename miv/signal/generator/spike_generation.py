@@ -1,4 +1,4 @@
-__all__ = ["generate_spikes"]
+__all__ = ["generate_random_spiketrain"]
 
 from typing import List
 
@@ -9,7 +9,7 @@ from quantities import s
 from miv.typing import SpikestampsType
 
 
-def generate_spikes(
+def generate_random_spiketrain(
     duration: float,
     spikes_per_second: float,
     num_channels: int,
