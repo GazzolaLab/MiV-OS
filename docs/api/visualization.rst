@@ -60,7 +60,7 @@ Burst Analysis
       plot_burst
 
 Spike Triggered Average
-------------------
+-----------------------
 
 .. currentmodule:: miv.visualization
 
