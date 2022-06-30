@@ -44,7 +44,9 @@ def spike_triggered_avg(
 
     dt = 1 / sampling_freq
     n = np.shape(signal[:, channel_x])[0] / sampling_freq
-    assert win < np.shape(signal[:,channel_x])[0]/2, "Window cannot be longer than signal length"
+    assert (
+        win < np.shape(signal[:, channel_x])[0] / 2
+    ), "Window cannot be longer than signal length"
     spike = binned_spiketrain(spiketrains, channel_x, 0, n, dt)
     lfp = signal[:, channel_x]
     spike_times = np.where(spike == 1)[0]
