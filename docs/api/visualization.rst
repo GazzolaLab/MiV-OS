@@ -59,6 +59,21 @@ Burst Analysis
 
       plot_burst
 
+Spike Triggered Average
+------------------
+
+.. currentmodule:: miv.visualization
+
+.. automodule:: miv.visualization.spike_triggered_avg
+
+   .. autosummary::
+      :nosignatures:
+      :toctree: _toctree/VisualizationAPI
+
+      spike_triggered_avg
+
+
+
 Useful External Packages
 ========================
 
