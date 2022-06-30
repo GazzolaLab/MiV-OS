@@ -60,7 +60,7 @@ def spike_triggered_avg(
     lags = np.arange(-win, win + 1) * dt * 1000
     fig, ax = plt.subplots()
     plt.plot(lags, spike_triggered_average)
-    ax.set_xlabel("Time (\u03bcs)")
+    ax.set_xlabel("Time (ms)")
     ax.set_ylabel("Voltage (\u03bcV)")
 
     return fig, ax
