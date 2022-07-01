@@ -70,8 +70,10 @@ class ChannelSpikeCutout:
     def get_labeled_cutouts(self) -> Dict[str, any]:
         labels = []
         labeled_cutouts = []
+        size = 0
         if self.categorized:
             for cutout in self.cutouts:
                 labels.append(self.categorization_list[cutout.pca_comp_index])
                 labeled_cutouts.append(cutout)
-        return {"labels": labels, "labeled_cutouts": labeled_cutouts}
+                size += 1
+        return {"labels": labels, "labeled_cutouts": labeled_cutouts, "size": size}
