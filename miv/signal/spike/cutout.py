@@ -13,7 +13,7 @@ class SpikeCutout:
 
     Attributes
     ----------
-    cutout : np.ndarray
+    cutout : Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]
     sampling_rate : float
     pca_comp_index : int
     """
@@ -30,7 +30,7 @@ class SpikeCutout:
 
 
 class ChannelSpikeCutout:
-    CATEGORY_NAMES: tuple[str] = ("uncategorized", "neuronal", "false", "mixed")
+    CATEGORY_NAMES = ["uncategorized", "neuronal", "false", "mixed"]
 
     def __init__(
         self,
