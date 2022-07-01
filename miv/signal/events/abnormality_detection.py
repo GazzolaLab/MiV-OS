@@ -1,6 +1,6 @@
 __all__ = ["AbnormalityDetector"]
 
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 import numpy as np
 import tensorflow as tf
@@ -104,7 +104,7 @@ class AbnormalityDetector:
             self.spontanous_cutouts[chan_index].categorize(chan_row)
         self.categorized = True
 
-    def train_model(self, layer_sizes: List[int], epochs: int = 5) -> Dict[str, any]:
+    def train_model(self, layer_sizes: List[int], epochs: int = 5) -> Dict[str, Any]:
         """Create and train model for cutout recognition
         This is the third step in the process of abnormality detection.
 
