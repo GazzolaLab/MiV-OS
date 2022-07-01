@@ -41,7 +41,7 @@ class ChannelSpikeCutout:
     channel_index : int
     categorization_list : Optional[np.ndarray], defualt = None
         List of categorization
-        (categorization_list[channel index][component index])
+        (categorization_list[component index][category index])
     """
 
     CATEGORY_NAMES = ["uncategorized", "neuronal", "false", "mixed"]
