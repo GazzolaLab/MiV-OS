@@ -30,16 +30,33 @@ class SpikeCutout:
 
 
 class ChannelSpikeCutout:
+    """This class holds the SpikeCutout objects for a single channel
+
+    Attributes
+    ----------
+    cutouts : List[Spikecutout]
+        List of SpikeCutout objects that belong to the same channel
+    num_components : int
+        Number of components for PCA decomposition
+    channel_index : int
+    categorization_list : Optional[np.ndarray], defualt = None
+        List of categorization
+        (categorization_list[channel index][component index])
+    """
+
     CATEGORY_NAMES = ["uncategorized", "neuronal", "false", "mixed"]
 
     def __init__(
         self,
         cutouts: List[SpikeCutout],
         num_components: int,
-        categorized: bool = False,
-        category_list: Optional[np.ndarray] = None,
+        channel_index: int,
+        categorization_list: Optional[np.ndarray] = None,
     ):
         self.cutouts: List[SpikeCutout] = cutouts
         self.num_components: int = num_components
-        self.categorized: bool = categorized
-        self.category_list = category_list if categorized else np.zeros(num_components)
+        self.channel_index: int = channel_index
+        self.categorized: bool = categorization_list
+        self.categorization_list = (
+            categorization_list if self.categorized else np.zeros(num_components)
+        )
