@@ -39,6 +39,7 @@ class ChannelSpikeCutout:
     num_components : int
         Number of components for PCA decomposition
     channel_index : int
+    categorized : bool
     categorization_list : Optional[np.ndarray], defualt = None
         List of categorization
         (categorization_list[component index][category index])
@@ -60,3 +61,8 @@ class ChannelSpikeCutout:
         self.categorization_list = (
             categorization_list if self.categorized else np.zeros(num_components)
         )
+
+    def categorize(self, category_index: List[int]) -> None:
+        self.categorization_list = category_index
+        if 0 not in self.categorization_list:
+            self.categorized = True
