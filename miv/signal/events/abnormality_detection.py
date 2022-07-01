@@ -1,7 +1,10 @@
 __all__ = ["AbnormalityDetector"]
 
-from typing import List
+from typing import Dict, List, Optional
 
+import numpy as np
+import tensorflow as tf
+from sklearn.utils import shuffle
 from tqdm import tqdm
 
 from miv.io import Data, DataManager
@@ -40,6 +43,7 @@ class AbnormalityDetector:
         signal_filter: FilterProtocol,
         spike_detector: SpikeDetectionProtocol,
         pca_num_components: int = 3,
+        model: Optional[tf.keras.Model] = None,
     ):
         self.spontaneous_data: Data = spontaneous_data
         self.data_manager: DataManager = experiment_data
@@ -48,6 +52,7 @@ class AbnormalityDetector:
         self.num_components: int = pca_num_components
         self.trained: bool = False
         self.categorized: bool = False
+        self.model = model if model else None
 
         # 1. Generate PCA cutouts for spontaneous recording
         self.spontanous_cutouts = self._get_cutouts(spontaneous_data)
@@ -96,7 +101,62 @@ class AbnormalityDetector:
             index represents the PCA component index.
         """
         for chan_index, chan_row in enumerate(categorization_list):
-            for comp_index, comp_category in enumerate(chan_row):
-                self.spontanous_cutouts[chan_index].categorization_list[
-                    comp_index
-                ] = comp_category
+            self.spontanous_cutouts[chan_index].categorize(chan_row)
+        self.categorized = True
+
+    def train_model(self, layer_sizes: List[int], epochs: int = 5) -> Dict[str, any]:
+        """Create and train model for cutout recognition
+        This is the third step in the process of abnormality detection.
+
+        Parameters
+        ----------
+        layer_sizes : List[int]
+            The number of nodes in each layer.
+            For example, a first layer with 256 nodes and a second with 64 nodes
+            would be [256, 64].
+        epochs : int, default = 5
+            The number of iterations for model training
+
+        Returns
+        -------
+        test_loss : float
+        test_accuracy : float
+        """
+        # Get the labeled cutouts
+        labeled_cutouts = []
+        labels = []
+        size = 0
+        for chan_index, channelCutout in enumerate(self.spontanous_cutouts):
+            channel_labeled_cutouts = channelCutout.get_labeled_cutouts()
+            labeled_cutouts.append(channel_labeled_cutouts["labeled_cutouts"])
+            labels.append(channel_labeled_cutouts["labels"])
+            size += channel_labeled_cutouts["size"]
+
+        # Shuffle the cutouts and split into training and test portions
+        labeled_cutouts, labels = shuffle(labeled_cutouts, labels)
+        split = int(size * 0.8)
+        train_cutouts = labeled_cutouts[:split]
+        train_labels = labels[:split]
+        test_cutouts = labeled_cutouts[split:]
+        test_labels = labels[:split]
+
+        # Set up and train model
+        layers = [tf.keras.layers.Dense(90)]
+        for layer_size in layer_sizes:
+            layers.append(tf.keras.layers.Dense(layer_size))
+        layers.append(
+            tf.keras.layers.Dense(len(self.spontanous_cutouts[0].CATEGORY_NAMES[1:]))
+        )
+        model = tf.keras.Sequential(layers)
+        model.compile(
+            optimizer="adam",
+            loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+            metrics=["accuracy"],
+        )
+        model.fit(train_cutouts, train_labels, epochs=epochs)
+
+        # Test and return model
+        test_loss, test_acc = model.evaluate(test_cutouts, test_labels)
+        self.model = model
+        self.trained = True
+        return {"test_loss": test_loss, "test_accuracy": test_acc}
