@@ -1,5 +1,7 @@
 __all__ = ["SpikeCutout"]
 
+from typing import Tuple, Union
+
 from dataclasses import dataclass
 
 import numpy as np
@@ -20,7 +22,10 @@ class SpikeCutout:
     CATEGORY_NAMES: tuple[str] = ("uncategorized", "neuronal", "false", "mixed")
 
     def __init__(
-        self, cutout: np.ndarray, sampling_rate: float, category: int = 0
+        self,
+        cutout: Union[np.ndarray, Tuple[np.ndarray, np.ndarray]],
+        sampling_rate: float,
+        category: int = 0,
     ) -> None:
         self.cutout: np.ndarray = cutout
         self.sampling_rate: float = sampling_rate
