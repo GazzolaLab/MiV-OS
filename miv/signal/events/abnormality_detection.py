@@ -17,6 +17,22 @@ from miv.visualization import extract_waveforms
 
 
 class AbnormalityDetector:
+    """Abnormality Detector
+    The initialization of this class if the first step in the process.
+    With initialization, PCA cutouts for the spontaneous spikes are generated.
+
+        Attributes
+        ----------
+        spontaneous_data : Data
+        experiment_data : Data
+        signal_filter : FilterProtocol
+            Signal filter used prior to spike detection
+        spike_detector : SpikeDetectionProtocol
+            Spike detector used to get spiketrains from signal
+        pca_num_components : int, default = 3
+            The number of components in PCA decomposition
+    """
+
     def __init__(
         self,
         spontaneous_data: Data,
@@ -57,10 +73,30 @@ class AbnormalityDetector:
                             SpikeCutout(raw_cutout, samp, labels[cutout_index])
                         )
                     exp_cutouts.append(
-                        ChannelSpikeCutout(channel_cutouts_list, self.num_components)
+                        ChannelSpikeCutout(
+                            channel_cutouts_list, self.num_components, chan_index
+                        )
                     )
                 except ValueError:
                     skipped_channels.append(chan_index)
         return exp_cutouts
 
-    # def categorize_spontaneous(self, category_list):
+    def categorize_spontaneous(
+        self, categorization_list: List[List[int]]  # list[chan_index][comp_index]
+    ):
+        """Categorize the spontaneous recording components.
+        This is the second step in the process of abnormality detection.
+        This categorization provides training data for the next step.
+
+        Parameters
+        ----------
+        categorization_list: List[List[int]]
+            The categorization given to components of channels of the spontaneous recording.
+            This is a 2D list. The row index represents the channel index. The column
+            index represents the PCA component index.
+        """
+        for chan_index, chan_row in enumerate(categorization_list):
+            for comp_index, comp_category in enumerate(chan_row):
+                self.spontanous_cutouts[chan_index].categorization_list[
+                    comp_index
+                ] = comp_category
