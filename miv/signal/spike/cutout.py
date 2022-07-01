@@ -1,6 +1,6 @@
 __all__ = ["SpikeCutout", "ChannelSpikeCutout"]
 
-from typing import List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 from dataclasses import dataclass
 
@@ -66,3 +66,12 @@ class ChannelSpikeCutout:
         self.categorization_list = category_index
         if 0 not in self.categorization_list:
             self.categorized = True
+
+    def get_labeled_cutouts(self) -> Dict[str, any]:
+        labels = []
+        labeled_cutouts = []
+        if self.categorized:
+            for cutout in self.cutouts:
+                labels.append(self.categorization_list[cutout.pca_comp_index])
+                labeled_cutouts.append(cutout)
+        return {"labels": labels, "labeled_cutouts": labeled_cutouts}
