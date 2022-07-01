@@ -1,13 +1,8 @@
 __all__ = ["SpikeCutout"]
 
-from typing import Optional, Union
-
-import string
 from dataclasses import dataclass
 
-import neo
 import numpy as np
-import quantities as pq
 
 
 @dataclass
