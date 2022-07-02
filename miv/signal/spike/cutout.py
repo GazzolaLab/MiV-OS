@@ -24,12 +24,15 @@ class SpikeCutout:
         sampling_rate: float,
         pca_comp_index: int,
     ) -> None:
-        self.cutout: np.ndarray = cutout
+        self.cutout: np.ndarray = np.array(cutout)
         self.sampling_rate: float = sampling_rate
         self.pca_comp_index: int = pca_comp_index
 
     def __getitem__(self, key):
         return self.cutout[key]
+
+    def __len__(self) -> int:
+        return len(self.cutout)
 
 
 class ChannelSpikeCutout:
@@ -52,17 +55,19 @@ class ChannelSpikeCutout:
 
     def __init__(
         self,
-        cutouts: np.array,
+        cutouts: np.ndarray,
         num_components: int,
         channel_index: int,
         categorization_list: Optional[np.ndarray] = None,
     ):
-        self.cutouts: np.array = cutouts
+        self.cutouts: np.ndarray = cutouts
         self.num_components: int = num_components
         self.channel_index: int = channel_index
-        self.categorized: bool = categorization_list
-        self.categorization_list = (
-            categorization_list if self.categorized else np.zeros(num_components)
+        self.categorized: bool = not (categorization_list is None)
+        self.categorization_list: np.ndarray = (
+            np.array(categorization_list)
+            if self.categorized
+            else np.zeros(num_components)
         )
 
     def __len__(self) -> int:
@@ -74,14 +79,14 @@ class ChannelSpikeCutout:
         -------
         2D list of SpikeCutout elements where rows correspond to PCA component indices
         """
-        components = []
+        components: List[List[SpikeCutout]] = []
         for row_index in range(self.num_components):
             components.append([])
-        for cutout in self.cutouts:
+        for index, cutout in enumerate(self.cutouts):
             components[cutout.pca_comp_index].append(cutout)
         return components
 
-    def categorize(self, category_index: List[int]) -> None:
+    def categorize(self, category_index: np.ndarray) -> None:
         """
         Categorize the components in this channel with category indices in
         a 1D list where each element corresponds to the component index.
@@ -113,7 +118,7 @@ class ChannelSpikeCutout:
         labeled_cutouts = []
         size = 0
         if self.categorized:
-            for cutout in self.cutouts:
+            for cutout_index, cutout in enumerate(self.cutouts):
                 labels.append(self.categorization_list[cutout.pca_comp_index])
                 labeled_cutouts.append(cutout)
                 size += 1
