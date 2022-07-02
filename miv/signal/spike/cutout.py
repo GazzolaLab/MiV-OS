@@ -28,13 +28,16 @@ class SpikeCutout:
         self.sampling_rate: float = sampling_rate
         self.pca_comp_index: int = pca_comp_index
 
+    def __getitem__(self, key):
+        return self.cutout[key]
+
 
 class ChannelSpikeCutout:
     """This class holds the SpikeCutout objects for a single channel
 
     Attributes
     ----------
-    cutouts : List[Spikecutout]
+    cutouts : np.array
         List of SpikeCutout objects that belong to the same channel
     num_components : int
         Number of components for PCA decomposition
@@ -49,18 +52,21 @@ class ChannelSpikeCutout:
 
     def __init__(
         self,
-        cutouts: List[SpikeCutout],
+        cutouts: np.array,
         num_components: int,
         channel_index: int,
         categorization_list: Optional[np.ndarray] = None,
     ):
-        self.cutouts: List[SpikeCutout] = cutouts
+        self.cutouts: np.array = cutouts
         self.num_components: int = num_components
         self.channel_index: int = channel_index
         self.categorized: bool = categorization_list
         self.categorization_list = (
             categorization_list if self.categorized else np.zeros(num_components)
         )
+
+    def __len__(self) -> int:
+        return len(self.cutouts)
 
     def get_cutouts_by_component(self) -> List[List[SpikeCutout]]:
         """
