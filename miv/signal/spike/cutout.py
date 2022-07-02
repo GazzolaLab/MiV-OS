@@ -62,12 +62,47 @@ class ChannelSpikeCutout:
             categorization_list if self.categorized else np.zeros(num_components)
         )
 
+    def get_cutouts_by_component(self) -> List[List[SpikeCutout]]:
+        """
+        Returns
+        -------
+        2D list of SpikeCutout elements where rows correspond to PCA component indices
+        """
+        components = []
+        for row_index in range(self.num_components):
+            components.append([])
+        for cutout in self.cutouts:
+            components[cutout.pca_comp_index].append(cutout)
+        return components
+
     def categorize(self, category_index: List[int]) -> None:
+        """
+        Categorize the components in this channel with category indices in
+        a 1D list where each element corresponds to the component index.
+
+        CATEGORY_NAMES = ["uncategorized", "neuronal", "false", "mixed"]
+
+        Example:
+        categorize([1, 3, 2]) categorizes component 0 as neuronal spikes, component 1
+        as mixed spikes, and 2 as false spikes.
+        """
         self.categorization_list = category_index
         if 0 not in self.categorization_list:
             self.categorized = True
 
     def get_labeled_cutouts(self) -> Dict[str, Any]:
+        """
+        This function returns only the cutouts that were categorized.
+
+        Returns
+        -------
+        labels :
+            1D list of category label index for each spike
+        labeled_cutouts :
+            1D list of corresponding cutouts
+        size :
+            int value for the number of labeled cutouts
+        """
         labels = []
         labeled_cutouts = []
         size = 0
