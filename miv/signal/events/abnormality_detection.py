@@ -55,6 +55,7 @@ class AbnormalityDetector:
         self.model = model if model else None
 
         # 1. Generate PCA cutouts for spontaneous recording
+        self.num_channels: int = 0
         self.spontanous_cutouts = self._get_cutouts(spontaneous_data)
 
     def _get_cutouts(self, data: Data) -> List[ChannelSpikeCutout]:
@@ -62,10 +63,11 @@ class AbnormalityDetector:
         with data.load() as (sig, times, samp):
             spontaneous_sig = self.signal_filter(sig, samp)
             spontaneous_spikes = self.spike_detector(spontaneous_sig, times, samp)
+            self.num_channels = spontaneous_sig.shape[1]
 
             skipped_channels = []  # Channels with not enough spikes for cutouts
             exp_cutouts = []  # List of SpikeCutout objects
-            for chan_index in tqdm(range(spontaneous_sig.shape[1])):
+            for chan_index in tqdm(range(self.num_channels)):
                 if spontaneous_spikes[chan_index].shape[0] >= self.num_components:
                     channel_cutouts_list: List[SpikeCutout] = []
                     raw_cutouts = extract_waveforms(
