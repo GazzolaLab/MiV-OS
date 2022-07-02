@@ -1,7 +1,7 @@
 __doc__ = """
 Module for extracting each spike waveform and visualize.
 """
-__all__ = ["extract_waveforms", "plot_waveforms"]
+__all__ = ["extract_waveforms", "plot_waveforms", "plot_waveforms_with_SpikeCutout"]
 
 from typing import Any, Dict, Optional, Tuple, Union
 
