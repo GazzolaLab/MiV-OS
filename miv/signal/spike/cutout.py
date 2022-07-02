@@ -28,9 +28,6 @@ class SpikeCutout:
         self.sampling_rate: float = sampling_rate
         self.pca_comp_index: int = pca_comp_index
 
-    def __getitem__(self, key):
-        return self.cutout[key]
-
     def __len__(self) -> int:
         return len(self.cutout)
 
@@ -40,8 +37,8 @@ class ChannelSpikeCutout:
 
     Attributes
     ----------
-    cutouts : np.array
-        List of SpikeCutout objects that belong to the same channel
+    cutouts : np.ndarray
+        1D NumPy array of SpikeCutout objects that belong to the same channel
     num_components : int
         Number of components for PCA decomposition
     channel_index : int
