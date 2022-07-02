@@ -157,7 +157,7 @@ def plot_waveforms_with_SpikeCutout(
         Addtional keyword-arguments for matplotlib.pyplot.plot.
     """
     if n_spikes is None:
-        n_spikes = len(spike_cutouts)
+        n_spikes = len(spike_cutouts[0])
     n_spikes = min(n_spikes, len(spike_cutouts))
 
     if len(spike_cutouts) == 0:
@@ -165,7 +165,7 @@ def plot_waveforms_with_SpikeCutout(
             "plot_waveforms_with_SpikeCutout called with empty spike_cutouts array"
         )
     samp = spike_cutouts[0].sampling_rate
-    cutouts: np.ndarray = np.ndarray((n_spikes, len(spike_cutouts[0])))
+    cutouts: np.ndarray = np.ndarray((len(spike_cutouts), len(spike_cutouts[0])))
 
     for spike_index, spike_cutout in enumerate(spike_cutouts):
         cutouts[spike_index] = spike_cutout.cutout
