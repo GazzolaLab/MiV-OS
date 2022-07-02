@@ -66,7 +66,7 @@ class AbnormalityDetector:
             skipped_channels = []  # Channels with not enough spikes for cutouts
             exp_cutouts = []  # List of SpikeCutout objects
             for chan_index in tqdm(range(spontaneous_sig.shape[1])):
-                try:
+                if spontaneous_spikes[chan_index].shape[0] >= self.num_components:
                     channel_cutouts_list: List[SpikeCutout] = []
                     raw_cutouts = extract_waveforms(
                         spontaneous_sig, spontaneous_spikes, chan_index, samp
@@ -79,16 +79,18 @@ class AbnormalityDetector:
                         )
                     exp_cutouts.append(
                         ChannelSpikeCutout(
-                            channel_cutouts_list, self.num_components, chan_index
+                            np.array(channel_cutouts_list),
+                            self.num_components,
+                            chan_index,
                         )
                     )
-                except ValueError:
+                else:
                     skipped_channels.append(chan_index)
         return exp_cutouts
 
     def categorize_spontaneous(
         self, categorization_list: List[List[int]]  # list[chan_index][comp_index]
-    ):
+    ) -> None:
         """Categorize the spontaneous recording components.
         This is the second step in the process of abnormality detection.
         This categorization provides training data for the next step.
@@ -101,7 +103,7 @@ class AbnormalityDetector:
             index represents the PCA component index.
         """
         for chan_index, chan_row in enumerate(categorization_list):
-            self.spontanous_cutouts[chan_index].categorize(chan_row)
+            self.spontanous_cutouts[chan_index].categorize(np.array(chan_row))
         self.categorized = True
 
     def train_model(self, layer_sizes: List[int], epochs: int = 5) -> Dict[str, Any]:
