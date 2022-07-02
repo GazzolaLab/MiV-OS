@@ -16,6 +16,7 @@ from sklearn.decomposition import PCA
 from sklearn.mixture import GaussianMixture
 from sklearn.preprocessing import StandardScaler
 
+from miv.signal.spike.cutout import ChannelSpikeCutout, SpikeCutout
 from miv.typing import SignalType, SpikestampsType
 
 # TODO: Modularize the entire process.
@@ -127,3 +128,46 @@ def plot_waveforms(
         plt.xlabel("Time (ms)")
         plt.ylabel("Voltage (uV)")
         plt.title("Cutouts")
+
+
+def plot_waveforms_with_SpikeCutout(
+    spike_cutouts: np.ndarray,
+    pre: float = 0.001,
+    post: float = 0.002,
+    n_spikes: Optional[int] = 100,
+    color: str = "k",
+    plot_kwargs: Dict[Any, Any] = None,
+) -> plt.Figure:
+    """
+    Plot an overlay of spike cutouts
+
+    Parameters
+    ----------
+    spike_cutouts : np.ndarray
+        NumPy array of SpikeCutout objects
+    pre : float
+        The duration of the cutout before the spike in seconds
+    post : float
+        The duration of the cutout after the spike in seconds
+    n_spikes : Optional[int]
+        The number of cutouts to plot. None to plot all. (Default: 100)
+    color : str
+        The line color as a pyplot line/marker style. (Default: 'k'=black)
+    plot_kwargs : Dict[Any, Any]
+        Addtional keyword-arguments for matplotlib.pyplot.plot.
+    """
+    if n_spikes is None:
+        n_spikes = len(spike_cutouts)
+    n_spikes = min(n_spikes, len(spike_cutouts))
+
+    if len(spike_cutouts) == 0:
+        raise Exception(
+            "plot_waveforms_with_SpikeCutout called with empty spike_cutouts array"
+        )
+    samp = spike_cutouts[0].sampling_rate
+    cutouts: np.ndarray = np.ndarray((n_spikes, len(spike_cutouts[0])))
+
+    for spike_index, spike_cutout in enumerate(spike_cutouts):
+        cutouts[spike_index] = spike_cutout.cutout
+
+    return plot_waveforms(cutouts, samp, pre, post, n_spikes, color, plot_kwargs)
