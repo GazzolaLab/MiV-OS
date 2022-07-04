@@ -13,14 +13,13 @@ def spike_triggered_avg(
     spiketrains: SpikestampsType,
     channel_y: int,
     sampling_freq: float,
-     window_length: float,
+    window_length: float,
 ):
     """
     Plots the spike-triggered average of Local Field Potential (LFP) from channel X
     corresponding to spiketrain from channel Y. The spiketrain from channel Y
     can be replaced with stimulation signal to understand stimulus dependent
     LFP on channel X, but take care in providing stimualtion as SpikestampsType.
-
     Parameters
     ----------
     signal : SignalType
@@ -35,7 +34,6 @@ def spike_triggered_avg(
         sampling frequency for LFP recordings
      window_length: float
         window length to consider before and after spike
-
     Returns
     -------
     figure : matplotlib.pyplot.Figure
@@ -47,7 +45,7 @@ def spike_triggered_avg(
     dt = 1 / sampling_freq
     n = np.shape(signal[:, channel_x])[0] / sampling_freq
     assert (
-         window_length < np.shape(signal[:, channel_x])[0] / 2
+        window_length < np.shape(signal[:, channel_x])[0] / 2
     ), "Window cannot be longer than signal length"
     spike = binned_spiketrain(spiketrains, channel_x, 0, n, dt)
     lfp = signal[:, channel_x]
@@ -56,10 +54,10 @@ def spike_triggered_avg(
     sta = np.zeros([2 * win + 1])
 
     for i in np.arange(spike_len):
-        sta += lfp[spike_times[i] -  window_length : spike_times[i] + window_length + 1]
+        sta += lfp[spike_times[i] - window_length : spike_times[i] + window_length + 1]
 
     spike_triggered_average = sta / spike_len
-    lags = np.arange(-window_length,  window_length + 1) * dt * 1000
+    lags = np.arange(-window_length, window_length + 1) * dt * 1000
     fig, ax = plt.subplots()
     plt.plot(lags, spike_triggered_average)
     ax.set_xlabel("Time (ms)")
