@@ -88,6 +88,11 @@ class AbnormalityDetector:
                     )
                 else:
                     skipped_channels.append(chan_index)
+                    exp_cutouts.append(
+                        ChannelSpikeCutout(
+                            np.array([]), self.num_components, chan_index
+                        )
+                    )
         return exp_cutouts
 
     def categorize_spontaneous(
