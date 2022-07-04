@@ -57,7 +57,7 @@ class AbnormalityDetector:
 
         # 1. Generate PCA cutouts for spontaneous recording
         self.num_channels: int = 0
-        self.spontanous_cutouts = self._get_cutouts(spontaneous_data)
+        self.spontaneous_cutouts = self._get_cutouts(spontaneous_data)
 
     def _get_cutouts(self, data: Data) -> List[ChannelSpikeCutout]:
         pca = PCADecomposition()
@@ -111,7 +111,7 @@ class AbnormalityDetector:
             index represents the PCA component index.
         """
         for chan_index, chan_row in enumerate(categorization_list):
-            self.spontanous_cutouts[chan_index].categorize(np.array(chan_row))
+            self.spontaneous_cutouts[chan_index].categorize(np.array(chan_row))
         self.categorized = True
 
     def train_model(self, layer_sizes: List[int], epochs: int = 5) -> Dict[str, Any]:
@@ -136,7 +136,7 @@ class AbnormalityDetector:
         labeled_cutouts = []
         labels = []
         size = 0
-        for chan_index, channelCutout in enumerate(self.spontanous_cutouts):
+        for chan_index, channelCutout in enumerate(self.spontaneous_cutouts):
             channel_labeled_cutouts = channelCutout.get_labeled_cutouts()
             labeled_cutouts.append(channel_labeled_cutouts["labeled_cutouts"])
             labels.append(channel_labeled_cutouts["labels"])
@@ -155,7 +155,7 @@ class AbnormalityDetector:
         for layer_size in layer_sizes:
             layers.append(tf.keras.layers.Dense(layer_size))
         layers.append(
-            tf.keras.layers.Dense(len(self.spontanous_cutouts[0].CATEGORY_NAMES[1:]))
+            tf.keras.layers.Dense(len(self.spontaneous_cutouts[0].CATEGORY_NAMES[1:]))
         )
         model = tf.keras.Sequential(layers)
         model.compile(

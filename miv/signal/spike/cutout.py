@@ -60,7 +60,7 @@ class ChannelSpikeCutout:
         self.cutouts: np.ndarray = cutouts
         self.num_components: int = num_components
         self.channel_index: int = channel_index
-        self.categorized: bool = not (categorization_list is None)
+        self.categorized: bool = bool(categorization_list)
         self.categorization_list: np.ndarray = (
             np.array(categorization_list)
             if self.categorized
@@ -91,11 +91,14 @@ class ChannelSpikeCutout:
         CATEGORY_NAMES = ["uncategorized", "neuronal", "false", "mixed"]
 
         Example:
-        categorize([1, 3, 2]) categorizes component 0 as neuronal spikes, component 1
-        as mixed spikes, and 2 as false spikes.
+        categorize(np.array([1, 3, 2])) categorizes component 0 as neuronal spikes,
+        component 1 as mixed spikes, and 2 as false spikes.
         """
-        self.categorization_list = category_index
-        if 0 not in self.categorization_list:
+        if len(category_index) < self.num_components:
+            self.categorization_list = np.zeros(self.num_components)
+            self.categorized = False
+        else:
+            self.categorization_list = category_index
             self.categorized = True
 
     def get_labeled_cutouts(self) -> Dict[str, Any]:
