@@ -45,6 +45,7 @@ Causality Analysis
       :toctree: _toctree/VisualizationAPI
 
       pairwise_causality_plot
+      spike_triggered_average_plot
 
 Burst Analysis
 ------------------
@@ -58,20 +59,6 @@ Burst Analysis
       :toctree: _toctree/VisualizationAPI
 
       plot_burst
-
-Spike Triggered Average
------------------------
-
-.. currentmodule:: miv.visualization
-
-.. automodule:: miv.visualization.spike_triggered_avg
-
-   .. autosummary::
-      :nosignatures:
-      :toctree: _toctree/VisualizationAPI
-
-      spike_triggered_avg
-
 
 
 Useful External Packages
