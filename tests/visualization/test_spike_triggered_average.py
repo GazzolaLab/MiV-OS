@@ -2,11 +2,10 @@ import numpy as np
 import pytest
 from neo.core import AnalogSignal, Segment, SpikeTrain
 
-from miv.visualization import spike_triggered_avg
-
 
 def test_spike_triggered_avg_output():
     from miv.statistics import burst
+    from miv.visualization import spike_triggered_average_plot
 
     # Initialize the spiketrain as below
     seg = Segment(index=1)
@@ -20,5 +19,5 @@ def test_spike_triggered_avg_output():
     seg.spiketrains.append(train0)
 
     with np.testing.assert_raises(AssertionError):
-        spike_triggered_avg(signal, 0, seg.spiketrains, 0, 2000, 10000000)
+        spike_triggered_average_plot(signal, 0, seg.spiketrains, 0, 2000, 10000000)
     # The function above should throw an error since the window is greater than signal length
