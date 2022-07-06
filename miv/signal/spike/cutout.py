@@ -27,6 +27,7 @@ class SpikeCutout:
         self.cutout: np.ndarray = np.array(cutout)
         self.sampling_rate: float = sampling_rate
         self.pca_comp_index: int = pca_comp_index
+        self.categorized: bool = False
 
     def __len__(self) -> int:
         return len(self.cutout)
@@ -64,7 +65,7 @@ class ChannelSpikeCutout:
         self.categorization_list: np.ndarray = (
             np.array(categorization_list)
             if self.categorized
-            else np.zeros(num_components)
+            else -1 * np.ones(num_components)
         )
 
     def __len__(self) -> int:
@@ -101,6 +102,9 @@ class ChannelSpikeCutout:
             self.categorization_list = category_index
             self.categorized = -1 not in self.categorization_list
 
+        for cutout_index, cutout in enumerate(self.cutouts):
+            cutout.categorized = self.categorization_list[cutout.pca_comp_index] != -1
+
     def get_labeled_cutouts(self) -> Dict[str, Any]:
         """
         This function returns only the cutouts that were categorized.
@@ -117,8 +121,8 @@ class ChannelSpikeCutout:
         labels = []
         labeled_cutouts = []
         size = 0
-        if self.categorized:
-            for cutout_index, cutout in enumerate(self.cutouts):
+        for cutout_index, cutout in enumerate(self.cutouts):
+            if cutout.categorized:
                 labels.append(self.categorization_list[cutout.pca_comp_index])
                 labeled_cutouts.append(list(cutout.cutout))
                 size += 1
