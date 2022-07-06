@@ -131,6 +131,8 @@ class AbnormalityDetector:
         -------
         test_loss : float
         test_accuracy : float
+        size : float
+            number of spike cutouts used for training
         """
         # Get the labeled cutouts
         labeled_cutouts = []
@@ -174,4 +176,4 @@ class AbnormalityDetector:
         test_loss, test_acc = model.evaluate(test_cutouts, test_labels)
         self.model = model
         self.trained = True
-        return {"test_loss": test_loss, "test_accuracy": test_acc}
+        return {"test_loss": test_loss, "test_accuracy": test_acc, "size": size}
