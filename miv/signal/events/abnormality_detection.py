@@ -53,7 +53,7 @@ class AbnormalityDetector:
         self.trained: bool = False
         self.categorized: bool = False
         self.model = model if model else None
-        self.skipped_channels = []
+        self.skipped_channels: List[int] = []
 
         # 1. Generate PCA cutouts for spontaneous recording
         self.num_channels: int = 0
@@ -193,10 +193,10 @@ class AbnormalityDetector:
         spike_detector: Optional[SpikeDetectionProtocol] = None,
     ) -> List[SpikestampsType]:
 
-        exp_filter = signal_filter if signal_filter else self.signal_filter
-        exp_detector = spike_detector if spike_detector else self.spike_detector
+        exp_filter = signal_filter if signal_filter else self.spont_signal_filter
+        exp_detector = spike_detector if spike_detector else self.spont_spike_detector
 
-        spiketrains = []
+        spiketrains: List[SpikestampsType] = []
         list_of_cutout_channels = self._get_cutouts(exp_data, exp_filter, exp_detector)
 
         prob_model = tf.keras.Sequential([self.model, tf.keras.layers.Softmax()])
