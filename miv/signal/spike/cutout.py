@@ -120,6 +120,6 @@ class ChannelSpikeCutout:
         if self.categorized:
             for cutout_index, cutout in enumerate(self.cutouts):
                 labels.append(self.categorization_list[cutout.pca_comp_index])
-                labeled_cutouts.append(cutout)
+                labeled_cutouts.append(list(cutout.cutout))
                 size += 1
         return {"labels": labels, "labeled_cutouts": labeled_cutouts, "size": size}

@@ -138,9 +138,14 @@ class AbnormalityDetector:
         size = 0
         for chan_index, channelCutout in enumerate(self.spontaneous_cutouts):
             channel_labeled_cutouts = channelCutout.get_labeled_cutouts()
-            labeled_cutouts.append(channel_labeled_cutouts["labeled_cutouts"])
-            labels.append(channel_labeled_cutouts["labels"])
-            size += channel_labeled_cutouts["size"]
+            for spike_index, spike_label in enumerate(
+                channel_labeled_cutouts["labels"]
+            ):
+                labels.extend([spike_label])
+                labeled_cutouts.append(
+                    list(channel_labeled_cutouts["labeled_cutouts"][spike_index])
+                )
+                size += channel_labeled_cutouts["size"]
 
         # Shuffle the cutouts and split into training and test portions
         labeled_cutouts, labels = shuffle(labeled_cutouts, labels)
