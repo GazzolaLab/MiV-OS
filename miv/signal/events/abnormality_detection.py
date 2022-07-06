@@ -147,18 +147,18 @@ class AbnormalityDetector:
                 labeled_cutouts.append(
                     list(channel_labeled_cutouts["labeled_cutouts"][spike_index])
                 )
-                size += channel_labeled_cutouts["size"]
+            size += channel_labeled_cutouts["size"]
 
         # Shuffle the cutouts and split into training and test portions
         labeled_cutouts, labels = shuffle(labeled_cutouts, labels)
         split = int(size * 0.8)
-        train_cutouts = labeled_cutouts[:split]
-        train_labels = labels[:split]
-        test_cutouts = labeled_cutouts[split:]
-        test_labels = labels[:split]
+        train_cutouts = np.array(labeled_cutouts[:split])
+        train_labels = np.array(labels[:split])
+        test_cutouts = np.array(labeled_cutouts[split:])
+        test_labels = np.array(labels[split:])
 
         # Set up and train model
-        layers = [tf.keras.layers.Dense(90)]
+        layers = [tf.keras.layers.Dense(np.shape(labeled_cutouts)[1])]
         for layer_size in layer_sizes:
             layers.append(tf.keras.layers.Dense(layer_size))
         layers.append(
