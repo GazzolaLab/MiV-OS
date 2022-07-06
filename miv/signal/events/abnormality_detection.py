@@ -3,7 +3,9 @@ __all__ = ["AbnormalityDetector"]
 from typing import Any, Dict, List, Optional
 
 import numpy as np
+import quantities as pq
 import tensorflow as tf
+from neo import SpikeTrain
 from sklearn.utils import shuffle
 from tqdm import tqdm
 
@@ -28,10 +30,10 @@ class AbnormalityDetector:
         ----------
         spontaneous_data : Data
         experiment_data : Data
-        signal_filter : FilterProtocol
-            Signal filter used prior to spike detection
-        spike_detector : SpikeDetectionProtocol
-            Spike detector used to get spiketrains from signal
+        spont_signal_filter : FilterProtocol
+            Spontaneous signal filter used prior to spike detection
+        spont_spike_detector : SpikeDetectionProtocol
+            Spontaneous spike detector used to get spiketrains from signal
         pca_num_components : int, default = 3
             The number of components in PCA decomposition
     """
@@ -39,16 +41,14 @@ class AbnormalityDetector:
     def __init__(
         self,
         spontaneous_data: Data,
-        experiment_data: DataManager,
-        signal_filter: FilterProtocol,
-        spike_detector: SpikeDetectionProtocol,
+        spont_signal_filter: FilterProtocol,
+        spont_spike_detector: SpikeDetectionProtocol,
         pca_num_components: int = 3,
         model: Optional[tf.keras.Model] = None,
     ):
         self.spontaneous_data: Data = spontaneous_data
-        self.data_manager: DataManager = experiment_data
-        self.signal_filter: FilterProtocol = signal_filter
-        self.spike_detector = spike_detector
+        self.spont_signal_filter: FilterProtocol = spont_signal_filter
+        self.spont_spike_detector = spont_spike_detector
         self.num_components: int = pca_num_components
         self.trained: bool = False
         self.categorized: bool = False
@@ -57,13 +57,20 @@ class AbnormalityDetector:
 
         # 1. Generate PCA cutouts for spontaneous recording
         self.num_channels: int = 0
-        self.spontaneous_cutouts = self._get_cutouts(spontaneous_data)
+        self.spontaneous_cutouts = self._get_cutouts(
+            spontaneous_data, self.spont_signal_filter, self.spont_spike_detector
+        )
 
-    def _get_cutouts(self, data: Data) -> List[ChannelSpikeCutout]:
+    def _get_cutouts(
+        self,
+        data: Data,
+        signal_filter: FilterProtocol,
+        spike_detector: SpikeDetectionProtocol,
+    ) -> List[ChannelSpikeCutout]:
         pca = PCADecomposition()
         with data.load() as (sig, times, samp):
-            spontaneous_sig = self.signal_filter(sig, samp)
-            spontaneous_spikes = self.spike_detector(spontaneous_sig, times, samp)
+            spontaneous_sig = signal_filter(sig, samp)
+            spontaneous_spikes = spike_detector(spontaneous_sig, times, samp)
             self.num_channels = spontaneous_sig.shape[1]
 
             self.skipped_channels = []  # Channels with not enough spikes for cutouts
@@ -177,3 +184,29 @@ class AbnormalityDetector:
         self.model = model
         self.trained = True
         return {"test_loss": test_loss, "test_accuracy": test_acc, "size": size}
+
+    def get_only_neuronal_spikes(
+        self,
+        exp_data: Data,
+        accuracy_threshold: float = 0.9,
+        signal_filter: Optional[FilterProtocol] = None,
+        spike_detector: Optional[SpikeDetectionProtocol] = None,
+    ) -> List[SpikestampsType]:
+
+        exp_filter = signal_filter if signal_filter else self.signal_filter
+        exp_detector = spike_detector if spike_detector else self.spike_detector
+
+        spiketrains = []
+        list_of_cutout_channels = self._get_cutouts(exp_data, exp_filter, exp_detector)
+
+        prob_model = tf.keras.Sequential([self.model, tf.keras.layers.Softmax()])
+        for chan_index, cutout_channel in enumerate(list_of_cutout_channels):
+            predictions = prob_model.predict(cutout_channel.cutouts[chan_index].cutout)
+
+            times = []
+            for spike_index, prediction in enumerate(predictions):
+                if prediction[0] >= accuracy_threshold:
+                    times.extend(spiketrains[chan_index][spike_index])
+            spiketrains.append(SpikeTrain(times, times[-1], pq.s))
+
+        return spiketrains
