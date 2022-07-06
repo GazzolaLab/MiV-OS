@@ -48,7 +48,7 @@ class ChannelSpikeCutout:
         (categorization_list[component index][category index])
     """
 
-    CATEGORY_NAMES = ["uncategorized", "neuronal", "false", "mixed"]
+    CATEGORY_NAMES = ["neuronal", "false", "uncategorized"]
 
     def __init__(
         self,
@@ -88,11 +88,11 @@ class ChannelSpikeCutout:
         Categorize the components in this channel with category indices in
         a 1D list where each element corresponds to the component index.
 
-        CATEGORY_NAMES = ["uncategorized", "neuronal", "false", "mixed"]
+        CATEGORY_NAMES = ["neuronal", "false", "uncategorized"]
 
         Example:
-        categorize(np.array([0, 2, 1, -1])) categorizes component 0 as neuronal spikes,
-        component 1 as mixed spikes, component 2 as false spikes, and component 4 as uncategorized.
+        categorize(np.array([0, 1, -1])) categorizes component 0 as neuronal spikes,
+        component 1 as false spikes, and component 2 as uncategorized.
         """
         if len(category_index) < self.num_components:
             self.categorization_list = -1 * np.ones(self.num_components, dtype=int)

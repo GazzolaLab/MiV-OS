@@ -162,7 +162,7 @@ class AbnormalityDetector:
         for layer_size in layer_sizes:
             layers.append(tf.keras.layers.Dense(layer_size))
         layers.append(
-            tf.keras.layers.Dense(len(self.spontaneous_cutouts[0].CATEGORY_NAMES[1:]))
+            tf.keras.layers.Dense(len(self.spontaneous_cutouts[0].CATEGORY_NAMES) - 1)
         )
         model = tf.keras.Sequential(layers)
         model.compile(
