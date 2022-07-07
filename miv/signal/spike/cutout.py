@@ -16,6 +16,7 @@ class SpikeCutout:
     cutout : Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]
     sampling_rate : float
     pca_comp_index : int
+    time : float
     """
 
     def __init__(
@@ -23,10 +24,12 @@ class SpikeCutout:
         cutout: Union[np.ndarray, Tuple[np.ndarray, np.ndarray]],
         sampling_rate: float,
         pca_comp_index: int,
+        time: float,
     ) -> None:
         self.cutout: np.ndarray = np.array(cutout)
         self.sampling_rate: float = sampling_rate
         self.pca_comp_index: int = pca_comp_index
+        self.time: float = time
         self.categorized: bool = False
 
     def __len__(self) -> int:
