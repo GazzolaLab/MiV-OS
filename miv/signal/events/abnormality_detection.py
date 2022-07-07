@@ -85,7 +85,12 @@ class AbnormalityDetector:
 
                     for cutout_index, raw_cutout in enumerate(raw_cutouts):
                         channel_cutouts_list.append(
-                            SpikeCutout(raw_cutout, samp, labels[cutout_index])
+                            SpikeCutout(
+                                raw_cutout,
+                                samp,
+                                labels[cutout_index],
+                                spontaneous_spikes[chan_index][cutout_index],
+                            )
                         )
                     exp_cutouts.append(
                         ChannelSpikeCutout(
@@ -195,18 +200,20 @@ class AbnormalityDetector:
 
         exp_filter = signal_filter if signal_filter else self.spont_signal_filter
         exp_detector = spike_detector if spike_detector else self.spont_spike_detector
-
-        spiketrains: List[SpikestampsType] = []
         list_of_cutout_channels = self._get_cutouts(exp_data, exp_filter, exp_detector)
+        new_spiketrains: List[SpikestampsType] = []
 
         prob_model = tf.keras.Sequential([self.model, tf.keras.layers.Softmax()])
-        for chan_index, cutout_channel in enumerate(list_of_cutout_channels):
-            predictions = prob_model.predict(cutout_channel.cutouts[chan_index].cutout)
-
+        for chan_index, cutout_channel in tqdm(enumerate(list_of_cutout_channels)):
             times = []
-            for spike_index, prediction in enumerate(predictions):
-                if prediction[0] >= accuracy_threshold:
-                    times.extend(spiketrains[chan_index][spike_index])
-            spiketrains.append(SpikeTrain(times, times[-1], pq.s))
+            t_stop = 0
+            for cutout_index, spike_cutout in enumerate(cutout_channel.cutouts):
+                prediction = prob_model.predict(
+                    np.array([spike_cutout.cutout]), verbose=0
+                )
+                if prediction[0][0] >= accuracy_threshold:
+                    times.append(spike_cutout.time)
+                    t_stop = spike_cutout.time
+            new_spiketrains.append(SpikeTrain(times, t_stop, pq.s))
 
-        return spiketrains
+        return new_spiketrains
