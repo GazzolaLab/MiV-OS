@@ -39,6 +39,11 @@ class MockSpikeCutout(SpikeCutout):
         super().__init__(cutout, 30000, pca_comp_index, time)
 
 
+def test_len():
+    cutout = MockSpikeCutout(0, 0, 0, 123)
+    assert cutout.__len__() == 123
+
+
 def test_get_cutouts_by_components():
     cutouts = []
     cutouts.append(MockSpikeCutout(0, 0, 0))
