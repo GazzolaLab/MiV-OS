@@ -37,3 +37,17 @@ class MockSpikeCutout(SpikeCutout):
                     cutout[index] = -4 + index * 4 / length
 
         super().__init__(cutout, 30000, pca_comp_index, time)
+
+
+def test_get_cutouts_by_components():
+    cutouts = []
+    cutouts.append(MockSpikeCutout(0, 0, 0))
+    cutouts.append(MockSpikeCutout(1, 1, 0.1))
+    cutouts.append(MockSpikeCutout(2, 2, 0.2))
+    cutouts.append(MockSpikeCutout(0, 0, 0.3))
+    cutouts.append(MockSpikeCutout(1, 1, 0.4))
+    cutouts.append(MockSpikeCutout(2, 2, 0.5))
+    chan_spike_cutout = ChannelSpikeCutout(cutouts, 3, 0)
+
+    cutouts_by_components = chan_spike_cutout.get_cutouts_by_component()
+    assert np.shape(cutouts_by_components) == (3, 2)
