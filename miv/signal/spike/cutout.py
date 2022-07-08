@@ -98,6 +98,8 @@ class ChannelSpikeCutout:
         categorize(np.array([0, 1, -1])) categorizes component 0 as neuronal spikes,
         component 1 as false spikes, and component 2 as uncategorized.
         """
+
+        self.categorized = True
         if len(category_index) < self.num_components:
             self.categorization_list = -1 * np.ones(self.num_components, dtype=int)
             self.categorized = False
