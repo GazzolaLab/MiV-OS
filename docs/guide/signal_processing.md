@@ -127,7 +127,7 @@ There are two way to apply the filter on the signal.
 - If you want to apply the filter to all signals in the `dataset`, `dataset` provide `.apply_filter` method that takes any `filter` (any filter that abide [`filter protocol`](../api/_toctree/FilterAPI/miv.signal.filter.FilterProtocol)).
   - You can select [subset of `dataset`](miv.io.data.DataManager) and [mask-out channels](miv.io.data.Data) before applying the filter.
 
-You can check the list of all provided filters [here](api/signal:signal filter).
+You can check the list of all provided filters [here](../api/signal).
 
 ```{code-cell} ipython3
 # Apply filter to entire dataset
