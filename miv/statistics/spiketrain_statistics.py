@@ -4,6 +4,7 @@ __all__ = [
     "coefficient_variation",
     "peri_stimulus_time",
     "binned_spiketrain",
+    "fano_factor",
 ]
 
 from typing import Any, Dict, Iterable, List, Optional, Union
@@ -185,3 +186,47 @@ def binned_spiketrain(
     bin_spike[bins - 1] = 1
 
     return bin_spike
+
+
+def fano_factor(
+    spiketrains: SpikestampsType,
+    channel: float,
+    t_start: float,
+    t_end: float,
+    n_bins: float,
+):
+    """
+    Calculates the Fano factor for given signal by dividing it into the specified number of bins
+
+    Parameters
+    ----------
+    spiketrains : SpikestampsType
+        Single spike-stamps
+    channel : float
+        electrode/channel
+    t_start : float
+        Binning start time
+    t_end : float
+        Binning end time
+    n_bins : float
+        Number of bins
+
+    Returns
+    -------
+        fano_fac: float
+        fanofactor for the specified channel and conditions
+
+    """
+
+    bin_spike = binned_spiketrain(spiketrains, channel, t_start, t_end, 0.002)
+    assert np.sum(bin_spike) != 0, "The channel has no spikes"
+    large_bin = []
+    bin_length = np.int32(np.size(bin_spike) / n_bins)
+    count = 0
+    for i in np.arange(n_bins):
+        large_bin.append(np.sum(bin_spike[count : count + bin_length]))
+        count += bin_length
+    bin_array = np.array(large_bin)
+    fano_fac = np.var(bin_array) / np.mean(bin_array)
+
+    return fano_fac
