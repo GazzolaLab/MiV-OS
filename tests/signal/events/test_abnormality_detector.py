@@ -10,8 +10,13 @@ from tests.spike.test_cutout import MockSpikeCutout
 
 
 class MockAbnormalDetector(AbnormalityDetector):
-    def __init__(self, spont_cutouts: List[List[SpikeCutout]], num_components: int):
-        AbnormalityDetector.num_channels = np.shape(spont_cutouts)[0]
+    def __init__(
+        self,
+        spont_cutouts: List[ChannelSpikeCutout],
+        num_components: int,
+        num_channels: int,
+    ):
+        AbnormalityDetector.num_channels = num_channels
         AbnormalityDetector.trained = False
         AbnormalityDetector.num_components = num_components
         AbnormalityDetector.model = None
@@ -33,7 +38,7 @@ def test_categorize_spontaneous():
         cutouts.append(MockSpikeCutout(1, 1, 0.4))
         cutouts.append(MockSpikeCutout(2, 2, 0.5))
         chan_spike_cutouts.append(ChannelSpikeCutout(cutouts, 3, 0))
-    abn_detector = MockAbnormalDetector(chan_spike_cutouts, 3)
+    abn_detector = MockAbnormalDetector(chan_spike_cutouts, 3, 6)
 
     cat_list = [[2, 1, 0], [2, 1, 0]]
     abn_detector.categorize_spontaneous(cat_list)
