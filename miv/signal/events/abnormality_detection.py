@@ -197,6 +197,31 @@ class AbnormalityDetector:
         signal_filter: Optional[FilterProtocol] = None,
         spike_detector: Optional[SpikeDetectionProtocol] = None,
     ) -> List[SpikestampsType]:
+        """This method takes each signle individual spike in the experiment data
+        and uses the trained model to predict whether the spike is neuronal.
+
+        Parameters
+        ----------
+        exp_data : Data
+            Experiment data
+        accuracy_threshold : float, defualt = 0.9
+            The category prediction comes in probabilities for each category.
+            If the probability for "neuronal" is higher than this threshold,
+            the spike will be included.
+        signal_filter : Optional[FilterProtocol], default = None
+            Filter applied to the experiment data before spike detection.
+            If left empty or None, the same filter for the spontaneous data
+            will be used.
+        spike_detector : Optional[SpikeDetectionProtocol], default = None
+            The spike detector used to detect spikes on the experiment data.
+            If left empty or None, the same spike detector for the spontaneous
+            data will be used.
+
+        Returns
+        -------
+        (Same return format as SpikeDetectionProtocol)
+        A list of SpikestampsType for each channel
+        """
 
         exp_filter = signal_filter if signal_filter else self.spont_signal_filter
         exp_detector = spike_detector if spike_detector else self.spont_spike_detector
@@ -217,3 +242,55 @@ class AbnormalityDetector:
             new_spiketrains.append(SpikeTrain(times, t_stop, pq.s))
 
         return new_spiketrains
+
+    def get_only_neuronal_components(
+        self,
+        exp_data: Data,
+        accuracy_threshold: float = 0.9,
+        signal_filter: Optional[FilterProtocol] = None,
+        spike_detector: Optional[SpikeDetectionProtocol] = None,
+    ) -> List[SpikestampsType]:
+        """This method first takes each spike in a single component group and
+        computer an average spike. Then, this average spike is used to determine
+        whether the component is neuronal and should be returned.
+
+        Parameters
+        ----------
+        exp_data : Data
+            Experiment data
+        accuracy_threshold : float, defualt = 0.9
+            The category prediction comes in probabilities for each category.
+            If the probability for "neuronal" is higher than this threshold,
+            the spikes in the component will be included.
+        signal_filter : Optional[FilterProtocol], default = None
+            Filter applied to the experiment data before spike detection.
+            If left empty or None, the same filter for the spontaneous data
+            will be used.
+        spike_detector : Optional[SpikeDetectionProtocol], default = None
+            The spike detector used to detect spikes on the experiment data.
+            If left empty or None, the same spike detector for the spontaneous
+            data will be used.
+
+        Returns
+        -------
+        (Same return format as SpikeDetectionProtocol)
+        A list of SpikestampsType for each channel
+        """
+
+        # exp_filter = signal_filter if signal_filter else self.spont_signal_filter
+        # exp_detector = spike_detector if spike_detector else self.spont_spike_detector
+        # list_of_cutout_channels = self._get_cutouts(exp_data, exp_filter, exp_detector)
+        # new_spiketrains: List[SpikestampsType] = []
+
+        # prob_model = tf.keras.Sequential([self.model, tf.keras.layers.Softmax()])
+        # for chan_index, cutout_channel in tqdm(enumerate(list_of_cutout_channels)):
+        #     chan_cutouts_by_comp = cutout_channel.get_cutouts_by_component()
+
+        #     for comp_index, comp_cutouts in enumerate(chan_cutouts_by_comp):
+        #         comp_cutout: List[List[float]] = []
+
+        #         for cutout_index, spike_cutout in comp_cutouts:
+        #             comp_cutout.append(spike_cutout.cutout)
+
+        # return new_spiketrains
+        return []
