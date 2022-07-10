@@ -222,6 +222,8 @@ class AbnormalityDetector:
         (Same return format as SpikeDetectionProtocol)
         A list of SpikestampsType for each channel
         """
+        if not self.trained:
+            raise Exception("Abnormality detector is not trained yet.")
 
         exp_filter = signal_filter if signal_filter else self.spont_signal_filter
         exp_detector = spike_detector if spike_detector else self.spont_spike_detector
@@ -276,6 +278,8 @@ class AbnormalityDetector:
         (Same return format as SpikeDetectionProtocol)
         A list of SpikestampsType for each channel
         """
+        if not self.trained:
+            raise Exception("Abnormality detector is not trained yet.")
 
         exp_filter = signal_filter if signal_filter else self.spont_signal_filter
         exp_detector = spike_detector if spike_detector else self.spont_spike_detector
