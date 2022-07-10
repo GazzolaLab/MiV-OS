@@ -277,20 +277,30 @@ class AbnormalityDetector:
         A list of SpikestampsType for each channel
         """
 
-        # exp_filter = signal_filter if signal_filter else self.spont_signal_filter
-        # exp_detector = spike_detector if spike_detector else self.spont_spike_detector
-        # list_of_cutout_channels = self._get_cutouts(exp_data, exp_filter, exp_detector)
-        # new_spiketrains: List[SpikestampsType] = []
+        exp_filter = signal_filter if signal_filter else self.spont_signal_filter
+        exp_detector = spike_detector if spike_detector else self.spont_spike_detector
+        list_of_cutout_channels = self._get_cutouts(exp_data, exp_filter, exp_detector)
+        new_spiketrains: List[SpikestampsType] = []
+        prob_model = tf.keras.Sequential([self.model, tf.keras.layers.Softmax()])
 
-        # prob_model = tf.keras.Sequential([self.model, tf.keras.layers.Softmax()])
-        # for chan_index, cutout_channel in tqdm(enumerate(list_of_cutout_channels)):
-        #     chan_cutouts_by_comp = cutout_channel.get_cutouts_by_component()
+        for chan_index, cutout_channel in tqdm(enumerate(list_of_cutout_channels)):
+            chan_cutouts_by_comp = cutout_channel.get_cutouts_by_component()
+            channel_times = []
 
-        #     for comp_index, comp_cutouts in enumerate(chan_cutouts_by_comp):
-        #         comp_cutout: List[List[float]] = []
+            for comp_index, comp_cutouts in enumerate(chan_cutouts_by_comp):
+                loaded_comp_cutouts: List[List[float]] = []
 
-        #         for cutout_index, spike_cutout in comp_cutouts:
-        #             comp_cutout.append(spike_cutout.cutout)
+                for cutout_index, spike_cutout in comp_cutouts:
+                    loaded_comp_cutouts.append(spike_cutout.cutout)
 
-        # return new_spiketrains
-        return []
+                comp_mean_cutout = np.mean(loaded_comp_cutouts, axis=0)
+                prediction = prob_model.predict(comp_mean_cutout, verbose=0)
+
+                if prediction[0] >= accuracy_threshold:
+                    for cutout_index, spike_cutout in comp_cutouts:
+                        channel_times.append(spike_cutout.time)
+
+            t_stop = 0 if not (channel_times) else channel_times[-1]
+            new_spiketrains.append(SpikeTrain(channel_times, t_stop, pq.s))
+
+        return new_spiketrains
