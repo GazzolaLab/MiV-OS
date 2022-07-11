@@ -32,7 +32,7 @@ def load_data():
 
     path = get_file(
         file_url=base_url,
-        cache_subdir=subdir,
+        directory=subdir,
         fname=file,
         file_hash=file_hash,
         archive_format=None,
