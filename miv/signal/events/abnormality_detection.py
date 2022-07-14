@@ -17,7 +17,7 @@ from miv.signal.spike import (
     SpikeCutout,
     SpikeDetectionProtocol,
 )
-from miv.typing import SpikestampsType
+from miv.typing import KerasModelType, SpikestampsType
 from miv.visualization import extract_waveforms
 
 
@@ -44,7 +44,6 @@ class AbnormalityDetector:
         spont_signal_filter: FilterProtocol,
         spont_spike_detector: SpikeDetectionProtocol,
         pca_num_components: int = 3,
-        model: Optional[tf.keras.Model] = None,
     ):
         self.spontaneous_data: Data = spontaneous_data
         self.spont_signal_filter: FilterProtocol = spont_signal_filter
@@ -52,7 +51,7 @@ class AbnormalityDetector:
         self.num_components: int = pca_num_components
         self.trained: bool = False
         self.categorized: bool = False
-        self.model = model if model else None
+        self.model = None
         self.skipped_channels: List[int] = []
 
         # 1. Generate PCA cutouts for spontaneous recording
@@ -126,16 +125,18 @@ class AbnormalityDetector:
             self.spontaneous_cutouts[chan_index].categorize(np.array(chan_row))
         self.categorized = True
 
-    def train_model(self, layer_sizes: List[int], epochs: int = 5) -> Dict[str, Any]:
+    def train_model(
+        self, model: KerasModelType = None, epochs: int = 5
+    ) -> Dict[str, Any]:
         """Create and train model for cutout recognition
         This is the third step in the process of abnormality detection.
 
         Parameters
         ----------
-        layer_sizes : List[int]
-            The number of nodes in each layer.
-            For example, a first layer with 256 nodes and a second with 64 nodes
-            would be [256, 64].
+        model : KerasModelType
+            The keras model used.
+            By passing None, a default keras model will be built with one hidden layer
+            that is the same size as the number of sample points in the cutout.
         epochs : int, default = 5
             The number of iterations for model training
 
@@ -169,19 +170,18 @@ class AbnormalityDetector:
         test_cutouts = np.array(labeled_cutouts[split:])
         test_labels = np.array(labels[split:])
 
-        # Set up and train model
-        layers = [tf.keras.layers.Dense(np.shape(labeled_cutouts)[1])]
-        for layer_size in layer_sizes:
-            layers.append(tf.keras.layers.Dense(layer_size))
-        layers.append(
-            tf.keras.layers.Dense(len(self.spontaneous_cutouts[0].CATEGORY_NAMES) - 1)
-        )
-        model = tf.keras.Sequential(layers)
-        model.compile(
-            optimizer="adam",
-            loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-            metrics=["accuracy"],
-        )
+        # Set up model (if not passed as argument)
+        hidden_layer_size = len(self.spontaneous_cutouts[0].cutouts[0].cutout)
+        if model is None:
+            self._create_default_model(
+                np.shape(labeled_cutouts[1]),
+                hidden_layer_size,
+                len(self.spontaneous_cutouts[0].CATEGORY_NAMES) - 1,
+            )
+        else:
+            self.model = model
+
+        # Train model
         model.fit(train_cutouts, train_labels, epochs=epochs)
 
         # Test and return model
@@ -189,6 +189,19 @@ class AbnormalityDetector:
         self.model = model
         self.trained = True
         return {"test_loss": test_loss, "test_accuracy": test_acc, "size": size}
+
+    def _create_defualt_model(self, input_size, hidden_size, output_size):
+        layers = [
+            tf.keras.layers.Dense(input_size),
+            tf.keras.layers.Dense(hidden_size),
+            tf.keras.layers.Dense(output_size),
+        ]
+        self.model = tf.keras.Sequential(layers)
+        self.model.compile(
+            optimizer="adam",
+            loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+            metrics=["accuracy"],
+        )
 
     def get_only_neuronal_spikes(
         self,
