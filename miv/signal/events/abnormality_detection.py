@@ -16,6 +16,7 @@ from miv.signal.spike import (
     PCADecomposition,
     SpikeCutout,
     SpikeDetectionProtocol,
+    SpikeFeatureExtractionProtocol,
 )
 from miv.typing import KerasModelType, SpikestampsType
 from miv.visualization import extract_waveforms
@@ -34,8 +35,6 @@ class AbnormalityDetector:
             Spontaneous signal filter used prior to spike detection
         spont_spike_detector : SpikeDetectionProtocol
             Spontaneous spike detector used to get spiketrains from signal
-        pca_num_components : int, default = 3
-            The number of components in PCA decomposition
     """
 
     def __init__(
@@ -43,21 +42,21 @@ class AbnormalityDetector:
         spontaneous_data: Data,
         spont_signal_filter: FilterProtocol,
         spont_spike_detector: SpikeDetectionProtocol,
-        pca_num_components: int = 3,
+        spike_feature_extractor: SpikeFeatureExtractionProtocol,
     ):
         self.spontaneous_data: Data = spontaneous_data
-        self.spont_signal_filter: FilterProtocol = spont_signal_filter
-        self.spont_spike_detector = spont_spike_detector
-        self.num_components: int = pca_num_components
         self.trained: bool = False
         self.categorized: bool = False
         self.model = None
         self.skipped_channels: List[int] = []
 
-        # 1. Generate PCA cutouts for spontaneous recording
+        # Generate PCA cutouts for spontaneous recording
         self.num_channels: int = 0
         self.spontaneous_cutouts = self._get_cutouts(
-            spontaneous_data, self.spont_signal_filter, self.spont_spike_detector
+            spontaneous_data,
+            spont_signal_filter,
+            spont_spike_detector,
+            spike_feature_extractor,
         )
 
     def _get_cutouts(
@@ -65,8 +64,8 @@ class AbnormalityDetector:
         data: Data,
         signal_filter: FilterProtocol,
         spike_detector: SpikeDetectionProtocol,
+        spike_feature_extractor: SpikeFeatureExtractionProtocol,
     ) -> List[ChannelSpikeCutout]:
-        pca = PCADecomposition()
         with data.load() as (sig, times, samp):
             spontaneous_sig = signal_filter(sig, samp)
             spontaneous_spikes = spike_detector(spontaneous_sig, times, samp)
@@ -80,7 +79,9 @@ class AbnormalityDetector:
                     raw_cutouts = extract_waveforms(
                         spontaneous_sig, spontaneous_spikes, chan_index, samp
                     )
-                    labels, transformed = pca.project(self.num_components, raw_cutouts)
+                    labels, transformed = spike_feature_extractor.project(
+                        self.num_components, raw_cutouts
+                    )
 
                     for cutout_index, raw_cutout in enumerate(raw_cutouts):
                         channel_cutouts_list.append(
