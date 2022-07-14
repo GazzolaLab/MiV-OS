@@ -5,7 +5,7 @@ from miv.signal.spike.cutout import ChannelSpikeCutout, SpikeCutout
 
 class MockSpikeCutout(SpikeCutout):
     def __init__(
-        self, spike_type: int, pca_comp_index: int, time: float, length: int = 40
+        self, spike_type: int, extractor_comp_index: int, time: float, length: int = 40
     ):
         """Mock SpikeCutout object
 
@@ -15,7 +15,7 @@ class MockSpikeCutout(SpikeCutout):
             0 for flat spike cutout
             1 for sine
             2 for triangle
-        pca_comp_index : int
+        extractor_comp_index : int
         time : float
         length : int, default = 40
             number of sampling points
@@ -36,7 +36,7 @@ class MockSpikeCutout(SpikeCutout):
                 else:
                     cutout[index] = -4 + index * 4 / length
 
-        super().__init__(cutout, 30000, pca_comp_index, time)
+        super().__init__(cutout, 30000, extractor_comp_index, time)
 
 
 def test_len():
@@ -73,8 +73,8 @@ def test_categorize():
     for spike_index, spike_cutout in enumerate(chan_spike_cutout.cutouts):
         assert spike_cutout.categorized
         assert (
-            chan_spike_cutout.categorization_list[spike_cutout.pca_comp_index]
-            == cat_list[spike_cutout.pca_comp_index]
+            chan_spike_cutout.categorization_list[spike_cutout.extractor_comp_index]
+            == cat_list[spike_cutout.extractor_comp_index]
         )
 
 

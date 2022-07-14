@@ -13,7 +13,6 @@ from miv.io import Data, DataManager
 from miv.signal.filter import ButterBandpass, FilterProtocol
 from miv.signal.spike import (
     ChannelSpikeCutout,
-    PCADecomposition,
     SpikeCutout,
     SpikeDetectionProtocol,
     SpikeFeatureExtractionProtocol,
@@ -25,7 +24,7 @@ from miv.visualization import extract_waveforms
 class AbnormalityDetector:
     """Abnormality Detector
     The initialization of this class if the first step in the process.
-    With initialization, PCA cutouts for the spontaneous spikes are generated.
+    With initialization, cutouts for the spontaneous spikes are generated.
 
         Attributes
         ----------
@@ -35,6 +34,10 @@ class AbnormalityDetector:
             Spontaneous signal filter used prior to spike detection
         spont_spike_detector : SpikeDetectionProtocol
             Spontaneous spike detector used to get spiketrains from signal
+        spike_feature_extractor : SpikeFeatureExtractionProtocol
+            Spike feature extraction object (PCA, Wavelet, etc.) used to group
+            the spontaneous cutouts
+        extractor_decomposition_parameter : int, default = 3
     """
 
     def __init__(
@@ -43,14 +46,16 @@ class AbnormalityDetector:
         spont_signal_filter: FilterProtocol,
         spont_spike_detector: SpikeDetectionProtocol,
         spike_feature_extractor: SpikeFeatureExtractionProtocol,
+        extractor_decomposition_parameter: int = 3,
     ):
         self.spontaneous_data: Data = spontaneous_data
+        self.extractor_decomposition_parameter: int = extractor_decomposition_parameter
         self.trained: bool = False
         self.categorized: bool = False
         self.model = None
         self.skipped_channels: List[int] = []
 
-        # Generate PCA cutouts for spontaneous recording
+        # Generate cutouts for spontaneous recording
         self.num_channels: int = 0
         self.spontaneous_cutouts = self._get_cutouts(
             spontaneous_data,
@@ -74,13 +79,16 @@ class AbnormalityDetector:
             self.skipped_channels = []  # Channels with not enough spikes for cutouts
             exp_cutouts = []  # List of SpikeCutout objects
             for chan_index in tqdm(range(self.num_channels)):
-                if spontaneous_spikes[chan_index].shape[0] >= self.num_components:
+                if (
+                    spontaneous_spikes[chan_index].shape[0]
+                    >= self.extractor_decomposition_parameter
+                ):
                     channel_cutouts_list: List[SpikeCutout] = []
                     raw_cutouts = extract_waveforms(
                         spontaneous_sig, spontaneous_spikes, chan_index, samp
                     )
                     labels, transformed = spike_feature_extractor.project(
-                        self.num_components, raw_cutouts
+                        self.extractor_decomposition_parameter, raw_cutouts
                     )
 
                     for cutout_index, raw_cutout in enumerate(raw_cutouts):
@@ -95,7 +103,7 @@ class AbnormalityDetector:
                     exp_cutouts.append(
                         ChannelSpikeCutout(
                             np.array(channel_cutouts_list),
-                            self.num_components,
+                            self.extractor_decomposition_parameter,
                             chan_index,
                         )
                     )
@@ -120,7 +128,7 @@ class AbnormalityDetector:
         categorization_list: List[List[int]]
             The categorization given to components of channels of the spontaneous recording.
             This is a 2D list. The row index represents the channel index. The column
-            index represents the PCA component index.
+            index represents the extractor component index.
         """
         for chan_index, chan_row in enumerate(categorization_list):
             self.spontaneous_cutouts[chan_index].categorize(np.array(chan_row))

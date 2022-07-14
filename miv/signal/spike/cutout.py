@@ -15,7 +15,7 @@ class SpikeCutout:
     ----------
     cutout : Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]
     sampling_rate : float
-    pca_comp_index : int
+    extractor_comp_index : int
     time : float
     """
 
@@ -23,12 +23,12 @@ class SpikeCutout:
         self,
         cutout: Union[np.ndarray, Tuple[np.ndarray, np.ndarray]],
         sampling_rate: float,
-        pca_comp_index: int,
+        extractor_comp_index: int,
         time: float,
     ) -> None:
         self.cutout: np.ndarray = np.array(cutout)
         self.sampling_rate: float = sampling_rate
-        self.pca_comp_index: int = pca_comp_index
+        self.extractor_comp_index: int = extractor_comp_index
         self.time: float = time
         self.categorized: bool = False
 
@@ -43,8 +43,9 @@ class ChannelSpikeCutout:
     ----------
     cutouts : np.ndarray
         1D NumPy array of SpikeCutout objects that belong to the same channel
-    num_components : int
-        Number of components for PCA decomposition
+    extractor_decomposition_prarmeter : int
+        Number of components for PCA decomposition or the number of features
+        for wavelet decomposition
     channel_index : int
     categorized : bool
     categorization_list : Optional[np.ndarray], defualt = None
@@ -78,13 +79,13 @@ class ChannelSpikeCutout:
         """
         Returns
         -------
-        2D list of SpikeCutout elements where rows correspond to PCA component indices
+        2D list of SpikeCutout elements where rows correspond to extractor component indices
         """
         components: List[List[SpikeCutout]] = []
         for row_index in range(self.num_components):
             components.append([])
         for index, cutout in enumerate(self.cutouts):
-            components[cutout.pca_comp_index].append(cutout)
+            components[cutout.extractor_comp_index].append(cutout)
         return components
 
     def categorize(self, category_index: np.ndarray) -> None:
@@ -108,7 +109,9 @@ class ChannelSpikeCutout:
             self.categorized = -1 not in self.categorization_list
 
         for cutout_index, cutout in enumerate(self.cutouts):
-            cutout.categorized = self.categorization_list[cutout.pca_comp_index] != -1
+            cutout.categorized = (
+                self.categorization_list[cutout.extractor_comp_index] != -1
+            )
 
     def get_labeled_cutouts(self) -> Dict[str, Any]:
         """
@@ -128,7 +131,7 @@ class ChannelSpikeCutout:
         size = 0
         for cutout_index, cutout in enumerate(self.cutouts):
             if cutout.categorized:
-                labels.append(self.categorization_list[cutout.pca_comp_index])
+                labels.append(self.categorization_list[cutout.extractor_comp_index])
                 labeled_cutouts.append(list(cutout.cutout))
                 size += 1
         return {"labels": labels, "labeled_cutouts": labeled_cutouts, "size": size}
