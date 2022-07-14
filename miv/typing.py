@@ -12,4 +12,4 @@ SignalType = Union[
 ]  # Shape should be [signal_length, n_channel]
 TimestampsType = np.ndarray
 SpikestampsType = Union[np.ndarray, neo.core.SpikeTrain]
-DeepLearningModelType = tf.keras.Model
+KerasModelType = tf.keras.Model
