@@ -53,7 +53,11 @@ class AbnormalityDetector:
         self.trained: bool = False
         self.categorized: bool = False
         self.model = None
+
         self.skipped_channels: List[int] = []
+        self.test_cutouts = np.array([])
+        self.test_labels = np.array([])
+        self.model_size: int = 0  # number of labeled spikes used to train model
 
         # Generate cutouts for spontaneous recording
         self.num_channels: int = 0
@@ -134,9 +138,7 @@ class AbnormalityDetector:
             self.spontaneous_cutouts[chan_index].categorize(np.array(chan_row))
         self.categorized = True
 
-    def train_model(
-        self, model: KerasModelType = None, epochs: int = 5
-    ) -> Dict[str, Any]:
+    def train_model(self, model: KerasModelType = None, epochs: int = 5) -> None:
         """Create and train model for cutout recognition
         This is the third step in the process of abnormality detection.
 
@@ -148,18 +150,11 @@ class AbnormalityDetector:
             that is the same size as the number of sample points in the cutout.
         epochs : int, default = 5
             The number of iterations for model training
-
-        Returns
-        -------
-        test_loss : float
-        test_accuracy : float
-        size : float
-            number of spike cutouts used for training
         """
         # Get the labeled cutouts
         labeled_cutouts = []
         labels = []
-        size = 0
+        self.model_size = 0
         for chan_index, channelCutout in enumerate(self.spontaneous_cutouts):
             channel_labeled_cutouts = channelCutout.get_labeled_cutouts()
             for spike_index, spike_label in enumerate(
@@ -169,15 +164,15 @@ class AbnormalityDetector:
                 labeled_cutouts.append(
                     list(channel_labeled_cutouts["labeled_cutouts"][spike_index])
                 )
-            size += channel_labeled_cutouts["size"]
+            self.model_size += channel_labeled_cutouts["size"]
 
         # Shuffle the cutouts and split into training and test portions
         labeled_cutouts, labels = shuffle(labeled_cutouts, labels)
-        split = int(size * 0.8)
+        split = int(self.model_size * 0.8)
         train_cutouts = np.array(labeled_cutouts[:split])
         train_labels = np.array(labels[:split])
-        test_cutouts = np.array(labeled_cutouts[split:])
-        test_labels = np.array(labels[split:])
+        self.test_cutouts = np.array(labeled_cutouts[split:])
+        self.test_labels = np.array(labels[split:])
 
         # Set up model (if not passed as argument)
         hidden_layer_size = len(self.spontaneous_cutouts[0].cutouts[0].cutout)
@@ -191,13 +186,39 @@ class AbnormalityDetector:
             self.model = model
 
         # Train model
-        model.fit(train_cutouts, train_labels, epochs=epochs)
-
-        # Test and return model
-        test_loss, test_acc = model.evaluate(test_cutouts, test_labels)
-        self.model = model
+        self.model.fit(train_cutouts, train_labels, epochs=epochs)
         self.trained = True
-        return {"test_loss": test_loss, "test_accuracy": test_acc, "size": size}
+
+    def evaluate_model(
+        self,
+        test_cutouts: Optional[np.ndarray] = None,
+        test_labels: Optional[np.ndarray] = None,
+    ) -> Dict[str, Any]:
+        """Evaluate the trained model
+
+        Parameters
+        ----------
+        test_cutouts : Optional[np.ndarray], default = None
+            Raw 2D numpy array of rows of cutout sample points
+        test_labels : Optional[np.ndarray], default = None
+            1D numpy array of categorization indices
+
+        Returns
+        -------
+        test_loss : float
+            1 if model was not trained
+        test_accuracy : float
+            0 if model was not trained
+        """
+
+        if not self.trained:
+            return {"test_loss": 1, "test_accuracy": 0}
+
+        data = test_cutouts if test_cutouts else self.test_cutouts
+        labels = test_labels if test_labels else self.test_labels
+
+        loss, acc = self.model.evaluate(data, labels)
+        return {"test_loss": loss, "test_accuracy": acc}
 
     def _create_defualt_model(self, input_size, hidden_size, output_size):
         layers = [
