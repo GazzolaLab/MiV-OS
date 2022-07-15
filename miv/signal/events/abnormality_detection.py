@@ -10,6 +10,7 @@ from sklearn.utils import shuffle
 from tqdm import tqdm
 
 from miv.io import Data, DataManager
+from miv.signal.events.protocol import SpikeClassificationModelProtocol
 from miv.signal.filter import ButterBandpass, FilterProtocol
 from miv.signal.spike import (
     ChannelSpikeCutout,
@@ -17,7 +18,7 @@ from miv.signal.spike import (
     SpikeDetectionProtocol,
     SpikeFeatureExtractionProtocol,
 )
-from miv.typing import KerasModelType, SpikestampsType
+from miv.typing import SpikestampsType
 from miv.visualization import extract_waveforms
 
 
@@ -52,7 +53,7 @@ class AbnormalityDetector:
         self.extractor_decomposition_parameter: int = extractor_decomposition_parameter
         self.trained: bool = False
         self.categorized: bool = False
-        self.model = None
+        self.model: SpikeClassificationModelProtocol
 
         self.skipped_channels: List[int] = []
         self.test_cutouts = np.array([])
@@ -138,14 +139,16 @@ class AbnormalityDetector:
             self.spontaneous_cutouts[chan_index].categorize(np.array(chan_row))
         self.categorized = True
 
-    def train_model(self, model: KerasModelType = None, epochs: int = 5) -> None:
+    def train_model(
+        self, model: Optional[SpikeClassificationModelProtocol] = None, epochs: int = 5
+    ) -> None:
         """Create and train model for cutout recognition
         This is the third step in the process of abnormality detection.
 
         Parameters
         ----------
-        model : KerasModelType
-            The keras model used.
+        model : SpikeClassificationModelProtocol
+            The classification model used.
             By passing None, a default keras model will be built with one hidden layer
             that is the same size as the number of sample points in the cutout.
         epochs : int, default = 5
@@ -175,8 +178,8 @@ class AbnormalityDetector:
         self.test_labels = np.array(labels[split:])
 
         # Set up model (if not passed as argument)
-        hidden_layer_size = len(self.spontaneous_cutouts[0].cutouts[0].cutout)
         if model is None:
+            hidden_layer_size = len(self.spontaneous_cutouts[0].cutouts[0].cutout)
             self._create_default_model(
                 np.shape(labeled_cutouts[1]),
                 hidden_layer_size,
@@ -220,7 +223,9 @@ class AbnormalityDetector:
         loss, acc = self.model.evaluate(data, labels)
         return {"test_loss": loss, "test_accuracy": acc}
 
-    def _create_defualt_model(self, input_size, hidden_size, output_size):
+    def _create_defualt_model(
+        self, input_size, hidden_size, output_size
+    ) -> SpikeClassificationModelProtocol:
         layers = [
             tf.keras.layers.Dense(input_size),
             tf.keras.layers.Dense(hidden_size),
