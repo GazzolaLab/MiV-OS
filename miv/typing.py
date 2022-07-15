@@ -4,7 +4,6 @@ from typing import Union
 import neo
 import numpy as np
 import numpy.typing as npt
-import tensorflow as tf
 
 SignalType = Union[
     np.ndarray,
@@ -12,4 +11,3 @@ SignalType = Union[
 ]  # Shape should be [signal_length, n_channel]
 TimestampsType = np.ndarray
 SpikestampsType = Union[np.ndarray, neo.core.SpikeTrain]
-KerasModelType = tf.keras.Model
