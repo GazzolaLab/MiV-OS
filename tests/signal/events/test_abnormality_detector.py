@@ -49,6 +49,27 @@ def test_categorize_spontaneous():
             assert elem == cat_list[chan_index][cutout_index]
 
 
+def test_create_default_model():
+    # 2 identical channels with 6 cutouts each
+    chan_spike_cutouts = []
+    for i in range(2):
+        cutouts = []
+        cutouts.append(MockSpikeCutout(0, 0, 0, 40))
+        cutouts.append(MockSpikeCutout(1, 1, 0.1, 40))
+        cutouts.append(MockSpikeCutout(2, 2, 0.2, 40))
+        cutouts.append(MockSpikeCutout(0, 0, 0.3, 40))
+        cutouts.append(MockSpikeCutout(1, 1, 0.4, 40))
+        cutouts.append(MockSpikeCutout(2, 2, 0.5, 40))
+        chan_spike_cutouts.append(ChannelSpikeCutout(cutouts, 3, 0))
+    abn_detector = MockAbnormalDetector(chan_spike_cutouts, 3, 2)
+
+    abn_detector._create_default_model(40, 80, 2)
+
+    assert abn_detector.model is not None
+    assert len(abn_detector.model.layers) == 3
+    assert abn_detector.model.layers[0].trainable
+
+
 # def test_train_model():
 #     chan_spike_cutouts = []
 #     for i in range(2):
@@ -63,7 +84,7 @@ def test_categorize_spontaneous():
 #     abn_detector = MockAbnormalDetector(chan_spike_cutouts, 3, 2)
 
 #     abn_detector.categorize_spontaneous([[-1, 1, 0], [-1, 1, 0]])
-#     abn_detector.train_model([16], 3)
+#     abn_detector.train_model()
 
 #     test_cutout0 = np.array(MockSpikeCutout(0, 0, 0.6).cutout)
 #     test_cutout1 = np.array(MockSpikeCutout(1, 1, 0.7).cutout)
