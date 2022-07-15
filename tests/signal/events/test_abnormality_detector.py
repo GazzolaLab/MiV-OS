@@ -19,8 +19,7 @@ class MockAbnormalDetector(AbnormalityDetector):
     ):
         AbnormalityDetector.num_channels = num_channels
         AbnormalityDetector.trained = False
-        AbnormalityDetector.num_components = num_components
-        AbnormalityDetector.model = None
+        AbnormalityDetector.extractor_decomposition_parameter = num_components
         AbnormalityDetector.categorized = False
         AbnormalityDetector.spontaneous_cutouts = spont_cutouts
 
