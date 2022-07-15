@@ -67,7 +67,8 @@ def test_create_default_model():
 
     assert abn_detector.model is not None
     assert len(abn_detector.model.layers) == 3
-    assert abn_detector.model.layers[0].trainable
+    for layer_index, layer in enumerate(abn_detector.model.layers):
+        assert layer.trainable
 
 
 # def test_train_model():
