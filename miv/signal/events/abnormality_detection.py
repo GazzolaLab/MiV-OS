@@ -50,6 +50,9 @@ class AbnormalityDetector:
         extractor_decomposition_parameter: int = 3,
     ):
         self.spontaneous_data: Data = spontaneous_data
+        self.spont_signal_filter: FilterProtocol = spont_signal_filter
+        self.spont_spike_detector: SpikeDetectionProtocol = spont_spike_detector
+        self.extractor: SpikeFeatureExtractionProtocol = spike_feature_extractor
         self.extractor_decomposition_parameter: int = extractor_decomposition_parameter
         self.trained: bool = False
         self.categorized: bool = False
@@ -116,7 +119,9 @@ class AbnormalityDetector:
                     self.skipped_channels.append(chan_index)
                     exp_cutouts.append(
                         ChannelSpikeCutout(
-                            np.array([]), self.num_components, chan_index
+                            np.array([]),
+                            self.extractor_decomposition_parameter,
+                            chan_index,
                         )
                     )
         return exp_cutouts
@@ -223,9 +228,7 @@ class AbnormalityDetector:
         loss, acc = self.model.evaluate(data, labels)
         return {"test_loss": loss, "test_accuracy": acc}
 
-    def _create_defualt_model(
-        self, input_size, hidden_size, output_size
-    ) -> SpikeClassificationModelProtocol:
+    def _create_default_model(self, input_size, hidden_size, output_size) -> None:
         layers = [
             tf.keras.layers.Dense(input_size),
             tf.keras.layers.Dense(hidden_size),
@@ -275,7 +278,9 @@ class AbnormalityDetector:
 
         exp_filter = signal_filter if signal_filter else self.spont_signal_filter
         exp_detector = spike_detector if spike_detector else self.spont_spike_detector
-        list_of_cutout_channels = self._get_cutouts(exp_data, exp_filter, exp_detector)
+        list_of_cutout_channels = self._get_cutouts(
+            exp_data, exp_filter, exp_detector, self.extractor
+        )
         new_spiketrains: List[SpikestampsType] = []
 
         prob_model = tf.keras.Sequential([self.model, tf.keras.layers.Softmax()])
@@ -331,7 +336,9 @@ class AbnormalityDetector:
 
         exp_filter = signal_filter if signal_filter else self.spont_signal_filter
         exp_detector = spike_detector if spike_detector else self.spont_spike_detector
-        list_of_cutout_channels = self._get_cutouts(exp_data, exp_filter, exp_detector)
+        list_of_cutout_channels = self._get_cutouts(
+            exp_data, exp_filter, exp_detector, self.extractor
+        )
         new_spiketrains: List[SpikestampsType] = []
         prob_model = tf.keras.Sequential([self.model, tf.keras.layers.Softmax()])
 
