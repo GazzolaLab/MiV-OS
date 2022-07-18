@@ -71,6 +71,54 @@ def test_create_default_model():
         assert layer.trainable
 
 
+def test_evaluate_model():
+    train_cutouts = np.ndarray((6, 40))
+    train_cutouts[0] = MockSpikeCutout(0, 0, 0.0, 40).cutout
+    train_cutouts[1] = MockSpikeCutout(1, 1, 0.1, 40).cutout
+    train_cutouts[2] = MockSpikeCutout(2, 2, 0.2, 40).cutout
+    train_cutouts[3] = MockSpikeCutout(0, 0, 0.3, 40).cutout
+    train_cutouts[4] = MockSpikeCutout(1, 1, 0.4, 40).cutout
+    train_cutouts[5] = MockSpikeCutout(2, 2, 0.5, 40).cutout
+    train_labels = np.array([0, 1, 2, 0, 1, 2])
+
+    test_cutouts = train_cutouts[0:4]
+    test_labels = np.array([0, 1, 2, 1])
+
+    layers = [
+        tf.keras.layers.Dense(40),
+        tf.keras.layers.Dense(120),
+        tf.keras.layers.Dense(3),
+    ]
+    model = tf.keras.Sequential(layers)
+    model.compile(
+        optimizer="adam",
+        loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+        metrics=["accuracy"],
+    )
+    # overfitting on purpose
+    model.fit(train_cutouts, train_labels, epochs=40, verbose=0)
+
+    chan_spike_cutouts = []
+    for i in range(2):
+        cutouts = []
+        cutouts.append(MockSpikeCutout(0, 0, 0, 40))
+        cutouts.append(MockSpikeCutout(1, 1, 0.1, 40))
+        cutouts.append(MockSpikeCutout(2, 2, 0.2, 40))
+        cutouts.append(MockSpikeCutout(0, 0, 0.3, 40))
+        cutouts.append(MockSpikeCutout(1, 1, 0.4, 40))
+        cutouts.append(MockSpikeCutout(2, 2, 0.5, 40))
+        chan_spike_cutouts.append(ChannelSpikeCutout(cutouts, 3, 0))
+    abn_detector = MockAbnormalDetector(chan_spike_cutouts, 3, 2)
+
+    abn_detector.model = model
+    abn_detector.trained = False
+    assert abn_detector.evaluate_model(test_cutouts, test_labels)["test_accuracy"] == 0
+    abn_detector.trained = True
+    assert (
+        abn_detector.evaluate_model(test_cutouts, test_labels)["test_accuracy"] == 0.75
+    )
+
+
 # def test_train_model():
 #     chan_spike_cutouts = []
 #     for i in range(2):
