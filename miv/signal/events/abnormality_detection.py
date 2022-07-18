@@ -222,8 +222,8 @@ class AbnormalityDetector:
         if not self.trained:
             return {"test_loss": 1, "test_accuracy": 0}
 
-        data = test_cutouts if test_cutouts else self.test_cutouts
-        labels = test_labels if test_labels else self.test_labels
+        data = test_cutouts if test_cutouts is not None else self.test_cutouts
+        labels = test_labels if test_labels is not None else self.test_labels
 
         loss, acc = self.model.evaluate(data, labels)
         return {"test_loss": loss, "test_accuracy": acc}
