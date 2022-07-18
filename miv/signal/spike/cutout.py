@@ -48,7 +48,7 @@ class ChannelSpikeCutout:
         for wavelet decomposition
     channel_index : int
     categorized : bool
-    categorization_list : Optional[np.ndarray], defualt = None
+    categorization_list : np.ndarray, defualt = np.array([])
         List of categorization
         (categorization_list[component index][category index])
     """
@@ -60,12 +60,12 @@ class ChannelSpikeCutout:
         cutouts: np.ndarray,
         num_components: int,
         channel_index: int,
-        categorization_list: Optional[np.ndarray] = None,
+        categorization_list: np.ndarray = np.array([]),
     ):
         self.cutouts: np.ndarray = cutouts
         self.num_components: int = num_components
         self.channel_index: int = channel_index
-        self.categorized: bool = bool(categorization_list)
+        self.categorized: bool = np.size(categorization_list)
         self.categorization_list: np.ndarray = (
             np.array(categorization_list)
             if self.categorized
