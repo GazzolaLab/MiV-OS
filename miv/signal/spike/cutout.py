@@ -65,12 +65,15 @@ class ChannelSpikeCutout:
         self.cutouts: np.ndarray = cutouts
         self.num_components: int = num_components
         self.channel_index: int = channel_index
-        self.categorized: bool = np.size(categorization_list)
+        valid_cat_list = (len(categorization_list) == num_components) and (
+            -1 not in categorization_list
+        )
         self.categorization_list: np.ndarray = (
             np.array(categorization_list)
-            if self.categorized
+            if valid_cat_list
             else -1 * np.ones(num_components)
         )
+        self.categorize(self.categorization_list)
 
     def __len__(self) -> int:
         return len(self.cutouts)
@@ -88,25 +91,33 @@ class ChannelSpikeCutout:
             components[cutout.extractor_comp_index].append(cutout)
         return components
 
-    def categorize(self, category_index: np.ndarray) -> None:
+    def categorize(self, category_indices: np.ndarray) -> None:
         """
         Categorize the components in this channel with category indices in
         a 1D list where each element corresponds to the component index.
+        Note: if any spike is not categorized, then this channel will not be labeled as categorized.
+        Note: if category_indices parameter length does not match the number of groups of extracted spikes,
+        then all cutouts are labeled as "uncategorized."
 
         CATEGORY_NAMES = ["neuronal", "false", "uncategorized"]
 
-        Example:
-        categorize(np.array([0, 1, -1])) categorizes component 0 as neuronal spikes,
-        component 1 as false spikes, and component 2 as uncategorized.
+        Parameters
+        ----------
+        category_indices : np.ndarray
+            The indices of the category for each group of extracted spikes
+
+            Example:
+            categorize(np.array([0, 1, -1])) categorizes component 0 as neuronal spikes,
+            component 1 as false spikes, and component 2 as uncategorized.
         """
 
-        self.categorized = True
-        if len(category_index) < self.num_components:
+        if len(category_indices) != self.num_components:
             self.categorization_list = -1 * np.ones(self.num_components, dtype=int)
             self.categorized = False
-        else:
-            self.categorization_list = category_index
-            self.categorized = -1 not in self.categorization_list
+            return
+
+        self.categorization_list = category_indices
+        self.categorized = -1 not in self.categorization_list
 
         for cutout_index, cutout in enumerate(self.cutouts):
             cutout.categorized = (

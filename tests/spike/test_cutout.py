@@ -58,7 +58,7 @@ def test_get_cutouts_by_components():
     assert np.shape(cutouts_by_components) == (3, 2)
 
 
-def test_categorize():
+def test_categorize_with_method():
     cutouts = []
     cutouts.append(MockSpikeCutout(0, 0, 0))
     cutouts.append(MockSpikeCutout(1, 1, 0.1))
@@ -70,6 +70,7 @@ def test_categorize():
 
     cat_list = [2, 1, 0]
     chan_spike_cutout.categorize(cat_list)
+    assert chan_spike_cutout.categorized
     for spike_index, spike_cutout in enumerate(chan_spike_cutout.cutouts):
         assert spike_cutout.categorized
         assert (
@@ -77,20 +78,47 @@ def test_categorize():
             == cat_list[spike_cutout.extractor_comp_index]
         )
 
+    cat_list = [-1, 1, 0]
+    chan_spike_cutout.categorize(cat_list)
+    assert not chan_spike_cutout.categorized
+    assert not chan_spike_cutout.cutouts[0].categorized
+    assert chan_spike_cutout.cutouts[1].categorized
+    assert chan_spike_cutout.cutouts[2].categorized
+
+
+def test_categorize_with_init():
+    cutouts = []
+    cutouts.append(MockSpikeCutout(0, 0, 0, 100))
+    cutouts.append(MockSpikeCutout(1, 1, 0.1, 100))
+    cutouts.append(MockSpikeCutout(2, 2, 0.2, 100))
+
+    cat_list = np.array([-1, 1, 0])
+    chan_spike_cutout = ChannelSpikeCutout(cutouts, 3, 0, cat_list)
+
+    assert not chan_spike_cutout.categorized
+    assert not chan_spike_cutout.cutouts[0].categorized
+    assert not chan_spike_cutout.cutouts[1].categorized
+    assert not chan_spike_cutout.cutouts[2].categorized
+
+    cat_list = np.array([1, 1, 0])
+    chan_spike_cutout = ChannelSpikeCutout(cutouts, 3, 0, cat_list)
+
+    assert chan_spike_cutout.categorized
+    assert chan_spike_cutout.cutouts[0].categorized
+    assert chan_spike_cutout.cutouts[1].categorized
+    assert chan_spike_cutout.cutouts[2].categorized
+
 
 def test_labeled_cutouts():
     cutouts = []
     cutouts.append(MockSpikeCutout(0, 0, 0, 100))
     cutouts.append(MockSpikeCutout(1, 1, 0.1, 100))
     cutouts.append(MockSpikeCutout(2, 2, 0.2, 100))
-    cutouts.append(MockSpikeCutout(0, 0, 0.3, 100))
-    cutouts.append(MockSpikeCutout(1, 1, 0.4, 100))
-    cutouts.append(MockSpikeCutout(2, 2, 0.5, 100))
     chan_spike_cutout = ChannelSpikeCutout(cutouts, 3, 0)
 
     cat_list = [-1, 1, 0]
     chan_spike_cutout.categorize(cat_list)
     labeled_cutouts = chan_spike_cutout.get_labeled_cutouts()
-    assert np.shape(labeled_cutouts["labels"]) == (4,)
-    assert np.shape(labeled_cutouts["labeled_cutouts"]) == (4, 100)
-    assert labeled_cutouts["size"] == 4
+    assert np.shape(labeled_cutouts["labels"]) == (2,)
+    assert np.shape(labeled_cutouts["labeled_cutouts"]) == (2, 100)
+    assert labeled_cutouts["size"] == 2
