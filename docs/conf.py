@@ -97,7 +97,7 @@ master_doc = "index"
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 
-html_theme = "sphinx_book_theme"
+html_theme = "pydata_sphinx_theme"
 html_theme_options = {
     "repository_url": "https://github.com/GazzolaLab/MiV-OS",
     "use_repository_button": True,
