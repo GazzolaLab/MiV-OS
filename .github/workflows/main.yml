@@ -74,7 +74,7 @@ jobs:
       - name: Test MiV-OS using pytest
         if: startsWith(runner.os, 'macOS')
         run: |
-          poetry run pytest -c pyproject.toml --cov=miv --cov-report=xml
+          make test_ci
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v2
         with:
