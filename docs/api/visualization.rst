@@ -45,6 +45,7 @@ Causality Analysis
       :toctree: _toctree/VisualizationAPI
 
       pairwise_causality_plot
+      spike_triggered_average_plot
 
 Burst Analysis
 ------------------
@@ -58,6 +59,7 @@ Burst Analysis
       :toctree: _toctree/VisualizationAPI
 
       plot_burst
+
 
 Useful External Packages
 ========================
