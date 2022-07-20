@@ -7,7 +7,8 @@ from miv.core.spiketrain import SpikeTrain
 
 
 def detect_avalanche(
-    signal: SpikeTrain,
+    pop_fir: scipy.sparse.csc_matrix,
+    custom_threshold: bool = True,
 ):
     """Finds neuronal avalanches present in a spike train signal
 
@@ -38,16 +39,18 @@ def detect_avalanche(
         threshold = np.mean(np.nonzero(pop_fir)) / 2
 
     # put 1s where a time bin is within a valid avalache, 0 otherwise
-    evts = pop_fir > thresh
+    events = pop_fir > threshold
 
     # pad and find where avalanches start or end based on where 0s change to
     # 1s and vice versa
-    act_change = diff(concat([0, evts, 0]))
+    act_change = np.diff(np.concat([0, events, 0]))
 
     # 1s indicate an avalanche began in the given time bin
     starts = np.flatnonzero(act_change == 1).reshape(1, -1) + 1
     # -1s indicate an avalanche ended in the previous time bin
     ends = np.flatnonzero(act_change == -1).reshape(1, -1)
+
+    #############################################################################
 
     if td != ts:
         ed2 = ends(np.arange(1, end(), 1).reshape(1, -1))
