@@ -24,8 +24,9 @@ from miv.visualization import extract_waveforms
 
 class AbnormalityDetector:
     """Abnormality Detector
-    The initialization of this class if the first step in the process.
-    With initialization, cutouts for the spontaneous spikes are generated.
+
+    This class integrates NeuronalSpikeClassifier with Data and SpikeFeatureExtractionProtocol
+
 
         Attributes
         ----------
@@ -44,87 +45,103 @@ class AbnormalityDetector:
     def __init__(
         self,
         spontaneous_data: Data,
-        spont_signal_filter: FilterProtocol,
-        spont_spike_detector: SpikeDetectionProtocol,
+        spontaneous_signal_filter: FilterProtocol,
+        spontaneous_spike_detector: SpikeDetectionProtocol,
         spike_feature_extractor: SpikeFeatureExtractionProtocol,
         extractor_decomposition_parameter: int = 3,
-    ):
-        self.spontaneous_data: Data = spontaneous_data
-        self.spont_signal_filter: FilterProtocol = spont_signal_filter
-        self.spont_spike_detector: SpikeDetectionProtocol = spont_spike_detector
-        self.extractor: SpikeFeatureExtractionProtocol = spike_feature_extractor
-        self.extractor_decomposition_parameter: int = extractor_decomposition_parameter
-        self.trained: bool = False
-        self.categorized: bool = False
-        self.model: SpikeClassificationModelProtocol
+    ) -> None:
 
-        self.skipped_channels: List[int] = []
-        self.test_cutouts = np.array([])
-        self.test_labels = np.array([])
-        self.model_size: int = 0  # number of labeled spikes used to train model
-
-        # Generate cutouts for spontaneous recording
-        self.num_channels: int = 0
-        self.spontaneous_cutouts = self._get_cutouts(
+        self.spontaneous_cutouts = self._get_all_cutouts(
             spontaneous_data,
-            spont_signal_filter,
-            spont_spike_detector,
+            spontaneous_signal_filter,
+            spontaneous_spike_detector,
             spike_feature_extractor,
+            extractor_decomposition_parameter,
         )
 
-    def _get_cutouts(
+    # # Don't use this
+    # def __init__(
+    #     self,
+    #     spontaneous_data: Data,
+    #     spont_signal_filter: FilterProtocol,
+    #     spont_spike_detector: SpikeDetectionProtocol,
+    #     spike_feature_extractor: SpikeFeatureExtractionProtocol,
+    #     extractor_decomposition_parameter: int = 3,
+    # ):
+    #     self.spontaneous_data: Data = spontaneous_data
+    #     self.spont_signal_filter: FilterProtocol = spont_signal_filter
+    #     self.spont_spike_detector: SpikeDetectionProtocol = spont_spike_detector
+    #     self.extractor: SpikeFeatureExtractionProtocol = spike_feature_extractor
+    #     self.extractor_decomposition_parameter: int = extractor_decomposition_parameter
+    #     self.trained: bool = False
+    #     self.categorized: bool = False
+    #     self.model: SpikeClassificationModelProtocol
+
+    #     self.skipped_channels: List[int] = []
+    #     self.test_cutouts = np.array([])
+    #     self.test_labels = np.array([])
+    #     self.model_size: int = 0  # number of labeled spikes used to train model
+
+    #     # Generate cutouts for spontaneous recording
+    #     self.num_channels: int = 0
+    #     self.spontaneous_cutouts = self._get_cutouts(
+    #         spontaneous_data,
+    #         spont_signal_filter,
+    #         spont_spike_detector,
+    #         spike_feature_extractor,
+    #     )
+
+    def _get_all_cutouts(
         self,
         data: Data,
         signal_filter: FilterProtocol,
         spike_detector: SpikeDetectionProtocol,
-        spike_feature_extractor: SpikeFeatureExtractionProtocol,
-    ) -> List[ChannelSpikeCutout]:
+        extractor: SpikeFeatureExtractionProtocol,
+        extractor_decomp_param: int,
+    ) -> np.ndarray:
         with data.load() as (sig, times, samp):
-            spontaneous_sig = signal_filter(sig, samp)
-            spontaneous_spikes = spike_detector(spontaneous_sig, times, samp)
-            self.num_channels = spontaneous_sig.shape[1]
+            filtered_sig = signal_filter(sig, samp)
+            spikestamps = spike_detector(filtered_sig, times, samp)
 
-            self.skipped_channels = []  # Channels with not enough spikes for cutouts
-            exp_cutouts = []  # List of SpikeCutout objects
-            for chan_index in tqdm(range(self.num_channels)):
-                if (
-                    spontaneous_spikes[chan_index].shape[0]
-                    >= self.extractor_decomposition_parameter
-                ):
-                    channel_cutouts_list: List[SpikeCutout] = []
-                    raw_cutouts = extract_waveforms(
-                        spontaneous_sig, spontaneous_spikes, chan_index, samp
-                    )
-                    labels, transformed = spike_feature_extractor.project(
-                        self.extractor_decomposition_parameter, raw_cutouts
+            num_channels = np.shape(filtered_sig)[1]
+            return_cutouts = np.ndarray(num_channels)
+
+            for chan_index in tqdm(range(num_channels)):
+                channel_spikes = spikestamps[chan_index]
+
+                if np.size(channel_spikes) < extractor_decomp_param:
+                    return_cutouts[chan_index] = ChannelSpikeCutout(
+                        np.array([]), extractor_decomp_param, chan_index
                     )
 
+                else:
+                    raw_cutouts: np.ndarray = extract_waveforms(
+                        filtered_sig, spikestamps, chan_index, samp
+                    )
+
+                    labels, transformed = extractor.project(
+                        extractor_decomp_param, raw_cutouts
+                    )
+
+                    channel_cutouts_list = []
                     for cutout_index, raw_cutout in enumerate(raw_cutouts):
                         channel_cutouts_list.append(
                             SpikeCutout(
                                 raw_cutout,
                                 samp,
-                                labels[cutout_index],
-                                spontaneous_spikes[chan_index][cutout_index],
+                                extractor_decomp_param,
+                                spikestamps[chan_index][cutout_index],
                             )
                         )
-                    exp_cutouts.append(
-                        ChannelSpikeCutout(
-                            np.array(channel_cutouts_list),
-                            self.extractor_decomposition_parameter,
-                            chan_index,
-                        )
+
+                    return_cutouts[chan_index] = ChannelSpikeCutout(
+                        np.array(
+                            channel_cutouts_list,
+                        ),
+                        extractor_decomp_param,
+                        chan_index,
                     )
-                else:
-                    self.skipped_channels.append(chan_index)
-                    exp_cutouts.append(
-                        ChannelSpikeCutout(
-                            np.array([]),
-                            self.extractor_decomposition_parameter,
-                            chan_index,
-                        )
-                    )
-        return exp_cutouts
+        return return_cutouts
 
     def categorize_spontaneous(
         self, categorization_list: List[List[int]]  # list[chan_index][comp_index]
