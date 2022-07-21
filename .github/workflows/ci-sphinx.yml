@@ -22,11 +22,12 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
-
-      - name: Poetry Setup
+      - name: Setup Poetry
+        uses: Gr1N/setup-poetry@v7
+        with:
+          poetry-preview: false
+      - name: Poetry install docs dependencies
         run: |
-            apt-get update -y && apt-get install curl
-            make poetry-download
             poetry --version
             poetry config virtualenvs.in-project false
             poetry config virtualenvs.create false

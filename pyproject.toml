@@ -169,16 +169,3 @@ addopts = [
 #  "--doctest-modules", TODO: Try to include pytest.doctest
 #  "--doctest-continue-on-failure",
 ]
-
-[tool.coverage.run]
-source = ["tests"]
-
-[coverage.paths]
-source = "miv"
-
-[coverage.run]
-branch = true
-
-[coverage.report]
-fail_under = 50
-show_missing = true

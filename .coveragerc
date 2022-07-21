@@ -4,6 +4,8 @@ exclude_lines =
     # Don't complain if non-runnable code isn't run:
     if 0:
     if __name__ == __main__:
+fail_under = 40
+show_missing = true
 
 [run]
 branch = True
