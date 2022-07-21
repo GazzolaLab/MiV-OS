@@ -261,19 +261,6 @@ class AbnormalityDetector:
 
         return {"test_loss": loss, "test_accuracy": acc}
 
-    def _create_default_model(self, input_size, hidden_size, output_size) -> None:
-        layers = [
-            tf.keras.layers.Dense(input_size),
-            tf.keras.layers.Dense(hidden_size),
-            tf.keras.layers.Dense(output_size),
-        ]
-        self.model = tf.keras.Sequential(layers)
-        self.model.compile(
-            optimizer="adam",
-            loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-            metrics=["accuracy"],
-        )
-
     def get_only_neuronal_spikes(
         self,
         exp_data: Data,
