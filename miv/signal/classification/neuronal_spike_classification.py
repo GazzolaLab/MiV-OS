@@ -10,7 +10,7 @@ from miv.signal.classification.protocol import SpikeClassificationModelProtocol
 
 
 class NeuronalSpikeClassifier:
-    """Neuronal Spike Detector
+    """Spike Classifier Classifier
 
     This object uses a deep learning model to tell neuronal spikes apart from other spikes.
 
