@@ -9,8 +9,8 @@ from miv.typing import SpikestampsType
 
 
 def plot_connectivity(
-    mea_map: numpy_array,
-    connectivity_matrix: numpy_array,
+    mea_map: array,
+    connectivity_matrix: array
     interactive: bool,
 ):
     """
@@ -18,9 +18,9 @@ def plot_connectivity(
 
     Parameters
     ----------
-    mea_map : numpy array
+    mea_map : array
         array containing spatial location of electrodes
-    connectivity_matrix: numpy array
+    connectivity_matrix: array
         array containing the connectivity parameters for each pair of electrodes
     interactive: bool
        If set True, the pyvis is used to generate an interactive html plot while False generates a graphviz based plot as pdf
@@ -28,7 +28,7 @@ def plot_connectivity(
     Returns
     -------
     figure, axes
-       matplot figure with bursts plotted for all electrodes
+       matplot figure with connectivity plotted for all electrodes
     """
 
     num_elec = np.size(mea_map)
