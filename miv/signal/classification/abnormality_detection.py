@@ -64,38 +64,6 @@ class AbnormalityDetector:
         self.classifier: NeuronalSpikeClassifier
         self.categorized: bool = False
 
-    # # Don't use this
-    # def __init__(
-    #     self,
-    #     spontaneous_data: Data,
-    #     spont_signal_filter: FilterProtocol,
-    #     spont_spike_detector: SpikeDetectionProtocol,
-    #     spike_feature_extractor: SpikeFeatureExtractionProtocol,
-    #     extractor_decomposition_parameter: int = 3,
-    # ):
-    #     self.spontaneous_data: Data = spontaneous_data
-    #     self.spont_signal_filter: FilterProtocol = spont_signal_filter
-    #     self.spont_spike_detector: SpikeDetectionProtocol = spont_spike_detector
-    #     self.extractor: SpikeFeatureExtractionProtocol = spike_feature_extractor
-    #     self.extractor_decomposition_parameter: int = extractor_decomposition_parameter
-    #     self.trained: bool = False
-    #     self.categorized: bool = False
-    #     self.model: SpikeClassificationModelProtocol
-
-    #     self.skipped_channels: List[int] = []
-    #     self.test_cutouts = np.array([])
-    #     self.test_labels = np.array([])
-    #     self.model_size: int = 0  # number of labeled spikes used to train model
-
-    #     # Generate cutouts for spontaneous recording
-    #     self.num_channels: int = 0
-    #     self.spontaneous_cutouts = self._get_cutouts(
-    #         spontaneous_data,
-    #         spont_signal_filter,
-    #         spont_spike_detector,
-    #         spike_feature_extractor,
-    #     )
-
     def _get_all_cutouts(
         self,
         data: Data,
