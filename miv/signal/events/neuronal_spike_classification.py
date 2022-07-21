@@ -16,7 +16,9 @@ class NeuronalSpikeClassifier:
 
         Attributes
         ----------
-        model : SpikeClassificationModelProtocol
+        model : SpikeClassificationModelProtocol, default = None
+        train_spikes : np.ndarray
+        train_labels : np.ndarray
 
     """
 
@@ -30,6 +32,14 @@ class NeuronalSpikeClassifier:
     def create_default_tf_keras_model(
         self, train_spikes: np.ndarray, train_labels: np.ndarray
     ) -> None:
+        """Creates a defualt classification model
+
+        Parameters
+        ----------
+        train_spikes : np.ndarray
+        train_labels : np.ndarray
+
+        """
 
         if np.shape(train_spikes)[0] != np.shape(train_labels)[0]:
             raise Exception("train spikes and train labels have incompatible sizes")
@@ -47,9 +57,18 @@ class NeuronalSpikeClassifier:
         self.model = tf.keras.Sequential(layers)
 
     def compile_model(self, **compile_kwargs) -> None:
+        """Compile model
+
+        Parameters
+        ----------
+        **compile_kwargs
+            keyworded arguments for the compile method of the model
+        """
         self.model.compile(compile_kwargs)
 
     def default_compile_model(self) -> None:
+        """Compile model with default compile paramters"""
+        # These need to be tweaked
         self.model.compile(
             optimizer="adam",
             loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
@@ -57,6 +76,13 @@ class NeuronalSpikeClassifier:
         )
 
     def train_model(self, **fit_kwargs) -> None:
+        """Train model
+
+        Parameters
+        ----------
+        **fit_kwargs
+            keyworded arguments for model.fit method
+        """
         self.model.fit(fit_kwargs)
 
     def get_confusion_matrix(
@@ -65,6 +91,19 @@ class NeuronalSpikeClassifier:
         test_labels: np.ndarray,
         **confusion_matrix_kwargs,
     ) -> np.ndarray:
+        """Get a confusion model with test spikes and labels
+
+        Parameters
+        ----------
+        test_spikes : np.ndarray
+        test_labels : np.ndarray
+        **confusion_matrix_kwargs
+            keyworded arguments for tf.math.confusion_matrix method
+
+        Returns
+        -------
+        Numpy 2D array of confusion matrix
+        """
 
         self._validate_model()
 
@@ -74,6 +113,18 @@ class NeuronalSpikeClassifier:
         )
 
     def predict_categories(self, spikes: np.ndarray, **predict_kwargs) -> np.ndarray:
+        """Predict with spikes and get the index of category for each prediction
+
+        Parameters
+        ----------
+        spikes : np.ndarray
+        **predict_kwargs
+            keyworded arguments for model.predict function
+
+        Returns
+        -------
+        Numpy array of prediction outcomes
+        """
 
         self._validate_model()
 
