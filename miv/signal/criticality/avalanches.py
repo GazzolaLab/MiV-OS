@@ -2,12 +2,13 @@ __all__ = ["detect_avalanche"]
 
 
 import numpy as np
+import scipy as sp
 
 from miv.core.spiketrain import SpikeTrain
 
 
 def detect_avalanche(
-    pop_fir: scipy.sparse.csc_matrix,
+    pop_fir: sp.sparse.csc_matrix,
     custom_threshold: bool = True,
 ):
     """Finds neuronal avalanches present in a spike train signal
@@ -26,10 +27,6 @@ def detect_avalanche(
     # each column represents a time bin since str_avas requires us to take sub
     # matrices of the raster from one time index to another. See CSC sparse
     # data format for why this is the case...
-
-    # todo:
-    # asdf to raster conversion
-    raster = 1
 
     # find number of spikes in each time bin
     # from sparse to full
@@ -52,22 +49,22 @@ def detect_avalanche(
 
     #############################################################################
 
-    if td != ts:
-        ed2 = ends(np.arange(1, end(), 1).reshape(1, -1))
-        t2 = starts(arange(2, end()))
-        q = st2 - ed2
-        inds = arange(1, length(st2))
-        inds = inds(q <= td)
-        starts = starts(concat([1, inds + 1]))
-        ends = ends(concat([inds, length(ends)]))
+    # if td != ts:
+    #    ed2 = ends(np.arange(1, end(), 1).reshape(1, -1))
+    #    t2 = starts(arange(2, end()))
+    #    q = st2 - ed2
+    #    inds = arange(1, length(st2))
+    #    inds = inds(q <= td)
+    #    starts = starts(concat([1, inds + 1]))
+    #    ends = ends(concat([inds, length(ends)]))
 
-    lens = ends - starts + 1
-    str_avas = cell(length(lens), 1)
-    szes = zeros(size(lens))
+    # lens = ends - starts + 1
+    # str_avas = []
+    # szes = []
 
-    for ii in arange(1, length(lens)).reshape(-1):
-        # select sub arrays of valid avalanches
-        str_avas[ii] = rast(arange(), arange(starts(ii), ends(ii)))
-        szes[ii] = nnz(str_avas[ii])
+    # for ii in arange(1, length(lens)).reshape(-1):
+    #    # select sub arrays of valid avalanches
+    #    str_avas.append(rast(arange(), arange(starts(ii), ends(ii))))
+    #    szes.append(nnz(str_avas[ii]))
 
-    return str_avas, szes, lens, rast, starts
+    # return str_avas, szes, lens, rast, starts
