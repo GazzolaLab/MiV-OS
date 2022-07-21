@@ -131,7 +131,7 @@ class ChannelSpikeCutout:
         Returns
         -------
         labels :
-            1D list of category label index for each spike
+            1D Numpy array of category label index for each spike
         labeled_cutouts :
             1D list of corresponding cutouts
         size :
@@ -145,4 +145,8 @@ class ChannelSpikeCutout:
                 labels.append(self.categorization_list[cutout.extractor_comp_index])
                 labeled_cutouts.append(list(cutout.cutout))
                 size += 1
-        return {"labels": labels, "labeled_cutouts": labeled_cutouts, "size": size}
+        return {
+            "labels": np.array(labels),
+            "labeled_cutouts": np.array(labeled_cutouts),
+            "size": size,
+        }
