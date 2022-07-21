@@ -10,6 +10,9 @@ from sklearn.utils import shuffle
 from tqdm import tqdm
 
 from miv.io import Data, DataManager
+from miv.signal.classification.neuronal_spike_classification import (
+    NeuronalSpikeClassifier,
+)
 from miv.signal.classification.protocol import SpikeClassificationModelProtocol
 from miv.signal.filter import ButterBandpass, FilterProtocol
 from miv.signal.spike import (
@@ -58,6 +61,8 @@ class AbnormalityDetector:
             spike_feature_extractor,
             extractor_decomposition_parameter,
         )
+        self.classifier: NeuronalSpikeClassifier
+        self.categorized: bool = False
 
     # # Don't use this
     # def __init__(
@@ -144,7 +149,8 @@ class AbnormalityDetector:
         return return_cutouts
 
     def categorize_spontaneous(
-        self, categorization_list: List[List[int]]  # list[chan_index][comp_index]
+        self,
+        categorization_list: np.ndarray,  # categorization_list[chan_index][comp_index]
     ) -> None:
         """Categorize the spontaneous recording components.
         This is the second step in the process of abnormality detection.
@@ -152,13 +158,13 @@ class AbnormalityDetector:
 
         Parameters
         ----------
-        categorization_list: List[List[int]]
+        categorization_list : np.ndarray
             The categorization given to components of channels of the spontaneous recording.
-            This is a 2D list. The row index represents the channel index. The column
+            This is a 2D Numpy array. The row index represents the channel index. The column
             index represents the extractor component index.
         """
         for chan_index, chan_row in enumerate(categorization_list):
-            self.spontaneous_cutouts[chan_index].categorize(np.array(chan_row))
+            self.spontaneous_cutouts[chan_index].categorize(chan_row)
         self.categorized = True
 
     def train_model(
