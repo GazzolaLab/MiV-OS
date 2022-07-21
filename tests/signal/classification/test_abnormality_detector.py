@@ -4,6 +4,7 @@ from unittest import mock
 
 import numpy as np
 import tensorflow as tf
+from grpc import Channel
 
 from miv.signal.events.abnormality_detection import AbnormalityDetector
 from miv.signal.spike.cutout import ChannelSpikeCutout, SpikeCutout
@@ -119,32 +120,29 @@ def test_evaluate_model():
     )
 
 
-# def test_train_model():
-#     chan_spike_cutouts = []
-#     for i in range(2):
-#         cutouts = []
-#         cutouts.append(MockSpikeCutout(0, 0, 0))
-#         cutouts.append(MockSpikeCutout(1, 1, 0.1))
-#         cutouts.append(MockSpikeCutout(2, 2, 0.2))
-#         cutouts.append(MockSpikeCutout(0, 0, 0.3))
-#         cutouts.append(MockSpikeCutout(1, 1, 0.4))
-#         cutouts.append(MockSpikeCutout(2, 2, 0.5))
-#         chan_spike_cutouts.append(ChannelSpikeCutout(cutouts, 3, 0))
-#     abn_detector = MockAbnormalDetector(chan_spike_cutouts, 3, 2)
+def test_train_model():
+    cutouts = []
+    cutouts.append(MockSpikeCutout(0, 0, 0))
+    cutouts.append(MockSpikeCutout(1, 1, 0.1))
+    cutouts.append(MockSpikeCutout(2, 2, 0.2))
+    cutouts.append(MockSpikeCutout(0, 0, 0.3))
+    cutouts.append(MockSpikeCutout(1, 1, 0.4))
+    cutouts.append(MockSpikeCutout(2, 2, 0.5))
+    cat_list = [[0, 1, -1]]
+    chan0_spike_cutout = ChannelSpikeCutout(cutouts, 3, 0)
+    abn_detector = MockAbnormalDetector([chan0_spike_cutout], 3, 1)
 
-#     abn_detector.categorize_spontaneous([[-1, 1, 0], [-1, 1, 0]])
-#     abn_detector.train_model()
+    abn_detector.categorize_spontaneous(cat_list)
 
-#     test_cutout0 = np.array(MockSpikeCutout(0, 0, 0.6).cutout)
-#     test_cutout1 = np.array(MockSpikeCutout(1, 1, 0.7).cutout)
-#     test_cutout2 = np.array(MockSpikeCutout(2, 2, 0.8).cutout)
+    abn_detector.train_model(epochs=10)
 
-#     prob_model = tf.keras.Sequential([abn_detector.model, tf.keras.layers.Softmax()])
+    test0 = np.array(MockSpikeCutout(0, 0, 0).cutout)
+    # test1 = np.array(MockSpikeCutout(1, 0, 0).cutout)
 
-#     prediction0 = prob_model.predict(test_cutout0, verbose=0)
-#     prediction1 = prob_model.predict(test_cutout1, verbose=0)
-#     prediction2 = prob_model.predict(test_cutout2, verbose=0)
+    assert np.shape(test0) == np.shape(cutouts[0].cutout)
 
-#     assert np.argmax(prediction0) == -1
-#     assert np.argmax(prediction1) == 1
-#     assert np.argmax(prediction2) == 0
+    # prob_model = tf.keras.Sequential([abn_detector.model, tf.keras.layers.Softmax()])
+    # prob_model = abn_detector.model
+
+    # pred0 = prob_model.predict(test0, verbose=0)
+    # pred1 = prob_model.predict(test1, verbose=0)

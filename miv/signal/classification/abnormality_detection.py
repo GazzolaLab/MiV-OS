@@ -10,7 +10,7 @@ from sklearn.utils import shuffle
 from tqdm import tqdm
 
 from miv.io import Data, DataManager
-from miv.signal.events.protocol import SpikeClassificationModelProtocol
+from miv.signal.classification.protocol import SpikeClassificationModelProtocol
 from miv.signal.filter import ButterBandpass, FilterProtocol
 from miv.signal.spike import (
     ChannelSpikeCutout,
@@ -145,7 +145,10 @@ class AbnormalityDetector:
         self.categorized = True
 
     def train_model(
-        self, model: Optional[SpikeClassificationModelProtocol] = None, epochs: int = 5
+        self,
+        model: Optional[SpikeClassificationModelProtocol] = None,
+        epochs: int = 5,
+        train_percentage: float = 0.8,
     ) -> None:
         """Create and train model for cutout recognition
         This is the third step in the process of abnormality detection.
@@ -158,6 +161,9 @@ class AbnormalityDetector:
             that is the same size as the number of sample points in the cutout.
         epochs : int, default = 5
             The number of iterations for model training
+        train_percentage : float, default = 0.8
+            The percentage of cutouts used for training the model. The rest is stored
+            as test_cutouts and test_labels.
         """
         # Get the labeled cutouts
         labeled_cutouts = []
@@ -176,7 +182,7 @@ class AbnormalityDetector:
 
         # Shuffle the cutouts and split into training and test portions
         labeled_cutouts, labels = shuffle(labeled_cutouts, labels)
-        split = int(self.model_size * 0.8)
+        split = int(self.model_size * train_percentage)
         train_cutouts = np.array(labeled_cutouts[:split])
         train_labels = np.array(labels[:split])
         self.test_cutouts = np.array(labeled_cutouts[split:])
@@ -184,10 +190,10 @@ class AbnormalityDetector:
 
         # Set up model (if not passed as argument)
         if model is None:
-            hidden_layer_size = len(self.spontaneous_cutouts[0].cutouts[0].cutout)
+            cutout_length = len(self.spontaneous_cutouts[0].cutouts[0].cutout)
             self._create_default_model(
-                np.shape(labeled_cutouts[1]),
-                hidden_layer_size,
+                cutout_length,
+                cutout_length * 4,
                 len(self.spontaneous_cutouts[0].CATEGORY_NAMES) - 1,
             )
         else:
@@ -217,6 +223,9 @@ class AbnormalityDetector:
             1 if model was not trained
         test_accuracy : float
             0 if model was not trained
+        test_precision : float
+        test_recall : float
+        test_f1 : float
         """
 
         if not self.trained:
@@ -226,6 +235,7 @@ class AbnormalityDetector:
         labels = test_labels if test_labels is not None else self.test_labels
 
         loss, acc = self.model.evaluate(data, labels)
+
         return {"test_loss": loss, "test_accuracy": acc}
 
     def _create_default_model(self, input_size, hidden_size, output_size) -> None:

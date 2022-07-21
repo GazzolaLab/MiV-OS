@@ -6,7 +6,7 @@ import numpy as np
 import tensorflow as tf
 
 from miv.io import Data, DataManager
-from miv.signal.events.protocol import SpikeClassificationModelProtocol
+from miv.signal.classification.protocol import SpikeClassificationModelProtocol
 
 
 class NeuronalSpikeClassifier:
