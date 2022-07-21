@@ -9,8 +9,8 @@ from miv.typing import SpikestampsType
 
 
 def plot_connectivity(
-    mea_map: array,
-    connectivity_matrix: array,
+    mea_map: int,
+    connectivity_matrix: float,
     interactive: bool,
 ):
     """
@@ -18,9 +18,9 @@ def plot_connectivity(
 
     Parameters
     ----------
-    mea_map : array
+    mea_map : int
         array containing spatial location of electrodes
-    connectivity_matrix: array
+    connectivity_matrix: float
         array containing the connectivity parameters for each pair of electrodes
     interactive: bool
        If set True, the pyvis is used to generate an interactive html plot while False generates a graphviz based plot as pdf
