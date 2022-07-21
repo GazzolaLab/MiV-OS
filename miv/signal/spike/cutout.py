@@ -147,6 +147,6 @@ class ChannelSpikeCutout:
                 size += 1
         return {
             "labels": np.array(labels),
-            "labeled_cutouts": np.array(labeled_cutouts),
+            "cutouts": np.array(labeled_cutouts),
             "size": size,
         }
