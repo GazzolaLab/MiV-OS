@@ -34,15 +34,14 @@ class AbnormalityDetector:
         Attributes
         ----------
         spontaneous_data : Data
-        experiment_data : Data
-        spont_signal_filter : FilterProtocol
-            Spontaneous signal filter used prior to spike detection
-        spont_spike_detector : SpikeDetectionProtocol
-            Spontaneous spike detector used to get spiketrains from signal
-        spike_feature_extractor : SpikeFeatureExtractionProtocol
-            Spike feature extraction object (PCA, Wavelet, etc.) used to group
-            the spontaneous cutouts
-        extractor_decomposition_parameter : int, default = 3
+        spontaneous_cutouts : np.ndarray
+        classifier : NeuronalSpikeClassifier
+        categorized : bool
+            Note: this value only marks whether categorize_spontaneous() is called with
+            a non-empty categorization array. Each ChannelSpikeCutout in spontaenous_cutouts
+            also has a categorized value for that specific channel.
+        test_labels : np.ndarray
+        test_cutouts : np.ndarray
     """
 
     def __init__(
@@ -53,8 +52,8 @@ class AbnormalityDetector:
         spike_feature_extractor: SpikeFeatureExtractionProtocol,
         extractor_decomposition_parameter: int = 3,
     ) -> None:
-
-        self.spontaneous_cutouts = self._get_all_cutouts(
+        self.spontaneous_data: Data = spontaneous_data
+        self.spontaneous_cutouts: np.ndarray = self._get_all_cutouts(
             spontaneous_data,
             spontaneous_signal_filter,
             spontaneous_spike_detector,
@@ -63,6 +62,8 @@ class AbnormalityDetector:
         )
         self.classifier: NeuronalSpikeClassifier
         self.categorized: bool = False
+        self.test_labels: np.ndarray
+        self.test_cutouts: np.ndarray
 
     def _check_categorized(self):
         if not self.categorized:
@@ -78,6 +79,20 @@ class AbnormalityDetector:
         extractor: SpikeFeatureExtractionProtocol,
         extractor_decomp_param: int,
     ) -> np.ndarray:
+        """Get all cutouts from data
+
+        Parameters
+        ----------
+        data : Data
+        signal_filter : FilterProtocol
+        spike_detector : SpikeDetectionProtocol
+        extractor : SpikeFeatureExtractionProtocol
+        extractor_decomp_param : int
+
+        Returns
+        -------
+        2D Numpy array of cutouts with rows as channels
+        """
         with data.load() as (sig, times, samp):
             filtered_sig = signal_filter(sig, samp)
             spikestamps = spike_detector(filtered_sig, times, samp)
@@ -122,10 +137,7 @@ class AbnormalityDetector:
                     )
         return return_cutouts
 
-    def categorize_spontaneous(
-        self,
-        categorization_list: np.ndarray,  # categorization_list[chan_index][comp_index]
-    ) -> None:
+    def categorize_spontaneous(self, categorization_list: np.ndarray) -> None:
         """Categorize the spontaneous recording components.
         This is the second step in the process of abnormality detection.
         This categorization provides training data for the next step.
@@ -137,16 +149,39 @@ class AbnormalityDetector:
             This is a 2D Numpy array. The row index represents the channel index. The column
             index represents the extractor component index.
         """
+        decomp_param = self.spontaneous_cutouts[0].num_composnents
+        if np.shape(categorization_list)[1] != decomp_param:
+            raise Exception(
+                "Number of category indices does not match the extractor decomposition parameter."
+            )
+
         for chan_index, chan_row in enumerate(categorization_list):
+            self.categorized = True
             self.spontaneous_cutouts[chan_index].categorize(chan_row)
-        self.categorized = True
 
     def _get_all_labeled_cutouts(self, shuffle_cutouts: bool = True) -> Dict[str, Any]:
+        """Get all cutouts that are labeled
+
+        Parameters
+        ----------
+        shuffle_cutouts : bool, default = True
+            Shuffle cutouts before returning. This is recommended if these labels and cutouts
+            will be used for model training.
+
+        Returns
+        -------
+        labels :
+            1D Numpy array of labels
+        cutouts :
+            2D Numpy array of cutouts with each row being a cutout's data points
+        sizes :
+            1D Numpy array for number of labeled cutouts for each channel
+        """
         self._check_categorized()
 
         labeled_cutouts = []
         labels = []
-        size = 0
+        sizes = np.ndarray(len(self.spontaneous_cutouts))
         for chan_index, channel_spike_cutout in enumerate(self.spontaneous_cutouts):
             channel_labeled_cutouts = channel_spike_cutout.get_labeled_cutouts()
 
@@ -157,7 +192,7 @@ class AbnormalityDetector:
                 labeled_cutouts.append(
                     np.array(channel_labeled_cutouts["cutouts"][cutout_index])
                 )
-                size += 1
+            sizes[chan_index] = channel_labeled_cutouts["size"]
 
         if shuffle_cutouts:
             labeled_cutouts, labels = shuffle(labeled_cutouts, labels)
@@ -165,7 +200,7 @@ class AbnormalityDetector:
         return {
             "labels": np.array(labels),
             "cutouts": np.array(labeled_cutouts),
-            "size": size,
+            "sizes": sizes,
         }
 
     def init_classifier(
@@ -197,7 +232,7 @@ class AbnormalityDetector:
         self._check_categorized()
 
         all_labeled_cutouts = self._get_all_labeled_cutouts(shuffle=True)
-        split_index = int(train_test_split * all_labeled_cutouts["size"])
+        split_index = int(train_test_split * len(all_labeled_cutouts["labels"]))
         train_labels = all_labeled_cutouts["labels"][:split_index]
         train_cutouts = all_labeled_cutouts["cutouts"][:split_index]
 
