@@ -167,64 +167,64 @@ class AbnormalityDetector:
             self.spontaneous_cutouts[chan_index].categorize(chan_row)
         self.categorized = True
 
-    def train_model(
+    def _get_all_labeled_cutouts(self, shuffle_cutouts: bool = True) -> Dict[str, Any]:
+        labeled_cutouts = []
+        labels = []
+        size = 0
+        for chan_index, channel_spike_cutout in enumerate(self.spontaneous_cutouts):
+            channel_labeled_cutouts = channel_spike_cutout.get_labeled_cutouts()
+
+            for cutout_index, cutout_label in enumerate(
+                channel_labeled_cutouts["labels"]
+            ):
+                labels.append(cutout_label)
+                labeled_cutouts.append(
+                    np.array(channel_labeled_cutouts["cutouts"][cutout_index])
+                )
+                size += 1
+
+        if shuffle_cutouts:
+            labeled_cutouts, labels = shuffle(labeled_cutouts, labels)
+
+        return {
+            "labels": np.array(labels),
+            "cutouts": np.array(labeled_cutouts),
+            "size": size,
+        }
+
+    def init_classifier(
         self,
         model: Optional[SpikeClassificationModelProtocol] = None,
-        epochs: int = 5,
-        train_percentage: float = 0.8,
     ) -> None:
-        """Create and train model for cutout recognition
-        This is the third step in the process of abnormality detection.
+        """Initialize Neuronal Spike Classifier
+
+        Uses the categorized cutouts to initiate a NeuronalSpikeClassifier object
 
         Parameters
         ----------
-        model : SpikeClassificationModelProtocol
-            The classification model used.
-            By passing None, a default keras model will be built with one hidden layer
-            that is the same size as the number of sample points in the cutout.
-        epochs : int, default = 5
-            The number of iterations for model training
-        train_percentage : float, default = 0.8
-            The percentage of cutouts used for training the model. The rest is stored
-            as test_cutouts and test_labels.
+        model : Optional[SpikeClassificationModelProtocol], default = None
+            The model used by the classfier.
+            By default, a standard tensorflow keras model will be created
         """
-        # Get the labeled cutouts
-        labeled_cutouts = []
-        labels = []
-        self.model_size = 0
-        for chan_index, channelCutout in enumerate(self.spontaneous_cutouts):
-            channel_labeled_cutouts = channelCutout.get_labeled_cutouts()
-            for spike_index, spike_label in enumerate(
-                channel_labeled_cutouts["labels"]
-            ):
-                labels.extend([spike_label])
-                labeled_cutouts.append(
-                    list(channel_labeled_cutouts["labeled_cutouts"][spike_index])
-                )
-            self.model_size += channel_labeled_cutouts["size"]
+        self.classifier = NeuronalSpikeClassifier(model)
 
-        # Shuffle the cutouts and split into training and test portions
-        labeled_cutouts, labels = shuffle(labeled_cutouts, labels)
-        split = int(self.model_size * train_percentage)
-        train_cutouts = np.array(labeled_cutouts[:split])
-        train_labels = np.array(labels[:split])
-        self.test_cutouts = np.array(labeled_cutouts[split:])
-        self.test_labels = np.array(labels[split:])
+    def train_classifier_model(
+        self, train_test_split: float, **model_fit_kwargs
+    ) -> None:
+        """Train classifier model with labeled spontaneous cutouts
 
-        # Set up model (if not passed as argument)
-        if model is None:
-            cutout_length = len(self.spontaneous_cutouts[0].cutouts[0].cutout)
-            self._create_default_model(
-                cutout_length,
-                cutout_length * 4,
-                len(self.spontaneous_cutouts[0].CATEGORY_NAMES) - 1,
-            )
-        else:
-            self.model = model
+        train_test_split : float
+            The proportion of labeled spontaneous cutouts used for training
+            For example, if there are 10 labeled cutouts and 8 is used for
+            training, then train_test_split would be 0.8.
+        """
 
-        # Train model
-        self.model.fit(train_cutouts, train_labels, epochs=epochs)
-        self.trained = True
+        all_labeled_cutouts = self._get_all_labeled_cutouts(shuffle=True)
+        split_index = int(train_test_split * all_labeled_cutouts["size"])
+        train_labels = all_labeled_cutouts["labels"][:split_index]
+        train_cutouts = all_labeled_cutouts["cutouts"][:split_index]
+
+        self.classifier.train_model(train_cutouts, train_labels, model_fit_kwargs)
 
     def evaluate_model(
         self,
