@@ -9,12 +9,12 @@ from neo import SpikeTrain
 from sklearn.utils import shuffle
 from tqdm import tqdm
 
-from miv.io import Data, DataManager
+from miv.io import Data
 from miv.signal.classification.neuronal_spike_classification import (
     NeuronalSpikeClassifier,
 )
 from miv.signal.classification.protocol import SpikeClassificationModelProtocol
-from miv.signal.filter import ButterBandpass, FilterProtocol
+from miv.signal.filter import FilterProtocol
 from miv.signal.spike import (
     ChannelSpikeCutout,
     SpikeCutout,
@@ -63,6 +63,12 @@ class AbnormalityDetector:
         )
         self.classifier: NeuronalSpikeClassifier
         self.categorized: bool = False
+
+    def _check_categorized(self):
+        if not self.categorized:
+            raise Exception(
+                "No cutouts are labeled yet. Try categorize_spontaneous method"
+            )
 
     def _get_all_cutouts(
         self,
@@ -136,6 +142,8 @@ class AbnormalityDetector:
         self.categorized = True
 
     def _get_all_labeled_cutouts(self, shuffle_cutouts: bool = True) -> Dict[str, Any]:
+        self._check_categorized()
+
         labeled_cutouts = []
         labels = []
         size = 0
@@ -172,7 +180,7 @@ class AbnormalityDetector:
         ----------
         model : Optional[SpikeClassificationModelProtocol], default = None
             The model used by the classfier.
-            By default, a standard tensorflow keras model will be created
+            If left as None, a standard tensorflow keras model will be created
         """
         self.classifier = NeuronalSpikeClassifier(model)
 
@@ -186,6 +194,7 @@ class AbnormalityDetector:
             For example, if there are 10 labeled cutouts and 8 is used for
             training, then train_test_split would be 0.8.
         """
+        self._check_categorized()
 
         all_labeled_cutouts = self._get_all_labeled_cutouts(shuffle=True)
         split_index = int(train_test_split * all_labeled_cutouts["size"])
@@ -218,9 +227,7 @@ class AbnormalityDetector:
         test_recall : float
         test_f1 : float
         """
-
-        if not self.trained:
-            return {"test_loss": 1, "test_accuracy": 0}
+        self._check_categorized()
 
         data = test_cutouts if test_cutouts is not None else self.test_cutouts
         labels = test_labels if test_labels is not None else self.test_labels
