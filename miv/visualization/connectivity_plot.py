@@ -10,7 +10,7 @@ from miv.typing import SpikestampsType
 
 def plot_connectivity(
     mea_map: array,
-    connectivity_matrix: array
+    connectivity_matrix: array,
     interactive: bool,
 ):
     """
