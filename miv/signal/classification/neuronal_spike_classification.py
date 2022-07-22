@@ -76,7 +76,7 @@ class NeuronalSpikeClassifier:
             metrics=["accuracy"],
         )
 
-    def train_model(self, **fit_kwargs) -> None:
+    def train_model(self, *fit_args, **fit_kwargs) -> None:
         """Train model
 
         Parameters
@@ -84,7 +84,7 @@ class NeuronalSpikeClassifier:
         **fit_kwargs
             keyworded arguments for model.fit method
         """
-        self.model.fit(fit_kwargs)
+        self.model.fit(fit_args, fit_kwargs)
 
     def get_confusion_matrix(
         self,
