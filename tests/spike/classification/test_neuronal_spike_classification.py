@@ -8,13 +8,13 @@ from tests.spike.cutout.test_cutout import MockSpikeCutout
 
 class MockSpikes:
     def __init__(self) -> None:
-        self.spikes = []
-        self.labels = []
+        spikes = []
+        labels = []
         for i in range(3):
-            self.spikes.append(MockSpikeCutout(i, i, i * 0.1).cutout)
-            self.labels.append(i)
-        self.spikes = np.array(self.spikes)
-        self.labels = np.array(self.labels)
+            spikes.append(MockSpikeCutout(i, i, i * 0.1).cutout)
+            labels.append(i)
+        self.spikes = np.array(spikes)
+        self.labels = np.array(labels)
 
 
 def test_default_model():

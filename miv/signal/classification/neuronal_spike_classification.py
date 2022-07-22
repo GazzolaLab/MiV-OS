@@ -25,7 +25,8 @@ class NeuronalSpikeClassifier:
     def __init__(
         self, model: Optional[SpikeClassificationModelProtocol] = None
     ) -> None:
-        self.model: Optional[SpikeClassificationModelProtocol] = model
+        if model is not None:
+            self.model: SpikeClassificationModelProtocol = model
         self.train_spikes: np.ndarray
         self.train_labels: np.ndarray
 
@@ -129,11 +130,13 @@ class NeuronalSpikeClassifier:
         self._validate_model()
 
         predictions = self.model.predict(spikes, predict_kwargs)
-        outcomes = np.ndarray(np.shape(spikes)[0])
+        outcomes: np.ndarray = np.ndarray(np.shape(spikes)[0])
         for i, prediction in enumerate(predictions):
             outcomes[i] = np.argmax(prediction)
         return outcomes
 
     def _validate_model(self):
-        if self.model is None:
+        try:
+            self.model
+        except AttributeError:
             raise Exception("model is not set yet")
