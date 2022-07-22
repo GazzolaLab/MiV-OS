@@ -4,8 +4,8 @@ from contextlib import contextmanager
 
 import numpy as np
 
-# from miv.typing import FilterProtocol, SpikeDetectionProtocol
 from miv.io.data import Data, DataManager
+from tests.spike.cutout.test_cutout import MockSpikeCutout
 
 
 class MockData(Data):
@@ -42,6 +42,26 @@ class MockData(Data):
         for i in range(800, 5800, 2000):
             channel_5[i] = 1000
         self.signal.append(channel_5)
+
+        self.signal = np.transpose(self.signal)
+
+    @contextmanager
+    def load(self):
+        yield self.signal, self.times, self.sampling_rate
+
+
+class AdvancedMockData(Data):
+    def __init__(self):
+        self.masking_channel_set: Set[int] = set()
+
+        self.duration: float = 1
+        self.sampling_rate = 100
+        self.times = np.arange(start=0, stop=self.duration, step=1 / self.sampling_rate)
+
+        self.signal = []
+        self.signal.append(MockSpikeCutout(0, 0, 0, self.sampling_rate).cutout)
+        self.signal.append(MockSpikeCutout(1, 1, 0, self.sampling_rate).cutout)
+        self.signal.append(MockSpikeCutout(2, 2, 0, self.sampling_rate).cutout)
 
         self.signal = np.transpose(self.signal)
 
