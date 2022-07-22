@@ -43,7 +43,7 @@ class NeuronalSpikeClassifier:
 
         if np.shape(train_spikes)[0] != np.shape(train_labels)[0]:
             raise Exception("train spikes and train labels have incompatible sizes")
-        if np.size(train_spikes) == 0 or np.size(train_labels == 0):
+        if np.size(train_spikes) == 0 or np.size(train_labels) == 0:
             raise Exception("can't create default model from empty training data")
 
         layers = [
