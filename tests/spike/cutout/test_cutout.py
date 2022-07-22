@@ -120,5 +120,5 @@ def test_labeled_cutouts():
     chan_spike_cutout.categorize(cat_list)
     labeled_cutouts = chan_spike_cutout.get_labeled_cutouts()
     assert np.shape(labeled_cutouts["labels"]) == (2,)
-    assert np.shape(labeled_cutouts["labeled_cutouts"]) == (2, 100)
+    assert np.shape(labeled_cutouts["cutouts"]) == (2, 100)
     assert labeled_cutouts["size"] == 2
