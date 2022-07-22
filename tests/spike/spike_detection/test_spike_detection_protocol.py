@@ -3,7 +3,7 @@ from typing import Any, Protocol, Type, runtime_checkable
 import pytest
 
 from miv.signal.spike import SpikeDetectionProtocol
-from tests.spike.mock_spike_detection import (
+from tests.spike.spike_detection.mock_spike_detection import (
     mock_nonspike_detection_list,
     mock_spike_detection_list,
 )
