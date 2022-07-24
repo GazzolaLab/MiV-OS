@@ -50,7 +50,7 @@ class NeuronalSpikeClassifier:
         layers = [
             tf.keras.layers.Dense(np.shape(train_spikes)[1]),
             tf.keras.layers.Dense(
-                np.shape(train_spikes)[1] / 2
+                int(np.shape(train_spikes)[1] / 2)
             ),  # This needs to be tweaked
             tf.keras.layers.Dense(len(np.unique(train_labels))),
         ]
@@ -65,7 +65,7 @@ class NeuronalSpikeClassifier:
         **compile_kwargs
             keyworded arguments for the compile method of the model
         """
-        self.model.compile(compile_kwargs)
+        self.model.compile(**compile_kwargs)
 
     def default_compile_model(self) -> None:
         """Compile model with default compile paramters"""
@@ -76,7 +76,7 @@ class NeuronalSpikeClassifier:
             metrics=["accuracy"],
         )
 
-    def train_model(self, *fit_args, **fit_kwargs) -> None:
+    def train_model(self, **fit_kwargs) -> None:
         """Train model
 
         Parameters
@@ -84,7 +84,7 @@ class NeuronalSpikeClassifier:
         **fit_kwargs
             keyworded arguments for model.fit method
         """
-        self.model.fit(fit_args, fit_kwargs)
+        self.model.fit(**fit_kwargs)
 
     def get_confusion_matrix(
         self,
@@ -110,7 +110,7 @@ class NeuronalSpikeClassifier:
 
         predictions = self.predict_categories(test_spikes, verbose=0)
         return tf.math.confusion_matrix(
-            test_labels, predictions, confusion_matrix_kwargs
+            test_labels, predictions, **confusion_matrix_kwargs
         )
 
     def predict_categories(self, spikes: np.ndarray, **predict_kwargs) -> np.ndarray:
@@ -129,7 +129,7 @@ class NeuronalSpikeClassifier:
 
         self._validate_model()
 
-        predictions = self.model.predict(spikes, predict_kwargs)
+        predictions = self.model.predict(spikes, **predict_kwargs)
         outcomes: np.ndarray = np.ndarray(np.shape(spikes)[0])
         for i, prediction in enumerate(predictions):
             outcomes[i] = np.argmax(prediction)
