@@ -10,7 +10,7 @@ from miv.datasets.utils import get_file
 from miv.io import DataManager
 
 
-def load_data():
+def load_data():  # pragma: no cover
     """
     Loads the sample optogenetic experiment data. `Direct Download <https://uofi.box.com/shared/static/9llg11ods9iejdt2omjwjosbsxb5ui10.zip>`_
 

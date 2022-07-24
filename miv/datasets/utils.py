@@ -93,22 +93,22 @@ def get_file(
         try:
             try:
                 _url_retrieve(file_url, filepath)
-            except urllib.error.HTTPError as e:
+            except urllib.error.HTTPError as e:  # pragma: no cover
                 raise Exception(error_msg.format(file_url, e.code, e.msg))
-            except urllib.error.URLError as e:
+            except urllib.error.URLError as e:  # pragma: no cover
                 raise Exception(error_msg.format(file_url, e.errno, e.reason))
-        except (Exception, KeyboardInterrupt):
+        except (Exception, RuntimeError, KeyboardInterrupt):  # pragma: no cover
             # Remove residue upon error
             if os.path.exists(filepath):
                 os.remove(filepath)
-            raise
+            raise RuntimeError("Interrupted during downloading the file.")
 
         # Validate download
         if os.path.exists(filepath) and file_hash is not None:
             hash_check = check_file_hash(filepath, file_hash)
             if not hash_check:
                 raise ValueError(
-                    f"The sha256 file hash does not match"
+                    f"The sha256 file hash does not match "
                     f"the provided value of {file_hash}. If the issue "
                     f"remains, please report this error on GitHub issue."
                 )
@@ -117,8 +117,11 @@ def get_file(
 
     if archive_format:
         flag = _extract_archive(filepath, data_dir, archive_format)
-        # TODO: corner case handling, .tar.gz
-        filepath = filepath[:-4]  # remove file extension
+        # remove file extension
+        if archive_format.endswith((".gz", ".bz")):  # Corner case
+            filepath = filepath[:-7]
+        else:
+            filepath = filepath[:-4]
         assert flag, (
             "File extraction is not completed properly."
             "Please report this error on GitHub issue."
@@ -160,7 +163,9 @@ def check_file_hash(filepath: str, file_hash: str, packet_size: int = 65535) -> 
     return str(hashed) == file_hash
 
 
-def _url_retrieve(url: str, filename: str, url_data: Optional[Any] = None):
+def _url_retrieve(
+    url: str, filename: str, url_data: Optional[Any] = None, progbar_disable=False
+):
     """
     Download file given URL
 
@@ -172,15 +177,18 @@ def _url_retrieve(url: str, filename: str, url_data: Optional[Any] = None):
         Local storage filename
     url_data : Optional[Any]
         Data argument passed to `urlopen`.
+    progbar_disable : bool
+        Disable progress bar. (default=False)
     """
 
     def packet_read(response, packet_size=8192):
         content_type = response.info().get("Content-Length")
         if content_type is not None:
             total_size = int(content_type.strip())
-        else:
+        else:  # pragma: no cover
+            raise FileNotFoundError("Invalid content. Please check your URL and file")
             total_size = -1
-        progbar = tqdm(total=total_size // 1024**1)
+        progbar = tqdm(total=total_size // 1024**1, disable=progbar_disable)
         while True:
             packet = response.read(packet_size)
             progbar.update(packet_size)
@@ -227,6 +235,8 @@ def _extract_archive(
         "tar.gz",
         "tar.bz",
     ], "Provided archive format is not yet supported."
+    if not os.path.exists(file_path):
+        raise FileNotFoundError(f"Archive file ({file_path}) does not exist.")
 
     if archive_format.startswith("tar"):
         open_fn = tarfile.open
@@ -236,17 +246,24 @@ def _extract_archive(
         is_match_fn = zipfile.is_zipfile
 
     if is_match_fn(file_path):
-        with open_fn(file_path) as archive:
+        with open_fn(file_path, "r") as archive:
             try:
                 # Extraction attempts
                 archive.extractall(output_path)
-            except (tarfile.TarError, RuntimeError, KeyboardInterrupt):
+            except (
+                zipfile.BadZipFile,
+                tarfile.TarError,
+                RuntimeError,
+                KeyboardInterrupt,
+            ):  # pragma: no cover
                 # On failure, remove any residue packets
                 if os.path.exists(output_path):
                     if os.path.isfile(output_path):
                         os.remove(output_path)
                     else:
                         shutil.rmtree(output_path)
-                raise
+                raise RuntimeError(
+                    "Failure/Interrupted during extracting archive-file."
+                )
         return True
     return False
