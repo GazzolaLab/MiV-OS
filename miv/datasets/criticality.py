@@ -9,7 +9,7 @@ import numpy as np
 from miv.datasets.utils import get_file
 
 
-def load_data():
+def load_data():  # pragma: no cover
     """
     Loads the sample for criticality analysis
 
