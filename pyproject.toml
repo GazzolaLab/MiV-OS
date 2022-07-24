@@ -5,7 +5,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "MiV-OS"
-version = "0.1.1"
+version = "0.1.2"
 description = "Python software for analysis and computing framework used in MiV project."
 readme = "README.md"
 authors = ["GazzolaLab <skim449@illinois.edu>"]
@@ -13,7 +13,7 @@ license = "MIT"
 repository = "https://github.com/GazzolaLab/MiV-OS"
 homepage = "https://mindinvitro.illinois.edu"
 documentation = "https://miv-os.readthedocs.io"
-keywords = []
+keywords = ["neuroscience", "statistics", "data-analysis", "electrophysiology", "neurophysiology"]
 
 # Pypi classifiers: https://pypi.org/classifiers/
 classifiers = [
