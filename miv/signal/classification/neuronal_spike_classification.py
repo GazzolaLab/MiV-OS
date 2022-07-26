@@ -75,7 +75,7 @@ class NeuronalSpikeClassifier:
         # These need to be tweaked
         self.model.compile(
             optimizer="Adamax",
-            loss="SquareHinge",
+            loss="SquaredHinge",
             metrics=["accuracy"],
         )
 
