@@ -181,7 +181,12 @@ def binned_spiketrain(
     n_bins = int((t_end - t_start) / bin_size + 1)
     time = np.linspace(t_start, bin_size * (n_bins - 1), n_bins)
     bin_spike = np.zeros(n_bins)
-    spike = spiketrains[channel].magnitude
+    if isinstance(spiketrains[channel], np.ndarray):
+        spike = spiketrains[channel]
+    elif isinstance(spiketrains[channel], neo.core.SpikeTrain):
+        spike = spiketrains[channel].magnitude
+    else:
+        raise TypeError(f"type {type(spiketrains[channel])} is not supported.")
     bins = np.digitize(spike, time)
     bin_spike[bins - 1] = 1
 
