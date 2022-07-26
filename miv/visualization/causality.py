@@ -4,7 +4,6 @@ import os
 
 import matplotlib.pyplot as plt
 import numpy as np
-from elephant.causality.granger import pairwise_granger
 from viziphant.spike_train_correlation import plot_corrcoef
 
 from miv.statistics import pairwise_causality
@@ -12,7 +11,7 @@ from miv.statistics.spiketrain_statistics import binned_spiketrain
 from miv.typing import SignalType, SpikestampsType
 
 
-def pairwise_causality_plot(signal: SignalType, start: float, end: float):
+def pairwise_causality_plot(signal: SignalType, start: int, end: int):
     """
     Plots pairwise Granger Causality
 
@@ -20,9 +19,9 @@ def pairwise_causality_plot(signal: SignalType, start: float, end: float):
     ----------
     signal : SignalType
         Input signal
-    start : float
+    start : int
         Starting point of the signal
-    end : float
+    end : int
         End point of the signal
 
     Returns
@@ -33,6 +32,10 @@ def pairwise_causality_plot(signal: SignalType, start: float, end: float):
         represents electrodes
     axes : matplotlib.axes
         axes parameters for plot modification
+
+    See Also
+    --------
+    miv.statistics.pairwise_causality
 
     """
 
@@ -70,7 +73,7 @@ def spike_triggered_average_plot(
     spiketrains: SpikestampsType,
     channel_y: int,
     sampling_freq: float,
-    window_length: float,
+    window_length: int,
 ):
     """
     Plots the spike-triggered average of Local Field Potential (LFP) from channel X
@@ -90,7 +93,7 @@ def spike_triggered_average_plot(
         Channel to consider for spiketrain data
     sampling_freq : float
         sampling frequency for LFP recordings
-    window_length : float
+    window_length : int
         window length to consider before and after spike
 
     Returns
@@ -103,7 +106,7 @@ def spike_triggered_average_plot(
     """
 
     # Spike Triggered Average
-    dt = 1 / sampling_freq
+    dt = 1.0 / sampling_freq
     n = np.shape(signal[:, channel_x])[0] / sampling_freq
     assert (
         window_length < np.shape(signal[:, channel_x])[0] / 2
