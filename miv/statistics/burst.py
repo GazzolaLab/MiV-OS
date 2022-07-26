@@ -40,7 +40,7 @@ def burst(spiketrains: SpikestampsType, channel: float, min_isi: float, min_len:
     hippocampal neurons." Journal of neurophysiology 114.2 (2015): 1059-1071.
     """
 
-    spike_interval = interspike_intervals(spiketrains[channel].magnitude)
+    spike_interval = interspike_intervals(spiketrains[channel])
     assert spike_interval.all() > 0, "Inter Spike Interval cannot be zero"
     burst_spike = (spike_interval <= min_isi).astype(
         np.bool_
@@ -67,7 +67,7 @@ def burst(spiketrains: SpikestampsType, channel: float, min_isi: float, min_len:
         burst_rate = 0
         burst_len = 0
     else:
-        spike = np.array(spiketrains[channel].magnitude)
+        spike = np.array(spiketrains[channel])
         start_time = spike[Q[:, 0]]
         end_time = spike[Q[:, 1]]
         burst_len = Q[:, 1] - Q[:, 0] + 1
