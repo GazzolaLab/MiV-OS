@@ -4,29 +4,10 @@ import pytest
 from matplotlib.axes import Axes
 
 from miv.typing import SignalType
-
-
-@pytest.fixture
-def mock_numpy_signal():
-    num_length = 512
-    num_channel = 32
-
-    # signal = np.arange(num_length * num_channel).reshape([num_length, num_channel])
-    signal_list = []
-    x = np.ones(num_length)
-    for i in range(num_channel):
-        _signal = (i / 1.5) + x + np.random.randn(num_length)  # jitter
-        signal_list.append(_signal)
-    signal = np.array(signal_list).T
-    return signal
-
-
-@pytest.fixture
-def mock_numpy_spiketrains():
-    spiketrains = [
-        np.sort(np.rint(np.arange(200, 500, 100))).astype(np.int_) for _ in range(32)
-    ]
-    return spiketrains
+from tests.visualization.mock import (
+    fixture_mock_numpy_signal,
+    fixture_mock_numpy_spiketrains,
+)
 
 
 @pytest.mark.parametrize("start, end", [(1, 100), (1, 50), (250, 500)])
