@@ -50,7 +50,7 @@ class NeuronalSpikeClassifier:
         layers = [
             tf.keras.layers.Dense(np.shape(train_spikes)[1]),
             tf.keras.layers.Dense(
-                int(np.shape(train_spikes)[1] / 2)
+                int(np.shape(train_spikes)[1])
             ),  # This needs to be tweaked
             tf.keras.layers.Dense(len(np.unique(train_labels))),
         ]
@@ -68,11 +68,14 @@ class NeuronalSpikeClassifier:
         self.model.compile(**compile_kwargs)
 
     def default_compile_model(self) -> None:
-        """Compile model with default compile paramters"""
+        """Compile model with default compile paramters
+
+        See docs/discussion/spike_classification/Classifier Model Comparison with Keras Optimizers and Losses.ipynb
+        """
         # These need to be tweaked
         self.model.compile(
-            optimizer="adam",
-            loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+            optimizer="Adamax",
+            loss="SquareHinge",
             metrics=["accuracy"],
         )
 
