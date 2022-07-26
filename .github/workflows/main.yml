@@ -28,6 +28,8 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - uses: FedericoCarboni/setup-ffmpeg@v1
         id: setup-ffmpeg
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Install Poetry
         uses: snok/install-poetry@v1
       - name: Set up cache
@@ -85,6 +87,8 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - uses: FedericoCarboni/setup-ffmpeg@v1
         id: setup-ffmpeg
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Install Poetry
         uses: snok/install-poetry@v1
       - name: Set up cache
