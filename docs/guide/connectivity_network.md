@@ -30,7 +30,7 @@ from miv.datasets import optogenetic
 from miv.io import DataManager
 from miv.signal.filter import ButterBandpass, FilterCollection, MedianFilter
 from miv.signal.spike import ThresholdCutoff
-from miv.visualization.connectivity_plot import plot_connectivity, plot_connectivity_plot
+from miv.visualization.connectivity import plot_connectivity
 
 ```
 
@@ -89,7 +89,7 @@ corrcoef_matrix = correlation_coefficient(rates)
 
 ## Plot Connectivity
 
-Plots connectivity using the provided MEA map and connectivity matrix. Documentation is available [here](miv.visualization.connectivity_plot.plot_connectivity)
+Plots connectivity using the provided MEA map and connectivity matrix. Documentation is available [here](miv.visualization.connectivity.plot_connectivity)
 
 ```{code-cell} ipython3
 #Non-interactive connectivity plot using correlation

@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from miv.visualization.connectivity_plot import (
+from miv.visualization.connectivity import (
     plot_connectivity,
     plot_connectivity_interactive,
 )
