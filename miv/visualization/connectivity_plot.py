@@ -1,3 +1,5 @@
+__all__ = ["plot_connectivity", "plot_connectivity_interactive"]
+
 import os
 
 import graphviz
@@ -29,7 +31,7 @@ def plot_connectivity(
        matplot figure with bursts plotted for all electrodes
     """
 
-    connec_x,connec_y = np.shape(connectivity_matrix)
+    connec_x, connec_y = np.shape(connectivity_matrix)
     assert connec_x == connec_y, "Connectivity matrix should be a square matrix"
     num_elec = np.count_nonzero(mea_map)
     assert num_elec > 0, "Number of electrodes should be greater than 0"
@@ -74,7 +76,8 @@ def plot_connectivity(
                         )
 
                         g.node(
-                            str(j), pos=posstr2,
+                            str(j),
+                            pos=posstr2,
                             fillcolor="deepskyblue2",
                             color="black",
                             style="filled,solid",
@@ -156,7 +159,7 @@ def plot_connectivity_interactive(
     figure, axes
        matplot figure with bursts plotted for all electrodes
     """
-    connec_x,connec_y = np.shape(connectivity_matrix)
+    connec_x, connec_y = np.shape(connectivity_matrix)
     assert connec_x == connec_y, "Connectivity matrix should be a square matrix"
     num_elec = np.count_nonzero(mea_map)
     assert num_elec > 0, "Number of electrodes should be greater than 0"
