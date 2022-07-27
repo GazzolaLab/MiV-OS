@@ -65,7 +65,7 @@ Connectivity Plots
 
 .. currentmodule:: miv.visualization
 
-.. automodule:: miv.visualization.connectivity_plot
+.. automodule:: miv.visualization.connectivity
 
    .. autosummary::
       :nosignatures:
