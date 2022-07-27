@@ -8,15 +8,17 @@ from pyvis.network import Network
 from miv.typing import SpikestampsType
 
 
-def plot_connectivity(mea_map: int, connectivity_matrix: float, directionality: bool):
+def plot_connectivity(
+    mea_map: np.ndarray, connectivity_matrix: np.ndarray, directionality: bool
+):
     """
     Plots the provided connectivity matrix with graphviz using the exact location of electrode.
 
     Parameters
     ----------
-    mea_map : int
+    mea_map : np.ndarray
         array containing spatial location of electrodes
-    connectivity_matrix: int
+    connectivity_matrix: np.ndarray
         array containing the connectivity parameters for each pair of electrodes
     directionality: bool
         if set true can be used to plot directional connectivity plots
@@ -27,8 +29,14 @@ def plot_connectivity(mea_map: int, connectivity_matrix: float, directionality: 
        matplot figure with bursts plotted for all electrodes
     """
 
-    num_elec = np.size(mea_map)
+    connec_x,connec_y = np.shape(connectivity_matrix)
+    assert connec_x == connec_y, "Connectivity matrix should be a square matrix"
+    num_elec = np.count_nonzero(mea_map)
+    assert num_elec > 0, "Number of electrodes should be greater than 0"
     elec_mat = np.linspace(1, num_elec, num_elec).astype(int)
+    assert (
+        connec_x == num_elec
+    ), "Connectivity matrix should have same dimensions as the number of electrodes"
 
     if directionality == True:
         g = graphviz.Digraph("G", filename="connectivity", engine="neato")
@@ -66,8 +74,7 @@ def plot_connectivity(mea_map: int, connectivity_matrix: float, directionality: 
                         )
 
                         g.node(
-                            str(j),
-                            pos=posstr2,
+                            str(j), pos=posstr2,
                             fillcolor="deepskyblue2",
                             color="black",
                             style="filled,solid",
@@ -128,8 +135,8 @@ def plot_connectivity(mea_map: int, connectivity_matrix: float, directionality: 
 
 
 def plot_connectivity_interactive(
-    mea_map: int,
-    connectivity_matrix: float,
+    mea_map: np.ndarray,
+    connectivity_matrix: np.ndarray,
     directionality: bool,
 ):
     """
@@ -137,9 +144,9 @@ def plot_connectivity_interactive(
 
     Parameters
     ----------
-    mea_map : int
+    mea_map : np.ndarray
         array containing spatial location of electrodes
-    connectivity_matrix: float
+    connectivity_matrix: np.ndarray
         array containing the connectivity parameters for each pair of electrodes
     directionality: bool
         if set true can be used to plot directional connectivity plots
@@ -149,9 +156,15 @@ def plot_connectivity_interactive(
     figure, axes
        matplot figure with bursts plotted for all electrodes
     """
-
-    num_elec = np.size(mea_map)
+    connec_x,connec_y = np.shape(connectivity_matrix)
+    assert connec_x == connec_y, "Connectivity matrix should be a square matrix"
+    num_elec = np.count_nonzero(mea_map)
+    assert num_elec > 0, "Number of electrodes should be greater than 0"
     elec_mat = np.linspace(1, num_elec, num_elec).astype(int)
+    assert (
+        connec_x == num_elec
+    ), "Connectivity matrix should have same dimensions as the number of electrodes"
+
     net = Network(
         height="500px",
         width="100%",
