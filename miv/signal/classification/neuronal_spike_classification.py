@@ -89,15 +89,11 @@ class NeuronalSpikeClassifier:
         """
         self.model.fit(**fit_kwargs)
 
-    # def default_train_model_with_early_stopping(
-    #     self,
-    #     spikes: np.ndarray,
-    #     labels: np.ndarray,
-    #     patience: int = 10,
-    #     **fit_kwargs
-    # ) -> None:
-    #     cb = tf.keras.callbacks.EarlyStopping(monitor="accuracy", patience=patience)
-    #     self.model.fit(x=spikes, y=labels, callbacks=cb, **fit_kwargs)
+    def default_train_model(
+        self, spikes: np.ndarray, labels: np.ndarray, **fit_kwargs
+    ) -> None:
+        cb = tf.keras.callbacks.EarlyStopping(monitor="accuracy", patience=2)
+        self.model.fit(x=spikes, y=labels, callbacks=cb, **fit_kwargs)
 
     def get_confusion_matrix(
         self,

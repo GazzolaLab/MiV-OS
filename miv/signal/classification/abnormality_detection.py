@@ -238,6 +238,19 @@ class AbnormalityDetector:
 
         self.classifier.train_model(train_cutouts, train_labels, model_fit_kwargs)
 
+    def default_init_and_train_model(self) -> None:
+
+        self._check_categorized()
+        train_test_split = 0.8
+        all_labeled_cutouts = self._get_all_labeled_cutouts(shuffle_cutouts=True)
+        split_index = int(train_test_split * len(all_labeled_cutouts["labels"]))
+        train_labels = all_labeled_cutouts["labels"][:split_index]
+        train_cutouts = all_labeled_cutouts["cutouts"][:split_index]
+
+        self.classifier.create_default_tf_keras_model(train_cutouts, train_labels)
+        self.classifier.default_compile_model()
+        self.classifier.default_train_model(train_cutouts, train_labels)
+
     # Below is work in progress
 
     # def evaluate_model(
