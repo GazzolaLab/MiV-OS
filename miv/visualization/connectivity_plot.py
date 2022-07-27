@@ -27,8 +27,9 @@ def plot_connectivity(
 
     Returns
     -------
-    figure, axes
-       matplot figure with bursts plotted for all electrodes
+    figure
+        matplot figure with bursts plotted for all electrodes
+    axes
     """
 
     connec_x, connec_y = np.shape(connectivity_matrix)
@@ -40,7 +41,7 @@ def plot_connectivity(
         connec_x == num_elec
     ), "Connectivity matrix should have same dimensions as the number of electrodes"
 
-    if directionality == True:
+    if directionality:
         g = graphviz.Digraph("G", filename="connectivity", engine="neato")
         for i in elec_mat:
             for j in elec_mat:
@@ -156,8 +157,9 @@ def plot_connectivity_interactive(
 
     Returns
     -------
-    figure, axes
-       matplot figure with bursts plotted for all electrodes
+    figure
+        matplot figure with bursts plotted for all electrodes
+    axes
     """
     connec_x, connec_y = np.shape(connectivity_matrix)
     assert connec_x == connec_y, "Connectivity matrix should be a square matrix"

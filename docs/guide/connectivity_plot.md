@@ -74,7 +74,7 @@ mea_map = np.array([[25  , 10 , 12 , 14 , 31 , 28 , 26 , 40],
 
 ```
 
-## Forming Connectivity Matrix 
+## Forming Connectivity Matrix
 
 ```{code-cell} ipython3
 #Correlation using Elephant
@@ -89,17 +89,16 @@ corrcoef_matrix = correlation_coefficient(rates)
 
 ## Plot Connectivity
 
-Plots connectivity using the provided MEA map and connectivity matrix. Documentation is available [here](miv.visualization.plot_connectivity)
+Plots connectivity using the provided MEA map and connectivity matrix. Documentation is available [here](miv.visualization.connectivity_plot.plot_connectivity)
 
 ```{code-cell} ipython3
-#Non-interactive connectivity plot using correlation 
+#Non-interactive connectivity plot using correlation
 plot_connectivity(mea_map, corrcoef_matrix, False)
 
 ```
 
 ```{code-cell} ipython3
-#Interactive connectivity plot using correlation 
+#Interactive connectivity plot using correlation
 plot_connectivity_interactive(mea_map, corrcoef_matrix, False)
 
 ```
-
