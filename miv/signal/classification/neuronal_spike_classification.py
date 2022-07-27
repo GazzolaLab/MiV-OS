@@ -75,7 +75,7 @@ class NeuronalSpikeClassifier:
 
         self.model.compile(
             optimizer="Adam",
-            loss="Hinge",
+            loss="BinaryCrossentropy",
             metrics=["accuracy"],
         )
 
@@ -89,11 +89,9 @@ class NeuronalSpikeClassifier:
         """
         self.model.fit(**fit_kwargs)
 
-    def default_train_model(
-        self, spikes: np.ndarray, labels: np.ndarray, **fit_kwargs
-    ) -> None:
+    def default_train_model(self, spikes: np.ndarray, labels: np.ndarray) -> None:
         cb = tf.keras.callbacks.EarlyStopping(monitor="accuracy", patience=2)
-        self.model.fit(x=spikes, y=labels, callbacks=cb, **fit_kwargs)
+        self.model.fit(x=spikes, y=labels, callbacks=cb, epochs=5)
 
     def get_confusion_matrix(
         self,
@@ -138,7 +136,8 @@ class NeuronalSpikeClassifier:
 
         self._validate_model()
 
-        predictions = self.model.predict(spikes, **predict_kwargs)
+        prob_model = tf.keras.Sequential([self.model, tf.keras.layers.Softmax()])
+        predictions = prob_model.predict(spikes, **predict_kwargs)
         outcomes: np.ndarray = np.ndarray(np.shape(spikes)[0])
         for i, prediction in enumerate(predictions):
             outcomes[i] = np.argmax(prediction)
