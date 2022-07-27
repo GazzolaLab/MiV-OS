@@ -41,6 +41,7 @@ If you are interested in contributing to this project, we prepared contribution 
    guide/granger_causality_psd_cpsd_coherence
    guide/burst_analysis
    guide/info_theory
+   guide/connectivity_plot
 
 .. toctree::
    :maxdepth: 2
