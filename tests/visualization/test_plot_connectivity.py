@@ -1,13 +1,17 @@
 import numpy as np
 import pytest
-from miv.visualization import plot_connectivity
-from miv.visualization import plot_connectivity_interactive
+
+from miv.visualization.connectivity_plot import (
+    plot_connectivity,
+    plot_connectivity_interactive,
+)
+
 
 def test_plot_connectivity_output():
 
     # Initialize the spiketrain as below
     mea_map = np.array([[1, 2], [3, 4], [5, 6]])
-    mea_map1= np.array([[0, 0], [0, 0], [0, 0]])
+    mea_map1 = np.array([[0, 0], [0, 0], [0, 0]])
     connectivity_matrix1 = np.array([[2, 3], [10, 11]])
     connectivity_matrix2 = np.array([[2, 3], [5, 8], [9, 10]])
 
@@ -26,7 +30,7 @@ def test_plot_connectivity_interactive_output():
 
     # Initialize the spiketrain as below
     mea_map = np.array([[1, 2], [3, 4], [5, 6]])
-    mea_map1= np.array([[0, 0], [0, 0], [0, 0]])
+    mea_map1 = np.array([[0, 0], [0, 0], [0, 0]])
     connectivity_matrix1 = np.array([[2, 3], [10, 11]])
     connectivity_matrix2 = np.array([[2, 3], [5, 8], [9, 10]])
 
@@ -39,4 +43,3 @@ def test_plot_connectivity_interactive_output():
     with np.testing.assert_raises(AssertionError):
         plot_connectivity_interactive(mea_map1, connectivity_matrix2, True)
         # The function above should throw an error since MEA map contains no identification
-
