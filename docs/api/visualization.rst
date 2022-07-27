@@ -60,6 +60,20 @@ Burst Analysis
 
       plot_burst
 
+Connectivity Plots
+------------------
+
+.. currentmodule:: miv.visualization
+
+.. automodule:: miv.visualization.connectivity
+
+   .. autosummary::
+      :nosignatures:
+      :toctree: _toctree/VisualizationAPI
+
+      plot_connectivity
+      plot_connectivity_interactive
+
 
 Useful External Packages
 ========================
