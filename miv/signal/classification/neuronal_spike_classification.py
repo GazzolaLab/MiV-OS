@@ -105,6 +105,8 @@ class NeuronalSpikeClassifier:
         Returns
         -------
         Numpy 2D array of confusion matrix
+            [[True positive, False negative],
+            [False positive, True negative]]
         """
 
         self._validate_model()
