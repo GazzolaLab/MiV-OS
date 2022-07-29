@@ -10,7 +10,7 @@ from miv.datasets.utils import get_file
 from miv.io import DataManager
 
 
-def load_data():
+def load_data():  # pragma: no cover
     """
     Loads the sample optogenetic experiment data. `Direct Download <https://uofi.box.com/shared/static/9llg11ods9iejdt2omjwjosbsxb5ui10.zip>`_
 
@@ -45,7 +45,7 @@ def load_data():
     Examples
     --------
         >>> from miv import datasets
-        >>> experiments: miv.io.DataManager = datasets.opogenetic.load_data()
+        >>> experiments: miv.io.DataManager = datasets.optogenetic.load_data()
         >>> experiments.tree()
         2022-03-10_16-19-09
             0: <miv.io.data.Data object at 0x7fbc30b9a9a0>
@@ -72,7 +72,7 @@ def load_data():
 
     path = get_file(
         file_url=base_url,
-        cache_subdir=subdir,
+        directory=subdir,
         fname=file,
         file_hash=file_hash,
         archive_format="zip",

@@ -52,13 +52,13 @@ If you are interested in contributing to this project, we prepared contribution 
    api/statistics
    api/causality
    api/visualization
+   api/signal_generator
 
 .. toctree::
    :maxdepth: 2
    :caption: Examples
 
    examples/sample_datasets
-.. examples/spike_detection
 
 .. toctree::
    :maxdepth: 2

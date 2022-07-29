@@ -104,7 +104,7 @@ class MockDataManager(DataManager):
             self.data_list.append(MockData())
             self.data_list.append(MockData())
 
-    def auto_channel_mask_baseline(
+    def auto_channel_mask_with_firing_rate(
         self, filter, detector, no_spike_threshold: float = 1
     ):
-        super().auto_channel_mask_baseline(filter, detector, no_spike_threshold)
+        super().auto_channel_mask_with_firing_rate(filter, detector, no_spike_threshold)

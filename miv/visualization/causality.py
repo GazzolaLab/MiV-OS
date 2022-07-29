@@ -1,17 +1,17 @@
-# Pairwise Granger Causality Plot
+__all__ = ["pairwise_causality_plot", "spike_triggered_average_plot"]
 
 import os
 
 import matplotlib.pyplot as plt
 import numpy as np
-from elephant.causality.granger import pairwise_granger
 from viziphant.spike_train_correlation import plot_corrcoef
 
 from miv.statistics import pairwise_causality
-from miv.typing import SignalType
+from miv.statistics.spiketrain_statistics import binned_spiketrain
+from miv.typing import SignalType, SpikestampsType
 
 
-def pairwise_causality_plot(signal: SignalType, start: float, end: float):
+def pairwise_causality_plot(signal: SignalType, start: int, end: int):
     """
     Plots pairwise Granger Causality
 
@@ -19,10 +19,10 @@ def pairwise_causality_plot(signal: SignalType, start: float, end: float):
     ----------
     signal : SignalType
         Input signal
-    start : float
-        starting point from signal
-    end : float
-        End point from signal
+    start : int
+        Starting point of the signal
+    end : int
+        End point of the signal
 
     Returns
     -------
@@ -31,7 +31,12 @@ def pairwise_causality_plot(signal: SignalType, start: float, end: float):
         instantaneous causality between X,Y, and total causality. X and Y
         represents electrodes
     axes : matplotlib.axes
-        Figure axes
+        axes parameters for plot modification
+
+    See Also
+    --------
+    miv.statistics.pairwise_causality
+
     """
 
     # Causality
@@ -60,3 +65,68 @@ def pairwise_causality_plot(signal: SignalType, start: float, end: float):
     axes[1, 1].set_title("Total interdependence of X,Y")
 
     return fig, axes
+
+
+def spike_triggered_average_plot(
+    signal: SignalType,
+    channel_x: int,
+    spiketrains: SpikestampsType,
+    channel_y: int,
+    sampling_freq: float,
+    window_length: int,
+):
+    """
+    Plots the spike-triggered average of Local Field Potential (LFP) from channel X
+    corresponding to spiketrain from channel Y. The spiketrain from channel Y
+    can be replaced with stimulation signal to understand stimulus dependent
+    LFP on channel X, but take care in providing stimualtion as SpikestampsType.
+
+    Parameters
+    ----------
+    signal : SignalType
+        LFP signal recorded from the electrodes
+    channel_x : float
+        Channel to consider for LFP data
+    spiketrains : SpikestampsType
+        Single spike-stamps
+    channel_y : float
+        Channel to consider for spiketrain data
+    sampling_freq : float
+        sampling frequency for LFP recordings
+    window_length : int
+        window length to consider before and after spike
+
+    Returns
+    -------
+    figure : matplotlib.pyplot.Figure
+        matplot figure plotting spike triggered average of channel X in the provided window
+    axes : matplotlib.axes.Axes
+        axes parameters for plot modification
+
+    """
+
+    # Spike Triggered Average
+    dt = 1.0 / sampling_freq
+    n = np.shape(signal[:, channel_x])[0] / sampling_freq
+    assert (
+        window_length < np.shape(signal[:, channel_x])[0] / 2
+    ), "Window cannot be longer than signal length"
+    spike = binned_spiketrain(spiketrains, channel_x, 0, n, dt)
+    lfp = signal[:, channel_x]
+    spike_times = np.where(spike == 1)[0]
+    spike_len = np.shape(spike_times)[0]
+    sta = np.zeros([2 * window_length + 1])
+
+    for i in np.arange(spike_len):
+        sta += lfp[spike_times[i] - window_length : spike_times[i] + window_length + 1]
+
+    spike_triggered_average = sta / spike_len
+    lags = np.arange(-window_length, window_length + 1) * dt * 1000
+
+    # Plotting
+    fig, ax = plt.subplots()
+    plt.plot(lags, spike_triggered_average)
+    ax.set_xlabel("Time (ms)")
+    ax.set_ylabel("Voltage (\u03bcV)")
+
+    return fig, ax
