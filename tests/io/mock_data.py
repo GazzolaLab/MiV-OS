@@ -54,20 +54,22 @@ class AdvancedMockData(Data):
     def __init__(self):
         self.masking_channel_set: Set[int] = set()
 
-        self.duration: float = 1
-        self.sampling_rate = 100
-        self.times = np.arange(start=0, stop=self.duration, step=1 / self.sampling_rate)
+        self.sampling_rate = 30000
+        self.times = np.linspace(start=0, stop=self.sampling_rate * 40, num=40)
 
-        self.signal = []
-        self.signal.append(MockSpikeCutout(0, 0, 0, self.sampling_rate).cutout)
-        self.signal.append(MockSpikeCutout(1, 1, 0, self.sampling_rate).cutout)
-        self.signal.append(MockSpikeCutout(2, 2, 0, self.sampling_rate).cutout)
+        self.signal = np.ndarray((6, 40))
+        self.signal[0] = 1000 * MockSpikeCutout(0, 0, 0, length=40).cutout
+        self.signal[1] = 1000 * MockSpikeCutout(1, 1, 0, length=40).cutout
+        self.signal[2] = 1000 * MockSpikeCutout(2, 2, 0, length=40).cutout
+        self.signal[3] = 1000 * MockSpikeCutout(0, 0, 0, length=40).cutout
+        self.signal[4] = 1000 * MockSpikeCutout(1, 1, 0, length=40).cutout
+        self.signal[5] = 1000 * MockSpikeCutout(2, 2, 0, length=40).cutout
 
         self.signal = np.transpose(self.signal)
 
     @contextmanager
     def load(self):
-        yield self.signal, self.times, self.sampling_rate
+        yield np.transpose(self.signal), self.times, self.sampling_rate
 
 
 # This MockSpontaneousData class generates signals with 5 channels that all look like
