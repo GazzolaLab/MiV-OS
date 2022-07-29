@@ -91,14 +91,16 @@ class AbnormalityDetector:
 
         Returns
         -------
-        2D Numpy array of cutouts with rows as channels
+        Numpy array of rows of ChannelSpikeCutout objects
         """
         with data.load() as (sig, times, samp):
             filtered_sig = signal_filter(sig, samp)
             spikestamps = spike_detector(filtered_sig, times, samp)
 
             num_channels = np.shape(filtered_sig)[1]
-            return_cutouts: np.ndarray = np.ndarray(num_channels)
+            return_cutouts: np.ndarray = np.ndarray(
+                num_channels, dtype=ChannelSpikeCutout
+            )
 
             for chan_index in tqdm(range(num_channels)):
                 channel_spikes = spikestamps[chan_index]
@@ -236,7 +238,7 @@ class AbnormalityDetector:
         train_labels = all_labeled_cutouts["labels"][:split_index]
         train_cutouts = all_labeled_cutouts["cutouts"][:split_index]
 
-        self.classifier.train_model(train_cutouts, train_labels, model_fit_kwargs)
+        self.classifier.train_model(train_cutouts, train_labels, **model_fit_kwargs)
 
     def default_init_and_train_model(self) -> None:
 
@@ -247,7 +249,7 @@ class AbnormalityDetector:
         train_labels = all_labeled_cutouts["labels"][:split_index]
         train_cutouts = all_labeled_cutouts["cutouts"][:split_index]
 
-        self.classifier.create_default_tf_keras_model(train_cutouts, train_labels)
+        self.classifier.create_default_tf_keras_model(len(train_cutouts[0]))
         self.classifier.default_compile_model()
         self.classifier.default_train_model(train_cutouts, train_labels)
 

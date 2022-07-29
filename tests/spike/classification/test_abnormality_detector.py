@@ -1,50 +1,33 @@
-from typing import List
-
-from unittest import mock
-
 import numpy as np
 import tensorflow as tf
-from grpc import Channel
 
-from miv.signal.events.abnormality_detection import AbnormalityDetector
-from miv.signal.spike.cutout import ChannelSpikeCutout, SpikeCutout
-from tests.spike.cutout.test_cutout import MockSpikeCutout
+from miv.signal.classification.abnormality_detection import AbnormalityDetector
+from miv.signal.filter.butter_bandpass_filter import ButterBandpass
+from miv.signal.spike.detection import ThresholdCutoff
+from miv.signal.spike.sorting import PCADecomposition
+from tests.io.mock_data import AdvancedMockData
 
 
-class MockAbnormalDetector(AbnormalityDetector):
-    def __init__(
-        self,
-        spont_cutouts: List[ChannelSpikeCutout],
-        num_components: int,
-        num_channels: int,
-    ):
-        AbnormalityDetector.num_channels = num_channels
-        AbnormalityDetector.trained = False
-        AbnormalityDetector.extractor_decomposition_parameter = num_components
+class MockAbnormalityDetector(AbnormalityDetector):
+    def __init__(self) -> None:
+        # 6 channels, length = 70
+        mock_data = AdvancedMockData()
+        AbnormalityDetector.spontaneous_data = mock_data
+        AbnormalityDetector.spontaneous_cutouts = mock_data.signal
         AbnormalityDetector.categorized = False
-        AbnormalityDetector.spontaneous_cutouts = spont_cutouts
+        self.filter = ButterBandpass(lowcut=300, highcut=3000)
+        self.spike_detector = ThresholdCutoff()
+        self.extractor = PCADecomposition()
 
-    def _get_cutouts(self):
-        return super().spontaneous_cutouts
 
+def test_get_all_cutouts():
+    abn_detector = MockAbnormalityDetector()
+    all_cutouts = abn_detector._get_all_cutouts(
+        abn_detector.spontaneous_data,
+        signal_filter=abn_detector.filter,
+        spike_detector=abn_detector.spike_detector,
+        extractor=abn_detector.extractor,
+        extractor_decomp_param=3,
+    )
 
-def test_categorize_spontaneous():
-    chan_spike_cutouts = []
-    for i in range(2):
-        cutouts = []
-        cutouts.append(MockSpikeCutout(0, 0, 0))
-        cutouts.append(MockSpikeCutout(1, 1, 0.1))
-        cutouts.append(MockSpikeCutout(2, 2, 0.2))
-        cutouts.append(MockSpikeCutout(0, 0, 0.3))
-        cutouts.append(MockSpikeCutout(1, 1, 0.4))
-        cutouts.append(MockSpikeCutout(2, 2, 0.5))
-        chan_spike_cutouts.append(ChannelSpikeCutout(cutouts, 3, 0))
-    abn_detector = MockAbnormalDetector(chan_spike_cutouts, 3, 2)
-
-    cat_list = [[2, 1, 0], [2, 1, 0]]
-    abn_detector.categorize_spontaneous(cat_list)
-
-    assert abn_detector.categorized
-    for chan_index, chan_spike_cutout in enumerate(abn_detector.spontaneous_cutouts):
-        for cutout_index, elem in enumerate(chan_spike_cutout.categorization_list):
-            assert elem == cat_list[chan_index][cutout_index]
+    assert np.shape(all_cutouts)[0] == 6
