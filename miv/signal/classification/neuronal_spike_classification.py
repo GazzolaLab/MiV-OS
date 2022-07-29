@@ -48,7 +48,6 @@ class NeuronalSpikeClassifier:
             ),
             tf.keras.layers.Dense(1, activation="sigmoid"),
         ]
-
         self.model = tf.keras.Sequential(layers)
 
     def compile_model(self, **compile_kwargs) -> None:
@@ -114,12 +113,16 @@ class NeuronalSpikeClassifier:
             test_labels, predictions, **confusion_matrix_kwargs
         )
 
-    def predict_categories(self, spikes: np.ndarray, **predict_kwargs) -> np.ndarray:
+    def predict_categories_sigmoid(
+        self, spikes: np.ndarray, threshold: float = 0.5, **predict_kwargs
+    ) -> np.ndarray:
         """Predict with spikes and get the index of category for each prediction
 
         Parameters
         ----------
         spikes : np.ndarray
+        threshold : float, default = 0.5
+            Prediction values above this threshold value will be marked as 1.
         **predict_kwargs
             keyworded arguments for model.predict function
 
@@ -130,11 +133,10 @@ class NeuronalSpikeClassifier:
 
         self._validate_model()
 
-        prob_model = tf.keras.Sequential([self.model, tf.keras.layers.Softmax()])
-        predictions = prob_model.predict(spikes, **predict_kwargs)
+        predictions = self.model.predict(spikes, **predict_kwargs)
         outcomes: np.ndarray = np.ndarray(np.shape(spikes)[0])
         for i, prediction in enumerate(predictions):
-            outcomes[i] = np.argmax(prediction)
+            outcomes[i] = prediction > threshold
         return outcomes
 
     def _validate_model(self):

@@ -36,7 +36,7 @@ class DistinctiveMockSpikes:
         self.labels = np.array([0, 1, 0, 1])
 
 
-def test_predict_categories():
+def test_predict_categories_sigmoid():
     mock_spikes = DistinctiveMockSpikes(size=30)
     classifier = NeuronalSpikeClassifier()
     classifier.create_default_tf_keras_model(30)
@@ -47,10 +47,6 @@ def test_predict_categories():
         epochs=100,  # Just 4 samples per epoch so this should be fine
     )
 
-    test_spikes = mock_spikes.spikes
-    test_labels = mock_spikes.labels
-
-    predictions = classifier.predict_categories(test_spikes)
-
+    predictions = classifier.predict_categories_sigmoid(mock_spikes.spikes)
     for spike_index, spike_prediction in enumerate(predictions):
-        assert test_labels[spike_index] == np.argmax(spike_prediction)
+        assert mock_spikes.labels[spike_index] == spike_prediction
