@@ -50,3 +50,38 @@ def test_predict_categories_sigmoid():
     predictions = classifier.predict_categories_sigmoid(mock_spikes.spikes)
     for spike_index, spike_prediction in enumerate(predictions):
         assert mock_spikes.labels[spike_index] == spike_prediction
+
+
+def test_get_confusion_matrix():
+    def verify_matrix(labels, matrix):
+        result_matrix = classifier.get_confusion_matrix(spikes, labels)
+        for row_index, row in enumerate(result_matrix):
+            for n_index, n in enumerate(row):
+                assert n == matrix[row_index][n_index]
+
+    mock_spikes = DistinctiveMockSpikes(size=30)
+    classifier = NeuronalSpikeClassifier()
+    classifier.create_default_tf_keras_model(30)
+    classifier.default_compile_model()
+    spikes = mock_spikes.spikes
+    classifier.train_model(x=spikes, y=mock_spikes.labels, epochs=100, verbose=0)
+
+    # Case 1: All true predictions
+    labels = np.array([0, 1, 0, 1])
+    matrix = np.array([[2, 0], [0, 2]])
+    verify_matrix(labels, matrix)
+
+    # Case 2: 1 false positive
+    labels = np.array([0, 1, 0, 0])
+    matrix = np.array([[1, 0], [1, 2]])
+    verify_matrix(labels, matrix)
+
+    # Case 3: 1 false negative
+    labels = np.array([1, 1, 0, 1])
+    matrix = np.array([[2, 1], [0, 1]])
+    verify_matrix(labels, matrix)
+
+    # Case 4: All false predictions
+    labels = np.array([1, 0, 1, 0])
+    matrix = np.array([[0, 2], [2, 0]])
+    verify_matrix(labels, matrix)

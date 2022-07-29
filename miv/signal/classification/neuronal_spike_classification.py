@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional
 
 import numpy as np
 import tensorflow as tf
+from sklearn.metrics import confusion_matrix
 
 from miv.io import Data, DataManager
 from miv.signal.classification.protocol import SpikeClassificationModelProtocol
@@ -108,10 +109,10 @@ class NeuronalSpikeClassifier:
 
         self._validate_model()
 
-        predictions = self.predict_categories(test_spikes, verbose=0)
-        return tf.math.confusion_matrix(
-            test_labels, predictions, **confusion_matrix_kwargs
-        )
+        predictions = self.predict_categories_sigmoid(test_spikes, verbose=0)
+        predictions = (predictions + 1) % 2
+        test_labels = (test_labels + 1) % 2
+        return confusion_matrix(test_labels, predictions, **confusion_matrix_kwargs)
 
     def predict_categories_sigmoid(
         self, spikes: np.ndarray, threshold: float = 0.5, **predict_kwargs
