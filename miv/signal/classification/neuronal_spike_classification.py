@@ -30,29 +30,23 @@ class NeuronalSpikeClassifier:
         self.train_spikes: np.ndarray
         self.train_labels: np.ndarray
 
-    def create_default_tf_keras_model(
-        self, train_spikes: np.ndarray, train_labels: np.ndarray
-    ) -> None:
+    def create_default_tf_keras_model(self, input_size: int) -> None:
         """Creates a defualt classification model
 
         Parameters
         ----------
-        train_spikes : np.ndarray
-        train_labels : np.ndarray
-
+        input_size : int
+            The input size that determines the number of nodes in the input
+            layer and the hidden layer.
         """
 
-        if np.shape(train_spikes)[0] != np.shape(train_labels)[0]:
-            raise Exception("train spikes and train labels have incompatible sizes")
-        if np.size(train_spikes) == 0 or np.size(train_labels) == 0:
-            raise Exception("can't create default model from empty training data")
-
         layers = [
-            tf.keras.layers.Dense(np.shape(train_spikes)[1]),
+            tf.keras.layers.Dense(input_size),
             tf.keras.layers.Dense(
-                int(np.shape(train_spikes)[1])
-            ),  # This needs to be tweaked
-            tf.keras.layers.Dense(len(np.unique(train_labels))),
+                # This needs to be tweaked
+                input_size
+            ),
+            tf.keras.layers.Dense(1, activation="sigmoid"),
         ]
 
         self.model = tf.keras.Sequential(layers)
