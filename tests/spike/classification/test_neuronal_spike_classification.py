@@ -18,19 +18,11 @@ class MockSpikes:
         self.labels = np.array(labels)
 
 
-def test_default_model():
-    mock_spikes = MockSpikes()
+def test_create_default_model():
+    mock_spikes = MockSpikes(size=3, length=40)
     classifier = NeuronalSpikeClassifier()
 
-    try:
-        classifier.create_default_tf_keras_model(
-            mock_spikes.spikes[1:], mock_spikes.labels
-        )
-        assert False
-    except Exception:
-        pass
-
-    classifier.create_default_tf_keras_model(mock_spikes.spikes, mock_spikes.labels)
+    classifier.create_default_tf_keras_model(40)
     assert np.size(classifier.model.layers) == 3
     classifier.default_compile_model()
     classifier.train_model(x=mock_spikes.spikes, y=mock_spikes.labels, epochs=5)
@@ -47,12 +39,12 @@ class DistinctiveMockSpikes:
 def test_predict_categories():
     mock_spikes = DistinctiveMockSpikes(size=30)
     classifier = NeuronalSpikeClassifier()
-    classifier.create_default_tf_keras_model(mock_spikes.spikes, mock_spikes.labels)
+    classifier.create_default_tf_keras_model(30)
     classifier.default_compile_model()
     classifier.train_model(
         x=mock_spikes.spikes,
         y=mock_spikes.labels,
-        epochs=500,  # Just 4 samples per epoch so this should be fine
+        epochs=100,  # Just 4 samples per epoch so this should be fine
     )
 
     test_spikes = mock_spikes.spikes
