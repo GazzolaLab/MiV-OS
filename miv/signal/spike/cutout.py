@@ -133,7 +133,7 @@ class ChannelSpikeCutout:
         labels :
             1D Numpy array of category label index for each spike
         cutouts :
-            1D list of corresponding cutouts
+            1D Numpy array of corresponding cutouts
         size :
             int value for the number of labeled cutouts
         """

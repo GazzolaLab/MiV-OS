@@ -3,6 +3,7 @@ import tensorflow as tf
 
 from miv.signal.classification.abnormality_detection import AbnormalityDetector
 from miv.signal.filter.butter_bandpass_filter import ButterBandpass
+from miv.signal.spike.cutout import ChannelSpikeCutout, SpikeCutout
 from miv.signal.spike.detection import ThresholdCutoff
 from miv.signal.spike.sorting import PCADecomposition
 from tests.io.mock_data import AdvancedMockData
@@ -10,11 +11,21 @@ from tests.io.mock_data import AdvancedMockData
 
 class MockAbnormalityDetector(AbnormalityDetector):
     def __init__(self) -> None:
-        # 6 channels, length = 70
+        # 2 channels, 6 cutouts each, 3 components, length = 70
         mock_data = AdvancedMockData()
         AbnormalityDetector.spontaneous_data = mock_data
-        AbnormalityDetector.spontaneous_cutouts = mock_data.signal
+
+        cutouts = np.ndarray(6, dtype=SpikeCutout)
+        for i in range(6):
+            cutouts[i] = SpikeCutout(mock_data.signal[i], 30000, i % 3, 0)
+
+        all_cutouts: np.ndarray = np.array(
+            [ChannelSpikeCutout(cutouts, 3, 0), ChannelSpikeCutout(cutouts, 3, 1)]
+        )
+
+        AbnormalityDetector.spontaneous_cutouts = all_cutouts
         AbnormalityDetector.categorized = False
+        AbnormalityDetector.num_components = 3
         self.filter = ButterBandpass(lowcut=300, highcut=3000)
         self.spike_detector = ThresholdCutoff()
         self.extractor = PCADecomposition()
@@ -31,3 +42,32 @@ def test_get_all_cutouts():
     )
 
     assert np.shape(all_cutouts)[0] == 6
+
+
+def test_categorize_spontaneous():
+    abn_detector = MockAbnormalityDetector()
+
+    # Case 1: decomp param does not match
+    cat = np.array([[0, 0, 0, 1], [1, 0, 0, 1]])
+    try:
+        abn_detector.categorize_spontaneous(cat)
+    except IndexError:
+        pass
+
+    # Case 2: num channels does not match
+    cat = np.array([0, 0, 1, 0, 1, 1])
+    try:
+        abn_detector.categorize_spontaneous(cat)
+    except IndexError:
+        pass
+
+    # Case 3: normal categorization
+    cat = np.array([[0, 1, 1], [0, 1, -1]])
+    abn_detector.categorize_spontaneous(cat)
+    chan0 = abn_detector.spontaneous_cutouts[0]
+    chan1 = abn_detector.spontaneous_cutouts[1]
+    assert abn_detector.categorized
+    assert chan0.categorized
+    assert not chan1.categorized
+    assert np.array_equal(chan0.categorization_list, np.array([0, 1, 1]))
+    assert np.array_equal(chan1.categorization_list, np.array([0, 1, -1]))

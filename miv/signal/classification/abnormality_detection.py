@@ -153,8 +153,13 @@ class AbnormalityDetector:
         """
         decomp_param = self.spontaneous_cutouts[0].num_components
         if np.shape(categorization_list)[1] != decomp_param:
-            raise Exception(
+            raise IndexError(
                 "Number of category indices does not match the extractor decomposition parameter."
+            )
+        num_channels = np.shape(self.spontaneous_cutouts)[0]
+        if np.shape(categorization_list)[0] != num_channels:
+            raise IndexError(
+                "Number of channels in categorization list does not match the number of channels from spontaneous cutouts."
             )
 
         for chan_index, chan_row in enumerate(categorization_list):
