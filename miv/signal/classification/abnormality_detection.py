@@ -231,6 +231,23 @@ class AbnormalityDetector:
         self._check_categorized()
         self.classifier = NeuronalSpikeClassifier(model)
 
+    def compile_classifier_model(self, **model_compile_kwargs) -> None:
+        """Compile classifier model
+
+        Parameters
+        ----------
+        **model_compile_kwargs
+            keyworded arguments for model.compile()
+        """
+        self._check_classifier_initiated()
+        self.classifier.compile_model(**model_compile_kwargs)
+
+    def default_init_and_compile_classifier(self) -> None:
+        """Initialize and compile classifier with default settings"""
+        self.init_classifier()
+        self.classifier.create_default_tf_keras_model()
+        self.classifier.default_compile_model()
+
     def train_classifier_model(
         self, train_test_split: float, **model_fit_kwargs
     ) -> None:
@@ -245,6 +262,7 @@ class AbnormalityDetector:
             Note: x=train_cutouts and y=train_labels are already included and should
             not be written again in this value.
         """
+        self._check_classifier_initiated()
         self._check_categorized()
 
         all_labeled_cutouts = self._get_all_labeled_cutouts(shuffle_cutouts=True)
