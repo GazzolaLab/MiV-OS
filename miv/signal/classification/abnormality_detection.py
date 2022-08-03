@@ -71,6 +71,10 @@ class AbnormalityDetector:
                 "No cutouts are labeled yet. Try categorize_spontaneous method"
             )
 
+    def _check_classifier_initiated(self):
+        if not self.classifier:
+            raise Exception("No classifier is initiated yet. Try init_classifier()")
+
     def _get_all_cutouts(
         self,
         data: Data,
@@ -224,6 +228,7 @@ class AbnormalityDetector:
             The model used by the classfier.
             If left as None, a standard tensorflow keras model will be created
         """
+        self._check_categorized()
         self.classifier = NeuronalSpikeClassifier(model)
 
     def train_classifier_model(
@@ -287,6 +292,7 @@ class AbnormalityDetector:
         f1 : float
         """
 
+        self._check_classifier_initiated()
         conf_matrix = self.classifier.get_confusion_matrix(
             test_spikes, test_labels, **confusion_matrix_kwargs
         )
