@@ -235,6 +235,10 @@ class AbnormalityDetector:
             The proportion of labeled spontaneous cutouts used for training
             For example, if there are 10 labeled cutouts and 8 is used for
             training, then train_test_split would be 0.8.
+        **model_fit_kwargs
+            Keyworded arguments for model.fit()
+            Note: x=train_cutouts and y=train_labels are already included and should
+            not be written again in this value.
         """
         self._check_categorized()
 
@@ -243,7 +247,7 @@ class AbnormalityDetector:
         train_labels = all_labeled_cutouts["labels"][:split_index]
         train_cutouts = all_labeled_cutouts["cutouts"][:split_index]
 
-        self.classifier.train_model(train_cutouts, train_labels, **model_fit_kwargs)
+        self.classifier.train_model(x=train_cutouts, y=train_labels, **model_fit_kwargs)
 
     def default_init_and_train_model(self) -> None:
 
