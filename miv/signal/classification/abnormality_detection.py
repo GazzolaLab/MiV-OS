@@ -262,6 +262,50 @@ class AbnormalityDetector:
         self.classifier.default_compile_model()
         self.classifier.default_train_model(train_cutouts, train_labels)
 
+    def evaluate_model(
+        self,
+        test_spikes: np.ndarray,
+        test_labels: np.ndarray,
+        **confusion_matrix_kwargs,
+    ) -> Dict[str, Any]:
+        """Get statistical measurements for this model
+
+        Parameters
+        ----------
+        test_spikes : np.ndarray
+            spikes used to test and obtain measurements
+        test_labels : np.ndarray
+            corresponding spike labels used to teest and obtain measurements
+        **confusion_matrix_kwargs
+            keyworded arguments for sklearn.metrics.confusion_matrix()
+
+        Returns
+        -------
+        accuracy : float
+        precision : float
+        recall : float
+        f1 : float
+        """
+
+        conf_matrix = self.classifier.get_confusion_matrix(
+            test_spikes, test_labels, **confusion_matrix_kwargs
+        )
+        tp = conf_matrix[0][0]
+        fn = conf_matrix[0][1]
+        fp = conf_matrix[1][0]
+        tn = conf_matrix[1][1]
+
+        recall = tp / (tp + fn)
+        accuracy = (tp + tn) / (tp + tn + fp + fn)
+        precision = tp / (tp + fp)
+        f1 = 2 * (precision * recall) / (precision + recall)
+        return {
+            "accuracy": accuracy,
+            "precision": precision,
+            "recall": recall,
+            "f1": f1,
+        }
+
     # Below is work in progress
 
     # def evaluate_model(
