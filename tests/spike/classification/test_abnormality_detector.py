@@ -12,6 +12,7 @@ from tests.io.mock_data import AdvancedMockData
 class MockAbnormalityDetector(AbnormalityDetector):
     def __init__(self) -> None:
         # 2 channels, 6 cutouts each, 3 components, length = 70
+        # [[0, 1, 2, 0, 1, 2], [0, 1, 2, 0, 1, 2]]
         mock_data = AdvancedMockData()
         AbnormalityDetector.spontaneous_data = mock_data
 
@@ -70,3 +71,15 @@ def test_categorize_spontaneous():
     assert not chan1.categorized
     assert np.array_equal(chan0.categorization_list, np.array([0, 1, 1]))
     assert np.array_equal(chan1.categorization_list, np.array([0, 1, -1]))
+
+
+def test_evaluate_model():
+    abn_detector = MockAbnormalityDetector()
+    abn_detector.categorize_spontaneous([[0, 1, 1], [0, 1, 1]])
+    abn_detector.default_init_and_compile_classifier()
+    test_spikes = abn_detector.spontaneous_cutouts[0].get_labeled_cutouts()["cutouts"]
+
+    # Case 1 : all correct
+    test_labels = np.array([0, 1, 1, 0, 1, 1])
+    metrics = abn_detector.evaluate_model(test_spikes, test_labels)
+    assert metrics["accuracy"] == 1

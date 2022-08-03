@@ -245,7 +245,8 @@ class AbnormalityDetector:
     def default_init_and_compile_classifier(self) -> None:
         """Initialize and compile classifier with default settings"""
         self.init_classifier()
-        self.classifier.create_default_tf_keras_model()
+        input_size = len(self.spontaneous_cutouts[0].cutouts[0])
+        self.classifier.create_default_tf_keras_model(input_size)
         self.classifier.default_compile_model()
 
     def train_classifier_model(
@@ -311,6 +312,7 @@ class AbnormalityDetector:
         """
 
         self._check_classifier_initiated()
+        self._check_categorized()
         conf_matrix = self.classifier.get_confusion_matrix(
             test_spikes, test_labels, **confusion_matrix_kwargs
         )
