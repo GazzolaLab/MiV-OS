@@ -15,7 +15,7 @@ class MockAbnormalityDetector(AbnormalityDetector):
         mock_data = AdvancedMockData()
         AbnormalityDetector.spontaneous_data = mock_data
 
-        cutouts = np.ndarray(6, dtype=SpikeCutout)
+        cutouts: np.ndarray = np.ndarray(6, dtype=SpikeCutout)
         for i in range(6):
             cutouts[i] = SpikeCutout(mock_data.signal[i], 30000, i % 3, 0)
 
@@ -25,7 +25,6 @@ class MockAbnormalityDetector(AbnormalityDetector):
 
         AbnormalityDetector.spontaneous_cutouts = all_cutouts
         AbnormalityDetector.categorized = False
-        AbnormalityDetector.num_components = 3
         self.filter = ButterBandpass(lowcut=300, highcut=3000)
         self.spike_detector = ThresholdCutoff()
         self.extractor = PCADecomposition()
