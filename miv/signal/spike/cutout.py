@@ -91,7 +91,7 @@ class ChannelSpikeCutout:
         for row_index, row in enumerate(result):
             result[row_index] = np.array(row)
 
-        return np.array(result)
+        return np.array(result, dtype=object)
 
     def categorize(self, category_indices: np.ndarray) -> None:
         """

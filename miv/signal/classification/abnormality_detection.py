@@ -60,6 +60,7 @@ class AbnormalityDetector:
         self.categorized: bool = False
         self.test_labels: np.ndarray
         self.test_cutouts: np.ndarray
+        self.extractor_decomposition_parameter = extractor_decomposition_parameter
 
     def _check_categorized(self):
         if not self.categorized:
@@ -210,6 +211,26 @@ class AbnormalityDetector:
             "cutouts": np.array(labeled_cutouts),
             "sizes": sizes,
         }
+
+    def get_spontaneous_cutouts_by_components(self) -> np.ndarray:
+        """Get all spontaneous cutouts in a 2D array
+        Note: The raw spike signals are returned, instead of SpikeCutout objects.
+
+        Returns
+        -------
+        3D Numpy array [component index][spike index][sampling point in raw spike]
+        """
+
+        result = [[] for i in range(self.extractor_decomposition_parameter)]
+
+        for chan_index, chan_spike_cutout in enumerate(self.spontaneous_cutouts):
+            chan_cutouts_by_comp = chan_spike_cutout.get_cutouts_by_component()
+
+            for comp_index, comp_spikes in enumerate(chan_cutouts_by_comp):
+                for spike_index, spike in enumerate(comp_spikes):
+                    result[comp_index].append(spike)
+
+        return np.array(result, dtype=object)
 
     def init_classifier(
         self,
