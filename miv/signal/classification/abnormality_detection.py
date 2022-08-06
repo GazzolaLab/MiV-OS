@@ -3,9 +3,6 @@ __all__ = ["AbnormalityDetector"]
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
-import quantities as pq
-import tensorflow as tf
-from neo import SpikeTrain
 from sklearn.utils import shuffle
 from tqdm import tqdm
 
@@ -21,7 +18,6 @@ from miv.signal.spike import (
     SpikeDetectionProtocol,
     SpikeFeatureExtractionProtocol,
 )
-from miv.typing import SpikestampsType
 from miv.visualization import extract_waveforms
 
 
@@ -109,6 +105,7 @@ class AbnormalityDetector:
             for chan_index in tqdm(range(num_channels)):
                 channel_spikes = spikestamps[chan_index]
 
+                # Not enough spikes, ignore channel
                 if np.size(channel_spikes) < extractor_decomp_param:
                     return_cutouts[chan_index] = ChannelSpikeCutout(
                         np.array([]), extractor_decomp_param, chan_index
@@ -129,7 +126,7 @@ class AbnormalityDetector:
                             SpikeCutout(
                                 raw_cutout,
                                 samp,
-                                extractor_decomp_param,
+                                labels[cutout_index],
                                 spikestamps[chan_index][cutout_index],
                             )
                         )
