@@ -78,18 +78,20 @@ class ChannelSpikeCutout:
     def __len__(self) -> int:
         return len(self.cutouts)
 
-    def get_cutouts_by_component(self) -> List[List[SpikeCutout]]:
+    def get_cutouts_by_component(self) -> np.ndarray:
         """
         Returns
         -------
-        2D list of SpikeCutout elements where rows correspond to extractor component indices
+        3D Numpy array of cutouts [component index][spike index][sampling point in raw spike]
         """
-        components: List[List[SpikeCutout]] = []
-        for row_index in range(self.num_components):
-            components.append([])
+        result = [[] for i in range(self.num_components)]
         for index, cutout in enumerate(self.cutouts):
-            components[cutout.extractor_comp_index].append(cutout)
-        return components
+            result[cutout.extractor_comp_index].append(cutout.cutout)
+
+        for row_index, row in enumerate(result):
+            result[row_index] = np.array(row)
+
+        return np.array(result)
 
     def categorize(self, category_indices: np.ndarray) -> None:
         """
