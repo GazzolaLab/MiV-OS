@@ -6,6 +6,7 @@ import pytest
 
 from miv.io.binary import (
     apply_channel_mask,
+    bits_to_voltage,
     load_continuous_data,
     load_recording,
     oebin_read,
@@ -154,3 +155,78 @@ def test_load_recording_assertion_single_data_file(num_channels, signal_length, 
         AssertionError, match=r"(?=.*temp1.*)(?=.*temp2.*)(?=There should be only one)"
     ):
         load_recording(dirname)
+
+
+def test_bits_to_voltage():
+    signal = np.ones([10, 3], dtype=np.float_)
+    channel_info = [
+        {"bit_volts": 5.0, "units": "V", "channel_name": "DC"},
+        {"bit_volts": 3.0, "units": "mV", "channel_name": "ADC_"},
+        {"bit_volts": 2.5, "units": "uV", "channel_name": "DC_"},
+    ]
+    result = bits_to_voltage(signal, channel_info)
+    expected_result = np.ones_like(signal)
+    expected_result[:, 0] *= 5.0 * 1e6
+    expected_result[:, 1] *= 3.0 * 1e3 * 1e6
+    expected_result[:, 2] *= 2.5
+    np.testing.assert_allclose(result, expected_result)
+
+
+def test_load_recording_readout_without_mask(tmp_path):
+    # TODO: Refactor into fixture mock data
+    dirname = tmp_path
+
+    num_channels = 3
+    signal_length = 100
+
+    # Prepare continuous.dat
+    signal = np.arange(signal_length * num_channels).reshape(
+        [signal_length, num_channels]
+    )
+    filename = os.path.join(dirname, "continuous.dat")
+    fp = np.memmap(filename, dtype="int16", mode="w+", shape=signal.shape)
+    fp[:] = signal[:]
+    fp.flush()
+    # Prepare timestamps.npy
+    timestamps_filename = os.path.join(dirname, "timestamps.npy")
+    timestamps = np.arange(signal_length) + np.pi
+    np.save(timestamps_filename, timestamps)
+    # Prepare structure.oebin
+    oebin_filename = os.path.join(dirname, "structure.oebin")
+    oebin = """{
+    "continuous": [
+        {
+            "sample_rate": 30000,
+            "num_channels": 3,
+            "channels": [
+                {
+                    "bit_volts":5.0,
+                    "units":"uV",
+                    "channel_name":"DC"
+                },
+                {
+                    "bit_volts":3.0,
+                    "units":"uV",
+                    "channel_name":"DC_"
+                },
+                {
+                    "bit_volts":2.5,
+                    "units":"uV",
+                    "channel_name":"DC_"
+                }
+            ]
+        }
+    ]
+}"""
+    with open(oebin_filename, "w") as f:
+        f.write(oebin)
+
+    data, out_timestamps, sampling_rate = load_recording(dirname)
+
+    assert sampling_rate == 30000
+    expected_data = signal.copy().astype("float32")
+    expected_data[:, 0] *= 5.0
+    expected_data[:, 1] *= 3.0
+    expected_data[:, 2] *= 2.5
+    np.testing.assert_allclose(data, expected_data)
+    np.testing.assert_allclose(out_timestamps, (timestamps - np.pi) / sampling_rate)
