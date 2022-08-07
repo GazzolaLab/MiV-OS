@@ -3,6 +3,7 @@
 exclude_lines =
     # Enable pragma
     pragma: no cover
+    TODO
 
     # Don't complain if non-runnable code isn't run:
     if 0:
