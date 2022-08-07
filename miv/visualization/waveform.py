@@ -35,7 +35,7 @@ def extract_waveforms(
     Parameters
     ----------
     signal : SignalType
-        The signal as a 1-dimensional numpy array
+        The signal as a 2-dimensional numpy array (length, num_channel)
     spikestamps : SpikestampsType
         The sample index of all spikes as a 1-dim numpy array
     channel : int
@@ -102,7 +102,6 @@ def plot_waveforms(
         The line color as a pyplot line/marker style. (Default: 'k'=black)
     plot_kwargs : Dict[Any, Any]
         Addtional keyword-arguments for matplotlib.pyplot.plot.
-
     """
     if n_spikes is None:
         n_spikes = cutouts.shape[0]
@@ -113,6 +112,7 @@ def plot_waveforms(
 
     # TODO: Need to match unit
     time_in_us = np.arange(-pre * 1000, post * 1000, 1e3 / sampling_rate)
+    fig = plt.figure()
     for i in range(n_spikes):
         plt.plot(
             time_in_us,
@@ -124,6 +124,7 @@ def plot_waveforms(
             alpha=0.3,
             **plot_kwargs,
         )
-        plt.xlabel("Time (ms)")
-        plt.ylabel("Voltage (uV)")
-        plt.title("Cutouts")
+    plt.xlabel("Time (ms)")
+    plt.ylabel("Voltage (uV)")
+    plt.title("Cutouts")
+    return fig
