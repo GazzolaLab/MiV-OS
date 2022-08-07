@@ -6,10 +6,12 @@ import pytest
 
 from miv.io.binary import (
     apply_channel_mask,
+    bits_to_voltage,
     load_continuous_data,
     load_recording,
     oebin_read,
 )
+from tests.io.mock_data import fixture_create_mock_data_file
 
 
 @pytest.mark.parametrize("signal", [np.arange(10), np.array([])])
@@ -154,3 +156,29 @@ def test_load_recording_assertion_single_data_file(num_channels, signal_length, 
         AssertionError, match=r"(?=.*temp1.*)(?=.*temp2.*)(?=There should be only one)"
     ):
         load_recording(dirname)
+
+
+def test_bits_to_voltage():
+    signal = np.ones([10, 3], dtype=np.float_)
+    channel_info = [
+        {"bit_volts": 5.0, "units": "V", "channel_name": "DC"},
+        {"bit_volts": 3.0, "units": "mV", "channel_name": "ADC_"},
+        {"bit_volts": 2.5, "units": "uV", "channel_name": "DC_"},
+    ]
+    result = bits_to_voltage(signal, channel_info)
+    expected_result = np.ones_like(signal)
+    expected_result[:, 0] *= 5.0 * 1e6
+    expected_result[:, 1] *= 3.0 * 1e3 * 1e6
+    expected_result[:, 2] *= 2.5
+    np.testing.assert_allclose(result, expected_result)
+
+
+def test_load_recording_readout_without_mask(create_mock_data_file):
+    # TODO: Refactor into fixture mock data
+    dirname, expected_data, expected_timestamps, sampling_rate = create_mock_data_file
+
+    out_data, out_timestamps, out_sampling_rate = load_recording(dirname)
+
+    assert sampling_rate == out_sampling_rate
+    np.testing.assert_allclose(out_data, expected_data)
+    np.testing.assert_allclose(out_timestamps, expected_timestamps)
