@@ -11,6 +11,7 @@ from miv.io.binary import (
     load_recording,
     oebin_read,
 )
+from tests.io.mock_data import fixture_create_mock_data_file
 
 
 @pytest.mark.parametrize("signal", [np.arange(10), np.array([])])
@@ -172,61 +173,12 @@ def test_bits_to_voltage():
     np.testing.assert_allclose(result, expected_result)
 
 
-def test_load_recording_readout_without_mask(tmp_path):
+def test_load_recording_readout_without_mask(create_mock_data_file):
     # TODO: Refactor into fixture mock data
-    dirname = tmp_path
+    dirname, expected_data, expected_timestamps, sampling_rate = create_mock_data_file
 
-    num_channels = 3
-    signal_length = 100
+    out_data, out_timestamps, out_sampling_rate = load_recording(dirname)
 
-    # Prepare continuous.dat
-    signal = np.arange(signal_length * num_channels).reshape(
-        [signal_length, num_channels]
-    )
-    filename = os.path.join(dirname, "continuous.dat")
-    fp = np.memmap(filename, dtype="int16", mode="w+", shape=signal.shape)
-    fp[:] = signal[:]
-    fp.flush()
-    # Prepare timestamps.npy
-    timestamps_filename = os.path.join(dirname, "timestamps.npy")
-    timestamps = np.arange(signal_length) + np.pi
-    np.save(timestamps_filename, timestamps)
-    # Prepare structure.oebin
-    oebin_filename = os.path.join(dirname, "structure.oebin")
-    oebin = """{
-    "continuous": [
-        {
-            "sample_rate": 30000,
-            "num_channels": 3,
-            "channels": [
-                {
-                    "bit_volts":5.0,
-                    "units":"uV",
-                    "channel_name":"DC"
-                },
-                {
-                    "bit_volts":3.0,
-                    "units":"uV",
-                    "channel_name":"DC_"
-                },
-                {
-                    "bit_volts":2.5,
-                    "units":"uV",
-                    "channel_name":"DC_"
-                }
-            ]
-        }
-    ]
-}"""
-    with open(oebin_filename, "w") as f:
-        f.write(oebin)
-
-    data, out_timestamps, sampling_rate = load_recording(dirname)
-
-    assert sampling_rate == 30000
-    expected_data = signal.copy().astype("float32")
-    expected_data[:, 0] *= 5.0
-    expected_data[:, 1] *= 3.0
-    expected_data[:, 2] *= 2.5
-    np.testing.assert_allclose(data, expected_data)
-    np.testing.assert_allclose(out_timestamps, (timestamps - np.pi) / sampling_rate)
+    assert sampling_rate == out_sampling_rate
+    np.testing.assert_allclose(out_data, expected_data)
+    np.testing.assert_allclose(out_timestamps, expected_timestamps)
