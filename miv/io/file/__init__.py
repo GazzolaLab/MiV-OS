@@ -5,9 +5,5 @@
 # NeuroH5: https://github.com/iraikov/neuroh5
 #
 
-__version__ = "0.0.1"
-
-__all__ = ("__version__",)
-
-from miv_file.read import *
-from miv_file.write import *
+from miv.io.file.read import *
+from miv.io.file.write import *
