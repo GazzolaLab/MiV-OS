@@ -59,12 +59,12 @@ def bits_to_voltage(signal: SignalType, channel_info: Sequence[Dict[str, Any]]):
     signal : SignalType, numpy array
     channel_info : Dict[str, Dict[str, Any]]
         Channel information dictionary. Typically located in `structure.oebin` file.
-        channel information includes bit-volts conversion ration and units (uV or mV).
+        Channel information includes bit-volts conversion ration and units (uV or mV).
 
     Returns
     -------
     signal : numpy array
-        Output signal is in microVolts unit.
+        Output signal is in microVolts (uV) unit.
 
     """
     resultant_unit = pq.Quantity(1, "uV")  # Final Unit
@@ -119,6 +119,7 @@ def load_recording(
     Returns
     -------
     signal : SignalType, neo.core.AnalogSignal
+    timestamps : TimestampsType
     sampling_rate : float
 
     Raises

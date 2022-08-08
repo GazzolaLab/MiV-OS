@@ -45,20 +45,17 @@ def burst(spiketrains: SpikestampsType, channel: float, min_isi: float, min_len:
     burst_spike = (spike_interval <= min_isi).astype(
         np.bool_
     )  # Only spikes within specified min ISI are 1 otherwise 0 and are stored
-    burst = []  # List to store burst parameters
 
-    flag = False
-    start_idx = -1
+    # Try to find the start and end indices for burst interval
     delta = np.logical_xor(burst_spike[:-1], burst_spike[1:])
-    for idx, dval in enumerate(delta):
-        if dval:
-            flag = ~flag
-            if flag:
-                start_idx = idx + 1
-            else:
-                if idx + 1 - start_idx >= min_len:
-                    burst.append((start_idx, idx + 1))
-    Q = np.array(burst)
+    interval = np.where(delta)[0]
+    if len(interval) % 2:
+        interval = np.append(interval, len(delta))
+    interval += 1
+    interval = interval.reshape([-1, 2])
+    mask = np.diff(interval) >= min_len
+    interval = interval[mask.ravel(), :]
+    Q = np.array(interval)
 
     if np.sum(Q) == 0:
         start_time = 0
@@ -75,14 +72,3 @@ def burst(spiketrains: SpikestampsType, channel: float, min_isi: float, min_len:
         burst_rate = burst_len / (burst_duration)
 
     return start_time, burst_duration, burst_len, burst_rate
-
-
-if __name__ == "__main__":
-    import timeit
-
-    from neo.core import SpikeTrain
-
-    arr = np.random.random(10000)
-    arr = np.sort(arr)
-    train0 = [SpikeTrain(times=arr, units="sec", t_stop=arr.max())]
-    o_algorithm = timeit.timeit(lambda: burst(train0, 0, 0.2, 5), number=1000)

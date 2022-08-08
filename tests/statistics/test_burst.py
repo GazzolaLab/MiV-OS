@@ -25,3 +25,14 @@ def test_burst_analysis_output():
     np.testing.assert_allclose(output[1], [0.4, 0.2])
     np.testing.assert_allclose(output[2], [5, 3])
     np.testing.assert_allclose(output[3], [12.5, 15])
+
+    seg1 = Segment(index=1)
+    train1 = SpikeTrain(
+        times=[0.1, 1.2, 1.2, 1.2, 5, 6],
+        units="sec",
+        t_stop=10,
+    )
+    seg1.spiketrains.append(train1)
+    with np.testing.assert_raises(AssertionError):
+        output = burst(seg1.spiketrains, 0, 0.2, 2)
+    # The function above should throw an error since the rate will become 1/0
