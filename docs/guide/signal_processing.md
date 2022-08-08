@@ -28,60 +28,18 @@ import matplotlib.pyplot as plt
 ```{code-cell} ipython3
 :tags: [hide-cell]
 
-from miv.io import load_data
-from miv.io.data import Data, Dataset
+from miv.io.data import Data, DataManager
 ```
 
 ```{code-cell} ipython3
 # Load dataset from OpenEphys recording
 folder_path: str = "~/Open Ephys/2022-03-10-16-19-09"  # Data Path
-# Provide the path of experimental recording tree to the DataSet class
-# Data set class will load the data and create a list of objects for each data
-# dataset = load_data(folder_path, device="OpenEphys")
-dataset = Dataset(data_folder_path=folder_path,
-                  device="OpenEphys",
-                  channels=32,
-                  sampling_rate=30E3,
-                  timestamps_npy="", # We can read similar to continuous.dat
-
-                  )
-#TODO: synchornized_timestamp what for shifted ??
-# Masking channels for data set. Channels can be a list.
-# Show user the tree. Implement representation method. filter_collection.html#FilterCollection.insert
-# An example code to get the tree https://github.com/skim0119/mindinvitro/blob/master/utility/common.py
-# Trimming the tree??
+# Provide the path of experimental recording tree to the DataManager class
+dataset = DataManager(folder_path)
 ```
 
-### 1.1. Meta Data Structure
+You should be able to check the data structure by running `dataset.tree()`.
 
-```{code-cell} ipython3
-# Get signal and rate(hz)
-record_node: int = dataset.get_nodes[0]
-recording = dataset[record_node]["experiment1"]["recording1"]   # Returns the object for recording 1
-# TODO: does openephys returns the timestamp??
-timestamp = recording.timestamp # returns the time stamp for the recording.
-
-signal, _, rate = recording.continuous["100"]
-# time = recording.continuous["100"].timestamp / rate
-num_channels = signal.shape[1]
-```
-
-### 1.2 Raw Data
-
-+++
-
-If the data is provided in single `continuous.dat` instead of meta-data, user must provide number of channels and sampling rate in order to import data accurately.
-
-> **WARNING** The size of the raw datafile can be _large_ depending on sampling rate and the amount of recorded duration. We highly recommand using meta-data structure to handle datafiles, since it only loads the data during the processing and unloads once the processing is done.
-
-```{code-cell} ipython3
-from miv.io import load_continuous_data_file
-
-datapath = 'continuous.dat'
-rate = 30_000
-num_channel = 64
-timestamps, signal = load_continuous_data_file(datapath, num_channel, rate)
-```
 
 ## 2. Filtering Raw Signal
 
@@ -130,17 +88,13 @@ There are two way to apply the filter on the signal.
 You can check the list of all provided filters [here](../api/signal).
 
 ```{code-cell} ipython3
-# Apply filter to entire dataset
-dataset.apply_filter(pre_filter)
-filtered_signal = dataset[record_node]['experiment1']['recording1'].filtered_signal
+# Apply filter to `dataset[0]`
+with dataset[0].load() as (signal, timestamps, sampling_rate):
+    filtered_signal = pre_filter(signal, sampling_rate)
 
 # Apply filter to array
 rate = 30_000
 filtered_signal = pre_filter(data_array, sampling_rate=rate)
-
-# Retrieve data from dataset and apply filter
-data = dataset[record_node]['experiment1']['recording1']
-filtered_signal = pre_filter(data, sampling_rate=rate)
 ```
 
 ## 3. Spike Detection
@@ -166,7 +120,7 @@ spike_detection = ThresholdCutoff()
 timestamps = spike_detection(signal, timestamps, sampling_rate=30_000, cutoff=3.5)
 
 # The detection can be applied on the dataset
-dataset.apply_spike_detection(spike_detection)
+spiketrains = spike_detection(filtered_signal, timestamps, sampling_rate)
 ```
 
 ## 4. Spike Visualization

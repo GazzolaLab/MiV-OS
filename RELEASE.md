@@ -1,3 +1,24 @@
+# Release Note (version 0.1.2)
+
+## What's Changed
+
+* Feature: automatic channel masking by @jihugo in https://github.com/GazzolaLab/MiV-OS/pull/56
+* Connectivity: Spike triggered average plot by @Gauravu2 in https://github.com/GazzolaLab/MiV-OS/pull/71
+* Visualization: Multi channel signal replay over MEA geometry (#24, #59) by @armantekinalp in https://github.com/GazzolaLab/MiV-OS/pull/66
+* Statistics: Fano factor by @Gauravu2 in https://github.com/GazzolaLab/MiV-OS/pull/67
+
+## Minor Updates
+
+* Refactor: remove poetry redundancies (#74) by @bhosale2 in https://github.com/GazzolaLab/MiV-OS/pull/75
+* Update tests by @skim0119 in https://github.com/GazzolaLab/MiV-OS/pull/78
+
+## New Contributors
+
+* @jihugo made their first contribution in https://github.com/GazzolaLab/MiV-OS/pull/56
+* @bhosale2 made their first contribution in https://github.com/GazzolaLab/MiV-OS/pull/75
+
+**Full Changelog**: https://github.com/GazzolaLab/MiV-OS/compare/v0.1.1...v0.1.2
+
 # Release Note (version 0.1.1)
 
 ## Developer Note
