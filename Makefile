@@ -35,11 +35,11 @@ formatting: codestyle
 #* Linting
 .PHONY: test
 test:
-	PYTHONPATH=$(PYTHONPATH) poetry run pytest -c pyproject.toml --cov-report=html --cov=miv tests/
+	poetry run pytest -c pyproject.toml --cov=miv
 
-.PHONY: coverage check
-coverage:
-	PYTHONPATH=$(PYTHONPATH) poetry run pytest -c pyproject.toml --cov=miv tests/
+.PHONY: test_ci
+test_ci:
+	poetry run pytest -c pyproject.toml --cov=miv --cov-report=xml
 
 .PHONY: check-codestyle
 check-codestyle:

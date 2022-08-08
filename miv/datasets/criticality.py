@@ -9,7 +9,7 @@ import numpy as np
 from miv.datasets.utils import get_file
 
 
-def load_data():
+def load_data():  # pragma: no cover
     """
     Loads the sample for criticality analysis
 
@@ -32,7 +32,7 @@ def load_data():
 
     path = get_file(
         file_url=base_url,
-        cache_subdir=subdir,
+        directory=subdir,
         fname=file,
         file_hash=file_hash,
         archive_format=None,
