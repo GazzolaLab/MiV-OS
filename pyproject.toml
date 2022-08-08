@@ -81,7 +81,7 @@ flake8 = "^4.0.1"
 docs = [
   "sphinx",
   "sphinx_rtd_theme",
-  "sphinx-book-theme",
+  "pydata-sphinx-theme",
   "readthedocs-sphinx-search",
   "sphinx-autodoc-typehints",
   "myst-parser",
