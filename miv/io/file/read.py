@@ -4,20 +4,23 @@
 # HEPfile: https://github.com/mattbellis/hepfile
 # NeuroH5: https://github.com/iraikov/neuroh5
 #
+from typing import Any, Dict, List, Optional, Tuple, Union
+
+from logging import Logger
+
 import h5py
 import numpy as np
 from h5py._hl.dataset import Dataset
-from logging import Logger
 from numpy import int64, ndarray
-from typing import Any, Dict, List, Optional, Tuple, Union
+
 
 def read(
     filename: str,
-    datasets: Optional[List[str]] = None,
+    groups: Optional[Union[str, List[str]]] = None,
     subset: Optional[Union[int, List[int], Tuple[int, int]]] = None,
     logger: Optional[Logger] = None,
 ) -> Tuple[Dict[str, Any], Dict[str, None]]:
-    
+
     """
     Reads all, or a subset of the data, from the HDF5 file to fill a data dictionary.
     Returns an empty dictionary to be filled later with data from individual containers.
@@ -25,7 +28,7 @@ def read(
     Args:
         **filename** (string): Name of the input file
 
-        **datasets* (list): Datasets to be read from input file.
+        **groups* (list): Dataset groups to be read from input file.
 
         **subset** (int): Number of containers to be read from input file
 
@@ -50,63 +53,23 @@ def read(
     data["_MAP_DATASETS_TO_INDEX_"] = {}
     data["_LIST_OF_COUNTERS_"] = []
     data["_LIST_OF_DATASETS_"] = []
+    data["_GROUPS_"] = []
+    data["_MAP_DATASETS_TO_GROUPS_"] = {}
 
     # Get the number of containers
     data["_NUMBER_OF_CONTAINERS_"] = infile.attrs["_NUMBER_OF_CONTAINERS_"]
 
+    ncontainers = data["_NUMBER_OF_CONTAINERS_"]
+
     # Determine if only a subset of the data should be read
     subset_: Union[None, List[int]] = None
     if subset is not None:
-        
-        if isinstance(subset, tuple):
-            subset_ = list(subset)
 
-        elif isinstance(subset, tuple):
-            subset_ = list(subset)
-
-        elif isinstance(subset, int):
-            if logger is not None:
-                logger.warning(
-                    "Single subset value of {subset} being interpreted as a high range"
-                    f"subset being set to a range of (0,{subset})\n"
-                )
-            subset_ = [0, subset]
-        else:
-            raise RuntimeError(f"Unsupported type of subset argument: {subset}")
-
-        # If the user has specified `subset` incorrectly, then let's return
-        # an empty data and container
-        if (subset_[1] - subset_[0] <= 0):
-            if logger is not None:
-                logger.warning(
-                    "The range in subset is either 0 or negative!"
-                    f"{subset_[1]} - {subset_[0]} = {subset_[1] - subset_[0]}"
-                    "Returning an empty data and container dictionary!\n"
-                )
-            return data, container
-
-        # Make sure the user is not asking for something bigger than the file!
-        ncontainers = data["_NUMBER_OF_CONTAINERS_"]
-
-        if (subset_[0] > ncontainers):
-            if logger is not None:
-                logger.error(
-                    "Range for subset starts greater than number of containers in file!"
-                    f"{subset_[0]} > {ncontainers}"
-                )
+        try:
+            subset_ = validate_subset(subset, ncontainers)
+        except RuntimeError:
             infile.close()
-            raise RuntimeError(
-                "Range for subset starts greater than number of containers in file!"
-            )
-
-        if (subset_[1] > ncontainers):
-            if logger is not None:
-                logger.warning(
-                    "Range for subset is greater than number of containers in file!"
-                    f"{subset_[1]} > {ncontainers}"
-                    f"High range of subset will be set to {ncontainers}\n"
-                )
-            subset_[1] = ncontainers
+            return data, container
 
         data["_NUMBER_OF_CONTAINERS_"] = subset_[1] - subset_[0]
         ncontainers = data["_NUMBER_OF_CONTAINERS_"]
@@ -119,13 +82,9 @@ def read(
                 f"Reading in {ncontainers} containers\n"
             )
 
-
     # Get the datasets and counters
     dc = infile["_MAP_DATASETS_TO_COUNTERS_"]
     for vals in dc:
-
-        if logger is not None:
-            logger.debug(f"Map datasets to counters: {vals}")
 
         # The decode is there because vals were stored as numpy.bytes
         counter = vals[1].decode()
@@ -141,57 +100,12 @@ def read(
     data["_LIST_OF_COUNTERS_"] = np.unique(data["_LIST_OF_COUNTERS_"]).tolist()
     data["_LIST_OF_DATASETS_"] = np.unique(data["_LIST_OF_DATASETS_"]).tolist()
 
-
     # Get the list of datasets and groups
     all_datasets = data["_LIST_OF_DATASETS_"]
 
-    if logger is not None:
-        logger.debug(f"all_datasets: {all_datasets}")
-
-    # Only keep select data from file, if we have specified datasets
-    if datasets is not None:
-        if isinstance(datasets, list):
-            datasets = list(datasets)
-
-        # Count backwards because we'll be removing stuff as we go.
-        i = len(all_datasets) - 1
-        while i >= 0:
-            entry = all_datasets[i]
-
-            is_dropped = True
-            # This is looking to see if the string is anywhere in the name
-            # of the dataset
-            for desdat in datasets:
-                if desdat in entry:
-                    is_dropped = False
-                    break
-
-            if is_dropped == True:
-                if logger is not None:
-                    logger.info(f"Not reading out {entry} from the file....")
-                all_datasets.remove(entry)
-
-            i -= 1
-
-        if logger is not None:
-            logger.debug(
-                f"After only selecting certain datasets ----- "
-                f"all_datasets: {all_datasets}"
-            )
-
-    if logger is not None:
-        logger.debug(
-            "\nDatasets and counters:"
-            f"{data['_MAP_DATASETS_TO_COUNTERS_']}"
-            "\nList of counters:"
-            f"{data['_LIST_OF_COUNTERS_']}"
-            "\n"
-        )
+    all_datasets = select_datasets(all_datasets, groups, logger=logger)
 
     # Pull out the counters and build the indices
-    if logger is not None:
-        logger.debug("data.keys:\n" f"{list(data.keys())}" "\n")
-
     # We will need to keep track of the indices in the entire file
     # This way, if the user specifies a subset of the data, we have the full
     # indices already calculated
@@ -202,23 +116,8 @@ def read(
         full_file_counters = infile[counter_name]
         full_file_index = calculate_index_from_counters(full_file_counters)
 
-        if logger is not None:
-            logger.debug(
-                f"full file counters: {full_file_counters}\n"
-                f"full file index: {full_file_index}\n"
-            )
-
         # If we passed in subset, grab that slice of the data from the file
-        if (subset_ is not None) and (subset_[1] <= subset_[0]):
-            if logger is not None:
-                logger.error(
-                    "Will not be reading anything in!"
-                    f"High range of {subset_[1]} is less than or equal to low range of {subset_[0]}"
-                )
-            raise RuntimeError(
-                f"High range of {subset_[1]} is less than or equal to low range of {subset_[0]}"
-            )
-        elif subset_ is not None:
+        if subset_ is not None:
             # Add 1 to the high range of subset when we pull out the counters
             # and index because in order to get all of the entries for the last entry.
             data[counter_name] = infile[counter_name][subset_[0] : subset_[1] + 1]
@@ -238,9 +137,6 @@ def read(
         data[index_name] = subset_index
         full_file_indices[index_name] = index
 
-    if logger is not None:
-        logger.debug("full_file_index: " f"{full_file_indices}\n")
-
     # Loop over the all_datasets we want and pull out the data.
     for name in all_datasets:
 
@@ -252,17 +148,12 @@ def read(
             index_name_ = data["_MAP_DATASETS_TO_INDEX_"][name]
             IS_COUNTER = False  # We will use different indices for the counters
 
-        if logger is not None:
-            logger.debug(f"------ {name}" f"index_name: {index_name_}\n")
-
         dataset = infile[name]
-
-        if logger is not None:
-            logger.debug(f"dataset type: {type(dataset)}")
 
         # This will ignore the groups
         if isinstance(dataset, h5py.Dataset):
             dataset_name = name
+            group_name = dataset.attrs.get("_GROUP_", None)
 
             if subset_ is not None:
                 if IS_COUNTER:
@@ -275,12 +166,14 @@ def read(
                         lo = full_file_indices[index_name_][0]
                         hi = full_file_indices[index_name_][-1]
                     else:
-                        raise RuntimeError(f"Unknown index")
-                if logger is not None:
-                    logger.debug(f"dataset name/lo/hi: {dataset_name},{lo},{hi}\n")
+                        raise RuntimeError("Unknown index")
                 data[dataset_name] = dataset[lo:hi]
             else:
                 data[dataset_name] = dataset[:]
+            if group_name not in data["_GROUPS_"]:
+                data["_GROUPS_"].append(group_name)
+            if dataset_name not in data["_MAP_DATASETS_TO_GROUPS_"]:
+                data["_MAP_DATASETS_TO_GROUPS_"][dataset_name] = group_name
 
             container[
                 dataset_name
@@ -290,15 +183,120 @@ def read(
     return data, container
 
 
+def select_datasets(
+    datasets: List[str],
+    groups: Optional[Union[str, List[str]]] = None,
+    logger: Optional[Logger] = None,
+) -> List[str]:
+
+    # Only keep select data from file, if we have specified datasets
+    if groups is not None:
+
+        if isinstance(groups, str):
+            groups = list(groups)
+
+        # Count backwards because we'll be removing stuff as we go.
+        i = len(datasets) - 1
+        while i >= 0:
+            entry = datasets[i]
+
+            is_dropped = True
+            # This is looking to see if the string is anywhere in the name
+            # of the dataset
+            for group in groups:
+                if group in entry:
+                    is_dropped = False
+                    break
+
+            if is_dropped:
+                if logger is not None:
+                    logger.info(f"Not reading out {entry} from the file....")
+                datasets.remove(entry)
+
+            i -= 1
+
+        if logger is not None:
+            logger.debug(
+                f"After only selecting certain datasets ----- " f"datasets: {datasets}"
+            )
+
+    return datasets
+
+
+def validate_subset(
+    subset: Union[int, List[int], Tuple[int, int]],
+    ncontainers: int,
+    logger: Optional[Logger] = None,
+) -> List[int]:
+
+    if isinstance(subset, tuple):
+        subset_ = list(subset)
+
+    elif isinstance(subset, list):
+        subset_ = subset
+
+    elif isinstance(subset, int):
+        if logger is not None:
+            logger.warning(
+                "Single subset value of {subset} being interpreted as a high range"
+                f"subset being set to a range of (0,{subset})\n"
+            )
+        subset_ = [0, subset]
+    else:
+        raise RuntimeError(f"Unsupported type of subset argument: {subset}")
+
+    # If the user has specified `subset` incorrectly, then let's return
+    # an empty data and container
+    if subset_[1] - subset_[0] <= 0:
+        if logger is not None:
+            logger.warning(
+                "The range in subset is either 0 or negative!"
+                f"{subset_[1]} - {subset_[0]} = {subset_[1] - subset_[0]}"
+                "Returning an empty data and container dictionary!\n"
+            )
+        raise RuntimeError("Range in subset is 0 or negative")
+
+    if subset_[0] > ncontainers:
+        if logger is not None:
+            logger.error(
+                "Range for subset starts greater than number of containers in file!"
+                f"{subset_[0]} > {ncontainers}"
+            )
+        raise RuntimeError(
+            "Range for subset starts greater than number of containers in file!"
+        )
+
+    if subset_[1] > ncontainers:
+        if logger is not None:
+            logger.warning(
+                "Range for subset is greater than number of containers in file!"
+                f"{subset_[1]} > {ncontainers}"
+                f"High range of subset will be set to {ncontainers}\n"
+            )
+    subset_[1] = ncontainers
+
+    if subset_[1] <= subset_[0]:
+        if logger is not None:
+            logger.error(
+                "Will not be reading anything in!"
+                f"High range of {subset_[1]} is less than or equal to low range of {subset_[0]}"
+            )
+        raise RuntimeError(
+            f"High range of {subset_[1]} is less than or equal to low range of {subset_[0]}"
+        )
+
+    return subset_
+
+
 def calculate_index_from_counters(counters: Dataset) -> ndarray:
     index = np.add.accumulate(counters) - counters
     return index
 
 
 def unpack(
-        container: Dict[str, Any],
-        data: Dict[str, Any],
-        n: int = 0,
+    container: Dict[str, Any],
+    data: Dict[str, Any],
+    n: int = 0,
 ) -> None:
 
     """Fills the container dictionary with selected rows from the data dictionary.
@@ -322,7 +320,7 @@ def unpack(
         if key in data["_LIST_OF_COUNTERS_"]:
             container[key] = data[key][n]
 
-        elif "INDEX" not in key:  # and 'Jets' in key:
+        elif "INDEX" not in key:
             indexkey = data["_MAP_DATASETS_TO_INDEX_"][key]
             numkey = data["_MAP_DATASETS_TO_COUNTERS_"][key]
 
@@ -334,7 +332,9 @@ def unpack(
                 container[key] = data[key][index : index + nobjs]
 
 
-def get_ncontainers_in_file(filename: str, logger: Optional[Logger] = None) -> Union[None, int64]:
+def get_ncontainers_in_file(
+    filename: str, logger: Optional[Logger] = None
+) -> Union[None, int64]:
 
     """Get the number of containers in the file."""
 
