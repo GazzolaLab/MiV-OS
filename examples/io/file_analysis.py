@@ -18,8 +18,8 @@ import matplotlib.colors as colors
 import matplotlib.cm as cm
 
 recording_id = "2022-03-10_16-19-09-Record Node 104-experiment1_spontaneous-recording1"
-input_data, data_container = miv_file.load('2022-03-10_16-19-09/MiV_data.h5', 
-                                          datasets=recording_id)
+input_data, data_container = miv_file.read('2022-03-10_16-19-09/MiV_data.h5', 
+                                           datasets=recording_id)
 
 signal = input_data[f"{recording_id}/signal"]
 timestamps = input_data[f"{recording_id}/timestamps"]

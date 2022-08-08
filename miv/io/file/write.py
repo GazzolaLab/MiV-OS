@@ -13,10 +13,10 @@ import sys
 from logging import Logger
 from h5py._hl.files import File
 from numpy import bytes_
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any, Dict, List, Optional, Type, Union, Sequence
 
 
-def initialize() -> Dict[str, List[str]]:
+def initialize() -> Dict[str, Any]:
     """Creates an empty data dictionary
 
     Returns:
@@ -25,7 +25,7 @@ def initialize() -> Dict[str, List[str]]:
 
     """
 
-    data = {}
+    data: Dict[str, Any] = {}
     data["_GROUPS_"] = {}
     data["_MAP_DATASETS_TO_COUNTERS_"] = {}
     data["_LIST_OF_COUNTERS_"] = []
@@ -55,32 +55,23 @@ def clear_container(container: Dict[str, Any]) -> None:
         if key == "_LIST_OF_COUNTERS_":
             continue
 
-        if type(container[key]) == list:
+        if isinstance(container[key], list):
             container[key].clear()
-        elif type(container[key]) == np.ndarray:
+        elif isinstance(container[key], np.ndarray):
             container[key] = []
-        elif type(container[key]) == int:
+        elif isinstance(container[key], int):
             if key in container["_LIST_OF_COUNTERS_"]:
                 container[key] = 0
             else:
                 container[key] = -999
-        elif type(container[key]) == float:
+        elif isinstance(container[key], float):
             container[key] = np.nan
-        elif type(container[key]) == str:
+        elif isinstance(container[key], str):
             container[key] = ""
 
 
 def create_container(
-    data: Dict[
-        str,
-        Union[
-            Dict[str, List[str]],
-            Dict[str, str],
-            List[str],
-            Dict[str, Union[Type[int], Type[float], Type[str]]],
-            Dict[str, Union[Type[int], Type[float]]],
-        ],
-    ]
+        data: Dict[str, Any],
 ) -> Dict[str, Any]:
     """Creates a container dictionary that will be used to collect data and then
     packed into the the master data dictionary.
@@ -93,7 +84,7 @@ def create_container(
 
     """
 
-    container = {}
+    container: Dict[str, Any] = {}
 
     for k in data.keys():
         if k in data["_LIST_OF_COUNTERS_"]:
@@ -105,19 +96,10 @@ def create_container(
 
 
 def create_group(
-    data: Dict[
-        str,
-        Union[
-            Dict[str, List[str]],
-            Dict[str, str],
-            List[str],
-            Dict[str, Union[Type[int], Type[float]]],
-            Dict[str, Type[int]],
-        ],
-    ],
-    group_name: str,
-    counter: Optional[str] = None,
-    logger: Optional[Logger] = None,
+        data: Dict[str, Any],
+        group_name: str,
+        counter: Optional[str] = None,
+        logger: Optional[Logger] = None,
 ) -> str:
     """Adds a group in the dictionary
 
@@ -136,7 +118,7 @@ def create_group(
             "----------------------------------------------------"
             f"Slashes / are not allowed in group names"
             f"Replacing / with - in group name {group_name}"
-            f"The new name will be {new_group_name}"
+            f"The new name will be {group_id}"
             "----------------------------------------------------"
         )
     # Change name of variable, just to keep code more understandable
@@ -187,20 +169,11 @@ def create_group(
 
 
 def create_dataset(
-    data: Dict[
-        str,
-        Union[
-            Dict[str, List[str]],
-            Dict[str, str],
-            List[str],
-            Dict[str, Union[Type[int], Type[float]]],
-            Dict[str, Type[int]],
-        ],
-    ],
-    datasets: List[str],
-    group: str,
-    dtype: Union[Type[int], Type[float], Type[str]] = float,
-    logger: Optional[Logger] = None,
+        data: Dict[str, Any],
+        datasets: Union[str, List[str]],
+        group: str,
+        dtype: Union[Type[int], Type[float], Type[str]] = float,
+        logger: Optional[Logger] = None,
 ) -> int:
     """Adds a dataset to a group in a dictionary. If the group does not exist, it will be created.
 
@@ -219,20 +192,22 @@ def create_dataset(
 
     """
 
-    if type(datasets) != list:
-        datasets = [datasets]
+    if isinstance(datasets, str):
+        datasets_: List[str] = [datasets]
+    else:
+        datasets_ = datasets
 
     # Check for slashes in the group name. We can't have them.
-    for i in range(len(datasets)):
-        tempname = datasets[i]
-        if tempname.find("/") >= 0:
-            new_dataset_name = tempname.replace("/", "-")
-            datasets[i] = new_dataset_name
+    for i in range(len(datasets_)):
+        dataset_name = datasets_[i]
+        if dataset_name.find("/") >= 0:
+            new_dataset_name = dataset_name.replace("/", "-")
+            datasets_[i] = new_dataset_name
             if logger is not None:
                 logger.warning(
                     "----------------------------------------------------"
                     f"Slashes / are not allowed in dataset names"
-                    f"Replacing / with - in dataset name {tempname}"
+                    f"Replacing / with - in dataset name {dataset_name}"
                     f"The new name will be {new_dataset_name}"
                     "----------------------------------------------------"
                 )
@@ -258,10 +233,7 @@ def create_dataset(
             )
 
     # Then put the datasets into the group in there next.
-    if type(datasets) != list:
-        datasets = [datasets]
-
-    for dataset in datasets:
+    for dataset in datasets_:
         keyfound = False
         name = f"{group}/{dataset}"
         for k in keys:
@@ -383,11 +355,11 @@ def pack(
         ):
             continue
 
-        if type(container[key]) == list:
+        if isinstance(container[key], list):
             value = container[key]
             if len(value) > 0:
                 data[key] += value
-        if type(container[key]) == ndarray:
+        if isinstance(container[key], np.ndarray):
             value = container[key]
             if len(value) > 0:
                 data[key] += value
@@ -558,7 +530,7 @@ def write(
 
             dataset_dtype = data["_MAP_DATASETS_TO_DATA_TYPES_"][name]
 
-            if type(x) == list:
+            if isinstance(x, list):
                 x = np.asarray(x, dtype=dataset_dtype)
 
             if logger is not None:
@@ -598,9 +570,10 @@ def write(
         if logger is not None:
             logger.debug(f"{countername:<32s} has {ncounter:<12d} entries")
         if i > 0 and ncounter != _NUMBER_OF_CONTAINERS_:
-            logger.warning(
-                f"{countername} and {prevcounter} have differing numbers of entries!"
-            )
+            if logger is not None:
+                logger.warning(
+                    f"{countername} and {prevcounter} have differing numbers of entries!"
+                )
 
         if _NUMBER_OF_CONTAINERS_ < ncounter:
             _NUMBER_OF_CONTAINERS_ = ncounter

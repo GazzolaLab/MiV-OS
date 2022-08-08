@@ -16,12 +16,8 @@ def read(
     datasets: Optional[List[str]] = None,
     subset: Optional[Union[int, List[int], Tuple[int, int]]] = None,
     logger: Optional[Logger] = None,
-) -> Union[
-    Tuple[Dict[str, Union[Dict[str, str], List[str], int64, ndarray]], Dict[str, None]],
-    Tuple[Dict[str, Union[Dict[str, str], List[str], int, ndarray]], Dict[str, None]],
-    Tuple[Dict[str, int64], Dict[Any, Any]],
-]:
-
+) -> Tuple[Dict[str, Any], Dict[str, None]]:
+    
     """
     Reads all, or a subset of the data, from the HDF5 file to fill a data dictionary.
     Returns an empty dictionary to be filled later with data from individual containers.
@@ -47,8 +43,8 @@ def read(
     infile = h5py.File(filename, "r")
 
     # Create the initial data and container dictionary to hold the data
-    data = {}
-    container = {}
+    data: Dict[str, Any] = {}
+    container: Dict[str, Any] = {}
 
     data["_MAP_DATASETS_TO_COUNTERS_"] = {}
     data["_MAP_DATASETS_TO_INDEX_"] = {}
@@ -59,25 +55,32 @@ def read(
     data["_NUMBER_OF_CONTAINERS_"] = infile.attrs["_NUMBER_OF_CONTAINERS_"]
 
     # Determine if only a subset of the data should be read
+    subset_: Union[None, List[int]] = None
     if subset is not None:
-        if type(subset) is tuple:
-            subset = list(subset)
+        
+        if isinstance(subset, tuple):
+            subset_ = list(subset)
 
-        if type(subset) is int:
+        elif isinstance(subset, tuple):
+            subset_ = list(subset)
+
+        elif isinstance(subset, int):
             if logger is not None:
                 logger.warning(
                     "Single subset value of {subset} being interpreted as a high range"
                     f"subset being set to a range of (0,{subset})\n"
                 )
-            subset = [0, subset]
+            subset_ = [0, subset]
+        else:
+            raise RuntimeError(f"Unsupported type of subset argument: {subset}")
 
         # If the user has specified `subset` incorrectly, then let's return
         # an empty data and container
-        if subset[1] - subset[0] <= 0:
+        if (subset_[1] - subset_[0] <= 0):
             if logger is not None:
                 logger.warning(
                     "The range in subset is either 0 or negative!"
-                    f"{subset[1]} - {subset[0]} = {subset[1] - subset[0]}"
+                    f"{subset_[1]} - {subset_[0]} = {subset_[1] - subset_[0]}"
                     "Returning an empty data and container dictionary!\n"
                 )
             return data, container
@@ -85,34 +88,34 @@ def read(
         # Make sure the user is not asking for something bigger than the file!
         ncontainers = data["_NUMBER_OF_CONTAINERS_"]
 
-        if subset[0] > ncontainers:
+        if (subset_[0] > ncontainers):
             if logger is not None:
                 logger.error(
                     "Range for subset starts greater than number of containers in file!"
-                    f"{subset[0]} > {ncontainers}"
+                    f"{subset_[0]} > {ncontainers}"
                 )
             infile.close()
             raise RuntimeError(
                 "Range for subset starts greater than number of containers in file!"
             )
 
-        if subset[1] > ncontainers:
+        if (subset_[1] > ncontainers):
             if logger is not None:
                 logger.warning(
                     "Range for subset is greater than number of containers in file!"
-                    f"{subset[1]} > {ncontainers}"
+                    f"{subset_[1]} > {ncontainers}"
                     f"High range of subset will be set to {ncontainers}\n"
                 )
-            subset[1] = ncontainers
+            subset_[1] = ncontainers
 
-        data["_NUMBER_OF_CONTAINERS_"] = subset[1] - subset[0]
+        data["_NUMBER_OF_CONTAINERS_"] = subset_[1] - subset_[0]
         ncontainers = data["_NUMBER_OF_CONTAINERS_"]
 
         if logger is not None:
             logger.info(
                 "Will read in a subset of the file!"
-                f"From container {subset[0]} (inclusive) through container {subset[1]-1} (inclusive)"
-                f"Container {subset[1]} is not read in"
+                f"From container {subset_[0]} (inclusive) through container {subset_[1]-1} (inclusive)"
+                f"Container {subset_[1]} is not read in"
                 f"Reading in {ncontainers} containers\n"
             )
 
@@ -126,9 +129,9 @@ def read(
 
         # The decode is there because vals were stored as numpy.bytes
         counter = vals[1].decode()
-        index = f"{counter}_INDEX"
+        index_name = f"{counter}_INDEX"
         data["_MAP_DATASETS_TO_COUNTERS_"][vals[0].decode()] = counter
-        data["_MAP_DATASETS_TO_INDEX_"][vals[0].decode()] = index
+        data["_MAP_DATASETS_TO_INDEX_"][vals[0].decode()] = index_name
         data["_LIST_OF_COUNTERS_"].append(vals[1].decode())
         data["_LIST_OF_DATASETS_"].append(vals[0].decode())
         data["_LIST_OF_DATASETS_"].append(vals[1].decode())  # Get the counters as well
@@ -147,7 +150,7 @@ def read(
 
     # Only keep select data from file, if we have specified datasets
     if datasets is not None:
-        if type(datasets) != list:
+        if isinstance(datasets, list):
             datasets = list(datasets)
 
         # Count backwards because we'll be removing stuff as we go.
@@ -206,19 +209,20 @@ def read(
             )
 
         # If we passed in subset, grab that slice of the data from the file
-        if subset is not None and subset[1] <= subset[0]:
-            logger.error(
-                "Will not be reading anything in!"
-                f"High range of {subset[1]} is less than or equal to low range of {subset[0]}"
-            )
+        if (subset_ is not None) and (subset_[1] <= subset_[0]):
+            if logger is not None:
+                logger.error(
+                    "Will not be reading anything in!"
+                    f"High range of {subset_[1]} is less than or equal to low range of {subset_[0]}"
+                )
             raise RuntimeError(
-                f"High range of {subset[1]} is less than or equal to low range of {subset[0]}"
+                f"High range of {subset_[1]} is less than or equal to low range of {subset_[0]}"
             )
-        elif subset is not None:
+        elif subset_ is not None:
             # Add 1 to the high range of subset when we pull out the counters
             # and index because in order to get all of the entries for the last entry.
-            data[counter_name] = infile[counter_name][subset[0] : subset[1] + 1]
-            index = full_file_index[subset[0] : subset[1] + 1]
+            data[counter_name] = infile[counter_name][subset_[0] : subset_[1] + 1]
+            index: np.ndarray = full_file_index[subset_[0] : subset_[1] + 1]
         else:
             data[counter_name] = infile[counter_name][:]
             index = full_file_index
@@ -243,13 +247,13 @@ def read(
         # If this is a counter, we're going to have to grab the indices
         # differently than for a "normal" dataset
         IS_COUNTER = True
-        index_name = None
+        index_name_: Union[None, str] = None
         if name not in data["_LIST_OF_COUNTERS_"]:
-            index_name = data["_MAP_DATASETS_TO_INDEX_"][name]
+            index_name_ = data["_MAP_DATASETS_TO_INDEX_"][name]
             IS_COUNTER = False  # We will use different indices for the counters
 
         if logger is not None:
-            logger.debug(f"------ {name}" f"index_name: {index_name}\n")
+            logger.debug(f"------ {name}" f"index_name: {index_name_}\n")
 
         dataset = infile[name]
 
@@ -257,18 +261,21 @@ def read(
             logger.debug(f"dataset type: {type(dataset)}")
 
         # This will ignore the groups
-        if type(dataset) == h5py.Dataset:
+        if isinstance(dataset, h5py.Dataset):
             dataset_name = name
 
-            if subset is not None:
+            if subset_ is not None:
                 if IS_COUNTER:
                     # If this is a counter, then the subset indices
                     # map on to the same locations for any counters
-                    lo = subset[0]
-                    hi = subset[1]
+                    lo = subset_[0]
+                    hi = subset_[1]
                 else:
-                    lo = full_file_indices[index_name][0]
-                    hi = full_file_indices[index_name][-1]
+                    if index_name_ is not None:
+                        lo = full_file_indices[index_name_][0]
+                        hi = full_file_indices[index_name_][-1]
+                    else:
+                        raise RuntimeError(f"Unknown index")
                 if logger is not None:
                     logger.debug(f"dataset name/lo/hi: {dataset_name},{lo},{hi}\n")
                 data[dataset_name] = dataset[lo:hi]
@@ -289,9 +296,9 @@ def calculate_index_from_counters(counters: Dataset) -> ndarray:
 
 
 def unpack(
-    container: Dict[str, None],
-    data: Dict[str, Union[Dict[str, str], List[str], int, ndarray]],
-    n: int = 0,
+        container: Dict[str, Any],
+        data: Dict[str, Any],
+        n: int = 0,
 ) -> None:
 
     """Fills the container dictionary with selected rows from the data dictionary.
@@ -327,7 +334,7 @@ def unpack(
                 container[key] = data[key][index : index + nobjs]
 
 
-def get_ncontainers_in_file(filename: str, logger: Optional[Logger] = None) -> int64:
+def get_ncontainers_in_file(filename: str, logger: Optional[Logger] = None) -> Union[None, int64]:
 
     """Get the number of containers in the file."""
 
@@ -347,7 +354,7 @@ def get_ncontainers_in_file(filename: str, logger: Optional[Logger] = None) -> i
             return None
 
 
-def get_ncontainers_in_data(data, logger=None):
+def get_ncontainers_in_data(data, logger=None) -> Union[None, int64]:
 
     """Get the number of containers in the data dictionary.
 
@@ -355,7 +362,7 @@ def get_ncontainers_in_data(data, logger=None):
 
     """
 
-    if type(data) is not dict:
+    if not isinstance(data, dict):
         if logger is not None:
             logger.warning(f"{data} is not a dictionary!\n")
         return None
@@ -371,7 +378,7 @@ def get_ncontainers_in_data(data, logger=None):
         return None
 
 
-def get_file_metadata(filename: str) -> Dict[str, Union[Any, str]]:
+def get_file_metadata(filename: str) -> Union[None, Dict[str, Any]]:
 
     """Get the file metadata and return it as a dictionary"""
 
