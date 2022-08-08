@@ -1,8 +1,9 @@
-import numpy as np
-import h5py as h5
 import time
+
+import h5py as h5
+import numpy as np
+
 from miv.io import file as miv_file
-from test_write import test_write_file
 
 
 def isEmpty(dictionary):
@@ -21,6 +22,35 @@ def isEmpty(dictionary):
     return test
 
 
+def test_write_file():
+
+    data = miv_file.initialize()
+
+    miv_file.create_group(data, "coordinates", counter="ncoords")
+    miv_file.create_dataset(data, ["px", "py", "pz"], group="coordinates", dtype=float)
+
+    miv_file.create_dataset(data, ["u", "v"], group="electrodes", dtype=float)
+
+    event = miv_file.create_container(data)
+
+    for i in range(0, 10):
+
+        ncoords = 5
+        event["coordinates/ncoords"] = ncoords
+
+        for n in range(ncoords):
+            event["coordinates/px"].append(np.random.random())
+            event["coordinates/py"].append(np.random.random())
+            event["coordinates/pz"].append(np.random.random())
+
+        event["electrodes/u"].append(np.random.random())
+        event["electrodes/v"].append(np.random.random())
+
+        miv_file.pack(data, event)
+
+    miv_file.write("MiV_TESTS.h5", data, comp_type="gzip", comp_opts=9)
+
+
 def test_read():
 
     test_write_file()
@@ -34,8 +64,8 @@ def test_read():
     assert isinstance(test_data, dict)
     assert isinstance(test_container, dict)
 
-    assert isEmpty(test_container) == True
-    assert isEmpty(test_data) == False
+    assert isEmpty(test_container)
+    assert not isEmpty(test_data)
 
     # Testing desired_datasets
     assert "coordinates/px" in test_data.keys()
@@ -89,7 +119,7 @@ def test_unpack():
 
     miv_file.unpack(data, container)
 
-    assert isEmpty(container) == False
+    assert not isEmpty(container)
 
 
 def test_get_ncontainers_in_file():

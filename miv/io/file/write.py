@@ -5,15 +5,17 @@
 # NeuroH5: https://github.com/iraikov/neuroh5
 #
 
-import numpy as np
-import h5py
-import h5py_cache
+from typing import Any, Dict, List, Optional, Sequence, Type, Union
+
 import datetime
 import sys
 from logging import Logger
+
+import h5py
+import h5py_cache
+import numpy as np
 from h5py._hl.files import File
 from numpy import bytes_
-from typing import Any, Dict, List, Optional, Type, Union, Sequence
 
 
 def initialize() -> Dict[str, Any]:
@@ -26,17 +28,20 @@ def initialize() -> Dict[str, Any]:
     """
 
     data: Dict[str, Any] = {}
+
     data["_GROUPS_"] = {}
     data["_MAP_DATASETS_TO_COUNTERS_"] = {}
     data["_LIST_OF_COUNTERS_"] = []
-
     data["_MAP_DATASETS_TO_DATA_TYPES_"] = {}
+    data["_GROUP_METADATA_"] = {}
 
     data["_PROTECTED_NAMES_"] = [
         "_PROTECTED_NAMES_",
         "_GROUPS_",
         "_MAP_DATASETS_TO_COUNTERS_",
-        "_MAP_DATASETS_TO_DATA_TYPES_" "_LIST_OF_COUNTERS_",
+        "_MAP_DATASETS_TO_DATA_TYPES_",
+        "_LIST_OF_COUNTERS_",
+        "_GROUP_METADATA_",
     ]
 
     return data
@@ -46,7 +51,7 @@ def clear_container(container: Dict[str, Any]) -> None:
     """Clears the data from the container dictionary.
 
     Args:
-        **container** (dict): The container to be cleared. 
+        **container** (dict): The container to be cleared.
 
     """
 
@@ -71,7 +76,7 @@ def clear_container(container: Dict[str, Any]) -> None:
 
 
 def create_container(
-        data: Dict[str, Any],
+    data: Dict[str, Any],
 ) -> Dict[str, Any]:
     """Creates a container dictionary that will be used to collect data and then
     packed into the the master data dictionary.
@@ -96,10 +101,11 @@ def create_container(
 
 
 def create_group(
-        data: Dict[str, Any],
-        group_name: str,
-        counter: Optional[str] = None,
-        logger: Optional[Logger] = None,
+    data: Dict[str, Any],
+    group_name: str,
+    metadata: Dict[str, Union[str, int, float]] = {},
+    counter: Optional[str] = None,
+    logger: Optional[Logger] = None,
 ) -> str:
     """Adds a group in the dictionary
 
@@ -150,13 +156,14 @@ def create_group(
             keyfound = True
             break
 
-    if keyfound == False:
+    if not keyfound:
 
         data["_GROUPS_"][group_id] = []
 
         data["_GROUPS_"][group_id].append(counter_id)
         counter_path = f"{group_id}/{counter_id}"
 
+        data["_GROUP_METADATA_"][group_id] = metadata
         data["_MAP_DATASETS_TO_COUNTERS_"][group_id] = counter_path
         data["_MAP_DATASETS_TO_DATA_TYPES_"][counter_path] = int
 
@@ -169,11 +176,11 @@ def create_group(
 
 
 def create_dataset(
-        data: Dict[str, Any],
-        datasets: Union[str, List[str]],
-        group: str,
-        dtype: Union[Type[int], Type[float], Type[str]] = float,
-        logger: Optional[Logger] = None,
+    data: Dict[str, Any],
+    datasets: Union[str, List[str]],
+    group: str,
+    dtype: Union[Type[int], Type[float], Type[str]] = float,
+    logger: Optional[Logger] = None,
 ) -> int:
     """Adds a dataset to a group in a dictionary. If the group does not exist, it will be created.
 
@@ -223,7 +230,7 @@ def create_dataset(
         if group == k:
             keyfound = True
 
-    if keyfound == False:
+    if not keyfound:
         counter = f"N_{group}"
         create_group(data, group, counter=counter)
         if logger is not None:
@@ -241,7 +248,7 @@ def create_dataset(
                 if logger is not None:
                     logger.warning(f"{name} is already in the dictionary!")
                 keyfound = True
-        if keyfound == False:
+        if not keyfound:
             if logger is not None:
                 logger.info(
                     f"Adding dataset {dataset} to the dictionary under group {group}."
@@ -275,10 +282,10 @@ def pack(
 
         **container** (dict): container to be packed into data.
 
-        **EMPTY_OUT_CONTAINER** (bool): If this is `True` (default) then empty out the container in preparation 
+        **EMPTY_OUT_CONTAINER** (bool): If this is `True` (default) then empty out the container in preparation
                                 for the next iteration. Useful to disable when debugging and inspecting containers.
 
-        **STRICT_CHECKING** (bool): If `True`, then check that all datasets have the same length, otherwise 
+        **STRICT_CHECKING** (bool): If `True`, then check that all datasets have the same length, otherwise
 
         **AUTO_SET_COUNTER** (bool): If `True`, update counter value with length of dataset in container
 
@@ -288,9 +295,6 @@ def pack(
     # value of that counter.
     if AUTO_SET_COUNTER:
         for group in data["_GROUPS_"]:
-
-            if logger is not None:
-                logger.debug(f"packing group: {group}")
 
             datasets = data["_GROUPS_"][group]
             counter = data["_MAP_DATASETS_TO_COUNTERS_"][group]
@@ -302,8 +306,6 @@ def pack(
             # Loop over the datasets
             for d in datasets:
                 full_dataset_name = group + "/" + d
-                if logger is not None:
-                    logger.debug(f"packing dataset: {d}")
                 # Skip any counters
                 if counter == full_dataset_name:
                     continue
@@ -335,31 +337,20 @@ def pack(
                                 # Don't worry about the dataset
                                 if counter == temp_full_dataset_name:
                                     continue
-                                if logger is not None:
-                                    logger.debug(
-                                        f"{tempd}: {len(container[temp_full_dataset_name])}"
-                                    )
 
                             # Return a value for the external program to catch.
-                            raise RuntimeError(f"Two datasets in group {group} have different sizes!")
+                            raise RuntimeError(
+                                f"Two datasets in group {group} have different sizes!"
+                            )
 
     # Then pack the container into the data
     keys = list(container.keys())
     for key in keys:
 
-        if (
-            key == "_MAP_DATASETS_TO_COUNTERS_"
-            or key == "_GROUPS_"
-            or key == "_LIST_OF_COUNTERS_"
-            or key == "_MAP_DATASETS_TO_DATA_TYPES_"
-        ):
+        if key in data["_PROTECTED_NAMES_"]:
             continue
 
         if isinstance(container[key], list):
-            value = container[key]
-            if len(value) > 0:
-                data[key] += value
-        if isinstance(container[key], np.ndarray):
             value = container[key]
             if len(value) > 0:
                 data[key] += value
@@ -412,8 +403,6 @@ def convert_dict_to_string_data(dictionary: Dict[str, str]) -> List[List[bytes_]
 
     keys = dictionary.keys()
 
-    nkeys = len(keys)
-
     mydataset = []
     for i, key in enumerate(keys):
         a = np.string_(key)
@@ -425,7 +414,7 @@ def convert_dict_to_string_data(dictionary: Dict[str, str]) -> List[List[bytes_]
 
 def write_metadata(
     filename: str,
-    mydict: Dict[str, str] = {},
+    metadata: Dict[str, str] = {},
     write_default_values: bool = True,
     append: bool = True,
 ) -> File:
@@ -435,7 +424,7 @@ def write_metadata(
     Args:
     **filename** (string): Name of output file
 
-    **mydict** (dictionary): Metadata desired by user
+    **metadata** (dictionary): Metadata desired by user
 
     **write_default_values** (boolean): True if user wants to write/update the
                                         default metadata: date, hepfile version,
@@ -464,8 +453,8 @@ def write_metadata(
         hdoutfile.attrs["h5py_version"] = h5py.__version__
         hdoutfile.attrs["python_version"] = sys.version
 
-    for key in mydict:
-        hdoutfile.attrs[key] = mydict[key]
+    for key in metadata:
+        hdoutfile.attrs[key] = metadata[key]
 
     hdoutfile.close()
     return hdoutfile
@@ -478,7 +467,7 @@ def write(
     comp_opts: Optional[int] = None,
     logger: Optional[Logger] = None,
 ) -> File:
-    
+
     """Writes the selected data to an HDF5 file
 
     Args:
@@ -518,6 +507,15 @@ def write(
         hdoutfile[group].attrs["counter"] = np.string_(
             data["_MAP_DATASETS_TO_COUNTERS_"][group]
         )
+
+        metadata = data["_GROUP_METADATA_"][group]
+        for key in metadata:
+            val = metadata[key]
+            if isinstance(val, str):
+                hval = np.string_(val)
+            else:
+                hval = val
+            hdoutfile[group].attrs[key] = hval
 
         datasets = data["_GROUPS_"][group]
 
@@ -560,6 +558,7 @@ def write(
                     compression=comp_type,
                     compression_opts=comp_opts,
                 )
+            dset.attrs["_GROUP_"] = np.string_(group)
 
     # Get the number of containers
     counters = data["_LIST_OF_COUNTERS_"]

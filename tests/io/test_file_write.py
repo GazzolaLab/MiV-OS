@@ -1,8 +1,11 @@
-import numpy as np
-import h5py as h5
-import time
 import sys
+import time
+
+import h5py as h5
+import numpy as np
+
 from miv.io import file as miv_file
+
 
 def isEmpty(dictionary):
     test = True
@@ -28,7 +31,6 @@ def test_write_file():
 
     event = miv_file.create_container(data)
 
-    #'''
     for i in range(0, 10):
 
         # miv_file.clear_container(event)
@@ -46,7 +48,7 @@ def test_write_file():
 
         miv_file.pack(data, event)
 
-    f = miv_file.write("MiV_TESTS.h5", data, comp_type="gzip", comp_opts=9)
+    miv_file.write("MiV_TESTS.h5", data, comp_type="gzip", comp_opts=9)
 
 
 def test_initialize():
@@ -66,7 +68,7 @@ def test_clear_container():
 
     miv_file.clear_container(container)
 
-    assert isEmpty(container) == True
+    assert isEmpty(container)
 
 
 def test_create_container():
@@ -81,9 +83,8 @@ def test_create_container():
 
     test_container = miv_file.create_container(data)
 
-    assert isEmpty(test_container) == False
+    assert not isEmpty(test_container)
     assert isinstance(test_container, dict)
-
 
 
 def test_create_group():
@@ -91,14 +92,13 @@ def test_create_group():
     data = miv_file.initialize()
     miv_file.create_group(data, "coordinates", counter="ncoords")
 
-    assert isEmpty(data["_GROUPS_"]) == False
+    assert not isEmpty(data["_GROUPS_"])
     assert "coordinates/ncoords" in data.keys()
 
     miv_file.create_group(data, "test/slash", counter="ntest/slash")
 
     assert "test-slash" in data["_GROUPS_"]
     assert "test-slash/ntest-slash" in data.keys()
-
 
 
 def test_pack():
@@ -150,14 +150,18 @@ def test_pack():
     container["obj/myint"].append(2)
     # 1 != 0, strict checking should fail.
 
-    test = miv_file.pack(data, container, STRICT_CHECKING=True)
+    test = 0
+    try:
+        miv_file.pack(data, container, STRICT_CHECKING=True)
+    except RuntimeError:
+        test = -1
 
     # Was the mistake caught?
     assert test == -1
     # Was nothing packed?
     assert len(data["obj/myint"]) == 6
     # Is container not cleared?
-    assert isEmpty(container) == False
+    assert not isEmpty(container)
 
     # EMPTY_OUT_CONTAINER = False
 
@@ -165,9 +169,10 @@ def test_pack():
 
     miv_file.pack(data, container, EMPTY_OUT_CONTAINER=False)
 
-    assert isEmpty(container) == False
+    assert not isEmpty(container)
 
     # assert type(data['obj/mystr'][0]) is str
+
 
 def test_create_dataset():
 
@@ -176,13 +181,14 @@ def test_create_dataset():
     miv_file.create_dataset(data, ["px", "py", "pz"], group="coordinates", dtype=float)
     miv_file.create_dataset(data, ["e"], group="coordinates", dtype=int)
 
-    assert isEmpty(data["_GROUPS_"]) == False
+    assert not isEmpty(data["_GROUPS_"])
     assert "coordinates/ncoords" in data.keys()
     assert "coordinates/px" in data.keys()
     assert "coordinates/e" in data["_MAP_DATASETS_TO_COUNTERS_"].keys()
     assert data["_MAP_DATASETS_TO_COUNTERS_"]["coordinates/e"] == "coordinates/ncoords"
     assert data["_MAP_DATASETS_TO_DATA_TYPES_"]["coordinates/px"] == float
     assert data["_MAP_DATASETS_TO_DATA_TYPES_"]["coordinates/e"] == int
+
 
 def test_write_metadata():
 
@@ -213,4 +219,3 @@ def test_write_metadata():
     assert file.attrs["author"] == "John Doe"
 
     file.close()
-
