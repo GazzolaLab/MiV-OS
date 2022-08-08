@@ -99,12 +99,19 @@ master_doc = "index"
 
 html_theme = "pydata_sphinx_theme"
 html_theme_options = {
-    "repository_url": "https://github.com/GazzolaLab/MiV-OS",
-    "use_repository_button": True,
+    "logo": {
+        # "link": "https://mindinvitro.illinois.edu/",
+        "text": "Open Software"
+    },
+    # "repository_url": "https://github.com/GazzolaLab/MiV-OS",
+    # "use_repository_button": True,
+    # Theme (https://help.farbox.com/pygments.html)
+    "pygment_light_style": "default",
+    "pygment_dark_style": "native",
 }
 html_title = "MiV-OS"
-# html_logo = ""
-# pygments_style = "sphinx"
+
+html_context = {"default_mode": "light"}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
