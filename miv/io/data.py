@@ -152,16 +152,6 @@ class Data:
                 self.data_path, self.masking_channel_set
             )
             yield signal, timestamps, sampling_rate
-        except FileNotFoundError as e:
-            logging.error(
-                f"The file could not be loaded because the file {self.data_path} does not exist."
-            )
-            logging.error(e.strerror)
-        except ValueError as e:
-            logging.error(
-                "The data size does not match the number of channel. Check if oebin or continuous.dat file is corrupted."
-            )
-            logging.error(e)
         finally:
             del timestamps
             del signal
