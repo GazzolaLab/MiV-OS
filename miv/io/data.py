@@ -152,16 +152,6 @@ class Data:
                 self.data_path, self.masking_channel_set
             )
             yield signal, timestamps, sampling_rate
-        except FileNotFoundError as e:
-            logging.error(
-                f"The file could not be loaded because the file {self.data_path} does not exist."
-            )
-            logging.error(e.strerror)
-        except ValueError as e:
-            logging.error(
-                "The data size does not match the number of channel. Check if oebin or continuous.dat file is corrupted."
-            )
-            logging.error(e)
         finally:
             del timestamps
             del signal
@@ -342,7 +332,8 @@ class Data:
             "empty_channels": empty_channels,
         }
 
-    def save(self, tag: str, format: str):  # TODO
+    def save(self, tag: str, format: str):  # pragma: no cover
+        # TODO
         assert tag == "continuous", "You cannot alter raw data, change the data tag"
         # save_path = os.path.join(self.data_path, tag)
 
@@ -429,7 +420,8 @@ class DataManager(MutableSequence):
         return list(filter(lambda d: query_path in d.data_path, self.data_list))
 
     # DataManager Representation
-    def tree(self):
+    # TODO: Display data structure
+    def tree(self):  # pragma: no cover
         """
         Pretty-print available recordings in DataManager in tree format.
 
@@ -502,12 +494,12 @@ class DataManager(MutableSequence):
                 path_list.append(path)
         return path_list
 
-    def save(self, tag: str, format: str):
+    def save(self, tag: str, format: str):  # pragma: no cover
         raise NotImplementedError  # TODO
         for data in self.data_list:
             data.save(tag, format)
 
-    def apply_filter(self, filter: FilterProtocol):
+    def apply_filter(self, filter: FilterProtocol):  # pragma: no cover
         raise NotImplementedError  # TODO
         for data in self.data_list:
             data.load()

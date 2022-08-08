@@ -104,14 +104,15 @@ class SpikeSorting:
         feature_extractor: SpikeFeatureExtractionProtocol,
         clustering_method: UnsupervisedFeatureClusteringProtocol,
     ):
-        pass
+        self.featrue_extractor = feature_extractor
+        self.clustering_method = clustering_method
 
-    def __call__(self):
-        pass
+    def __call__(self, cutouts: np.ndarray, n_group: int = 3):
+        assert n_group >= 2, "n_group must be larger than 1"
 
 
 # UnsupervisedFeatureClusteringProtocol
-class SuperParamagneticClustering:
+class SuperParamagneticClustering:  # pragma : no cover
     """Super-Paramagnetic Clustering (SPC)
 
     The implementation is heavily inspired from [1]_ and [2]_.
@@ -195,7 +196,7 @@ class PCADecomposition:
         """
 
 
-class WaveletDecomposition:
+class WaveletDecomposition:  # TODO
     """
     Wavelet Decomposition for spike sorting.
     The implementation is heavily inspired from [1]_ and [2]_;
