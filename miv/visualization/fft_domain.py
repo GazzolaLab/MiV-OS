@@ -23,6 +23,7 @@ def plot_frequency_domain(signal: SignalType) -> plt.Figure:
 
     """
     # FFT
+    # TODO: Move out the computational part into 'miv/signal'
     fig = plt.figure()
     sig_fft = fftpack.fft(signal)
     plt.plot(np.abs(sig_fft) ** 2)
@@ -32,7 +33,7 @@ def plot_frequency_domain(signal: SignalType) -> plt.Figure:
 
 
 def plot_spectral(
-    signal: SignalType, X: float, Y: float, sampling_rate: float, Number_Segments: float
+    signal: SignalType, X: int, Y: int, sampling_rate: float, Number_Segments: int
 ):
     """
     Plots power spectral densities for channels X and Y: cross power spctral densities
@@ -42,13 +43,13 @@ def plot_spectral(
     ----------
     signal : SignalType
         Input signal
-    X : float
+    X : int
         First Channel
-    Y : float
+    Y : int
         Second Channel
     sampling_rate : float
         Sampling frequency
-    Number_Segments: float
+    Number_Segments: int
         Number of segments to divide the entire signal
 
     Returns
@@ -64,6 +65,8 @@ def plot_spectral(
     """
     ## Welch PSD for an electrode's Signal
     ## Welch Coherence Estimation between signal X and Y
+
+    # TODO: Move out the computational part into 'miv/signal'
 
     L = np.int32(len(signal[:, 0]) / Number_Segments)  # L = length of each segment
     fs = sampling_rate  # fs = Sampling Frequeny
@@ -89,12 +92,12 @@ def plot_spectral(
 
     axes[0, 0].set_ylabel("PSD [V**2/Hz]")
     axes[1, 0].set_ylabel("CSD [V**2/Hz]")
-    axes[1, 0].set_xlabel("'frequency [Hz]'")
-    axes[1, 1].set_xlabel("'frequency [Hz]'")
+    axes[1, 0].set_xlabel("Frequency [Hz]")
+    axes[1, 1].set_xlabel("Frequency [Hz]")
     axes[0, 1].set_ylabel("PSD [V**2/Hz]")
     axes[1, 1].set_ylabel("Coherence")
-    axes[0, 0].set_xlabel("'frequency [Hz]'")
-    axes[0, 1].set_xlabel("'frequency [Hz]'")
+    axes[0, 0].set_xlabel("Frequency [Hz]")
+    axes[0, 1].set_xlabel("Frequency [Hz]")
     axes[0, 0].set_title("PSD for X")
     axes[0, 1].set_title("PSD for Y")
     axes[1, 0].set_title("CPSD for X and Y")
