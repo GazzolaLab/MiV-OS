@@ -32,7 +32,11 @@ jobs:
             poetry install -E docs
       - name: Sphinx Build Check
         run: |
+            source .venv/bin/activate
             cd docs
+            python --version
+            which python
+            sphinx-build --version
             make clean
             if ! (make html SPHINXOPTS="-W --keep-going") ; then
                 echo Please resolve the warnings/errors
