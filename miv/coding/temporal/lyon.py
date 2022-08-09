@@ -14,9 +14,10 @@ import numpy as np
 
 class LyonEarModel:  # TemporalEncoderProtocol
     """
-    Lyon Ear Model. Wrapper for the module lyon.LyonCalc module.
+    Lyon's Ear Model. Wrapper for lyon.LyonCalc module.
 
     Implementation details can be found `here <https://engineering.purdue.edu/~malcolm/interval/1998-010/>`_
+    The above MATLAB/C implementation is ported to python `here <https://github.com/sciforce/lyon>`_
 
     .. automodule:: lyon.LyonCalc.lyon_passive_ear
     """
@@ -26,7 +27,7 @@ class LyonEarModel:  # TemporalEncoderProtocol
         sampling_rate: float = 16000,
         decimation_factor: int = 1,
         ear_quality: int = 8,
-        step_factor: bool = None,
+        step_factor: Optional[float] = None,
         differ: bool = True,
         agc: bool = True,
         tau_factor: int = 3,
@@ -39,26 +40,18 @@ class LyonEarModel:  # TemporalEncoderProtocol
         sampling_rate : float
             sample_rate Waveform sample rate. (default=16000)
         decimation_factor : int
-            decimation_factor
+            decimation_factor How much to decimate model output. (default=1)
         ear_quality : int
-            ear_quality
-        step_factor : bool
-            step_factor
+            Smaller values mean broader filters. (default=8)
+        step_factor : float
+            Filter stepping factor. If not given, default value set to 25% overlap.
+            (default=ear_quality / 32)
         differ : bool
-            differ
+            Differ Channel difference: improves model's freq response. (default=True)
         agc : bool
-            agc
+            Whether to use AGC for neural model adaptation. (default=True)
         tau_factor : int
-            tau_factor
-        """
-        """
-        @parameter decimation_factor How much to decimate model output. Default: 1
-        @parameter ear_q Ear quality. Smaller values mean broader filters. Default: 8
-        @parameter step_factor Filter stepping factor. Defaults to ear_q / 32 (25% overlap)
-        @parameter differ Channel difference: improves model's freq response. Default: True
-        @parameter agc Whether to use AGC for neural model adaptation. Default: True
-        @parameter tau_factor Reduces antialiasing in filter decimation. Default: 3
-        @returns ndarray of shape [N / decimation_factor, channels]
+            Reduces antialiasing in filter decimation. (default=3)
         """
         self.lyon = lyon.calc.LyonCalc()
         self.parameters = {
@@ -72,11 +65,16 @@ class LyonEarModel:  # TemporalEncoderProtocol
         }
 
     def __call__(self, signal: np.ndarray) -> np.ndarray:
-        """__call__.
+        """
 
         Parameters
         ----------
         signal : np.ndarray
-            signal waveform: mono, float64
+            signal waveform: mono,
+
+        Returns
+        -------
+        Output : np.ndarray
+            array shape (N / decimation_factor, channels)
         """
         return self.lyon.lyon_passive_ear(signal, **self.parameters)

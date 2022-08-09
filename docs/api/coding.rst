@@ -1,6 +1,6 @@
-******
-Coding
-******
+*************
+Neural Coding
+*************
 
 Temporal Encoding/Decoding
 ==========================
