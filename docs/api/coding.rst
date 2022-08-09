@@ -5,9 +5,9 @@ Neural Coding
 Temporal Encoding/Decoding
 ==========================
 
-.. automodule:: miv.converter.temporal
+.. automodule:: miv.coding.temporal
 
 Spatial Encoding/Decoding
 =========================
 
-.. automodule:: miv.converter.spatial
+.. automodule:: miv.coding.spatial
