@@ -43,14 +43,32 @@ import IPython
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.io import wavfile
+import scipy.signal
 ```
 
 ```{code-cell} ipython3
-from miv.converter.temporal import LyonEarModel, BensSpikerAlgorithm
+from miv.coding.temporal import LyonEarModel, BensSpikerAlgorithm
+```
+
+### BSA on Simple Signal
+
+```{code-cell} ipython3
+data = np.sin(np.arange(200)/20000*2*np.pi*1000)
+plt.plot(data)
 ```
 
 ```{code-cell} ipython3
-filepath = "Cochlear-Implant-Processor/Samples/Birds.wav"
+bsa = BensSpikerAlgorithm(10)
+spiketrain, timestamps = bsa(data[:,None])
+
+events = np.where(spiketrain)[0]
+plt.eventplot(events)
+```
+
+## Demo: Lyon Ear Model on Sound File
+
+```{code-cell} ipython3
+filepath = "Cochlear-Implant-Processor/Samples/Birds.wav" # Repository
 IPython.display.Audio(filepath)
 ```
 
@@ -89,15 +107,11 @@ ax2.set_aspect('auto')
 plt.colorbar(img2)
 ```
 
-## BSA
+## BSA on Sound
 
 ```{code-cell} ipython3
-out = np.stack([cochlear_left, cochlear_right])
-```
-
-```{code-cell} ipython3
-bsa = BensSpikerAlgorithm(out)
-spiketrain = bsa.get_spikes()[0]
+bsa = BensSpikerAlgorithm(sampling_rate)
+spiketrain = bsa(cochlear_left)[0]
 ```
 
 ```{code-cell} ipython3
@@ -120,10 +134,10 @@ plt.ioff()
 ```{code-cell} ipython3
 fig, ax = plt.subplots()
 
-window = 0.15
-tfinal = 10.0
+window = 0.35
+tfinal = 3.0
 dps = int(spiketrain.shape[0] / tfinal)
-fps = 60.0
+fps = 10.0
 def animate(frame):
     t = frame / fps
     plt.cla()
@@ -140,37 +154,29 @@ animation.FuncAnimation(fig, animate, frames=int(tfinal * fps))
 
 ## Testing (Sinusoidal)
 
-```{code-cell} ipython3
-raise Exception # Do not proceed beyond
-```
-
-```{code-cell} ipython3
+```{raw-cell}
 out = calc.lyon_passive_ear(data[:,0], samplerate)
 print('Out:')
 print(out.shape)
 ```
 
-```{code-cell} ipython3
+```{raw-cell}
 data2 = np.sin(np.arange(2041)/20000*2*np.pi*1000)
 out = calc.lyon_passive_ear(data2, 20000, 20)
 ```
 
-```{code-cell} ipython3
+```{raw-cell}
 plt.imshow(out, aspect='auto')
 plt.colorbar()
 ```
 
-```{code-cell} ipython3
+```{raw-cell}
 data3 = np.zeros(256); data3[0] = 1
 out = calc.lyon_passive_ear(data3, 16000, 1)
 out = np.fmin(out, 0.0004)
 ```
 
-```{code-cell} ipython3
+```{raw-cell}
 plt.imshow(out, aspect='auto')
 plt.colorbar()
-```
-
-```{code-cell} ipython3
-
 ```
