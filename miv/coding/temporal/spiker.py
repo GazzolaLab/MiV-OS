@@ -112,6 +112,7 @@ class BensSpikerAlgorithm:
         if self.data_normalize:
             _data = normalize(data, axis=1)
         else:
+            _data = data.copy()
             _data -= data.min(axis=0, keepdims=True)
 
         spikes = np.zeros_like(data, dtype=np.bool_)
