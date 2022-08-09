@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from miv.converter.temporal import LyonEarModel
+from miv.coding.temporal import LyonEarModel
 
 
 def test_ear_model_simple_array():
