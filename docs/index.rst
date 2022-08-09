@@ -55,7 +55,7 @@ If you are interested in contributing to this project, we prepared contribution 
    api/causality
    api/visualization
    api/signal_generator
-   api/converter
+   api/coding
 
 .. toctree::
    :maxdepth: 2
