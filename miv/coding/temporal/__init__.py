@@ -1,9 +1,11 @@
 __doc__ = """
-# Auditory Toolbox
+Auditory Model
+==============
 
-## References
+References
+----------
 
-https://engineering.purdue.edu/~malcolm/interval/1998-010/
+- https://engineering.purdue.edu/~malcolm/interval/1998-010/
 """
 
 from miv.converter.temporal.lyon import *
