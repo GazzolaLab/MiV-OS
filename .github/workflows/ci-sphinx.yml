@@ -23,19 +23,20 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
       - name: Setup Poetry
-        uses: Gr1N/setup-poetry@v7
-        with:
-          poetry-preview: false
+        uses: snok/install-poetry@v1
       - name: Poetry install docs dependencies
         run: |
             poetry --version
-            poetry config virtualenvs.in-project false
-            poetry config virtualenvs.create false
+            poetry config virtualenvs.in-project true
+            #poetry config virtualenvs.create false
             poetry install -E docs
-
       - name: Sphinx Build Check
         run: |
+            source .venv/bin/activate
             cd docs
+            python --version
+            which python
+            sphinx-build --version
             make clean
             if ! (make html SPHINXOPTS="-W --keep-going") ; then
                 echo Please resolve the warnings/errors
@@ -44,9 +45,9 @@ jobs:
                 echo Doc build success
                 exit 0
             fi
-
       - name: Sphinx Link Check
         run: |
+            source .venv/bin/activate
             cd docs
             make clean
             make linkcheck
