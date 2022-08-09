@@ -135,6 +135,8 @@ class Data:
         Returns
         -------
         signal : SignalType, neo.core.AnalogSignal
+            The length of the first axis `signal.shape[0]` correspond to the length of the
+            signal, while second axis `signal.shape[1]` correspond to the number of channels.
         timestamps : TimestampsType, numpy array
         sampling_rate : float
 
