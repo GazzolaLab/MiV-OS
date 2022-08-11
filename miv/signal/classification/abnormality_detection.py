@@ -39,12 +39,20 @@ class DetectorWithTrainData:
     def __init__(self, train_datapath: str) -> None:
         if not os.path.exists(train_datapath):
             raise Exception("train_datapath does not exist!")
-        self.train_datapath = train_datapath
-        self.classifier
+        self.train_datapath: str = train_datapath
+        self.classifier: NeuronalSpikeClassifier
 
     def init_classifier(
         self, model: Optional[SpikeClassificationModelProtocol] = None
     ) -> None:
+        """Initiate NeuronalSpikeClassifier object
+
+        Parameters
+        ----------
+        model : Optional[SpikeClassificationModelProtocol], default = None
+            Classification model used to initiate classifier.
+            If left as None, a default TF Keras model will be built.
+        """
         self.classifier = NeuronalSpikeClassifier(model)
 
         if model is None:
@@ -53,6 +61,21 @@ class DetectorWithTrainData:
                 spike_length = len(spikes[0])
                 del spikes
             self.classifier.create_default_tf_keras_model(spike_length)
+
+    def default_compile_and_train(self) -> None:
+        """Compile and train classifier model with train data"""
+
+    def get_only_neuronal_spikes(self, exp_data: Data) -> np.ndarray:
+        """Get spiketrains where only neuronal spikes are present
+
+        This function uses the classifier to select spikes.
+
+        Parameters
+        ----------
+        exp_data : Data
+        """
+
+        return np.ndarray([])
 
 
 class DetectorWithSpontaneousData:
