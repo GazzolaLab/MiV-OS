@@ -1,4 +1,4 @@
-__all__ = ["AbnormalityDetector"]
+__all__ = ["DetectorWithSpontaneousData"]
 
 from typing import Any, Dict, List, Optional, Tuple, Union
 
@@ -21,8 +21,8 @@ from miv.signal.spike import (
 from miv.visualization import extract_waveforms
 
 
-class AbnormalityDetector:
-    """Abnormality Detector
+class DetectorWithSpontaneousData:
+    """Abnormality Detector that works by using categorized spontaneous recording
 
     This class integrates NeuronalSpikeClassifier with Data and SpikeFeatureExtractionProtocol
 
@@ -352,39 +352,6 @@ class AbnormalityDetector:
 
     # Below is work in progress
 
-    # def evaluate_model(
-    #     self,
-    #     test_cutouts: Optional[np.ndarray] = None,
-    #     test_labels: Optional[np.ndarray] = None,
-    # ) -> Dict[str, Any]:
-    #     """Evaluate the trained model
-
-    #     Parameters
-    #     ----------
-    #     test_cutouts : Optional[np.ndarray], default = None
-    #         Raw 2D numpy array of rows of cutout sample points
-    #     test_labels : Optional[np.ndarray], default = None
-    #         1D numpy array of categorization indices
-
-    #     Returns
-    #     -------
-    #     test_loss : float
-    #         1 if model was not trained
-    #     test_accuracy : float
-    #         0 if model was not trained
-    #     test_precision : float
-    #     test_recall : float
-    #     test_f1 : float
-    #     """
-    #     self._check_categorized()
-
-    #     data = test_cutouts if test_cutouts is not None else self.test_cutouts
-    #     labels = test_labels if test_labels is not None else self.test_labels
-
-    #     loss, acc = self.model.evaluate(data, labels)
-
-    #     return {"test_loss": loss, "test_accuracy": acc}
-
     # def get_only_neuronal_spikes(
     #     self,
     #     exp_data: Data,
@@ -439,71 +406,5 @@ class AbnormalityDetector:
     #                 times.append(spike_cutout.time)
     #                 t_stop = spike_cutout.time
     #         new_spiketrains.append(SpikeTrain(times, t_stop, pq.s))
-
-    #     return new_spiketrains
-
-    # def get_only_neuronal_components(
-    #     self,
-    #     exp_data: Data,
-    #     accuracy_threshold: float = 0.9,
-    #     signal_filter: Optional[FilterProtocol] = None,
-    #     spike_detector: Optional[SpikeDetectionProtocol] = None,
-    # ) -> List[SpikestampsType]:
-    #     """This method first takes each spike in a single component group and
-    #     computer an average spike. Then, this average spike is used to determine
-    #     whether the component is neuronal and should be returned.
-
-    #     Parameters
-    #     ----------
-    #     exp_data : Data
-    #         Experiment data
-    #     accuracy_threshold : float, defualt = 0.9
-    #         The category prediction comes in probabilities for each category.
-    #         If the probability for "neuronal" is higher than this threshold,
-    #         the spikes in the component will be included.
-    #     signal_filter : Optional[FilterProtocol], default = None
-    #         Filter applied to the experiment data before spike detection.
-    #         If left empty or None, the same filter for the spontaneous data
-    #         will be used.
-    #     spike_detector : Optional[SpikeDetectionProtocol], default = None
-    #         The spike detector used to detect spikes on the experiment data.
-    #         If left empty or None, the same spike detector for the spontaneous
-    #         data will be used.
-
-    #     Returns
-    #     -------
-    #     (Same return format as SpikeDetectionProtocol)
-    #     A list of SpikestampsType for each channel
-    #     """
-    #     if not self.trained:
-    #         raise Exception("Abnormality detector is not trained yet.")
-
-    #     exp_filter = signal_filter if signal_filter else self.spont_signal_filter
-    #     exp_detector = spike_detector if spike_detector else self.spont_spike_detector
-    #     list_of_cutout_channels = self._get_cutouts(
-    #         exp_data, exp_filter, exp_detector, self.extractor
-    #     )
-    #     new_spiketrains: List[SpikestampsType] = []
-    #     prob_model = tf.keras.Sequential([self.model, tf.keras.layers.Softmax()])
-
-    #     for chan_index, cutout_channel in tqdm(enumerate(list_of_cutout_channels)):
-    #         chan_cutouts_by_comp = cutout_channel.get_cutouts_by_component()
-    #         channel_times = []
-
-    #         for comp_index, comp_cutouts in enumerate(chan_cutouts_by_comp):
-    #             loaded_comp_cutouts: List[List[float]] = []
-
-    #             for cutout_index, spike_cutout in comp_cutouts:
-    #                 loaded_comp_cutouts.append(spike_cutout.cutout)
-
-    #             comp_mean_cutout = np.mean(loaded_comp_cutouts, axis=0)
-    #             prediction = prob_model.predict(comp_mean_cutout, verbose=0)
-
-    #             if prediction[0] >= accuracy_threshold:
-    #                 for cutout_index, spike_cutout in comp_cutouts:
-    #                     channel_times.append(spike_cutout.time)
-
-    #         t_stop = 0 if not (channel_times) else channel_times[-1]
-    #         new_spiketrains.append(SpikeTrain(channel_times, t_stop, pq.s))
 
     #     return new_spiketrains
