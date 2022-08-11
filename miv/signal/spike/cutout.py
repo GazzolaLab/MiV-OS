@@ -84,14 +84,15 @@ class ChannelSpikeCutout:
         -------
         3D Numpy array of cutouts [component index][spike index][sampling point in raw spike]
         """
-        result = [[] for i in range(self.num_components)]
+        result: List = [[] for i in range(self.num_components)]
         for index, cutout in enumerate(self.cutouts):
             result[cutout.extractor_comp_index].append(cutout.cutout)
 
         for row_index, row in enumerate(result):
             result[row_index] = np.array(row)
 
-        return np.array(result, dtype=object)
+        return_arr: np.ndarray = np.array(result, dtype=object)
+        return return_arr
 
     def categorize(self, category_indices: np.ndarray) -> None:
         """

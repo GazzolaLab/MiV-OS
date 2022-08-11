@@ -124,7 +124,8 @@ class DetectorWithTrainData:
             if outcome:
                 result.append(exp_spikes[index])
 
-        return np.ndarray(result)
+        return_arr: np.ndarray = np.array(result)
+        return return_arr
 
 
 class DetectorWithSpontaneousData:
@@ -340,7 +341,7 @@ class DetectorWithSpontaneousData:
         3D Numpy array [component index][spike index][sampling point in raw spike]
         """
 
-        result = [[] for i in range(self.extractor_decomposition_parameter)]
+        result: List = [[] for i in range(self.extractor_decomposition_parameter)]
 
         for chan_index, chan_spike_cutout in enumerate(self.spontaneous_cutouts):
             chan_cutouts_by_comp = chan_spike_cutout.get_cutouts_by_component()
@@ -349,7 +350,8 @@ class DetectorWithSpontaneousData:
                 for spike_index, spike in enumerate(comp_spikes):
                     result[comp_index].append(spike)
 
-        return np.array(result, dtype=object)
+        return_arr = np.array(result, dtype=object)
+        return return_arr
 
     def init_classifier(
         self,
