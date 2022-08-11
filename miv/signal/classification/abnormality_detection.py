@@ -1,4 +1,4 @@
-__all__ = ["DetectorWithSpontaneousData"]
+__all__ = ["DetectorWithTrainData", "DetectorWithSpontaneousData"]
 
 from typing import Any, Dict, List, Optional, Tuple, Union
 
@@ -32,6 +32,7 @@ class DetectorWithTrainData:
         ----------
         train_datapath : str
         classifier : NeuronalSpikeClassifier
+        trained : bool
 
 
     """
@@ -41,6 +42,11 @@ class DetectorWithTrainData:
             raise Exception("train_datapath does not exist!")
         self.train_datapath: str = train_datapath
         self.classifier: NeuronalSpikeClassifier
+        self.trained = False
+
+    def _check_classifier_initiated(self):
+        if not self.classifier:
+            raise Exception("No classifier is initiated yet! Try init_classifier()")
 
     def init_classifier(
         self, model: Optional[SpikeClassificationModelProtocol] = None
@@ -62,8 +68,29 @@ class DetectorWithTrainData:
                 del spikes
             self.classifier.create_default_tf_keras_model(spike_length)
 
-    def default_compile_and_train(self) -> None:
-        """Compile and train classifier model with train data"""
+    def default_compile_and_train(self, train_ratio: float = 1) -> None:
+        """Compile and train classifier model with train data
+
+        Parameters
+        ----------
+        train_ratio : float, default = 1
+            The ratio that determines the portion of spikes that will be used
+            for training.
+            Note: spikes and labels are shuffled prior to truncation."""
+
+        self._check_classifier_initiated()
+        self.classifier.default_compile_model()
+
+        with np.load(self.train_datapath) as file:
+            spikes, labels = shuffle(file["spike"], file["label"])
+            split = int(train_ratio * len(labels))
+            train_spikes = spikes[:split]
+            train_labels = labels[:split]
+            del spikes
+            del labels
+
+        self.classifier.default_train_model(train_spikes, train_labels)
+        self.trained = True
 
     def get_only_neuronal_spikes(self, exp_data: Data) -> np.ndarray:
         """Get spiketrains where only neuronal spikes are present
