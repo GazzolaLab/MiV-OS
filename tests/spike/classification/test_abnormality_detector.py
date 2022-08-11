@@ -79,7 +79,7 @@ def test_evaluate_model():
     abn_detector.default_init_and_compile_classifier()
     test_spikes = abn_detector.spontaneous_cutouts[0].get_labeled_cutouts()["cutouts"]
 
-    # Case 1 : all correct
     test_labels = np.array([0, 1, 1, 0, 1, 1])
     metrics = abn_detector.evaluate_model(test_spikes, test_labels)
     assert metrics["accuracy"] == 1
+    assert metrics["f1"] == 1

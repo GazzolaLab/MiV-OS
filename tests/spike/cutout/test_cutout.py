@@ -55,7 +55,7 @@ def test_get_cutouts_by_components():
     chan_spike_cutout = ChannelSpikeCutout(cutouts, 3, 0)
 
     cutouts_by_components = chan_spike_cutout.get_cutouts_by_component()
-    assert np.shape(cutouts_by_components) == (3, 2)
+    assert np.shape(cutouts_by_components) == (3, 2, 40)
 
 
 def test_categorize_with_method():
