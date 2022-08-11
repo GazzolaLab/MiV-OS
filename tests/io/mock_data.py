@@ -1,11 +1,112 @@
 from typing import Iterable, Optional, Set
 
+import enum
+import os
 from contextlib import contextmanager
+from enum import Enum
 
 import numpy as np
+import pytest
 
 from miv.io.data import Data, DataManager
 from tests.spike.cutout.test_cutout import MockSpikeCutout
+
+
+class SignalGeneratorType(Enum):
+    RANDOM = enum.auto()
+    ARANGE = enum.auto()
+    ONES = enum.auto()
+
+
+class MockDataGenerator:
+    @staticmethod
+    def save_continuous_data_file(
+        dirname,
+        num_channels,
+        signal_length,
+        signaltype: SignalGeneratorType = SignalGeneratorType.RANDOM,
+        seed=0,
+    ):
+        np_rng = np.random.default_rng(seed)
+        if signaltype == SignalGeneratorType.RANDOM:
+            signal = np_rng.random([signal_length, num_channels])
+        elif signaltype == SignalGeneratorType.ARANGE:
+            signal = np.arange(signal_length * num_channels).reshape(
+                [signal_length, num_channels]
+            )
+        elif signaltype == SignalGeneratorType.ONES:
+            signal = np.ones([signal_length, num_channels])
+        else:
+            raise NotImplementedError
+        signal = signal.astype("int16")
+        filename = os.path.join(dirname, "continuous.dat")
+        fp = np.memmap(filename, dtype="int16", mode="w+", shape=signal.shape)
+        fp[:] = signal[:]
+        fp.flush()
+
+        return signal
+
+    # staticmethod
+    def create_mock_data_structure(dirname, num_channels, signal_length):
+        # Create mock datafile structure with continuous.dat, timestamps.np, and structure.oebin files.
+        # Returns directory name and expected data values.
+
+        # Prepare continuous.dat
+        signal = MockDataGenerator.save_continuous_data_file(
+            dirname, num_channels, signal_length
+        )
+        # Prepare timestamps.npy
+        timestamps_filename = os.path.join(dirname, "timestamps.npy")
+        timestamps = np.arange(signal_length) + np.pi
+        np.save(timestamps_filename, timestamps)
+        # Prepare structure.oebin
+        oebin_filename = os.path.join(dirname, "structure.oebin")
+        oebin = """{
+        "continuous": [
+            {
+                "sample_rate": 30000,
+                "num_channels": 3,
+                "channels": [
+                    {
+                        "bit_volts":5.0,
+                        "units":"uV",
+                        "channel_name":"DC"
+                    },
+                    {
+                        "bit_volts":3.0,
+                        "units":"uV",
+                        "channel_name":"DC_"
+                    },
+                    {
+                        "bit_volts":2.5,
+                        "units":"uV",
+                        "channel_name":"DC_"
+                    }
+                ]
+            }
+        ]
+    }"""
+        with open(oebin_filename, "w") as f:
+            f.write(oebin)
+
+        # Expected Dataset
+        expected_data = signal.copy().astype("float32")
+        expected_data[:, 0] *= 5.0
+        expected_data[:, 1] *= 3.0
+        expected_data[:, 2] *= 2.5
+
+        # Expected timestamps
+        sampling_rate = 30000
+        expected_timestamps = (timestamps - np.pi) / sampling_rate
+
+        return dirname, expected_data, expected_timestamps, sampling_rate
+
+
+@pytest.fixture(name="create_mock_data_file")
+def fixture_create_mock_data_file(tmp_path):
+    return MockDataGenerator.create_mock_data_structure(
+        tmp_path, num_channels=3, signal_length=100
+    )
 
 
 class MockData(Data):
