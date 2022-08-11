@@ -131,13 +131,13 @@ class NeuronalSpikeClassifier:
 
         Returns
         -------
-        Numpy array of prediction outcomes
+        Numpy array of boolean prediction outcomes
         """
 
         self._validate_model()
 
         predictions = self.model.predict(spikes, **predict_kwargs)
-        outcomes: np.ndarray = np.ndarray(np.shape(spikes)[0])
+        outcomes: np.ndarray = np.ndarray(np.shape(spikes)[0], dtype=bool)
         for i, prediction in enumerate(predictions):
             outcomes[i] = prediction > threshold
         return outcomes

@@ -92,17 +92,39 @@ class DetectorWithTrainData:
         self.classifier.default_train_model(train_spikes, train_labels)
         self.trained = True
 
-    def get_only_neuronal_spikes(self, exp_data: Data) -> np.ndarray:
-        """Get spiketrains where only neuronal spikes are present
+    def keep_only_neuronal_spikes(
+        self, exp_spikes: np.ndarray, threshold: float = 0.5, **predict_kwargs
+    ) -> np.ndarray:
+        """Get spiketrains where only neuronal spikes are kept
 
         This function uses the classifier to select spikes.
 
         Parameters
         ----------
-        exp_data : Data
+        exp_spikes : np.ndarray
+            2D Numpy array
+            Note: Length of each spike should be identical to that of train data.
+            Note: Each element should be sample points of a spike cutout.
+        threshold : float, default = 0.5
+            Probability threshold used for prediction
+        **predict_kwargs
+            Keyworded arguments for model.predict()
         """
+        self._check_classifier_initiated()
+        if not self.trained:
+            raise Exception(
+                "Classifier model has not been trained yet! Try default_compile_and_train()"
+            )
 
-        return np.ndarray([])
+        result = []
+        outcomes = self.classifier.predict_categories_sigmoid(
+            exp_spikes, threshold, **predict_kwargs
+        )
+        for index, outcome in enumerate(outcomes):
+            if outcome:
+                result.append(exp_spikes[index])
+
+        return np.ndarray(result)
 
 
 class DetectorWithSpontaneousData:
