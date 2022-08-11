@@ -2,6 +2,8 @@ __all__ = ["DetectorWithSpontaneousData"]
 
 from typing import Any, Dict, List, Optional, Tuple, Union
 
+import os
+
 import numpy as np
 from sklearn.utils import shuffle
 from tqdm import tqdm
@@ -21,10 +23,45 @@ from miv.signal.spike import (
 from miv.visualization import extract_waveforms
 
 
+class DetectorWithTrainData:
+    """Abnormality Detector that works by using train data file with labeled spikes
+
+    Train data files may be huge. This class integrates the file with classifier.
+
+        Attributes
+        ----------
+        train_datapath : str
+        classifier : NeuronalSpikeClassifier
+
+
+    """
+
+    def __init__(self, train_datapath: str) -> None:
+        if not os.path.exists(train_datapath):
+            raise Exception("train_datapath does not exist!")
+        self.train_datapath = train_datapath
+        self.classifier
+
+    def init_classifier(
+        self, model: Optional[SpikeClassificationModelProtocol] = None
+    ) -> None:
+        self.classifier = NeuronalSpikeClassifier(model)
+
+        if model is None:
+            with np.load(self.train_datapath) as file:
+                spikes = file["spike"]
+                spike_length = len(spikes[0])
+                del spikes
+            self.classifier.create_default_tf_keras_model(spike_length)
+
+
 class DetectorWithSpontaneousData:
     """Abnormality Detector that works by using categorized spontaneous recording
 
     This class integrates NeuronalSpikeClassifier with Data and SpikeFeatureExtractionProtocol
+
+    This class is shown to be somewhat useless as the extracted spikes may not be similar within
+    each component, making categorization impossible.
 
 
         Attributes
@@ -48,6 +85,16 @@ class DetectorWithSpontaneousData:
         spike_feature_extractor: SpikeFeatureExtractionProtocol,
         extractor_decomposition_parameter: int = 3,
     ) -> None:
+        """
+        Parameters
+        ----------
+        spontaneous_data : Data
+        spontaneous_signal_filter : FilterProtocol
+        spontaneous_spike_detector : SpikeDetectionProtocol
+        spike_feature_extractor : SpikeFeatureExtractorProtocol
+        extractor_decomposition_parameter : int, default = 3
+
+        """
         self.spontaneous_data: Data = spontaneous_data
         self.spontaneous_cutouts: np.ndarray = self._get_all_cutouts(
             spontaneous_data,
