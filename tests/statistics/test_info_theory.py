@@ -36,8 +36,6 @@ def test_block_entropy_output():
     with np.testing.assert_raises(AssertionError):
         output = block_entropy(seg.spiketrains, 0, 1, 0, 0, 0.1)
     with np.testing.assert_raises(AssertionError):
-        output = block_entropy(seg.spiketrains, 0, 0, 0, 1, 0.1)
-    with np.testing.assert_raises(AssertionError):
         output = block_entropy(seg.spiketrains, 0, 1, 0, 1, 0)
     output = block_entropy(seg.spiketrains, 0, 1, 0, 1, 1)
     np.testing.assert_allclose(output, 0.0)
@@ -47,8 +45,6 @@ def test_entropy_rate_output():
     with np.testing.assert_raises(AssertionError):
         output = entropy_rate(seg.spiketrains, 0, 1, 0, 0, 0.1)
     with np.testing.assert_raises(AssertionError):
-        output = entropy_rate(seg.spiketrains, 0, 0, 0, 1, 0.1)
-    with np.testing.assert_raises(AssertionError):
         output = entropy_rate(seg.spiketrains, 0, 1, 0, 1, 0)
     output = entropy_rate(seg.spiketrains, 0, 1, 0, 1, 1)
     np.testing.assert_allclose(output, 0.0)
@@ -57,8 +53,6 @@ def test_entropy_rate_output():
 def test_active_information_output():
     with np.testing.assert_raises(AssertionError):
         output = active_information(seg.spiketrains, 0, 1, 0, 0, 0.1)
-    with np.testing.assert_raises(AssertionError):
-        output = active_information(seg.spiketrains, 0, 0, 0, 1, 0.1)
     with np.testing.assert_raises(AssertionError):
         output = active_information(seg.spiketrains, 0, 1, 0, 1, 0)
     output = active_information(seg.spiketrains, 0, 1, 0, 1, 1)
@@ -95,8 +89,6 @@ def test_conditional_entropy_output():
 def test_transfer_entropy_output():
     with np.testing.assert_raises(AssertionError):
         output = transfer_entropy(seg.spiketrains, 0, 0, 1, 0, 0, 0.1)
-    with np.testing.assert_raises(AssertionError):
-        output = transfer_entropy(seg.spiketrains, 0, 0, 0, 0, 1, 0.1)
     with np.testing.assert_raises(AssertionError):
         output = transfer_entropy(seg.spiketrains, 0, 0, 1, 0, 1, 0)
     output = transfer_entropy(seg.spiketrains, 0, 0, 1, 0, 1, 1)
