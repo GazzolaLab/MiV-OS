@@ -27,9 +27,9 @@ def test_plot_connectivity_output():
         plot_connectivity(mea_map1, connectivity_matrix2, True)
         # The function above should throw an error since MEA map contains no identification
     output = plot_connectivity(mea_map_t, connectivity_matrix_t, False)
-    assert output[0].engine == "neato"
+    assert output.engine == "neato"
     output = plot_connectivity(mea_map_t, connectivity_matrix_t, True)
-    assert output[0].engine == "neato"
+    assert output.engine == "neato"
 
 
 def test_plot_connectivity_interactive_output():
@@ -53,6 +53,6 @@ def test_plot_connectivity_interactive_output():
         # The function above should throw an error since MEA map contains no identification
 
     output = plot_connectivity_interactive(mea_map_t, connectivity_matrix_t, False)
-    assert output[0].get_edges()[0]["width"] == "1"
+    assert output.get_edges()[0]["width"] == "1"
     output = plot_connectivity_interactive(mea_map_t, connectivity_matrix_t, True)
-    assert output[0].get_edges()[0]["width"] == "1"
+    assert output.get_edges()[0]["width"] == "1"
