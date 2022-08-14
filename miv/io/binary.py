@@ -73,8 +73,6 @@ def bits_to_voltage(signal: SignalType, channel_info: Sequence[Dict[str, Any]]):
         recorded_unit = pq.Quantity([1], channel_info[channel]["units"])
         unit_conversion = (recorded_unit / resultant_unit).simplified
         signal[:, channel] *= bit_to_volt_conversion * unit_conversion
-        if "ADC" in channel_info[channel]["channel_name"]:
-            signal[:, channel] *= 10**6
     return signal
 
 
