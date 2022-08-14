@@ -5,7 +5,7 @@ import pytest
 
 
 def test_multi_channel_signal_plot_filecheck(tmp_path):
-    from miv.visualization import multi_channel_signal_plot
+    from miv.visualization.raw_signal import multi_channel_signal_plot
 
     length = 64
     channel = 16
