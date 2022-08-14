@@ -27,9 +27,8 @@ def plot_connectivity(
 
     Returns
     -------
-    figure
-        matplot figure with bursts plotted for all electrodes
-    axes
+    g
+        graphviz graph object
     """
 
     connec_x, connec_y = np.shape(connectivity_matrix)
@@ -92,7 +91,7 @@ def plot_connectivity(
                 fontsize="15",
                 fontname="Times:Roman bold",
             )
-    return g.view()
+    return g
 
 
 def plot_connectivity_interactive(
@@ -114,9 +113,8 @@ def plot_connectivity_interactive(
 
     Returns
     -------
-    figure
-        matplot figure with bursts plotted for all electrodes
-    axes
+    net
+        pyvis network object
     """
     connec_x, connec_y = np.shape(connectivity_matrix)
     assert connec_x == connec_y, "Connectivity matrix should be a square matrix"
@@ -163,4 +161,4 @@ def plot_connectivity_interactive(
     for n in net.nodes:
         n.update({"physics": False})
 
-    return net.show("nodes.html")
+    return net
