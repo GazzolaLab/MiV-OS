@@ -12,6 +12,7 @@ API Documentation
    causality
    visualization
    signal_generator
+   coding
 
 Indices and tables
 ==================
