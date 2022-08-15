@@ -11,3 +11,4 @@ SignalType = Union[
 ]  # Shape should be [signal_length, n_channel]
 TimestampsType = np.ndarray
 SpikestampsType = Union[np.ndarray, neo.core.SpikeTrain]
+SpiketrainType = np.ndarray  # non-sparse boolean

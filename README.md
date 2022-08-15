@@ -12,7 +12,7 @@
 
 ---
 
-Python analysis and computing framework developed for Mind-in-Vitro(MiV) project.
+Python analysis and computing framework developed for [Mind-in-Vitro(MiV)][link-project-website] project.
 
 ## Installation
 [![PyPI version][badge-pypi]][link-pypi]
@@ -66,6 +66,7 @@ _Names arranged alphabetically_
 [//]: # (Collection of URLs.)
 
 [link-lab-website]: http://mattia-lab.com/
+[link-project-website]: https://mindinvitro.illinois.edu/
 [link-docs-status]: https://miv-os.readthedocs.io/en/latest/?badge=latest
 [link-CI]: https://github.com/GazzolaLab/MiV-OS/actions
 [link-LICENSE]: https://github.com/GazzolaLab/MiV-OS/blob/main/LICENSE

@@ -16,15 +16,13 @@ from typing import Any, Dict
 import os
 import sys
 
-# import sphinx_rtd_theme
-
 sys.path.insert(0, os.path.abspath("../"))
 
 from miv import get_version
 
 # -- Project information -----------------------------------------------------
 
-project = "Mind-in-Vitro MiV-OS"
+project = "Mind-in-Vitro"
 copyright = "2022, GazzolaLab"
 author = "Gazzola Lab"
 
@@ -45,7 +43,6 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx_togglebutton",
     "sphinx_copybutton",
-    "sphinx_rtd_theme",
     "sphinx.ext.mathjax",
     "numpydoc",
     # "myst_parser", # Moving onto jupyter-notebook style
@@ -97,20 +94,49 @@ master_doc = "index"
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 
-html_theme = "sphinx_book_theme"
+
+html_theme = "pydata_sphinx_theme"
+html_logo = "https://raw.githubusercontent.com/skim0119/MiV-OS/assets_logo/docs/_static/assets/logo1.svg"
+html_favicon = "https://raw.githubusercontent.com/skim0119/MiV-OS/assets_logo/docs/_static/assets/logo1.svg"
 html_theme_options = {
-    "repository_url": "https://github.com/GazzolaLab/MiV-OS",
-    "use_repository_button": True,
+    "logo": {
+        # "link": "https://mindinvitro.illinois.edu/",
+        "text": "Open Software"
+    },
+    # Navbar Configuration
+    "navbar_start": ["navbar-logo", "miv-switcher.html"],
+    "navbar_center": ["navbar-nav"],
+    # "navbar_end": ["navbar-icon-links"],
+    # Header Link
+    "external_links": [
+        # {"name": "link-one-name", "url": "https://<link-one>"},
+    ],
+    "icon_links": [
+        {
+            # Label for this link
+            "name": "GitHub",
+            "url": "https://github.com/GazzolaLab/MiV-OS",  # required
+            # Icon class (if "type": "fontawesome"), or path to local image (if "type": "local")
+            # The type of image to be used (see below for details)
+            "icon": "fab fa-github-square",
+            "type": "fontawesome",
+        }
+    ],
+    # Sidebar Configuraion
+    "left_sidebar_end": [],
+    # Theme (https://help.farbox.com/pygments.html)
+    # "pygment_light_style": "default",
+    # "pygment_dark_style": "native",
 }
 html_title = "MiV-OS"
-# html_logo = ""
-# pygments_style = "sphinx"
+
+html_context = {"default_mode": "dark"}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static", "_static/assets"]
-html_css_files = ["css/*", "css/logo.css"]
+# html_css_files = ["css/*", "css/logo.css"]
 
 # -- Options for numpydoc ---------------------------------------------------
 numpydoc_show_class_members = False
