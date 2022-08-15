@@ -1,6 +1,6 @@
 # About
 
-`MiV-OS` is a open-source software project to provide modular framework for operating neuromorphic computation.
+`MiV-OS` is an open-source software project to provide modular framework for operating neuromorphic computation.
 
 ## Related Projects
 
