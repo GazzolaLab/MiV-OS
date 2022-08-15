@@ -1,0 +1,17 @@
+[
+  {
+    "name": "OS",
+    "version": "latest",
+    "url": "https://miv-os.readthedocs.io/en/latest/"
+  },
+  {
+    "name": "Simulator",
+    "version": "latest",
+    "url": "https://miv-simulator.readthedocs.io/en/latest/"
+  },
+  {
+    "name": "OH",
+    "version": "latest",
+    "url": "https://miv-oh.readthedocs.io/en/latest/"
+  }
+]
