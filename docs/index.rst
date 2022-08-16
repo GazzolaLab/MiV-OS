@@ -27,6 +27,7 @@ If you are interested in contributing to this project, we prepared contribution 
    :caption: Overview
 
    overview/index
+   tutorial/index
    guide/index
    api/index
    discussion/index
