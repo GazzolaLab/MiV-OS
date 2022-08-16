@@ -123,6 +123,7 @@ If you are interested in contributing to this project, we prepared contribution 
    Gazzola Lab <https://mattia-lab.com/>
 =======
    overview/index
+   tutorial/index
    guide/index
    api/index
    discussion/index

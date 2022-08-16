@@ -1,17 +1,20 @@
-Guide/Examples
-==============
+How-To Guide
+============
 
 .. toctree::
    :maxdepth: 2
-   :caption: Guide
+   :caption: Analysis
 
-   signal_processing
-   spike_cutout
-   spike_sorting
    channel_correlation
    granger_causality_psd_cpsd_coherence
    burst_analysis
    info_theory
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Experiment
+
+   stimjim_spiketrain
 
 .. toctree::
    :maxdepth: 2
