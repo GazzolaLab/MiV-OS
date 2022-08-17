@@ -28,10 +28,15 @@ class ArduinoSerial:
     """
 
     def __init__(self, port: str, baudrate: int = 112500):
-        self.serial_port = self._setup_serial(baudrate, port)
         self._data_started = False
         self._data_buf = ""
-        self._message_complete
+        self._message_complete = False
+        self.baudrate = baudrate
+        self.port = port
+        self.serial_port = None
+
+    def connect(self):
+        self.serial_port = self._setup_serial(self.baudrate, self.port)
 
     def _setup_serial(
         self, baudrate: int, serial_port_name: str, verbose: bool = False
