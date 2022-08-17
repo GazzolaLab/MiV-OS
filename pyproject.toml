@@ -50,7 +50,7 @@ tqdm = "^4.64.0"
 numpy = "^1.22.4"
 viziphant = "^0.2.0"
 Sphinx = {version = "^4.5.0", optional = true, extras = ["docs"]}
-pydata-sphinx-theme = {version = "0.9.0", optional = true, extras = ["docs"]}
+pydata-sphinx-theme = {version = "^0.9.0", optional = true, extras = ["docs"]}
 readthedocs-sphinx-search = {version = "^0.1.2", optional = true, extras = ["docs"]}
 sphinx-autodoc-typehints = {version = "^1.18.1", optional = true, extras = ["docs"]}
 myst-parser = {version = "^0.17.2", optional = true, extras = ["docs"]}
@@ -62,7 +62,8 @@ pyinform = "^0.2.0"
 graphviz = "^0.20"
 Pillow = "9.1.1"
 pyvis = "^0.2.1"
-lyon = { git = "https://github.com/sciforce/lyon.git", rev = "91dd700" }
+lyon = { git = "https://github.com/sciforce/lyon.git", optional = true, extras = ["experiment"], rev = "91dd700" }
+pyseries = {extras = ["experiment", "docs"], version = "^1.0.26"}
 
 [tool.poetry.dev-dependencies]
 black = "^22.3.0"
@@ -90,6 +91,10 @@ docs = [
   "numpydoc",
   "sphinx-togglebutton",
   "sphinx-copybutton"
+]
+experiment = [
+  "lyon",
+  "pyseries"
 ]
 
 

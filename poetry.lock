@@ -124,7 +124,7 @@ name = "certifi"
 version = "2022.6.15"
 description = "Python package for providing Mozilla's CA Bundle."
 category = "main"
-optional = true
+optional = false
 python-versions = ">=3.6"
 
 [[package]]
@@ -151,7 +151,7 @@ name = "charset-normalizer"
 version = "2.1.0"
 description = "The Real First Universal Charset Detector. Open, modern and actively maintained alternative to Chardet."
 category = "main"
-optional = true
+optional = false
 python-versions = ">=3.6.0"
 
 [package.extras]
@@ -213,6 +213,22 @@ description = "Decorators for Humans"
 category = "main"
 optional = false
 python-versions = ">=3.5"
+
+[[package]]
+name = "deepdish"
+version = "0.3.7"
+description = "Deep Learning experiments from University of Chicago."
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+numpy = "*"
+scipy = "*"
+tables = "*"
+
+[package.extras]
+image = ["skimage"]
 
 [[package]]
 name = "dill"
@@ -357,7 +373,7 @@ name = "greenlet"
 version = "1.1.2"
 description = "Lightweight in-process concurrent programming"
 category = "main"
-optional = true
+optional = false
 python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*"
 
 [package.extras]
@@ -379,7 +395,7 @@ name = "idna"
 version = "3.3"
 description = "Internationalized Domain Names in Applications (IDNA)"
 category = "main"
-optional = true
+optional = false
 python-versions = ">=3.5"
 
 [[package]]
@@ -650,11 +666,25 @@ optional = false
 python-versions = ">=3.6"
 
 [[package]]
+name = "lxml"
+version = "4.9.1"
+description = "Powerful and Pythonic XML processing library combining libxml2/libxslt with the ElementTree API."
+category = "main"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, != 3.4.*"
+
+[package.extras]
+cssselect = ["cssselect (>=0.7)"]
+html5 = ["html5lib"]
+htmlsoup = ["beautifulsoup4"]
+source = ["Cython (>=0.29.7)"]
+
+[[package]]
 name = "lyon"
 version = "1.0.0"
 description = ""
 category = "main"
-optional = false
+optional = true
 python-versions = "*"
 develop = false
 
@@ -921,6 +951,18 @@ optional = false
 python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,!=3.6.*"
 
 [[package]]
+name = "numexpr"
+version = "2.8.3"
+description = "Fast numerical expression evaluator for NumPy"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+numpy = ">=1.13.3"
+packaging = "*"
+
+[[package]]
 name = "numpy"
 version = "1.23.2"
 description = "NumPy is the fundamental package for array computing with Python."
@@ -942,6 +984,30 @@ sphinx = ">=3.0"
 
 [package.extras]
 testing = ["pytest", "pytest-cov", "matplotlib"]
+
+[[package]]
+name = "obspy"
+version = "1.3.0"
+description = "ObsPy - a Python framework for seismological observatories."
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+decorator = "*"
+lxml = "*"
+matplotlib = ">=3.2.0"
+numpy = ">=1.15.0"
+requests = "*"
+scipy = ">=1.0.0"
+sqlalchemy = "*"
+
+[package.extras]
+tests = ["pytest-json-report", "pytest", "pyproj", "packaging"]
+"io.shapefile" = ["pyshp"]
+imaging = ["cartopy"]
+geo = ["geographiclib"]
+all = ["pyshp", "cartopy", "geographiclib", "pytest-json-report", "pytest", "pyproj", "packaging"]
 
 [[package]]
 name = "packaging"
@@ -1174,6 +1240,17 @@ snowballstemmer = "*"
 toml = ["toml"]
 
 [[package]]
+name = "pyedflib"
+version = "0.1.30"
+description = "library to read/write EDF+/BDF+ files"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+numpy = ">=1.9.1"
+
+[[package]]
 name = "pyflakes"
 version = "2.4.0"
 description = "passive checker of Python programs"
@@ -1241,6 +1318,26 @@ description = "Persistent/Functional/Immutable data structures"
 category = "main"
 optional = true
 python-versions = ">=3.7"
+
+[[package]]
+name = "pyseries"
+version = "1.0.26"
+description = "pySeries is a package for statistical analysis of time-series data."
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+deepdish = "*"
+matplotlib = "*"
+numpy = "*"
+obspy = "*"
+pandas = "*"
+pyedflib = "*"
+scipy = "*"
+seaborn = "*"
+sklearn = "*"
+tabulate = "*"
 
 [[package]]
 name = "pytest"
@@ -1405,7 +1502,7 @@ name = "requests"
 version = "2.28.1"
 description = "Python HTTP for Humans."
 category = "main"
-optional = true
+optional = false
 python-versions = ">=3.7, <4"
 
 [package.dependencies]
@@ -1488,6 +1585,17 @@ optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
 
 [[package]]
+name = "sklearn"
+version = "0.0"
+description = "A set of python modules for machine learning and data mining"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+scikit-learn = "*"
+
+[[package]]
 name = "snowballstemmer"
 version = "2.2.0"
 description = "This package provides 29 stemmers for 28 languages generated from Snowball algorithms."
@@ -1565,21 +1673,6 @@ sphinx = ">=1.8"
 [package.extras]
 code_style = ["pre-commit (==2.12.1)"]
 rtd = ["sphinx", "ipython", "myst-nb", "sphinx-book-theme"]
-
-[[package]]
-name = "sphinx-rtd-theme"
-version = "1.0.0"
-description = "Read the Docs theme for Sphinx"
-category = "main"
-optional = true
-python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*"
-
-[package.dependencies]
-docutils = "<0.18"
-sphinx = ">=1.6"
-
-[package.extras]
-dev = ["transifex-client", "sphinxcontrib-httpdomain", "bump2version"]
 
 [[package]]
 name = "sphinx-togglebutton"
@@ -1687,7 +1780,7 @@ name = "sqlalchemy"
 version = "1.4.40"
 description = "Database Abstraction Library"
 category = "main"
-optional = true
+optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,>=2.7"
 
 [package.dependencies]
@@ -1731,11 +1824,27 @@ pure-eval = "*"
 tests = ["cython", "littleutils", "pygments", "typeguard", "pytest"]
 
 [[package]]
+name = "tables"
+version = "3.7.0"
+description = "Hierarchical datasets for Python"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[package.dependencies]
+numexpr = ">=2.6.2"
+numpy = ">=1.19.0"
+packaging = "*"
+
+[package.extras]
+doc = ["sphinx (>=1.1)", "sphinx-rtd-theme", "numpydoc", "ipython"]
+
+[[package]]
 name = "tabulate"
 version = "0.8.10"
 description = "Pretty-print tabular data"
 category = "main"
-optional = true
+optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
 [package.extras]
@@ -1830,7 +1939,7 @@ name = "urllib3"
 version = "1.26.11"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
 category = "main"
-optional = true
+optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*, <4"
 
 [package.extras]
@@ -1900,12 +2009,13 @@ docs = ["sphinx", "jaraco.packaging (>=9)", "rst.linker (>=1.9)", "jaraco.tideli
 testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-cov", "pytest-enabler (>=1.3)", "jaraco.itertools", "func-timeout", "pytest-black (>=0.3.7)", "pytest-mypy (>=0.9.1)"]
 
 [extras]
-docs = ["Sphinx", "sphinx-rtd-theme", "pydata-sphinx-theme", "readthedocs-sphinx-search", "sphinx-autodoc-typehints", "myst-parser", "myst-nb", "numpydoc", "sphinx-togglebutton", "sphinx-copybutton"]
+docs = ["Sphinx", "pydata-sphinx-theme", "readthedocs-sphinx-search", "sphinx-autodoc-typehints", "myst-parser", "myst-nb", "numpydoc", "sphinx-togglebutton", "sphinx-copybutton"]
+experiment = ["lyon"]
 
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8,<3.11"
-content-hash = "95175404d08b91f898be145f01e90f7b8d2ed90098549c2dd7026c8bf7dcf601"
+content-hash = "b15a03d7927dc9b81600996b8475d53c6462248757053944e831ce9426e7c210"
 
 [metadata.files]
 alabaster = [
@@ -1985,6 +2095,7 @@ decorator = [
     {file = "decorator-5.1.1-py3-none-any.whl", hash = "sha256:b8c3f85900b9dc423225913c5aace94729fe1fa9763b38939a95226f02d37186"},
     {file = "decorator-5.1.1.tar.gz", hash = "sha256:637996211036b6385ef91435e4fae22989472f9d571faba8927ba8253acbc330"},
 ]
+deepdish = []
 dill = [
     {file = "dill-0.3.5.1-py2.py3-none-any.whl", hash = "sha256:33501d03270bbe410c72639b350e941882a8b0fd55357580fbc873fba0c59302"},
     {file = "dill-0.3.5.1.tar.gz", hash = "sha256:d75e41f3eff1eee599d738e76ba8f4ad98ea229db8b085318aa2b3333a208c86"},
@@ -2216,6 +2327,7 @@ lazy-object-proxy = [
     {file = "lazy_object_proxy-1.7.1-cp39-cp39-win_amd64.whl", hash = "sha256:677ea950bef409b47e51e733283544ac3d660b709cfce7b187f5ace137960d61"},
     {file = "lazy_object_proxy-1.7.1-pp37.pp38-none-any.whl", hash = "sha256:d66906d5785da8e0be7360912e99c9188b70f52c422f9fc18223347235691a84"},
 ]
+lxml = []
 lyon = []
 markdown-it-py = [
     {file = "markdown-it-py-2.1.0.tar.gz", hash = "sha256:cf7e59fed14b5ae17c0006eff14a2d9a00ed5f3a846148153899a0224e2c07da"},
@@ -2338,11 +2450,13 @@ nodeenv = [
     {file = "nodeenv-1.7.0-py2.py3-none-any.whl", hash = "sha256:27083a7b96a25f2f5e1d8cb4b6317ee8aeda3bdd121394e5ac54e498028a042e"},
     {file = "nodeenv-1.7.0.tar.gz", hash = "sha256:e0e7f7dfb85fc5394c6fe1e8fa98131a2473e04311a45afb6508f7cf1836fa2b"},
 ]
+numexpr = []
 numpy = []
 numpydoc = [
     {file = "numpydoc-1.4.0-py3-none-any.whl", hash = "sha256:fd26258868ebcc75c816fe68e1d41e3b55bd410941acfb969dee3eef6e5cf260"},
     {file = "numpydoc-1.4.0.tar.gz", hash = "sha256:9494daf1c7612f59905fa09e65c9b8a90bbacb3804d91f7a94e778831e6fcfa5"},
 ]
+obspy = []
 packaging = [
     {file = "packaging-21.3-py3-none-any.whl", hash = "sha256:ef103e05f519cdc783ae24ea4e2e0f508a9c99b2d4969652eed6a2e1ea5bd522"},
     {file = "packaging-21.3.tar.gz", hash = "sha256:dd47c42927d89ab911e606518907cc2d3a1f38bbd026385970643f9c5b8ecfeb"},
@@ -2499,6 +2613,7 @@ pydocstyle = [
     {file = "pydocstyle-6.1.1-py3-none-any.whl", hash = "sha256:6987826d6775056839940041beef5c08cc7e3d71d63149b48e36727f70144dc4"},
     {file = "pydocstyle-6.1.1.tar.gz", hash = "sha256:1d41b7c459ba0ee6c345f2eb9ae827cab14a7533a88c5c6f7e94923f72df92dc"},
 ]
+pyedflib = []
 pyflakes = [
     {file = "pyflakes-2.4.0-py2.py3-none-any.whl", hash = "sha256:3bb3a3f256f4b7968c9c788781e4ff07dce46bdf12339dcda61053375426ee2e"},
     {file = "pyflakes-2.4.0.tar.gz", hash = "sha256:05a85c2872edf37a4ed30b0cce2f6093e1d0581f8c19d7393122da7e25b2b24c"},
@@ -2540,6 +2655,7 @@ pyrsistent = [
     {file = "pyrsistent-0.18.1-cp39-cp39-win_amd64.whl", hash = "sha256:e24a828f57e0c337c8d8bb9f6b12f09dfdf0273da25fda9e314f0b684b415a07"},
     {file = "pyrsistent-0.18.1.tar.gz", hash = "sha256:d4d61f8b993a7255ba714df3aca52700f8125289f84f704cf80916517c46eb96"},
 ]
+pyseries = []
 pytest = [
     {file = "pytest-7.1.2-py3-none-any.whl", hash = "sha256:13d0e3ccfc2b6e26be000cb6568c832ba67ba32e719443bfe725814d3c42433c"},
     {file = "pytest-7.1.2.tar.gz", hash = "sha256:a06a0425453864a270bc45e71f783330a7428defb4230fb5e6a731fde06ecd45"},
@@ -2672,6 +2788,7 @@ six = [
     {file = "six-1.16.0-py2.py3-none-any.whl", hash = "sha256:8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254"},
     {file = "six-1.16.0.tar.gz", hash = "sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926"},
 ]
+sklearn = []
 snowballstemmer = [
     {file = "snowballstemmer-2.2.0-py2.py3-none-any.whl", hash = "sha256:c8e1716e83cc398ae16824e5572ae04e0d9fc2c6b985fb0f900f5f0c96ecba1a"},
     {file = "snowballstemmer-2.2.0.tar.gz", hash = "sha256:09b16deb8547d3412ad7b590689584cd0fe25ec8db3be37788be3810cbf19cb1"},
@@ -2688,10 +2805,6 @@ sphinx-autodoc-typehints = []
 sphinx-copybutton = [
     {file = "sphinx-copybutton-0.5.0.tar.gz", hash = "sha256:a0c059daadd03c27ba750da534a92a63e7a36a7736dcf684f26ee346199787f6"},
     {file = "sphinx_copybutton-0.5.0-py3-none-any.whl", hash = "sha256:9684dec7434bd73f0eea58dda93f9bb879d24bff2d8b187b1f2ec08dfe7b5f48"},
-]
-sphinx-rtd-theme = [
-    {file = "sphinx_rtd_theme-1.0.0-py2.py3-none-any.whl", hash = "sha256:4d35a56f4508cfee4c4fb604373ede6feae2a306731d533f409ef5c3496fdbd8"},
-    {file = "sphinx_rtd_theme-1.0.0.tar.gz", hash = "sha256:eec6d497e4c2195fa0e8b2016b337532b8a699a68bcb22a512870e16925c6a5c"},
 ]
 sphinx-togglebutton = []
 sphinxcontrib-applehelp = [
@@ -2724,6 +2837,7 @@ sphinxcontrib-websupport = [
 ]
 sqlalchemy = []
 stack-data = []
+tables = []
 tabulate = [
     {file = "tabulate-0.8.10-py3-none-any.whl", hash = "sha256:0ba055423dbaa164b9e456abe7920c5e8ed33fcc16f6d1b2f2d152c8e1e8b4fc"},
     {file = "tabulate-0.8.10-py3.8.egg", hash = "sha256:436f1c768b424654fce8597290d2764def1eea6a77cfa5c33be00b1bc0f4f63d"},
