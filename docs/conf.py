@@ -143,4 +143,4 @@ html_static_path = ["_static", "_static/assets"]
 numpydoc_show_class_members = False
 
 # -- Options for myst-nb ---------------------------------------------------
-nb_execution_mode = "off"
+nb_execution_mode = "auto"
