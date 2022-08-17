@@ -170,14 +170,12 @@ class DetectorWithTrainData:
             )
 
         with experiment_data.load() as (sig, times, samp):
-            result = np.ndarray(np.shape(sig)[1], dtype=object)
+            result: np.ndarray = np.ndarray(np.shape(sig)[1], dtype=object)
             filtered_sig = signal_filter(sig, samp)
-            spiketrain = spike_detector(filtered_sig, times)
+            spiketrain = spike_detector(filtered_sig, times, samp)
             del filtered_sig
 
-            all_channels = []
-
-            for chan in range(np.shape(spiketrain[0])):
+            for chan in range(np.shape(spiketrain)[0]):
                 cutouts = extract_waveforms(sig, spiketrain, chan, samp)
 
                 channel_cutouts = []
@@ -190,16 +188,7 @@ class DetectorWithTrainData:
                             time=spiketrain[spike_index],
                         )
                     )
-                all_channels.append(
-                    ChannelSpikeCutout(
-                        cutouts=np.array(channel_cutouts),
-                        extractor_decomposition_parameter=-1,
-                        channel_index=chan,
-                        categorized=False,
-                    )
-                )
-
-            result: np.ndarray = np.array(all_channels, dtype=object)
+                result[chan] = ChannelSpikeCutout(np.array(channel_cutouts), -1, chan)
             return result
 
 
