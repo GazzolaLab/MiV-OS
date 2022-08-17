@@ -64,6 +64,7 @@ Pillow = "9.1.1"
 pyvis = "^0.2.1"
 lyon = { git = "https://github.com/sciforce/lyon.git", optional = true, extras = ["experiment"], rev = "91dd700" }
 pyseries = {extras = ["experiment", "docs"], version = "^1.0.26"}
+serial = "^0.0.97"
 
 [tool.poetry.dev-dependencies]
 black = "^22.3.0"
