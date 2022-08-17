@@ -93,7 +93,7 @@ class DetectorWithTrainData:
         self.trained = True
 
     def keep_only_neuronal_spikes(
-        self, exp_spikes: np.ndarray, threshold: float = 0.5, **predict_kwargs
+        self, experiment_spikes: np.ndarray, threshold: float = 0.5, **predict_kwargs
     ) -> np.ndarray:
         """Get spiketrains where only neuronal spikes are kept
 
@@ -101,7 +101,7 @@ class DetectorWithTrainData:
 
         Parameters
         ----------
-        exp_spikes : np.ndarray
+        experiment_spikes : np.ndarray
             2D Numpy array
             Note: Length of each spike should be identical to that of train data.
             Note: Each element should be sample points of a spike cutout.
@@ -118,14 +118,62 @@ class DetectorWithTrainData:
 
         result = []
         outcomes = self.classifier.predict_categories_sigmoid(
-            exp_spikes, threshold, **predict_kwargs
+            experiment_spikes, threshold, **predict_kwargs
         )
         for index, outcome in enumerate(outcomes):
             if outcome:
-                result.append(exp_spikes[index])
+                result.append(experiment_spikes[index])
 
         return_arr: np.ndarray = np.array(result)
         return return_arr
+
+    def keep_only_neuronal_spikes_from_data(
+        self,
+        experiment_data: Data,
+        signal_filter: FilterProtocol,
+        spike_detector: SpikeDetectionProtocol,
+        threshold: float = 0.5,
+        **predict_kwargs,
+    ) -> np.ndarray:
+        """Get spiketrains where only neuronal spikes are kept
+
+        This function uses the classifier to select spikes.
+
+        Parameters
+        ----------
+        experiment_data : Data
+            2D Numpy array
+            Note: Length of each spike should be identical to that of train data.
+            Note: Each element should be sample points of a spike cutout.
+        threshold : float, default = 0.5
+            Probability threshold used for prediction
+        **predict_kwargs
+            Keyworded arguments for model.predict()
+        """
+
+        self._check_classifier_initiated()
+        if not self.trained:
+            raise Exception(
+                "Classifier model has not been trained yet! Try default_compile_and_train()"
+            )
+
+        result = []
+
+        with experiment_data.load() as (sig, times, samp):
+            filtered_sig = signal_filter(sig, samp)
+            raw_spikes = spike_detector(filtered_sig, times)
+            del filtered_sig
+
+            for c in range(np.shape(raw_spikes[0])):
+                spikes = extract_waveforms(sig, raw_spikes, c, samp)
+                result.append(
+                    self.keep_only_neuronal_spikes(spikes, threshold, **predict_kwargs)
+                )
+
+            del raw_spikes
+
+        return_result = np.array(result)
+        return return_result
 
 
 class DetectorWithSpontaneousData:
@@ -470,62 +518,3 @@ class DetectorWithSpontaneousData:
             "recall": recall,
             "f1": f1,
         }
-
-    # Below is work in progress
-
-    # def get_only_neuronal_spikes(
-    #     self,
-    #     exp_data: Data,
-    #     accuracy_threshold: float = 0.9,
-    #     signal_filter: Optional[FilterProtocol] = None,
-    #     spike_detector: Optional[SpikeDetectionProtocol] = None,
-    # ) -> List[SpikestampsType]:
-    #     """This method takes each signle individual spike in the experiment data
-    #     and uses the trained model to predict whether the spike is neuronal.
-
-    #     Parameters
-    #     ----------
-    #     exp_data : Data
-    #         Experiment data
-    #     accuracy_threshold : float, defualt = 0.9
-    #         The category prediction comes in probabilities for each category.
-    #         If the probability for "neuronal" is higher than this threshold,
-    #         the spike will be included.
-    #     signal_filter : Optional[FilterProtocol], default = None
-    #         Filter applied to the experiment data before spike detection.
-    #         If left empty or None, the same filter for the spontaneous data
-    #         will be used.
-    #     spike_detector : Optional[SpikeDetectionProtocol], default = None
-    #         The spike detector used to detect spikes on the experiment data.
-    #         If left empty or None, the same spike detector for the spontaneous
-    #         data will be used.
-
-    #     Returns
-    #     -------
-    #     (Same return format as SpikeDetectionProtocol)
-    #     A list of SpikestampsType for each channel
-    #     """
-    #     if not self.trained:
-    #         raise Exception("Abnormality detector is not trained yet.")
-
-    #     exp_filter = signal_filter if signal_filter else self.spont_signal_filter
-    #     exp_detector = spike_detector if spike_detector else self.spont_spike_detector
-    #     list_of_cutout_channels = self._get_cutouts(
-    #         exp_data, exp_filter, exp_detector, self.extractor
-    #     )
-    #     new_spiketrains: List[SpikestampsType] = []
-
-    #     prob_model = tf.keras.Sequential([self.model, tf.keras.layers.Softmax()])
-    #     for chan_index, cutout_channel in tqdm(enumerate(list_of_cutout_channels)):
-    #         times = []
-    #         t_stop = 0
-    #         for cutout_index, spike_cutout in enumerate(cutout_channel.cutouts):
-    #             prediction = prob_model.predict(
-    #                 np.array([spike_cutout.cutout]), verbose=0
-    #             )
-    #             if prediction[0][0] >= accuracy_threshold:
-    #                 times.append(spike_cutout.time)
-    #                 t_stop = spike_cutout.time
-    #         new_spiketrains.append(SpikeTrain(times, t_stop, pq.s))
-
-    #     return new_spiketrains
