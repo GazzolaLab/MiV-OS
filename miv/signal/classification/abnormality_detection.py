@@ -105,10 +105,16 @@ class DetectorWithTrainData:
             2D Numpy array
             Note: Length of each spike should be identical to that of train data.
             Note: Each element should be sample points of a spike cutout.
+
         threshold : float, default = 0.5
             Probability threshold used for prediction
+
         **predict_kwargs
             Keyworded arguments for model.predict()
+
+        Returns
+        -------
+        Numpy array of spikes that remain
         """
         self._check_classifier_initiated()
         if not self.trained:
@@ -145,10 +151,16 @@ class DetectorWithTrainData:
             2D Numpy array
             Note: Length of each spike should be identical to that of train data.
             Note: Each element should be sample points of a spike cutout.
+
         threshold : float, default = 0.5
             Probability threshold used for prediction
+
         **predict_kwargs
             Keyworded arguments for model.predict()
+
+        Returns
+        ------
+        Numpy array of ChannelSpikeCutout objects
         """
 
         self._check_classifier_initiated()
@@ -157,23 +169,38 @@ class DetectorWithTrainData:
                 "Classifier model has not been trained yet! Try default_compile_and_train()"
             )
 
-        result = []
-
         with experiment_data.load() as (sig, times, samp):
+            result = np.ndarray(np.shape(sig)[1], dtype=object)
             filtered_sig = signal_filter(sig, samp)
-            raw_spikes = spike_detector(filtered_sig, times)
+            spiketrain = spike_detector(filtered_sig, times)
             del filtered_sig
 
-            for c in range(np.shape(raw_spikes[0])):
-                spikes = extract_waveforms(sig, raw_spikes, c, samp)
-                result.append(
-                    self.keep_only_neuronal_spikes(spikes, threshold, **predict_kwargs)
+            all_channels = []
+
+            for chan in range(np.shape(spiketrain[0])):
+                cutouts = extract_waveforms(sig, spiketrain, chan, samp)
+
+                channel_cutouts = []
+                for spike_index, cutout in cutouts:
+                    channel_cutouts.append(
+                        SpikeCutout(
+                            cutout=cutout,
+                            sampling_rate=samp,
+                            extractor_comp_index=-1,
+                            time=spiketrain[spike_index],
+                        )
+                    )
+                all_channels.append(
+                    ChannelSpikeCutout(
+                        cutouts=np.array(channel_cutouts),
+                        extractor_decomposition_parameter=-1,
+                        channel_index=chan,
+                        categorized=False,
+                    )
                 )
 
-            del raw_spikes
-
-        return_result = np.array(result)
-        return return_result
+            result: np.ndarray = np.array(all_channels, dtype=object)
+            return result
 
 
 class DetectorWithSpontaneousData:
