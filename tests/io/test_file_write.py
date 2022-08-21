@@ -1,10 +1,13 @@
+import os
 import sys
 import time
 
 import h5py as h5
 import numpy as np
+import pytest
 
 from miv.io import file as miv_file
+from tests.io.test_file_read import fixture_mock_h5_file
 
 
 def isEmpty(dictionary):
@@ -20,37 +23,6 @@ def isEmpty(dictionary):
     return test
 
 
-def test_write_file():
-
-    data = miv_file.initialize()
-
-    miv_file.create_group(data, "coordinates", counter="ncoords")
-    miv_file.create_dataset(data, ["px", "py", "pz"], group="coordinates", dtype=float)
-
-    miv_file.create_dataset(data, ["u", "v"], group="electrodes", dtype=float)
-
-    event = miv_file.create_container(data)
-
-    for i in range(0, 10):
-
-        # miv_file.clear_container(event)
-
-        ncoords = 5
-        event["coordinates/ncoords"] = ncoords
-
-        for n in range(ncoords):
-            event["coordinates/px"].append(np.random.random())
-            event["coordinates/py"].append(np.random.random())
-            event["coordinates/pz"].append(np.random.random())
-
-        event["electrodes/u"].append(np.random.random())
-        event["electrodes/v"].append(np.random.random())
-
-        miv_file.pack(data, event)
-
-    miv_file.write("MiV_TESTS.h5", data, comp_type="gzip", comp_opts=9)
-
-
 def test_initialize():
 
     test_data = miv_file.initialize()
@@ -58,9 +30,9 @@ def test_initialize():
     assert isinstance(test_data, dict)
 
 
-def test_clear_container():
+def test_clear_container(mock_h5_file):
+    filename = mock_h5_file
 
-    filename = "MiV_TESTS.h5"
     desired_datasets = ["coordinates", "electrodes"]
     subset = 1000
 
@@ -190,9 +162,9 @@ def test_create_dataset():
     assert data["_MAP_DATASETS_TO_DATA_TYPES_"]["coordinates/e"] == int
 
 
-def test_write_metadata():
+def test_write_metadata(mock_h5_file):
 
-    filename = "MiV_TESTS.h5"
+    filename = mock_h5_file
     file = h5.File(filename, "r")
 
     # Check default attribute existence
