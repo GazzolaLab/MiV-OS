@@ -1,3 +1,23 @@
+---
+jupytext:
+  text_representation:
+    extension: .md
+    format_name: myst
+    format_version: 0.13
+    jupytext_version: 1.14.1
+kernelspec:
+  display_name: Python 3
+  language: python
+  name: python3
+mystnb:
+  execution_mode: 'off'
+---
+
+# HDF5 Read
+
+```{code-cell} ipython3
+:tags: [hide-cell]
+
 # Import required modules
 import os
 import sys
@@ -17,17 +37,29 @@ from miv.signal.filter import ButterBandpass, FilterCollection, MedianFilter
 from miv.signal.spike import PCADecomposition, SpikeSorting, ThresholdCutoff
 from miv.statistics import firing_rates, signal_to_noise
 from miv.visualization import extract_waveforms, plot_frequency_domain, plot_waveforms
+```
 
+## Read h5
+
+```{code-cell} ipython3
 recording_id = "2022-03-10_16-19-09-Record Node 104-experiment1_spontaneous-recording1"
 input_data, data_container = miv_file.read(
     "2022-03-10_16-19-09/MiV_data.h5", groups=recording_id
 )
+```
 
+## Data Access
+
+```{code-cell} ipython3
 signal = input_data[f"{recording_id}/signal"]
 timestamps = input_data[f"{recording_id}/timestamps"]
 sampling_rate = input_data[f"{recording_id}/sampling_rate"][0]
 num_channel = signal.shape[-1]
+```
 
+## Processing Example
+
+```{code-cell} ipython3
 # Set up filters, we use butter bandpass and median filters here. More details are here (https://miv-os.readthedocs.io/en/latest/api/signal.html)
 signal_filter = (
     FilterCollection()
@@ -49,3 +81,4 @@ stat = firing_rates(spiketrains)["rates"]
 
 plt.figure(figsize=(24, 8))
 a, b, c = rasterplot_rates(spiketrains, ax=plt.gca())
+```
