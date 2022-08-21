@@ -1,10 +1,3 @@
-# HDF5-based file format for heterogeneous numerical data.
-# Based on code from and inspired by
-#
-# HEPfile: https://github.com/mattbellis/hepfile
-# NeuroH5: https://github.com/iraikov/neuroh5
-#
-
 from typing import Any, Dict, List, Optional, Sequence, Type, Union
 
 import datetime
