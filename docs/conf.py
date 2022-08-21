@@ -96,8 +96,8 @@ master_doc = "index"
 # a list of builtin themes.
 
 html_theme = "pydata_sphinx_theme"
-html_logo = "_static/assets/logo1.png"
-html_favicon = "_static/assets/logo1.png"
+html_logo = "_static/assets/logo1.svg"
+html_favicon = html_logo
 html_sourcelink_suffix = ""
 html_theme_options = {
     "logo": {
@@ -128,16 +128,23 @@ html_theme_options = {
     # Theme (https://help.farbox.com/pygments.html)
     # "pygment_light_style": "default",
     # "pygment_dark_style": "native",
+    "use_edit_page_button": True,
 }
 html_title = "MiV-OS"
 
-html_context = {"default_mode": "dark"}
+html_context = {
+    "default_mode": "dark",
+    "github_user": "GazzolaLab",
+    "github_repo": "MiV-OS",
+    "github_version": "main",
+    "doc_path": "docs",
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
-# html_css_files = ["css/*", "css/logo.css"]
+html_css_files = ["css/*", "css/logo.css"]
 
 # -- Options for numpydoc ---------------------------------------------------
 numpydoc_show_class_members = False
@@ -146,7 +153,7 @@ numpydoc_show_class_members = False
 nb_execution_mode = "cache"
 
 # External Data Download
-urlretrieve(
+urlretrieve(  # Logo image file
     "https://raw.githubusercontent.com/skim0119/MiV-OS/assets_logo/docs/_static/assets/logo1.svg",
-    "_static/assets/logo1.png",
+    html_logo,
 )
