@@ -92,6 +92,34 @@ class DetectorWithTrainData:
         self.classifier.default_train_model(train_spikes, train_labels)
         self.trained = True
 
+    def train_model(self, train_ratio: float = 1, **fit_kwargs) -> None:
+        """Train classifier model with train data
+
+        Parameters
+        ----------
+        train_ratio : float, default = 1
+            The ratio that determines the portion of spikes that will be used
+            for training.
+            Note: spikes and labels are shuffled prior to truncation.
+
+        **fit_kwargs
+            Keyworded arguments for classifier.model.fit
+            Note: x and y are already automatically generated with train data file.
+        """
+
+        self._check_classifier_initiated()
+
+        with np.load(self.train_datapath) as file:
+            spikes, labels = shuffle(file["spike"], file["label"])
+            split = int(train_ratio * len(labels))
+            train_spikes = spikes[:split]
+            train_labels = labels[:split]
+            del spikes
+            del labels
+
+        self.classifier.train_model(x=train_spikes, y=train_labels, **fit_kwargs)
+        self.trained = True
+
     def keep_only_neuronal_spikes(
         self, experiment_spikes: np.ndarray, threshold: float = 0.5, **predict_kwargs
     ) -> np.ndarray:
@@ -160,7 +188,7 @@ class DetectorWithTrainData:
 
         Returns
         ------
-        Numpy array of ChannelSpikeCutout objects
+        Numpy array of spiketrains
         """
 
         self._check_classifier_initiated()
@@ -176,19 +204,23 @@ class DetectorWithTrainData:
             del filtered_sig
 
             for chan in range(np.shape(spiketrain)[0]):
-                cutouts = extract_waveforms(sig, spiketrain, chan, samp)
+                try:
+                    cutouts = extract_waveforms(sig, spiketrain, chan, samp)
+                except ValueError:
+                    cutouts = np.array([])
 
-                channel_cutouts = []
-                for spike_index, cutout in cutouts:
-                    channel_cutouts.append(
-                        SpikeCutout(
-                            cutout=cutout,
-                            sampling_rate=samp,
-                            extractor_comp_index=-1,
-                            time=spiketrain[spike_index],
-                        )
+                channel_spikes = []
+                for spike_index, cutout in enumerate(cutouts):
+
+                    prediction = self.classifier.predict_categories_sigmoid(
+                        cutout, threshold, **predict_kwargs
                     )
-                result[chan] = ChannelSpikeCutout(np.array(channel_cutouts), -1, chan)
+
+                    channel_spikes.append(
+                        prediction
+                    )  # The prediction is placeholder for now
+
+                result[chan] = np.array(channel_spikes)
             return result
 
 
