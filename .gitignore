@@ -203,6 +203,7 @@ TODO.md
 *.png
 *.eps
 *.pdf
+*.svg
 
 # data files
 *.dat
