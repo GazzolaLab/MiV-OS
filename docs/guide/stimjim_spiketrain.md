@@ -119,7 +119,7 @@ def pitch(freq):
 ### Ben's Spiker Algorithm
 
 ```{code-cell} ipython3
-frequency = 8
+frequency = 4
 sampling_rate = 40
 print(pitch(frequency))
 ```
@@ -150,7 +150,7 @@ t_max = int(1e6 * 2 * np.pi / frequency)
 ```
 
 ```{code-cell} ipython3
-stimjim.send_spiketrain(0, spiketrain_micro, t_max, 1e6 * 60)
+stimjim.send_spiketrain(0, spiketrain_micro, t_max, int(1e6 * 60))
 ```
 
 ```{code-cell} ipython3
