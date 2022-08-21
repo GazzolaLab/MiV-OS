@@ -24,8 +24,8 @@ def isEmpty(dictionary):
     return test
 
 
-@pytest.fixture()
-def test_write_file(tmp_path):
+@pytest.fixture(name="mock_h5_file")
+def fixture_mock_h5_file(tmp_path):
 
     filename = os.path.join(tmp_path, "MiV_TESTS.h5")
 
@@ -57,8 +57,8 @@ def test_write_file(tmp_path):
     return filename
 
 
-def test_read(test_write_file):
-    filename = test_write_file
+def test_read(mock_h5_file):
+    filename = mock_h5_file
 
     desired_datasets = ["coordinates", "electrodes"]
     subset = 5
@@ -111,8 +111,8 @@ def test_read(test_write_file):
     assert len(test_container.keys()) == 0
 
 
-def test_unpack(test_write_file):
-    filename = test_write_file
+def test_unpack(mock_h5_file):
+    filename = mock_h5_file
 
     # This assumes you run nosetests from the h5hep directory and not
     # the tests directory.
@@ -126,16 +126,16 @@ def test_unpack(test_write_file):
     assert not isEmpty(container)
 
 
-def test_get_ncontainers_in_file(test_write_file):
-    filename = test_write_file
+def test_get_ncontainers_in_file(mock_h5_file):
+    filename = mock_h5_file
 
     ncontainers = miv_file.get_ncontainers_in_file(filename)
 
     assert ncontainers == 10
 
 
-def test_get_file_metadata(test_write_file):
-    filename = test_write_file
+def test_get_file_metadata(mock_h5_file):
+    filename = mock_h5_file
 
     metadata = miv_file.get_file_metadata(filename)
 
