@@ -12,7 +12,7 @@ build:
       - asdf global poetry latest
       - poetry config virtualenvs.create false  # Key
     post_install:
-      - poetry install -E docs
+      - poetry install -E "docs experiment" # Later after poetry 1.2, replace with flag --all-extras (https://github.com/python-poetry/poetry/issues/3413)
 
 # Build documentation in the docs/ directory with Sphinx
 sphinx:
