@@ -15,6 +15,7 @@ from typing import Any, Dict
 
 import os
 import sys
+from urllib.request import urlretrieve
 
 sys.path.insert(0, os.path.abspath("../"))
 
@@ -94,10 +95,9 @@ master_doc = "index"
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 
-
 html_theme = "pydata_sphinx_theme"
-html_logo = "https://raw.githubusercontent.com/skim0119/MiV-OS/assets_logo/docs/_static/assets/logo1.svg"
-html_favicon = "https://raw.githubusercontent.com/skim0119/MiV-OS/assets_logo/docs/_static/assets/logo1.svg"
+html_logo = "_static/assets/logo1.png"
+html_favicon = "_static/assets/logo1.png"
 html_sourcelink_suffix = ""
 html_theme_options = {
     "logo": {
@@ -144,3 +144,9 @@ numpydoc_show_class_members = False
 
 # -- Options for myst-nb ---------------------------------------------------
 nb_execution_mode = "auto"
+
+# External Data Download
+urlretrieve(
+    "https://raw.githubusercontent.com/skim0119/MiV-OS/assets_logo/docs/_static/assets/logo1.svg",
+    "_static/assets/logo1.png",
+)
