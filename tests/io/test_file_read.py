@@ -1,7 +1,9 @@
+import os
 import time
 
 import h5py as h5
 import numpy as np
+import pytest
 
 from miv.io import file as miv_file
 
@@ -22,7 +24,10 @@ def isEmpty(dictionary):
     return test
 
 
-def test_write_file():
+@pytest.fixture()
+def test_write_file(tmp_path):
+
+    filename = os.path.join(tmp_path, "MiV_TESTS.h5")
 
     data = miv_file.initialize()
 
@@ -48,14 +53,13 @@ def test_write_file():
 
         miv_file.pack(data, event)
 
-    miv_file.write("MiV_TESTS.h5", data, comp_type="gzip", comp_opts=9)
+    miv_file.write(filename, data, comp_type="gzip", comp_opts=9)
+    return filename
 
 
-def test_read():
+def test_read(test_write_file):
+    filename = test_write_file
 
-    test_write_file()
-
-    filename = "MiV_TESTS.h5"
     desired_datasets = ["coordinates", "electrodes"]
     subset = 5
 
@@ -107,11 +111,11 @@ def test_read():
     assert len(test_container.keys()) == 0
 
 
-def test_unpack():
+def test_unpack(test_write_file):
+    filename = test_write_file
 
     # This assumes you run nosetests from the h5hep directory and not
     # the tests directory.
-    filename = "MiV_TESTS.h5"
     desired_datasets = ["coordinates", "electrodes"]
     subset = 10
 
@@ -122,18 +126,16 @@ def test_unpack():
     assert not isEmpty(container)
 
 
-def test_get_ncontainers_in_file():
-
-    filename = "MiV_TESTS.h5"
+def test_get_ncontainers_in_file(test_write_file):
+    filename = test_write_file
 
     ncontainers = miv_file.get_ncontainers_in_file(filename)
 
     assert ncontainers == 10
 
 
-def test_get_file_metadata():
-
-    filename = "MiV_TESTS.h5"
+def test_get_file_metadata(test_write_file):
+    filename = test_write_file
 
     metadata = miv_file.get_file_metadata(filename)
 
