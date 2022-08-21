@@ -1,9 +1,3 @@
-# HDF5-based file format for heterogeneous numerical data.
-# Based on code from and inspired by
-#
-# HEPfile: https://github.com/mattbellis/hepfile
-# NeuroH5: https://github.com/iraikov/neuroh5
-#
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from logging import Logger
@@ -20,7 +14,6 @@ def read(
     subset: Optional[Union[int, List[int], Tuple[int, int]]] = None,
     logger: Optional[Logger] = None,
 ) -> Tuple[Dict[str, Any], Dict[str, None]]:
-
     """
     Reads all, or a subset of the data, from the HDF5 file to fill a data dictionary.
     Returns an empty dictionary to be filled later with data from individual containers.
@@ -28,7 +21,7 @@ def read(
     Args:
         **filename** (string): Name of the input file
 
-        **groups* (list): Dataset groups to be read from input file.
+        **groups** (list): Dataset groups to be read from input file.
 
         **subset** (int): Number of containers to be read from input file
 
