@@ -168,7 +168,7 @@ def test_bits_to_voltage():
     result = bits_to_voltage(signal, channel_info)
     expected_result = np.ones_like(signal)
     expected_result[:, 0] *= 5.0 * 1e6
-    expected_result[:, 1] *= 3.0 * 1e3 * 1e6
+    expected_result[:, 1] *= 3.0 * 1e3
     expected_result[:, 2] *= 2.5
     np.testing.assert_allclose(result, expected_result)
 

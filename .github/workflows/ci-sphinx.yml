@@ -29,7 +29,7 @@ jobs:
             poetry --version
             poetry config virtualenvs.in-project true
             #poetry config virtualenvs.create false
-            poetry install -E docs
+            poetry install -E "docs experiment"
       - name: Sphinx Build Check
         run: |
             source .venv/bin/activate
@@ -45,9 +45,9 @@ jobs:
                 echo Doc build success
                 exit 0
             fi
-      - name: Sphinx Link Check
-        run: |
-            source .venv/bin/activate
-            cd docs
-            make clean
-            make linkcheck
+    #- name: Sphinx Link Check
+        #run: |
+            #source .venv/bin/activate
+            #cd docs
+            #make clean
+            #make linkcheck

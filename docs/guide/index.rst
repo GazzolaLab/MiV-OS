@@ -1,6 +1,8 @@
 How-To Guide
 ============
 
+Here we provide number of example scripts using `MiV` tools. Some examples provide additional files or links to published paper for a complete description. Examples are written to serve as a starting template for customized usages.
+
 .. toctree::
    :maxdepth: 2
    :caption: Analysis
@@ -20,9 +22,10 @@ How-To Guide
 
 .. toctree::
    :maxdepth: 2
-   :caption: Sample Data
+   :caption: Data / Data Structure
 
    sample_datasets
+   data_structure/hdf5_based_data_format
 
 Indices and tables
 ==================

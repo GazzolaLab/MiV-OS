@@ -235,3 +235,6 @@ outcmaes/*
 
 # csv files
 *.csv
+
+# Emacs backup:
+*~
