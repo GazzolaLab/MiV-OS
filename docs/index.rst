@@ -1,12 +1,9 @@
-.. MiV-OS documentation master file, created by
-   sphinx-quickstart on Thu Mar 24 23:35:49 2022.
-
-MiV-OS documentation!
-=====================
+Mind-in-Vitro Open Software
+===========================
 
 **MiV-OS** is a *free* and *open-source* software project for the post-processing and analysis of **mind-in-vitro** project.
 
-The software is developed and maintained by the Gazzola Lab at the University of Illinois at Urbana-Champaign. For more information on the projects and what we work on, visit our `website <https://mattia-lab.com>`_.
+The software is developed and maintained by the Gazzola Lab at the University of Illinois at Urbana-Champaign. For more information on the projects and what we work on, visit our `website <https://mindinvitro.illinois.edu>`_.
 
 Installation Instruction
 ------------------------
