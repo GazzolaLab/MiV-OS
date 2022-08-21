@@ -42,6 +42,7 @@ If you are interested in contributing to this project, we prepared contribution 
    guide/burst_analysis
    guide/info_theory
    guide/connectivity_network
+   guide/lyon_ear_model
 
 .. toctree::
    :maxdepth: 2
@@ -54,6 +55,7 @@ If you are interested in contributing to this project, we prepared contribution 
    api/causality
    api/visualization
    api/signal_generator
+   api/coding
 
 .. toctree::
    :maxdepth: 2

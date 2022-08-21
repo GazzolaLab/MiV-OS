@@ -5,7 +5,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "MiV-OS"
-version = "0.1.2"
+version = "0.2.0"
 description = "Python software for analysis and computing framework used in MiV project."
 readme = "README.md"
 authors = ["GazzolaLab <skim449@illinois.edu>"]
@@ -65,6 +65,8 @@ Pillow = "9.1.1"
 h5py = "^3.7.0"
 h5py-cache = "^1.0"
 pyvis = "^0.2.1"
+lyon = { git = "https://github.com/sciforce/lyon.git", rev = "91dd700" }
+
 [tool.poetry.dev-dependencies]
 black = "^22.3.0"
 isort = {extras = ["colors"], version = "^5.10.1"}
