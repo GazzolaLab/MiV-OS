@@ -266,7 +266,7 @@ def validate_subset(
                 f"{subset_[1]} > {ncontainers}"
                 f"High range of subset will be set to {ncontainers}\n"
             )
-    subset_[1] = ncontainers
+        subset_[1] = ncontainers
 
     if subset_[1] <= subset_[0]:
         if logger is not None:
