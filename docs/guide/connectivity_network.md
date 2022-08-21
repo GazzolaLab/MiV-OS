@@ -62,7 +62,7 @@ with data.load() as (signal, timestamps, sampling_rate):
     spiketrains = spike_detection(signal, timestamps, sampling_rate)
 ```
 
-## Provide MEA mao
+## Provide MEA map
 
 ```{code-cell} ipython3
 #Matrix containing electrode numbers according to their spatial location
@@ -96,12 +96,14 @@ Plots connectivity using the provided MEA map and connectivity matrix. Documenta
 
 ```{code-cell} ipython3
 #Non-interactive connectivity plot using correlation
-plot_connectivity(mea_map, corrcoef_matrix, False)
+G = plot_connectivity(mea_map, corrcoef_matrix, False)
+G.view()
 
 ```
 
 ```{code-cell} ipython3
 #Interactive connectivity plot using correlation
-plot_connectivity_interactive(mea_map, corrcoef_matrix, False)
+N = plot_connectivity_interactive(mea_map, corrcoef_matrix, False)
+N.show("nodes.html")
 
 ```
