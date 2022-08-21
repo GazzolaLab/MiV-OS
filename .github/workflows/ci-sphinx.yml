@@ -45,9 +45,9 @@ jobs:
                 echo Doc build success
                 exit 0
             fi
-      - name: Sphinx Link Check
-        run: |
-            source .venv/bin/activate
-            cd docs
-            make clean
-            make linkcheck
+    #- name: Sphinx Link Check
+        #run: |
+            #source .venv/bin/activate
+            #cd docs
+            #make clean
+            #make linkcheck
