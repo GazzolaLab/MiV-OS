@@ -34,3 +34,6 @@ def test_fano_factor_output():
     with np.testing.assert_raises(AssertionError):
         output = fano_factor(seg1.spiketrains, 0, 0, 10, 10)
     # The function above should throw an error since there are no spike to compute variance and mean
+    with np.testing.assert_raises(AssertionError):
+        output = fano_factor(seg1.spiketrains, 0, 0, 0, 10)
+    # The function above should throw an error since start time cannot be same or greater than end time
