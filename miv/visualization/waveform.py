@@ -113,6 +113,7 @@ def plot_waveforms(
 
     # TODO: Need to match unit
     time_in_us = np.arange(-pre * 1000, post * 1000, 1e3 / sampling_rate)
+    fig = plt.figure()
     for i in range(n_spikes):
         plt.plot(
             time_in_us,
@@ -124,6 +125,7 @@ def plot_waveforms(
             alpha=0.3,
             **plot_kwargs,
         )
-        plt.xlabel("Time (ms)")
-        plt.ylabel("Voltage (uV)")
-        plt.title("Cutouts")
+    plt.xlabel("Time (ms)")
+    plt.ylabel("Voltage (uV)")
+    plt.title("Cutouts")
+    return fig
