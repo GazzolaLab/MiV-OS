@@ -35,6 +35,10 @@ class DetectorWithTrainData:
         train_datapath : str
         classifier : NeuronalSpikeClassifier
         trained : bool
+        TRAIN_DATA_CUTOUT_WIDTH : int
+            The number of sample points for each spike cutout in the train data
+        TRAIN_DATA_SIZE : int
+            The number of spikes in train file
 
 
     """
@@ -45,6 +49,12 @@ class DetectorWithTrainData:
         self.train_datapath: str = train_datapath
         self.classifier: NeuronalSpikeClassifier
         self.trained = False
+        with np.load(self.train_datapath) as file:
+            spikes, labels = file["spike"], file["label"]
+            self.TRAIN_DATA_CUTOUT_WIDTH: int = np.shape(spikes)[1]
+            self.TRAIN_DATA_SIZE: int = np.shape(spikes[0])
+            del spikes
+            del labels
 
     def _check_classifier_initiated(self):
         if not self.classifier:
@@ -198,6 +208,7 @@ class DetectorWithTrainData:
             raise Exception(
                 "Classifier model has not been trained yet! Try default_compile_and_train()"
             )
+        self.classifier._validate_model()
 
         with experiment_data.load() as (sig, times, samp):
             result: np.ndarray = np.ndarray(np.shape(sig)[1], dtype=object)
@@ -205,15 +216,21 @@ class DetectorWithTrainData:
             spiketrains = spike_detector(filtered_sig, times, samp)
             del filtered_sig
 
+            # A default 67-33 ratio is used
+            pre = self.TRAIN_DATA_CUTOUT_WIDTH / 3 / samp
+            post = 2 * self.TRAIN_DATA_CUTOUT_WIDTH / 3 / samp
+
             for chan in range(np.shape(spiketrains)[0]):
                 try:
-                    cutouts = extract_waveforms(sig, spiketrains, chan, samp)
+                    cutouts = extract_waveforms(
+                        sig, spiketrains, chan, samp, pre=pre, post=post
+                    )
+                    predictions = self.classifier.model.predict(
+                        cutouts, **predict_kwargs
+                    )
                 except ValueError:
                     cutouts = np.array([])
-
-                predictions = self.classifier.predict_categories_sigmoid(
-                    cutouts, threshold, **predict_kwargs
-                )
+                    predictions = np.array([])
 
                 original_times = np.array(spiketrains[chan].times)
                 times = []
@@ -221,7 +238,9 @@ class DetectorWithTrainData:
                     if prediction >= threshold:
                         times.append(original_times[spike_index])
 
-                result[chan] = SpikeTrain(times * pq.s, spiketrains[chan].t_stop)
+                result[chan] = SpikeTrain(
+                    np.array(times) * pq.s, spiketrains[chan].t_stop
+                )
 
             return result
 
