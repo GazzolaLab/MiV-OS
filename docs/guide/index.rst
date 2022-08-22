@@ -26,6 +26,7 @@ Here we provide number of example scripts using `MiV` tools. Some examples provi
 
    sample_datasets
    data_structure/hdf5_based_data_format
+   read_TTL_events
 
 Indices and tables
 ==================
