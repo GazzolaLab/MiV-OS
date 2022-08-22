@@ -53,7 +53,7 @@ def extract_waveforms(
         Return stacks of spike cutout; shape(n_spikes, width).
 
     """
-    if channel:
+    if channel is not None:
         signal = signal[:, channel]
         spikestamps = spikestamps[channel]
 
