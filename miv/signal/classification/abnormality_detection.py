@@ -52,7 +52,7 @@ class DetectorWithTrainData:
         with np.load(self.train_datapath) as file:
             spikes, labels = file["spike"], file["label"]
             self.TRAIN_DATA_CUTOUT_WIDTH: int = np.shape(spikes)[1]
-            self.TRAIN_DATA_SIZE: int = np.shape(spikes[0])
+            self.TRAIN_DATA_SIZE: int = np.shape(spikes)[0]
             del spikes
             del labels
 
@@ -224,8 +224,10 @@ class DetectorWithTrainData:
 
             for chan in range(np.shape(spiketrains)[0]):
                 try:
-                    cutouts = extract_waveforms(
-                        sig, spiketrains, chan, samp, pre=pre, post=post
+                    cutouts: np.ndarray = np.array(
+                        extract_waveforms(
+                            sig, spiketrains, chan, samp, pre=pre, post=post
+                        )
                     )
                     predictions = self.classifier.predict_categories_sigmoid(
                         cutouts, verbose=0, **predict_kwargs
