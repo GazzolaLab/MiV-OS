@@ -178,7 +178,6 @@ class DetectorWithTrainData:
         experiment_data: Data,
         signal_filter: FilterProtocol,
         spike_detector: SpikeDetectionProtocol,
-        threshold: float = 0.5,
         **predict_kwargs,
     ) -> np.ndarray:
         """Get spiketrains where only neuronal spikes are kept
@@ -192,8 +191,11 @@ class DetectorWithTrainData:
             Note: Length of each spike should be identical to that of train data.
             Note: Each element should be sample points of a spike cutout.
 
-        threshold : float, default = 0.5
-            Probability threshold used for prediction
+        signal_filter : FilterProtocol
+            Signal filter applied on the raw signal before spike detection
+
+        spike_detector : SpikeDetectionProtocol
+            Spike detector
 
         **predict_kwargs
             Keyworded arguments for model.predict()
@@ -225,8 +227,8 @@ class DetectorWithTrainData:
                     cutouts = extract_waveforms(
                         sig, spiketrains, chan, samp, pre=pre, post=post
                     )
-                    predictions = self.classifier.model.predict(
-                        cutouts, **predict_kwargs
+                    predictions = self.classifier.predict_categories_sigmoid(
+                        cutouts, verbose=0, **predict_kwargs
                     )
                 except ValueError:
                     cutouts = np.array([])
@@ -235,7 +237,7 @@ class DetectorWithTrainData:
                 original_times = np.array(spiketrains[chan].times)
                 times = []
                 for spike_index, prediction in enumerate(predictions):
-                    if prediction >= threshold:
+                    if prediction:
                         times.append(original_times[spike_index])
 
                 result[chan] = SpikeTrain(
