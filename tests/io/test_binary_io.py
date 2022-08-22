@@ -85,21 +85,16 @@ def test_load_continuous_data_temp_file_with_timestamps_shift(
     fp[:] = signal[:]
     fp.flush()
     # Prepare timestamps.npy
-    timestamps = np.arange(signal_length) + np.pi
+    timestamps = (np.arange(signal_length) + np.pi).astype("float32")
     np.save(timestamps_filename, timestamps)
-
-    # With shift
-    raw_data, out_timestamps = load_continuous_data(
-        fp.filename, num_channels, freq, start_at_zero=False
-    )
-    np.testing.assert_allclose(out_timestamps, timestamps / freq)
-    np.testing.assert_allclose(raw_data, signal)
 
     # Without shift
     raw_data, out_timestamps = load_continuous_data(
-        fp.filename, num_channels, freq, start_at_zero=True
+        fp.filename,
+        num_channels,
+        freq,
     )
-    np.testing.assert_allclose(out_timestamps, (timestamps - np.pi) / freq)
+    np.testing.assert_allclose(out_timestamps, timestamps / freq)
     np.testing.assert_allclose(raw_data, signal)
 
 
@@ -177,8 +172,27 @@ def test_load_recording_readout_without_mask(create_mock_data_file):
     # TODO: Refactor into fixture mock data
     dirname, expected_data, expected_timestamps, sampling_rate = create_mock_data_file
 
-    out_data, out_timestamps, out_sampling_rate = load_recording(dirname)
+    out_data, out_timestamps, out_sampling_rate = load_recording(
+        dirname, start_at_zero=False
+    )
 
     assert sampling_rate == out_sampling_rate
     np.testing.assert_allclose(out_data, expected_data)
     np.testing.assert_allclose(out_timestamps, expected_timestamps)
+
+
+def test_load_recording_readout_without_mask_with_shift(create_mock_data_file):
+    # TODO: Refactor into fixture mock data
+    dirname, expected_data, expected_timestamps, sampling_rate = create_mock_data_file
+
+    out_data, out_timestamps, out_sampling_rate = load_recording(
+        dirname, start_at_zero=True
+    )
+
+    assert sampling_rate == out_sampling_rate
+    np.testing.assert_allclose(out_data, expected_data)
+    np.testing.assert_allclose(
+        out_timestamps,
+        (sampling_rate * expected_timestamps - np.pi) / sampling_rate,
+        rtol=2e-7,
+    )

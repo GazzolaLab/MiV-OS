@@ -97,7 +97,7 @@ class MockDataGenerator:
 
         # Expected timestamps
         sampling_rate = 30000
-        expected_timestamps = (timestamps - np.pi) / sampling_rate
+        expected_timestamps = timestamps / sampling_rate
 
         return dirname, expected_data, expected_timestamps, sampling_rate
 

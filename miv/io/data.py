@@ -199,9 +199,15 @@ class Data:
         plt.savefig(filepath, **savefig_kwargs)
 
     @contextmanager
-    def load(self):
+    def load(self, start_at_zero: bool = False):
         """
         Context manager for loading data instantly.
+
+        Parameters
+        ----------
+        start_at_zero : bool
+            If set to True, time first timestamps will be shifted to zero. To achieve synchronized
+            timestamps with other recordings/events, set this to False.
 
         Examples
         --------
@@ -228,7 +234,7 @@ class Data:
             raise FileNotFoundError("Data directory does not have all necessary files.")
         try:
             signal, timestamps, sampling_rate = load_recording(
-                self.data_path, self.masking_channel_set
+                self.data_path, self.masking_channel_set, start_at_zero=start_at_zero
             )
             yield signal, timestamps, sampling_rate
         finally:

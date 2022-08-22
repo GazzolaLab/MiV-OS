@@ -161,7 +161,7 @@ def load_ttl_event(
     ttl_info = [data for data in info["events"] if "TTL Input" in data["channel_name"]]
     assert len(ttl_info) > 0, "No events recorded (TTL)."
     assert (
-        len(ttl_info) != 1
+        len(ttl_info) == 1
     ), "Multiple TTL input is found, which is not supported yet. (TODO)"
     ttl_info = ttl_info[0]
 
@@ -177,7 +177,7 @@ def load_ttl_event(
         file_timestamps = "timestamps.npy"
         file_sample_numbers = "sample_numbers.npy"
         file_full_words = "full_words.npy"
-    file_path = os.path.join(folder, ttl_info["folder_name"])
+    file_path = os.path.join(folder, "events", ttl_info["folder_name"])
 
     states = np.load(os.path.join(file_path, file_states)).astype(np.int16)
     sample_numbers = np.load(os.path.join(file_path, file_sample_numbers)).astype(
@@ -204,8 +204,7 @@ def load_ttl_event(
 
 
 def load_recording(
-    folder: str,
-    channel_mask: Optional[Set[int]] = None,
+    folder: str, channel_mask: Optional[Set[int]] = None, start_at_zero: bool = True
 ):
     """
     Loads data recorded by Open Ephys in Binary format as numpy memmap.
@@ -221,6 +220,9 @@ def load_recording(
         folder containing at least the subfolder 'experiment1'.
     channel_mask: Set[int], optional
         Channel index list to ignore in import (default=None)
+    start_at_zero : bool
+        If True, the timestamps is adjusted to start at zero.
+        Note, recorded timestamps might not start at zero for some reason.
 
     Returns
     -------
@@ -261,6 +263,10 @@ def load_recording(
     if channel_mask:
         signal = apply_channel_mask(signal, channel_mask)
 
+    # Adjust timestamps to start from zero
+    if start_at_zero and not np.isclose(timestamps[0], 0.0):
+        timestamps -= timestamps[0]
+
     return signal, timestamps, sampling_rate
 
 
@@ -269,7 +275,6 @@ def load_continuous_data(
     num_channels: int,
     sampling_rate: float,
     timestamps_path: Optional[str] = None,
-    start_at_zero: bool = False,
 ):
     """
     Load single continous data file and return timestamps and raw data in numpy array.
@@ -293,9 +298,6 @@ def load_continuous_data(
         If None, first check if the file "timestamps.npy" exists on the same directory.
         If the file doesn't exist, we deduce the timestamps based on the sampling rate
         and the length of the data.
-    start_at_zero : bool
-        If True, the timestamps is adjusted to start at zero.
-        Note, recorded timestamps might not start at zero for some reason.
 
     Returns
     -------
@@ -325,13 +327,8 @@ def load_continuous_data(
     # Get timestamps
     if os.path.exists(timestamps_path):
         timestamps = np.array(np.load(timestamps_path), dtype=np.float32)
-        # timestamps /= float(sampling_rate)
+        timestamps /= float(sampling_rate)
     else:  # If timestamps_path doesn't exist, deduce the stamps
-        raise NotImplementedError
         timestamps = np.array(range(0, length)) / sampling_rate
-
-    # Adjust timestamps to start from zero
-    if start_at_zero and not np.isclose(timestamps[0], 0.0):
-        timestamps -= timestamps[0]
 
     return np.array(raw_data), timestamps
