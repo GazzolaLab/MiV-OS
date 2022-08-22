@@ -5,6 +5,8 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import os
 
 import numpy as np
+import quantities as pq
+from neo.core import SpikeTrain
 from sklearn.utils import shuffle
 from tqdm import tqdm
 
@@ -200,27 +202,27 @@ class DetectorWithTrainData:
         with experiment_data.load() as (sig, times, samp):
             result: np.ndarray = np.ndarray(np.shape(sig)[1], dtype=object)
             filtered_sig = signal_filter(sig, samp)
-            spiketrain = spike_detector(filtered_sig, times, samp)
+            spiketrains = spike_detector(filtered_sig, times, samp)
             del filtered_sig
 
-            for chan in range(np.shape(spiketrain)[0]):
+            for chan in range(np.shape(spiketrains)[0]):
                 try:
-                    cutouts = extract_waveforms(sig, spiketrain, chan, samp)
+                    cutouts = extract_waveforms(sig, spiketrains, chan, samp)
                 except ValueError:
                     cutouts = np.array([])
 
-                channel_spikes = []
-                for spike_index, cutout in enumerate(cutouts):
+                predictions = self.classifier.predict_categories_sigmoid(
+                    cutouts, threshold, **predict_kwargs
+                )
 
-                    prediction = self.classifier.predict_categories_sigmoid(
-                        cutout, threshold, **predict_kwargs
-                    )
+                original_times = np.array(spiketrains[chan].times)
+                times = []
+                for spike_index, prediction in enumerate(predictions):
+                    if prediction >= threshold:
+                        times.append(original_times[spike_index])
 
-                    channel_spikes.append(
-                        prediction
-                    )  # The prediction is placeholder for now
+                result[chan] = SpikeTrain(times * pq.s, spiketrains[chan].t_stop)
 
-                result[chan] = np.array(channel_spikes)
             return result
 
 
