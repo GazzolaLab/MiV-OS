@@ -61,7 +61,7 @@ sphinx-copybutton = {version = "^0.5.0", optional = true, extras = ["docs"]}
 myst-nb = {version = "^0.15.0", optional = true, extras = ["docs"]}
 pyinform = "^0.2.0"
 graphviz = "^0.20"
-Pillow = "9.1.1"
+Pillow = "9.2.0"
 pyvis = "^0.2.1"
 lyon = { git = "https://github.com/sciforce/lyon.git", rev = "91dd700" }
 
