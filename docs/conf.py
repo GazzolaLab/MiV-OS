@@ -96,7 +96,7 @@ master_doc = "index"
 # a list of builtin themes.
 
 html_theme = "pydata_sphinx_theme"
-html_logo = "_static/assets/logo1.svg"
+html_logo = "MiV-Shared-Docs/_static/assets/logo1.svg"
 html_favicon = html_logo
 html_sourcelink_suffix = ""
 html_theme_options = {
@@ -153,7 +153,7 @@ numpydoc_show_class_members = False
 nb_execution_mode = "cache"
 
 # External Data Download
-urlretrieve(  # Logo image file
-    "https://raw.githubusercontent.com/skim0119/MiV-OS/assets_logo/docs/_static/assets/logo1.svg",
-    html_logo,
-)
+# urlretrieve(  # Logo image file
+#    "https://raw.githubusercontent.com/skim0119/MiV-OS/assets_logo/docs/_static/assets/logo1.svg",
+#    html_logo,
+# )
