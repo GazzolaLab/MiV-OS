@@ -151,7 +151,7 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin):
 
     def run(
         self,
-        save_path: Union[str, pathlib.Path] = "results",
+        save_path: Union[str, pathlib.Path],
         dry_run: bool = False,
         cache_dir: Union[str, pathlib.Path] = ".cache",
         enable_callback: bool = True,

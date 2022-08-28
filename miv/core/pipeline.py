@@ -12,7 +12,7 @@ class Pipeline:
 
     def run(
         self,
-        save_path: Optional[Union[str, pathlib.Path]] = None,
+        save_path: Optional[Union[str, pathlib.Path]] = "./results",
         dry_run: bool = False,
         verbose: bool = False,
     ):
