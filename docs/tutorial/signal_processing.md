@@ -11,7 +11,9 @@ kernelspec:
   name: python3
 ---
 
-# Introduction
+# Introduction : Quick Start
+
+Here is a quick-start example of how to start using `MiV-OS`.
 
 ```{code-cell} ipython3
 :tags: [hide-cell]
@@ -22,7 +24,9 @@ import quantities as pq
 import matplotlib.pyplot as plt
 ```
 
-## 1. Data Load
+## 1. Data Load (Open Ephys)
+
+We natively support the output file-structure that `OpenEphys` uses.
 
 ```{code-cell} ipython3
 :tags: [hide-cell]
@@ -32,9 +36,13 @@ from miv.io.data import Data, DataManager
 
 ```{code-cell} ipython3
 # Load dataset from OpenEphys recording
-folder_path: str = "~/Open Ephys/2022-03-10-16-19-09"  # Data Path
+folder_path: str = "2022-03-10_16-19-09/"  # Data Path
 # Provide the path of experimental recording tree to the DataManager class
 dataset = DataManager(folder_path)
+```
+
+```{code-cell} ipython3
+dataset.tree()
 ```
 
 You should be able to check the data structure by running `dataset.tree()`.
@@ -44,7 +52,7 @@ You should be able to check the data structure by running `dataset.tree()`.
 
 +++
 
-We provide a set of basic signal filter tools. It is highly recommended to filter the signal before doing the spike-detection.
+We provide a set of basic signal filter tools.
 Here, we provide examples of how to create and apply the filter to the [`dataset`](../api/io.rst).
 
 +++
@@ -59,8 +67,8 @@ from miv.signal.filter import FilterCollection, ButterBandpass
 
 ### 2.1 Filter Collection
 
-[Here](api/signal:signal filter) is the list of provided filters.
-All filters are `Callable`, taking `signal` and `sampling_rate` as parameters.
+[Here](../api/signal:signal-filter) is the list of provided filters.
+All filters are directly `Callable`, taking `signal` and `sampling_rate` as parameters.
 To define a multiple filters together, we provide [`FilterCollection`](miv.signal.filter.FilterCollection) that execute multiple filters in a series.
 
 ```{code-cell} ipython3
@@ -90,15 +98,11 @@ You can check the list of all provided filters [here](../api/signal).
 # Apply filter to `dataset[0]`
 with dataset[0].load() as (signal, timestamps, sampling_rate):
     filtered_signal = pre_filter(signal, sampling_rate)
-
-# Apply filter to array
-rate = 30_000
-filtered_signal = pre_filter(data_array, sampling_rate=rate)
 ```
 
 ## 3. Spike Detection
 
-You can check the available method [here](api/signal:spike detection).
+You can check the available method [here](api/signal:spike-detection).
 
 Most simple example of spike-detection method is using `ThresholdCutoff`.
 
@@ -116,7 +120,6 @@ spike_detection = ThresholdCutoff()
 #   signal        : np.array or neo.core.AnalogSignal, shape(N_channels, N)
 #   timestamps    : np.array, shape(N)
 #   sampling_rate : float
-timestamps = spike_detection(signal, timestamps, sampling_rate=30_000, cutoff=3.5)
 
 # The detection can be applied on the dataset
 spiketrains = spike_detection(filtered_signal, timestamps, sampling_rate)
@@ -133,5 +136,13 @@ from viziphant.rasterplot import rasterplot_rates
 
 ```{code-cell} ipython3
 # Plot
-rasterplot_rates(spiketrain_list)
+rasterplot_rates(spiketrains)
+```
+
+```{code-cell} ipython3
+timestamps.max()
+```
+
+```{code-cell} ipython3
+
 ```
