@@ -223,4 +223,4 @@ def load_continuous_data(
     if start_at_zero and not np.isclose(timestamps[0], 0.0):
         timestamps -= timestamps[0]
 
-    return np.array(raw_data), timestamps
+    return np.array(raw_data), np.array(timestamps)
