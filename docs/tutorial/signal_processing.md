@@ -4,17 +4,14 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.13.8
+    jupytext_version: 1.14.1
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
   name: python3
-file_format: mystnb
-mystnb:
-  execution_mode: 'off'
 ---
 
-# Signal Processing Guideline
+# Introduction
 
 ```{code-cell} ipython3
 :tags: [hide-cell]
@@ -23,7 +20,6 @@ import os
 import numpy as np
 import quantities as pq
 import matplotlib.pyplot as plt
-
 ```
 
 ## 1. Data Load
