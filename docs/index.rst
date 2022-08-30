@@ -5,13 +5,6 @@ Mind-in-Vitro Open Software
 
 The software is developed and maintained by the Gazzola Lab at the University of Illinois at Urbana-Champaign. For more information on the projects and what we work on, visit our `website <https://mindinvitro.illinois.edu>`_.
 
-Installation Instruction
-------------------------
-
-:code:`pip install MiV-OS`
-
-You can also download the source code from `GitHub <https://github.com/GazzolaLab/MiV-OS>`_ directly.
-
 Contribution
 ------------
 

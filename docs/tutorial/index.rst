@@ -5,6 +5,7 @@ Tutorial
    :maxdepth: 2
    :caption: Overview
 
+   installation
    signal_processing
    spike_cutout
    spike_sorting
