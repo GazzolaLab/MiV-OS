@@ -81,13 +81,13 @@ mypy = "^0.950"
 mypy-extensions = "^0.4.3"
 pre-commit = "^2.19.0"
 pydocstyle = "^6.1.1"
-pylint = "^2.13.9"
+pylint = "^2.15.0"
 pytest = "^7.1.2"
 pyupgrade = "^2.32.1"
 coverage = "^6.3.3"
 pytest-html = "^3.1.1"
 pytest-cov = "^3.0.0"
-flake8 = "^4.0.1"
+flake8 = "^5.0.4"
 
 [tool.poetry.extras]
 docs = [
