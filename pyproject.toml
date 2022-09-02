@@ -165,7 +165,8 @@ docs = [
   "myst-nb",
   "numpydoc",
   "sphinx-togglebutton",
-  "sphinx-copybutton"
+  "sphinx-copybutton",
+  "sphinxcontrib-mermaid"
 ]
 experiment = [
   "lyon",
