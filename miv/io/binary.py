@@ -331,4 +331,4 @@ def load_continuous_data(
     else:  # If timestamps_path doesn't exist, deduce the stamps
         timestamps = np.array(range(0, length)) / sampling_rate
 
-    return np.array(raw_data), timestamps
+    return np.array(raw_data), np.array(timestamps)

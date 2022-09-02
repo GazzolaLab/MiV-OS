@@ -14,7 +14,7 @@ mystnb:
   execution_mode: 'off'
 ---
 
-#
+# Spike Sorting
 
 ## References
 

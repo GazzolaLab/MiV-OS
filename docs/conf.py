@@ -39,12 +39,13 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
     "sphinx.ext.autosectionlabel",
+    "sphinx.ext.mathjax",
     "sphinx_autodoc_typehints",
     #'sphinx.ext.napoleon',
     "sphinx.ext.viewcode",
     "sphinx_togglebutton",
     "sphinx_copybutton",
-    "sphinx.ext.mathjax",
+    "sphinxcontrib.mermaid",
     "numpydoc",
     # "myst_parser", # Moving onto jupyter-notebook style
     "myst_nb",
@@ -96,7 +97,7 @@ master_doc = "index"
 # a list of builtin themes.
 
 html_theme = "pydata_sphinx_theme"
-html_logo = "_static/assets/logo1.svg"
+html_logo = "MiV-Shared-Docs/_static/assets/logo1.svg"
 html_favicon = html_logo
 html_sourcelink_suffix = ""
 html_theme_options = {
@@ -151,9 +152,10 @@ numpydoc_show_class_members = False
 
 # -- Options for myst-nb ---------------------------------------------------
 nb_execution_mode = "cache"
+myst_heading_anchors = 3
 
 # External Data Download
-urlretrieve(  # Logo image file
-    "https://raw.githubusercontent.com/skim0119/MiV-OS/assets_logo/docs/_static/assets/logo1.svg",
-    html_logo,
-)
+# urlretrieve(  # Logo image file
+#    "https://raw.githubusercontent.com/skim0119/MiV-OS/assets_logo/docs/_static/assets/logo1.svg",
+#    html_logo,
+# )
