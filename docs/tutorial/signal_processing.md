@@ -70,7 +70,6 @@ from miv.signal.filter import FilterCollection, ButterBandpass
 
 ### 2.1 Filter Collection
 
-[Here](../api/signal:signal filter) is the list of provided filters.
 All filters are directly `Callable`, taking `signal` and `sampling_rate` as parameters.
 To define a multiple filters together, we provide [`FilterCollection`](miv.signal.filter.FilterCollection) that execute multiple filters in a series.
 
@@ -105,8 +104,6 @@ with dataset[0].load() as (signal, timestamps, sampling_rate):
 
 ## 3. Spike Detection
 
-You can check the available method [here](api/signal:spike detection).
-
 Most simple example of spike-detection method is using `ThresholdCutoff`.
 
 ```{code-cell} ipython3
@@ -140,12 +137,4 @@ from viziphant.rasterplot import rasterplot_rates
 ```{code-cell} ipython3
 # Plot
 rasterplot_rates(spiketrains)
-```
-
-```{code-cell} ipython3
-timestamps.max()
-```
-
-```{code-cell} ipython3
-
 ```

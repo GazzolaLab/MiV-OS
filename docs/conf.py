@@ -152,6 +152,7 @@ numpydoc_show_class_members = False
 
 # -- Options for myst-nb ---------------------------------------------------
 nb_execution_mode = "cache"
+myst_heading_anchors = 3
 
 # External Data Download
 # urlretrieve(  # Logo image file
