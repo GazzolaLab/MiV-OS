@@ -5,7 +5,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "MiV-OS"
-version = "0.2.0"
+version = "0.2.1"
 description = "Python software for analysis and computing framework used in MiV project."
 readme = "README.md"
 authors = ["GazzolaLab <skim449@illinois.edu>"]
@@ -41,11 +41,11 @@ convert_open_ephys_to_miv = "scripts.convert_open_ephys_to_miv:main"
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"
-scipy = "^1.9.0"
+scipy = "^1.9.1"
 elephant = "^0.11.1"
 matplotlib = "^3.5.3"
 neo = "^0.10.2"
-pandas = "^1.4.3"
+pandas = "^1.4.4"
 PyWavelets = "^1.3.0"
 quantities = "^0.13.0"
 scikit-learn = "^1.1.2"
@@ -74,16 +74,17 @@ serial = "^0.0.97"
 click = "^8.1.3"
 sphinxcontrib-mermaid = {version = "^0.7.1", extras = ["docs"]}
 poetryup = "^0.10.0"
+importlib = {version = "^1.0.4", extras = ["docs"], optional = true}
 
 [tool.poetry.dev-dependencies]
-black = "^22.6.0"
+black = "^22.8.0"
 isort = {extras = ["colors"], version = "^5.10.1"}
 mypy = "^0.950"
 mypy-extensions = "^0.4.3"
 pre-commit = "^2.20.0"
 pydocstyle = "^6.1.1"
 pylint = "^2.15.0"
-pytest = "^7.1.2"
+pytest = "^7.1.3"
 pyupgrade = "^2.37.3"
 coverage = "^6.4.4"
 pytest-html = "^3.1.1"
