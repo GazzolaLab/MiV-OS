@@ -1,3 +1,29 @@
+# Release Note (version 0.2.1)
+
+## What's Changed
+
+* Test Cases + Bug fix binned_spiketrain by @Gauravu2 in https://github.com/GazzolaLab/MiV-OS/pull/93
+* Shift documentation theme to PyData by @skim0119 in https://github.com/GazzolaLab/MiV-OS/pull/94
+* Initial implementation of MiV HDF5-based data format by @iraikov in https://github.com/GazzolaLab/MiV-OS/pull/90
+* TTL event readout from OpenEphys dataset by @skim0119 in https://github.com/GazzolaLab/MiV-OS/pull/99
+* Add core datatypes: SpikeTrain by @skim0119 in https://github.com/GazzolaLab/MiV-OS/pull/102
+* Setup dependabot by @skim0119 in https://github.com/GazzolaLab/MiV-OS/pull/103
+* Documentation theme updated to `pydata-theme`
+
+## New Contributors
+
+* @iraikov made their first contribution in https://github.com/GazzolaLab/MiV-OS/pull/90
+* @dependabot made their first contribution in https://github.com/GazzolaLab/MiV-OS/pull/107
+
+## Dependency Version Upgrade
+
+* build(deps-dev): bump flake8 from 4.0.1 to 5.0.4 by @dependabot in https://github.com/GazzolaLab/MiV-OS/pull/107
+* build(deps): bump codecov/codecov-action from 2 to 3 by @dependabot in https://github.com/GazzolaLab/MiV-OS/pull/105
+* build(deps): bump actions/setup-python from 2.2.2 to 4.2.0 by @dependabot in https://github.com/GazzolaLab/MiV-OS/pull/104
+* build(deps-dev): bump pylint from 2.14.5 to 2.15.0 by @dependabot in https://github.com/GazzolaLab/MiV-OS/pull/111
+
+**Full Changelog**: https://github.com/GazzolaLab/MiV-OS/compare/v0.2.0...v0.2.1
+
 # Release Note (version 0.2.0)
 
 [Milestone](https://github.com/GazzolaLab/MiV-OS/issues/30)
