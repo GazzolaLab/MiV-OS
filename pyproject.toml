@@ -74,7 +74,6 @@ serial = "^0.0.97"
 click = "^8.1.3"
 sphinxcontrib-mermaid = {version = "^0.7.1", extras = ["docs"]}
 poetryup = "^0.10.0"
-importlib = {version = "^1.0.4", extras = ["docs"], optional = true}
 
 [tool.poetry.dev-dependencies]
 black = "^22.8.0"
