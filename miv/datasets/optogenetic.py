@@ -59,10 +59,6 @@ def load_data():  # pragma: no cover
             4: <miv.io.data.Data object at 0x7fbc2ac9e160>
                └── Record Node 104/experiment4/recording3
 
-    License
-    -------
-        ...
-
     """
 
     subdir = "optogenetic"

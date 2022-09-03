@@ -1,0 +1,3 @@
+[submodule "docs/MiV-Shared-Docs"]
+	path = docs/MiV-Shared-Docs
+	url = https://github.com/GazzolaLab/MiV-Shared-Docs

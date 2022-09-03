@@ -24,7 +24,7 @@ from miv.typing import SignalType, SpikestampsType
 def extract_waveforms(
     signal: SignalType,
     spikestamps: SpikestampsType,
-    channel: int,
+    channel: Optional[int],
     sampling_rate: float,
     pre: pq.Quantity = 0.001 * pq.s,
     post: pq.Quantity = 0.002 * pq.s,
@@ -38,8 +38,8 @@ def extract_waveforms(
         The signal as a 2-dimensional numpy array (length, num_channel)
     spikestamps : SpikestampsType
         The sample index of all spikes as a 1-dim numpy array
-    channel : int
-        Interested channel
+    channel : Optional[int]
+        Interested channel. If None, assume signal and spikestamps are single channel.
     sampling_rate : float
         The sampling frequency in Hz
     pre : pq.Quantity
@@ -53,9 +53,9 @@ def extract_waveforms(
         Return stacks of spike cutout; shape(n_spikes, width).
 
     """
-    # TODO: Refactor this part
-    signal = signal[:, channel]
-    spikestamps = spikestamps[channel]
+    if channel is not None:
+        signal = signal[:, channel]
+        spikestamps = spikestamps[channel]
 
     cutouts = []
     pre_idx = int(pre * sampling_rate)

@@ -203,6 +203,7 @@ TODO.md
 *.png
 *.eps
 *.pdf
+*.svg
 
 # data files
 *.dat
@@ -234,3 +235,6 @@ outcmaes/*
 
 # csv files
 *.csv
+
+# Emacs backup:
+*~

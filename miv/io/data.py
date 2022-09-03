@@ -37,7 +37,7 @@ from glob import glob
 import matplotlib.pyplot as plt
 import numpy as np
 
-from miv.io.binary import load_continuous_data, load_recording
+from miv.io.binary import load_continuous_data, load_recording, load_ttl_event
 from miv.signal.filter.protocol import FilterProtocol
 from miv.signal.spike.protocol import SpikeDetectionProtocol
 from miv.statistics import firing_rates
@@ -122,9 +122,15 @@ class Data:
         plt.savefig(filepath, **savefig_kwargs)
 
     @contextmanager
-    def load(self):
+    def load(self, start_at_zero: bool = False):
         """
         Context manager for loading data instantly.
+
+        Parameters
+        ----------
+        start_at_zero : bool
+            If set to True, time first timestamps will be shifted to zero. To achieve synchronized
+            timestamps with other recordings/events, set this to False.
 
         Examples
         --------
@@ -151,12 +157,18 @@ class Data:
             raise FileNotFoundError("Data directory does not have all necessary files.")
         try:
             signal, timestamps, sampling_rate = load_recording(
-                self.data_path, self.masking_channel_set
+                self.data_path, self.masking_channel_set, start_at_zero=start_at_zero
             )
             yield signal, timestamps, sampling_rate
         finally:
             del timestamps
             del signal
+
+    def load_ttl_event(self):
+        """
+        Load TTL event data if data contains. Detail implementation is :func:`here <miv.io.binary.load_ttl_event>`.
+        """
+        return load_ttl_event(self.data_path)
 
     def set_channel_mask(self, channel_id: Iterable[int]):
         """
