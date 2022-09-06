@@ -14,7 +14,7 @@ mystnb:
   execution_mode: 'off'
 ---
 
-# Channel-wise Signal Correlation
+# Channel-wise Correlation
 
 Here is the example script of cross-correlation analysis using `Elephant` package.
 
