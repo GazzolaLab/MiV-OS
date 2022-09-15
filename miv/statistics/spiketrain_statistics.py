@@ -63,7 +63,7 @@ def interspike_intervals(spikes: SpikestampsType):
 
     How to draw Inter-spike interval histogram (ISIH):
 
-        >>> from miv.statistics import inter_spike_intervals
+        >>> from miv.statistics import interspike_intervals
         >>> import matplotlib.pyplot as plt
         >>> interspike_interval = interspike_intervals(spikestamp)
         >>> plt.hist(interspike_interval)
