@@ -31,6 +31,7 @@ jobs:
             poetry --version
             poetry config virtualenvs.in-project true
             #poetry config virtualenvs.create false
+            poetry lock --no-update
             poetry install -E "docs experiment"
       - name: Sphinx Build Check
         run: |
