@@ -278,6 +278,7 @@ def load_continuous_data(
     sampling_rate: float,
     timestamps_path: Optional[str] = None,
     dtype: Optional[np.dtype] = None,
+    _recorded_dtype: Union[np.dtype, str] = "int16",
 ):
     """
     Load single continous data file and return timestamps and raw data in numpy array.
@@ -303,7 +304,9 @@ def load_continuous_data(
         and the length of the data.
     dtype: Optional[np.dtype]
         If None, skip data-type conversion. If the filesize is too large, it is advisable
-        to keep `dtype=None` and convert slice by slice.
+        to keep `dtype=None` and convert slice by slice. (default=None)
+    _recorded_dtype: Union[np.dtype, str]
+        Recorded data type. (default="int16")
 
     Returns
     -------
@@ -321,7 +324,9 @@ def load_continuous_data(
     """
 
     # Read raw data signal
-    raw_data: np.ndarray = np.memmap(data_path, dtype="int16", mode="c")
+    raw_data: np.ndarray = np.memmap(
+        data_path, dtype=_recorded_dtype, mode="r", order="C"
+    )
     length = raw_data.size // num_channels
     raw_data = raw_data.reshape(length, num_channels)
     if dtype is not None:
