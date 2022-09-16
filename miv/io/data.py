@@ -229,8 +229,8 @@ class Data:
         """
         pkl_kwargs = pkl_kwargs or {}
         filepath = os.path.join(self.analysis_path, filename + ".pkl")
-        with open(filepath, "rb") as output_file:
-            pickle.dump(data, output_file)
+        with open(filepath, "wb") as output_file:
+            pickle.dump(data, output_file, **pkl_kwargs)
 
     @contextmanager
     def load(self, start_at_zero: bool = False):
