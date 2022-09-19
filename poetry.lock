@@ -872,21 +872,27 @@ test = ["check-manifest", "pre-commit", "pytest", "testpath"]
 
 [[package]]
 name = "neo"
-version = "0.10.2"
+version = "0.11.0"
 description = "Neo is a package for representing electrophysiology data in Python, together with support for reading a wide range of neurophysiology file formats"
 category = "main"
 optional = false
 python-versions = ">=3.7"
 
 [package.dependencies]
-numpy = ">=1.16.1"
+numpy = ">=1.18.5"
+packaging = "*"
 quantities = ">=0.12.1"
 
 [package.extras]
+biocam = ["h5py"]
+ced = ["sonpy"]
+edf = ["pyedflib"]
 igorproio = ["igor"]
-kwikio = ["klusta", "scipy"]
+kwikio = ["klusta"]
+maxwell = ["h5py"]
 neomatlabio = ["scipy (>=1.0.0)"]
 nixio = ["nixio (>=1.5.0)"]
+nwb = ["pynwb"]
 stimfitio = ["stfio"]
 tiffio = ["pillow"]
 
@@ -1957,7 +1963,7 @@ docs = ["Sphinx", "sphinx-rtd-theme", "sphinx-book-theme", "readthedocs-sphinx-s
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8,<3.11"
-content-hash = "0b22f922a554d32176f24322888ac1aaaa6ccaeee768fdd47ac577e7ed50cda9"
+content-hash = "fac1cc60905b09206e1c2cc858873ea80ef4f38e77fbd90448507d50aedb1b51"
 
 [metadata.files]
 alabaster = [
@@ -2621,8 +2627,7 @@ nbformat = [
     {file = "nbformat-5.4.0.tar.gz", hash = "sha256:44ba5ca6acb80c5d5a500f1e5b83ede8cbe364d5a495c4c8cf60aaf1ba656501"},
 ]
 neo = [
-    {file = "neo-0.10.2-py3-none-any.whl", hash = "sha256:8ae6e79133461e2d50c9a8e592c636b784866d50544287caa5a3fc2bc9ef113f"},
-    {file = "neo-0.10.2.tar.gz", hash = "sha256:2d4218b0826daeea880e155227060029ec38a00238ceb5f097138d9467c6399b"},
+    {file = "neo-0.11.0.tar.gz", hash = "sha256:cdf8e1324a3fbbd1efd5618dcd37cfc497b1997923bd710b598472c1d846674a"},
 ]
 nest-asyncio = [
     {file = "nest_asyncio-1.5.5-py3-none-any.whl", hash = "sha256:b98e3ec1b246135e4642eceffa5a6c23a3ab12c82ff816a92c612d68205813b2"},
