@@ -232,6 +232,25 @@ class Data:
         with open(filepath, "wb") as output_file:
             pickle.dump(data, output_file, **pkl_kwargs)
 
+    def load_data(
+        self,
+        filename: str,
+        pkl_kwargs: Optional[Dict[Any, any]] = None,
+    ):
+        """Quick load pickled data (data saved using `save_data`)
+
+        Parameters
+        ----------
+        filename : str
+        pkl_kwargs : Optional[Dict[Any, Any]]
+            Additional parameters to pass to `plt.savefig`.
+        """
+        pkl_kwargs = pkl_kwargs or {}
+        filepath = os.path.join(self.analysis_path, filename + ".pkl")
+        with open(filepath, "rb") as output_file:
+            data = pickle.load(output_file, **pkl_kwargs)
+        return data
+
     @contextmanager
     def load(self, start_at_zero: bool = False):
         """
