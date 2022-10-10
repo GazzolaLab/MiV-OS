@@ -1318,7 +1318,7 @@ python-versions = "*"
 
 [[package]]
 name = "pyupgrade"
-version = "2.38.2"
+version = "3.0.0"
 description = "A tool to automatically upgrade syntax for newer versions."
 category = "dev"
 optional = false
@@ -1948,7 +1948,7 @@ docs = ["Sphinx", "sphinx-rtd-theme", "sphinx-book-theme", "readthedocs-sphinx-s
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8,<3.11"
-content-hash = "fed47006405c7fa3f4a14cee8ce443308766fb3261622fb9a02b7f99c6767d0f"
+content-hash = "774d71eca7acd39dd6ccc03c218fc8789343e0bb19d3c847af9b81985cea43d2"
 
 [metadata.files]
 alabaster = [
@@ -2899,8 +2899,8 @@ pytz = [
     {file = "pytz-2022.2.1.tar.gz", hash = "sha256:cea221417204f2d1a2aa03ddae3e867921971d0d76f14d87abb4414415bbdcf5"},
 ]
 pyupgrade = [
-    {file = "pyupgrade-2.38.2-py2.py3-none-any.whl", hash = "sha256:41bb9a9fd48fe57163b0dacffff433d6d5a63a0f7c2402918917b5f1a533342b"},
-    {file = "pyupgrade-2.38.2.tar.gz", hash = "sha256:a5d778c9de0b53975c6a9eac2d0df5adfad244a9f7d7993d8a114223ebbda367"},
+    {file = "pyupgrade-3.0.0-py2.py3-none-any.whl", hash = "sha256:f9ba6cb58713e7249f4f0486e425969618e953062a5fc805da9d21602a2d1441"},
+    {file = "pyupgrade-3.0.0.tar.gz", hash = "sha256:6ec1e2762d887cab94a5714b2ea7e944843d8c2de36c449d443e52ffac8ab14f"},
 ]
 pyvis = [
     {file = "pyvis-0.3.0.tar.gz", hash = "sha256:7b83d93f43cfe5627262cb6571cb8ba8ba189dbcb6a86f4ab901e9d958ecf1ee"},
