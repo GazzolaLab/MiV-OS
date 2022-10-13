@@ -46,7 +46,7 @@ elephant = "^0.11.1"
 matplotlib = "^3.5.3"
 neo = "^0.10.2"
 pandas = "^1.4.4"
-PyWavelets = "^1.3.0"
+PyWavelets = "1.3.0"
 quantities = "^0.13.0"
 scikit-learn = "^1.1.2"
 seaborn = "^0.11.2"
@@ -72,7 +72,7 @@ lyon = { git = "https://github.com/sciforce/lyon.git", optional = true, extras =
 pyseries = {extras = ["experiment", "docs"], version = "^1.0.26"}
 serial = "^0.0.97"
 click = "^8.1.3"
-sphinxcontrib-mermaid = {version = "^0.7.1", extras = ["docs"]}
+sphinxcontrib-mermaid = {version = "^0.7.1", extras = ["docs"], optional = true}
 poetryup = "^0.10.0"
 
 [tool.poetry.dev-dependencies]
