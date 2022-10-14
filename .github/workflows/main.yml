@@ -32,6 +32,11 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Install Poetry
         uses: snok/install-poetry@v1
+          version: 1.2.2
+          virtualenvs-create: false
+          virtualenvs-in-project: true
+          installer-parallel: true
+          #virtualenvs-path: ~/my-custom-path
       - name: Set up cache
         uses: actions/cache@v3
         with:
@@ -77,7 +82,6 @@ jobs:
             ${{ runner.os }}-pip-
       - name: Install dependencies
         run: |
-          poetry config virtualenvs.in-project true
           poetry install -E "docs experiment"
       # Set environment variables for coverage test. Coverage test is done using python 3.8
       - name: Run style checks
