@@ -26,11 +26,13 @@ jobs:
           submodules: recursive
       - name: Setup Poetry
         uses: snok/install-poetry@v1
+          version: 1.2.2
+          virtualenvs-create: false
+          virtualenvs-in-project: true
+    installer-parallel: true
       - name: Poetry install docs dependencies
         run: |
             poetry --version
-            poetry config virtualenvs.in-project true
-            #poetry config virtualenvs.create false
             poetry install -E "docs experiment"
       - name: Sphinx Build Check
         run: |
