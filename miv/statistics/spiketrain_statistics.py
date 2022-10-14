@@ -177,9 +177,10 @@ def binned_spiketrain(
         binned spiketrain with 1 corresponding to spike and zero otherwise
 
     """
-
+    assert t_start < t_end, "End time cannot be smaller or equal to start time"
+    assert bin_size > 0, "bin size should be greater than 0"
     n_bins = int((t_end - t_start) / bin_size + 1)
-    time = np.linspace(t_start, bin_size * (n_bins - 1), n_bins)
+    time = np.linspace(t_start, t_start + bin_size * (n_bins - 1), n_bins)
     bin_spike = np.zeros(n_bins)
     if isinstance(spiketrains[channel], np.ndarray):
         spike = spiketrains[channel]
@@ -222,7 +223,8 @@ def fano_factor(
         fanofactor for the specified channel and conditions
 
     """
-
+    assert t_start < t_end, "End time cannot be smaller or equal to start time"
+    assert n_bins > 0, "Number of bins should be a positive integer"
     bin_spike = binned_spiketrain(spiketrains, channel, t_start, t_end, 0.002)
     assert np.sum(bin_spike) != 0, "The channel has no spikes"
     large_bin = []

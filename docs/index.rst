@@ -1,19 +1,9 @@
-.. MiV-OS documentation master file, created by
-   sphinx-quickstart on Thu Mar 24 23:35:49 2022.
-
-MiV-OS documentation!
-=====================
+Mind-in-Vitro Open Software
+===========================
 
 **MiV-OS** is a *free* and *open-source* software project for the post-processing and analysis of **mind-in-vitro** project.
 
-The software is developed and maintained by the Gazzola Lab at the University of Illinois at Urbana-Champaign. For more information on the projects and what we work on, visit our `website <https://mattia-lab.com>`_.
-
-Installation Instruction
-------------------------
-
-:code:`pip install MiV-OS`
-
-You can also download the source code from `GitHub <https://github.com/GazzolaLab/MiV-OS>`_ directly.
+The software is developed and maintained by the Gazzola Lab at the University of Illinois at Urbana-Champaign. For more information on the projects and what we work on, visit our `website <https://mindinvitro.illinois.edu>`_.
 
 Contribution
 ------------
@@ -26,54 +16,11 @@ If you are interested in contributing to this project, we prepared contribution 
    :maxdepth: 2
    :caption: Overview
 
-   overview/about
-   overview/references
-   Contribution <https://github.com/GazzolaLab/MiV-OS/blob/main/CONTRIBUTING.md>
-
-.. toctree::
-   :maxdepth: 2
-   :caption: User Guide
-
-   guide/signal_processing
-   guide/spike_cutout
-   guide/spike_sorting
-   guide/channel_correlation
-   guide/granger_causality_psd_cpsd_coherence
-   guide/burst_analysis
-   guide/info_theory
-   guide/connectivity_network
-   guide/lyon_ear_model
-
-.. toctree::
-   :maxdepth: 2
-   :caption: API
-
-   api/io
-   api/signal
-   api/sorting
-   api/statistics
-   api/causality
-   api/visualization
-   api/signal_generator
-   api/coding
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Examples
-
-   examples/sample_datasets
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Advanced/Discussion
-
-   discussion/auto_channel_mask_demo
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Site
-
-   Gazzola Lab <https://mattia-lab.com/>
+   MiV-Shared-Docs/overview/index
+   tutorial/index
+   guide/index
+   api/index
+   discussion/index
 
 Indices and tables
 ==================

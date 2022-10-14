@@ -42,7 +42,8 @@ jobs:
       - name: Install dependencies
         run: |
           poetry config virtualenvs.in-project true
-          poetry install
+          poetry lock --no-update
+          poetry install -E "docs experiment"
       # Test MiV-OS using pytest
       - name: Run tests
         run: |
@@ -78,7 +79,8 @@ jobs:
       - name: Install dependencies
         run: |
           poetry config virtualenvs.in-project true
-          poetry install
+          poetry lock --no-update
+          poetry install -E "docs experiment"
       # Set environment variables for coverage test. Coverage test is done using python 3.8
       - name: Run style checks
         run: |
