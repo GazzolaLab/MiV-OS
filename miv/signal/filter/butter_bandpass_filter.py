@@ -23,6 +23,11 @@ class ButterBandpass:
         high-pass frequency
     order : int
         The order of the filter. (default=5)
+    btype : str
+        Filter type: bandpass, lowpass, highpass, bandstop. (default="bandpass")
+        If set to lowpass, the critical frequency is set to 'highcut'.
+        If set to highpass, the critical frequency is set to 'lowcut'.
+        If set to bandpass or bandstop, the critical frequency is '[lowcut, highcut]'.
     tag : str
         Tag for the collection of filter.
     """
@@ -30,6 +35,7 @@ class ButterBandpass:
     lowcut: float
     highcut: float
     order: int = 5
+    btype: str = "bandpass"
     tag: str = ""
 
     def __call__(
@@ -80,7 +86,15 @@ class ButterBandpass:
         nyq = 0.5 * sampling_rate
         low = self.lowcut / nyq
         high = self.highcut / nyq
-        b, a = sps.butter(self.order, [low, high], btype="band")
+        if self.btype in ["bandpass", "bandstop"]:
+            critical_frequency = [low, high]
+        elif self.btype == "highpass":
+            critical_frequency = low
+        elif self.btype == "lowpass":
+            critical_frequency = high
+        else:
+            raise ValueError("Unknown btype: %s" % self.btype)
+        b, a = sps.butter(self.order, critical_frequency, btype=self.btype)
         return b, a
 
     def plot_frequency_response(self, sampling_rate: float):
