@@ -182,20 +182,21 @@ def binned_spiketrain(
     """
     assert t_start < t_end, "End time cannot be smaller or equal to start time"
     assert bin_size > 0, "bin size should be greater than 0"
-    n_bins = int((t_end - t_start) / bin_size + 1)
-    time = np.linspace(t_start, t_start + bin_size * (n_bins - 1), n_bins)
-    bin_spike = np.zeros(n_bins)
-    if isinstance(spiketrains[channel], np.ndarray):
-        spike = spiketrains[channel]
-    elif isinstance(spiketrains[channel], neo.core.SpikeTrain):
-        spike = spiketrains[channel].magnitude
+    n_bins = int(np.ceil((t_end - t_start) / bin_size))
+    time = t_start + (np.arange(n_bins + 1) * bin_size)
+    spiketrain = spiketrains[channel]
+    if isinstance(spiketrain, np.ndarray):
+        spike = spiketrain
+    elif isinstance(spiketrain, neo.core.SpikeTrain):
+        spike = spiketrain.magnitude
     else:
-        raise TypeError(f"type {type(spiketrains[channel])} is not supported.")
+        raise TypeError(f"type {type(spiketrain)} is not supported.")
     bins = np.digitize(spike, time)
+    bincount = np.bincount(bins)[1:-1]
     if return_count:
-        bin_spike[bins - 1] = np.bincount(bins)
+        bin_spike = bincount
     else:
-        bin_spike[bins - 1] = 1
+        bin_spike = (bincount != 0).astype(np.int_)
 
     return bin_spike
 
