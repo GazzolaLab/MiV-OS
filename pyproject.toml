@@ -68,7 +68,7 @@ Pillow = "9.1.1"
 h5py = "^3.7.0"
 h5py-cache = "^1.0"
 pyvis = "^0.2.1"
-lyon = { git = "https://github.com/sciforce/lyon.git", optional = true, extras = ["experiment"], rev = "91dd700" }
+lyon = { version = "^1.0.0", optional = true, extras = ["experiment"] }
 pyseries = {extras = ["experiment", "docs"], version = "^1.0.26"}
 serial = "^0.0.97"
 click = "^8.1.3"
