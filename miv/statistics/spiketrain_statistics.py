@@ -153,6 +153,7 @@ def binned_spiketrain(
     t_start: float,
     t_end: float,
     bin_size: float,
+    return_count: bool = False,
 ):
     """
     Forms a binned spiketrain using the spiketrain
@@ -170,6 +171,8 @@ def binned_spiketrain(
         Binning end time
     bin_size : float
         bin size in seconds
+    return_count : bool
+        If set to true, return the bin count. (default=False)
 
     Returns
     -------
@@ -189,7 +192,10 @@ def binned_spiketrain(
     else:
         raise TypeError(f"type {type(spiketrains[channel])} is not supported.")
     bins = np.digitize(spike, time)
-    bin_spike[bins - 1] = 1
+    if return_count:
+        bin_spike[bins - 1] = np.bincount(bins)
+    else:
+        bin_spike[bins - 1] = 1
 
     return bin_spike
 
