@@ -5,7 +5,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "MiV-OS"
-version = "0.2.1"
+version = "0.2.2"
 description = "Python software for analysis and computing framework used in MiV project."
 readme = "README.md"
 authors = ["GazzolaLab <skim449@illinois.edu>"]
