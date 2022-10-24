@@ -192,7 +192,7 @@ def binned_spiketrain(
     else:
         raise TypeError(f"type {type(spiketrain)} is not supported.")
     bins = np.digitize(spike, time)
-    bincount = np.bincount(bins)[1:-1]
+    bincount = np.bincount(bins, minlength=n_bins + 2)[1:-1]
     if return_count:
         bin_spike = bincount
     else:
