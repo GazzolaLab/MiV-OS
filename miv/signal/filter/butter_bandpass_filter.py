@@ -23,20 +23,20 @@ class ButterBandpass:
         high-pass frequency
     order : int
         The order of the filter. (default=5)
+    tag : str
+        Tag for the collection of filter.
     btype : str
         Filter type: bandpass, lowpass, highpass, bandstop. (default="bandpass")
         If set to lowpass, the critical frequency is set to 'highcut'.
         If set to highpass, the critical frequency is set to 'lowcut'.
         If set to bandpass or bandstop, the critical frequency is '[lowcut, highcut]'.
-    tag : str
-        Tag for the collection of filter.
     """
 
     lowcut: float
     highcut: float
     order: int = 5
-    btype: str = "bandpass"
     tag: str = ""
+    btype: str = "bandpass"
 
     def __call__(
         self,
