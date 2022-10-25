@@ -1,3 +1,19 @@
+# Release Note (version 0.2.2)
+
+## What's Changed
+
+* Import binary raw file by @skim0119 in https://github.com/GazzolaLab/MiV-OS/pull/116
+* Include reverse capability for stimjim
+* Documentation Update
+
+## Bug Fix
+
+* Binned Spiketrain algorithm now includes counting
+* Fix bug in synchronizing timestamps for TTL event recording
+* Update dependencies and fix related issues
+
+**Full Changelog**: https://github.com/GazzolaLab/MiV-OS/compare/v0.2.1...v0.2.2
+
 # Release Note (version 0.2.1)
 
 ## What's Changed
