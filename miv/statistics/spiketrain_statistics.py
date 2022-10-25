@@ -41,10 +41,13 @@ def firing_rates(
     Iterable[Any]
 
     """
-    rates = [
-        float(elephant.statistics.mean_firing_rate(spikestamp).magnitude)
-        for spikestamp in spiketrains
-    ]
+    rates = []
+    for spikestamp in spiketrains:
+        mfr = elephant.statistics.mean_firing_rate(spikestamp)
+        if isinstance(mfr, pq.quantity.Quantity):
+            mfr = mfr.magnitude
+        rates.append(mfr)
+
     rates_mean_over_channel = np.mean(rates)
     rates_variance_over_channel = np.var(rates)
     return {
@@ -63,7 +66,7 @@ def interspike_intervals(spikes: SpikestampsType):
 
     How to draw Inter-spike interval histogram (ISIH):
 
-        >>> from miv.statistics import inter_spike_intervals
+        >>> from miv.statistics import interspike_intervals
         >>> import matplotlib.pyplot as plt
         >>> interspike_interval = interspike_intervals(spikestamp)
         >>> plt.hist(interspike_interval)
@@ -153,6 +156,7 @@ def binned_spiketrain(
     t_start: float,
     t_end: float,
     bin_size: float,
+    return_count: bool = False,
 ):
     """
     Forms a binned spiketrain using the spiketrain
@@ -170,6 +174,8 @@ def binned_spiketrain(
         Binning end time
     bin_size : float
         bin size in seconds
+    return_count : bool
+        If set to true, return the bin count. (default=False)
 
     Returns
     -------
@@ -179,17 +185,21 @@ def binned_spiketrain(
     """
     assert t_start < t_end, "End time cannot be smaller or equal to start time"
     assert bin_size > 0, "bin size should be greater than 0"
-    n_bins = int((t_end - t_start) / bin_size + 1)
-    time = np.linspace(t_start, t_start + bin_size * (n_bins - 1), n_bins)
-    bin_spike = np.zeros(n_bins)
-    if isinstance(spiketrains[channel], np.ndarray):
-        spike = spiketrains[channel]
-    elif isinstance(spiketrains[channel], neo.core.SpikeTrain):
-        spike = spiketrains[channel].magnitude
+    n_bins = int(np.ceil((t_end - t_start) / bin_size))
+    time = t_start + (np.arange(n_bins + 1) * bin_size)
+    spiketrain = spiketrains[channel]
+    if isinstance(spiketrain, np.ndarray):
+        spike = spiketrain
+    elif isinstance(spiketrain, neo.core.SpikeTrain):
+        spike = spiketrain.magnitude
     else:
-        raise TypeError(f"type {type(spiketrains[channel])} is not supported.")
+        raise TypeError(f"type {type(spiketrain)} is not supported.")
     bins = np.digitize(spike, time)
-    bin_spike[bins - 1] = 1
+    bincount = np.bincount(bins, minlength=n_bins + 2)[1:-1]
+    if return_count:
+        bin_spike = bincount
+    else:
+        bin_spike = (bincount != 0).astype(np.int_)
 
     return bin_spike
 

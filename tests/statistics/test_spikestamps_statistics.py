@@ -71,4 +71,4 @@ def test_binned_spiketrain():
         output = binned_spiketrain(seg.spiketrains, 0, 0, 5, 0)
     # bin_size cannot be negative
     output = binned_spiketrain(seg.spiketrains, 0, 2, 5, 1)
-    np.testing.assert_allclose(output, [0, 0, 1, 1])
+    np.testing.assert_allclose(output, [0, 0, 1])

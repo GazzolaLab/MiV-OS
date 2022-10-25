@@ -45,8 +45,11 @@ class StimjimSerial(ArduinoSerial):
         total_duration: int,
         delay: float = 0.0,
         channel: int = 0,
+        reverse: bool = False,
     ) -> bool:
-        total_string, total_period = self._spiketrain_to_str(spiketrain, t_max)
+        total_string, total_period = self._spiketrain_to_str(
+            spiketrain, t_max, reverse=reverse
+        )
         total_string.insert(
             0,
             self._start_str(
@@ -63,11 +66,17 @@ class StimjimSerial(ArduinoSerial):
         return f"S{pulsetrain},{output0_mode},{output1_mode},{period},{duration}"
 
     def _spiketrain_to_str(
-        self, spiketrain: SpiketrainType, t_max: int, pulse_length: int = 10_000
+        self,
+        spiketrain: SpiketrainType,
+        t_max: int,
+        pulse_length: int = 10_000,
+        reverse: bool = False,
     ) -> List[str]:
         spiketrain = np.insert(spiketrain, 0, 0)
         spiketrain = np.append(spiketrain, t_max)
-        gaps = np.diff(spiketrain)
+        gaps = np.diff(spiketrain).astype(np.int_)
+        if reverse:
+            gaps = gaps[::-1]
         if np.any(gaps < pulse_length):
             raise ValueError(
                 f"Gap between pulse must be larger than pulse length. {spiketrain}"
@@ -75,11 +84,11 @@ class StimjimSerial(ArduinoSerial):
 
         # String functions
         def gap_to_str(x, A1, A2):
-            return f"{A1},{A2},{x}"
+            return f"{A1},{A2},{x:d}"
 
         pulse_to_str = gap_to_str(pulse_length, self.high_v_1, 0)
 
-        total_string = [gap_to_str(gaps[0], self.low_v_1, 0)]  # First Gap
+        total_string = [pulse_to_str, gap_to_str(gaps[0], self.low_v_1, 0)]  # First Gap
         for gap in gaps[1:]:
             total_string.append(pulse_to_str)
             total_string.append(gap_to_str(gap - pulse_length, self.low_v_1, 0))

@@ -7,6 +7,7 @@ from typing import Any, Dict, Optional, Tuple, Union
 
 import os
 
+import matplotlib
 import matplotlib.pyplot as plt
 import neo
 import numpy as np
@@ -81,6 +82,7 @@ def plot_waveforms(
     post: float = 0.002,
     n_spikes: Optional[int] = 100,
     color: str = "k",  # TODO: change typing to matplotlib color
+    ax: Optional[matplotlib.axes.Axes] = None,
     plot_kwargs: Dict[Any, Any] = None,
 ) -> plt.Figure:
     """
@@ -100,6 +102,8 @@ def plot_waveforms(
         The number of cutouts to plot. None to plot all. (Default: 100)
     color : str
         The line color as a pyplot line/marker style. (Default: 'k'=black)
+    ax : Optional[matplotlib.axes.Axes]
+        Use provided axes to plot. If none, create new figure.
     plot_kwargs : Dict[Any, Any]
         Addtional keyword-arguments for matplotlib.pyplot.plot.
     """
@@ -112,9 +116,14 @@ def plot_waveforms(
 
     # TODO: Need to match unit
     time_in_us = np.arange(-pre * 1000, post * 1000, 1e3 / sampling_rate)
-    fig = plt.figure()
+
+    if ax is None:
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+    else:
+        fig = plt.gcf()
     for i in range(n_spikes):
-        plt.plot(
+        ax.plot(
             time_in_us,
             cutouts[
                 i,
@@ -124,7 +133,7 @@ def plot_waveforms(
             alpha=0.3,
             **plot_kwargs,
         )
-    plt.xlabel("Time (ms)")
-    plt.ylabel("Voltage (uV)")
-    plt.title("Cutouts")
+    ax.set_xlabel("Time (ms)")
+    ax.set_ylabel("Voltage (uV)")
+    ax.set_title("Cutouts")
     return fig
