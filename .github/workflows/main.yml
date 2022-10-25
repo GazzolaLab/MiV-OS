@@ -20,6 +20,9 @@ jobs:
             path: ~/Library/Caches/pip
           - os: windows-latest
             path: ~\AppData\Local\pip\Cache
+      defaults:
+        run:
+          shell: bash
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
@@ -32,6 +35,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Install Poetry
         uses: snok/install-poetry@v1
+          poetry config virtualenvs.in-project true
       - name: Set up cache
         uses: actions/cache@v3
         with:
@@ -41,7 +45,7 @@ jobs:
             ${{ runner.os }}-pip-
       - name: Install dependencies
         run: |
-          poetry config virtualenvs.in-project true
+          source $VENV
           poetry lock --no-update
           poetry install -E "docs experiment"
       # Test MiV-OS using pytest
@@ -69,6 +73,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Install Poetry
         uses: snok/install-poetry@v1
+          poetry config virtualenvs.in-project true
       - name: Set up cache
         uses: actions/cache@v3
         with:
@@ -78,7 +83,7 @@ jobs:
             ${{ runner.os }}-pip-
       - name: Install dependencies
         run: |
-          poetry config virtualenvs.in-project true
+          source $VENV
           poetry lock --no-update
           poetry install -E "docs experiment"
       # Set environment variables for coverage test. Coverage test is done using python 3.8
