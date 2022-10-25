@@ -46,7 +46,6 @@ jobs:
             ${{ runner.os }}-pip-
       - name: Install dependencies
         run: |
-          source $VENV
           poetry lock --no-update
           poetry install -E "docs experiment"
       # Test MiV-OS using pytest
@@ -85,7 +84,6 @@ jobs:
             ${{ runner.os }}-pip-
       - name: Install dependencies
         run: |
-          source $VENV
           poetry lock --no-update
           poetry install -E "docs experiment"
       # Set environment variables for coverage test. Coverage test is done using python 3.8
