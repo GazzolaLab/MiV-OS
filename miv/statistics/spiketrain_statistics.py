@@ -41,10 +41,13 @@ def firing_rates(
     Iterable[Any]
 
     """
-    rates = [
-        float(elephant.statistics.mean_firing_rate(spikestamp).magnitude)
-        for spikestamp in spiketrains
-    ]
+    rates = []
+    for spikestamp in spiketrains:
+        mfr = elephant.statistics.mean_firing_rate(spikestamp)
+        if isinstance(mfr, pq.quantity.Quantity):
+            mfr = mfr.magnitude
+        rates.append(mfr)
+
     rates_mean_over_channel = np.mean(rates)
     rates_variance_over_channel = np.var(rates)
     return {
