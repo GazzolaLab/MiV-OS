@@ -284,6 +284,17 @@ optional = true
 python-versions = ">=3.6"
 
 [[package]]
+name = "exceptiongroup"
+version = "1.0.0rc9"
+description = "Backport of PEP 654 (exception groups)"
+category = "dev"
+optional = false
+python-versions = ">=3.7"
+
+[package.extras]
+test = ["pytest (>=6)"]
+
+[[package]]
 name = "executing"
 version = "1.1.1"
 description = "Get the currently executing AST node of a frame, and other information"
@@ -471,7 +482,7 @@ python-versions = "*"
 
 [[package]]
 name = "ipykernel"
-version = "6.16.1"
+version = "6.16.2"
 description = "IPython Kernel for Jupyter"
 category = "main"
 optional = true
@@ -648,7 +659,7 @@ testing = ["coverage", "ipykernel", "jupytext", "matplotlib", "nbdime", "nbforma
 
 [[package]]
 name = "jupyter-client"
-version = "7.4.3"
+version = "7.4.4"
 description = "Jupyter protocol implementation and client libraries"
 category = "main"
 optional = true
@@ -1318,7 +1329,7 @@ python-versions = ">=3.7"
 
 [[package]]
 name = "pytest"
-version = "7.1.3"
+version = "7.2.0"
 description = "pytest: simple powerful testing with Python"
 category = "dev"
 optional = false
@@ -1327,11 +1338,11 @@ python-versions = ">=3.7"
 [package.dependencies]
 attrs = ">=19.2.0"
 colorama = {version = "*", markers = "sys_platform == \"win32\""}
+exceptiongroup = {version = ">=1.0.0rc8", markers = "python_version < \"3.11\""}
 iniconfig = "*"
 packaging = "*"
 pluggy = ">=0.12,<2.0"
-py = ">=1.8.2"
-tomli = ">=1.0.0"
+tomli = {version = ">=1.0.0", markers = "python_version < \"3.11\""}
 
 [package.extras]
 testing = ["argcomplete", "hypothesis (>=3.56)", "mock", "nose", "pygments (>=2.7.2)", "requests", "xmlschema"]
@@ -1353,13 +1364,14 @@ testing = ["fields", "hunter", "process-tests", "pytest-xdist", "six", "virtuale
 
 [[package]]
 name = "pytest-html"
-version = "3.1.1"
+version = "3.2.0"
 description = "pytest plugin for generating HTML reports"
 category = "dev"
 optional = false
 python-versions = ">=3.6"
 
 [package.dependencies]
+py = ">=1.8.2"
 pytest = ">=5.0,<6.0.0 || >6.0.0"
 pytest-metadata = "*"
 
@@ -2366,6 +2378,10 @@ entrypoints = [
     {file = "entrypoints-0.4-py3-none-any.whl", hash = "sha256:f174b5ff827504fd3cd97cc3f8649f3693f51538c7e4bdf3ef002c8429d42f9f"},
     {file = "entrypoints-0.4.tar.gz", hash = "sha256:b706eddaa9218a19ebcd67b56818f05bb27589b1ca9e8d797b74affad4ccacd4"},
 ]
+exceptiongroup = [
+    {file = "exceptiongroup-1.0.0rc9-py3-none-any.whl", hash = "sha256:2e3c3fc1538a094aab74fad52d6c33fc94de3dfee3ee01f187c0e0c72aec5337"},
+    {file = "exceptiongroup-1.0.0rc9.tar.gz", hash = "sha256:9086a4a21ef9b31c72181c77c040a074ba0889ee56a7b289ff0afb0d97655f96"},
+]
 executing = [
     {file = "executing-1.1.1-py2.py3-none-any.whl", hash = "sha256:236ea5f059a38781714a8bfba46a70fad3479c2f552abee3bbafadc57ed111b8"},
     {file = "executing-1.1.1.tar.gz", hash = "sha256:b0d7f8dcc2bac47ce6e39374397e7acecea6fdc380a6d5323e26185d70f38ea8"},
@@ -2511,8 +2527,8 @@ iniconfig = [
     {file = "iniconfig-1.1.1.tar.gz", hash = "sha256:bc3af051d7d14b2ee5ef9969666def0cd1a000e121eaea580d4a313df4b37f32"},
 ]
 ipykernel = [
-    {file = "ipykernel-6.16.1-py3-none-any.whl", hash = "sha256:32eb7bdc5af57185e9a42b0dcef66413ef91a0490b378eae46cbdf0d4e0b5912"},
-    {file = "ipykernel-6.16.1.tar.gz", hash = "sha256:3a27a550c1d682e7825f0f7732b0142b79ef1b21cd2e713cacac0c9847535f13"},
+    {file = "ipykernel-6.16.2-py3-none-any.whl", hash = "sha256:67daf93e5b52456cd8eea87a8b59405d2bb80ae411864a1ea206c3631d8179af"},
+    {file = "ipykernel-6.16.2.tar.gz", hash = "sha256:463f3d87a92e99969b1605cb7a5b4d7b36b7145a0e72d06e65918a6ddefbe630"},
 ]
 ipython = [
     {file = "ipython-8.5.0-py3-none-any.whl", hash = "sha256:6f090e29ab8ef8643e521763a4f1f39dc3914db643122b1e9d3328ff2e43ada2"},
@@ -2551,8 +2567,8 @@ jupyter-cache = [
     {file = "jupyter_cache-0.5.0-py3-none-any.whl", hash = "sha256:642e434b9b75c4b94dc8346eaf5a639c8926a0673b87e5e8ef6460d5cf2c9516"},
 ]
 jupyter-client = [
-    {file = "jupyter_client-7.4.3-py3-none-any.whl", hash = "sha256:8845e3f5a339734b1ecc21d2100638aa1c7a145e356a31845f155cda5b624b1c"},
-    {file = "jupyter_client-7.4.3.tar.gz", hash = "sha256:4fa2514cdb54dd9fbdcf7d7e4c5c3c8a973028168a8b4fc097b6aef625be13b0"},
+    {file = "jupyter_client-7.4.4-py3-none-any.whl", hash = "sha256:1c1d418ef32a45a1fae0b243e6f01cc9bf65fa8ddbd491a034b9ba6ac6502951"},
+    {file = "jupyter_client-7.4.4.tar.gz", hash = "sha256:5616db609ac720422e6a4b893d6572b8d655ff41e058367f4459a0d2c0726832"},
 ]
 jupyter-core = [
     {file = "jupyter_core-4.11.2-py3-none-any.whl", hash = "sha256:3815e80ec5272c0c19aad087a0d2775df2852cfca8f5a17069e99c9350cecff8"},
@@ -3092,16 +3108,16 @@ pyrsistent = [
     {file = "pyrsistent-0.18.1.tar.gz", hash = "sha256:d4d61f8b993a7255ba714df3aca52700f8125289f84f704cf80916517c46eb96"},
 ]
 pytest = [
-    {file = "pytest-7.1.3-py3-none-any.whl", hash = "sha256:1377bda3466d70b55e3f5cecfa55bb7cfcf219c7964629b967c37cf0bda818b7"},
-    {file = "pytest-7.1.3.tar.gz", hash = "sha256:4f365fec2dff9c1162f834d9f18af1ba13062db0c708bf7b946f8a5c76180c39"},
+    {file = "pytest-7.2.0-py3-none-any.whl", hash = "sha256:892f933d339f068883b6fd5a459f03d85bfcb355e4981e146d2c7616c21fef71"},
+    {file = "pytest-7.2.0.tar.gz", hash = "sha256:c4014eb40e10f11f355ad4e3c2fb2c6c6d1919c73f3b5a433de4708202cade59"},
 ]
 pytest-cov = [
     {file = "pytest-cov-4.0.0.tar.gz", hash = "sha256:996b79efde6433cdbd0088872dbc5fb3ed7fe1578b68cdbba634f14bb8dd0470"},
     {file = "pytest_cov-4.0.0-py3-none-any.whl", hash = "sha256:2feb1b751d66a8bd934e5edfa2e961d11309dc37b73b0eabe73b5945fee20f6b"},
 ]
 pytest-html = [
-    {file = "pytest-html-3.1.1.tar.gz", hash = "sha256:3ee1cf319c913d19fe53aeb0bc400e7b0bc2dbeb477553733db1dad12eb75ee3"},
-    {file = "pytest_html-3.1.1-py3-none-any.whl", hash = "sha256:b7f82f123936a3f4d2950bc993c2c1ca09ce262c9ae12f9ac763a2401380b455"},
+    {file = "pytest-html-3.2.0.tar.gz", hash = "sha256:c4e2f4bb0bffc437f51ad2174a8a3e71df81bbc2f6894604e604af18fbe687c3"},
+    {file = "pytest_html-3.2.0-py3-none-any.whl", hash = "sha256:868c08564a68d8b2c26866f1e33178419bb35b1e127c33784a28622eb827f3f3"},
 ]
 pytest-metadata = [
     {file = "pytest-metadata-2.0.2.tar.gz", hash = "sha256:fcd2f416f15be295943527b3c8ba16a44ae5a7141939c90c3dc5ce9d167cf2a5"},
