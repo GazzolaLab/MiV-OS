@@ -20,16 +20,16 @@ jobs:
             path: ~/Library/Caches/pip
           - os: windows-latest
             path: ~\AppData\Local\pip\Cache
-      defaults:
-        run:
-          shell: bash
+    defaults:
+      run:
+        shell: bash
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4.2.0
         with:
           python-version: ${{ matrix.python-version }}
-      - uses: FedericoCarboni/setup-ffmpeg@v1
+      - uses: FedericoCarboni/setup-ffmpeg@v2
         id: setup-ffmpeg
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -67,7 +67,7 @@ jobs:
         uses: actions/setup-python@v4.2.0
         with:
           python-version: ${{ matrix.python-version }}
-      - uses: FedericoCarboni/setup-ffmpeg@v1
+      - uses: FedericoCarboni/setup-ffmpeg@v2
         id: setup-ffmpeg
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
