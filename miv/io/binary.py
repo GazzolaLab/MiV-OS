@@ -158,7 +158,11 @@ def load_ttl_event(
     info: Dict[str, Any] = oebin_read(info_file)
     version = info["GUI version"]
     assert "events" in info.keys(), "No events recorded (TTL)."
-    ttl_info = [data for data in info["events"] if "TTL Input" in data["channel_name"]]
+    ttl_info = [
+        data
+        for data in info["events"]
+        if "TTL Input" in data["channel_name"] or "TTL events" in data["channel_name"]
+    ]
     assert len(ttl_info) > 0, "No events recorded (TTL)."
     assert (
         len(ttl_info) == 1
@@ -167,7 +171,12 @@ def load_ttl_event(
 
     # Data Structure (OpenEphys Structure)
     v_major, v_minor, v_sub = map(int, version.split("."))
-    if v_major == 0 and v_minor <= 5:  # Legacy file name before 0.6.0
+    if v_major == 0 and v_minor <= 5 and v_sub == 4:  # Legacy file name before 0.6.0
+        file_states = "channel_states.npy"
+        file_timestamps = "timestamps.npy"
+        file_sample_numbers = "channels.npy"
+        file_full_words = "full_words.npy"
+    elif v_major == 0 and v_minor <= 5:  # Legacy file name before 0.6.0
         file_states = "states.npy"
         file_timestamps = "synchronized_timestamps.npy"
         file_sample_numbers = "timestamps.npy"
@@ -188,7 +197,7 @@ def load_ttl_event(
 
     # Load from structure.oebin file
     sampling_rate: float = ttl_info["sample_rate"]
-    initial_state: int = ttl_info["initial_state"]
+    initial_state: int = ttl_info["initial_state"] if "initial_state" in ttl_info else 0
 
     if return_sample_numbers:
         return (
@@ -339,7 +348,9 @@ def load_continuous_data(
 
     # Get timestamps
     if os.path.exists(timestamps_path):
-        timestamps = np.asarray(np.load(timestamps_path), dtype=np.float32)
+        timestamps = np.asarray(
+            np.load(timestamps_path)
+        )  # TODO: check if npy file includes dtype. else, add "dtype=np.float32"
         timestamps /= float(sampling_rate)
     else:  # If timestamps_path doesn't exist, deduce the stamps
         timestamps = np.array(range(0, length)) / sampling_rate
