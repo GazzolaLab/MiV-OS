@@ -117,11 +117,8 @@ def plot_waveforms(
     # TODO: Need to match unit
     time_in_us = np.arange(-pre * 1000, post * 1000, 1e3 / sampling_rate)
 
-    if ax is None:
-        fig = plt.figure()
-        ax = fig.add_subplot(111)
-    else:
-        fig = plt.gcf()
+    fig = plt.gcf()
+    ax = ax or plt.gca()
     for i in range(n_spikes):
         ax.plot(
             time_in_us,
