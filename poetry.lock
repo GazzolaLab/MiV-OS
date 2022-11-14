@@ -1418,7 +1418,7 @@ tokenize-rt = "<5"
 
 [[package]]
 name = "pyvis"
-version = "0.3.0"
+version = "0.3.1"
 description = "A Python network graph visualization library"
 category = "main"
 optional = false
@@ -3136,7 +3136,7 @@ pyupgrade = [
     {file = "pyupgrade-2.38.4.tar.gz", hash = "sha256:1eb43a49f416752929741ba4d706bf3f33593d3cac9bdc217fc1ef55c047c1f4"},
 ]
 pyvis = [
-    {file = "pyvis-0.3.0.tar.gz", hash = "sha256:7b83d93f43cfe5627262cb6571cb8ba8ba189dbcb6a86f4ab901e9d958ecf1ee"},
+    {file = "pyvis-0.3.1.tar.gz", hash = "sha256:aa817caac54afc9a4df38ada6f46636b842a8bd57197bb6aca5084699da04307"},
 ]
 PyWavelets = [
     {file = "PyWavelets-1.4.1-cp310-cp310-macosx_10_13_x86_64.whl", hash = "sha256:d854411eb5ee9cb4bc5d0e66e3634aeb8f594210f6a1bed96dbed57ec70f181c"},
