@@ -30,7 +30,7 @@ def spike_amplitude_to_background_noise(
     Given the signal (filtered) and spikestamps, compute the signal-to-noise ratio where signal is the
     average power of the spike and the noise is the power of the background noise.
 
-    :ref:`<https://en.wikipedia.org/wiki/Signal-to-noise_ratio>`
+    :ref:`definition <https://en.wikipedia.org/wiki/Signal-to-noise_ratio>`
 
     Parameters
     ----------
