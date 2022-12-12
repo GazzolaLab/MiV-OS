@@ -76,7 +76,7 @@ poetryup = ">=0.10,<0.13"
 #pyseries = {extras = ["experiment", "docs"], version = "^1.0.26"}
 
 [tool.poetry.dev-dependencies]
-black = "^22.8.0"
+black = "^22.12.0"
 isort = {extras = ["colors"], version = "^5.10.1"}
 mypy = "^0.982"
 mypy-extensions = "^0.4.3"
