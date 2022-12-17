@@ -75,7 +75,7 @@ raw_signal_split = np.array_split(raw_signal, n_split, axis=0)
 timestamps_split = np.array_split(timestamps, n_split)
 for signal_seg, timestamps_seg in tqdm(zip(raw_signal_split, timestamps_split)):
     filtered_signal = pre_filter(signal_seg, sampling_rate=sampling_rate)
-    spks = spike_detection(filtered_signal, timestamps_seg, sampling_rate=sampling_rate, progress_bar=False)
+    spks = spike_detection(filtered_signal, timestamps, sampling_rate=sampling_rate, progress_bar=False)
     if total_spiketrain:
         total_spiketrain.merge(spks)
     else:
