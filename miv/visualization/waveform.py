@@ -62,10 +62,20 @@ def extract_waveforms(
     pre_idx = int(pre * sampling_rate)
     post_idx = int(post * sampling_rate)
 
+    assert (
+        pre_idx + post_idx > 0
+    ), "Set larger pre/post duration. pre+post duration must be more than 1/sampling_rate."
+
     # Padding signal
     signal = np.pad(signal, ((pre_idx, post_idx),), constant_values=0)
     for time in spikestamps:
         index = int(round(time * sampling_rate))
+        if index >= signal.shape[0] or index + post_idx + pre_idx >= signal.shape[0]:
+            raise IndexError(
+                "The width of the spike exceeded the signal. "
+                "Either timestamp exceeded the maximum time recorded, or "
+                "post duration is too large."
+            )
         # if index - pre_idx >= 0 and index + post_idx <= signal.shape[0]:
         #    cutout = signal[(index - pre_idx) : (index + post_idx)]
         #    cutouts.append(cutout)
