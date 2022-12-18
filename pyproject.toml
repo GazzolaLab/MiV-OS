@@ -69,11 +69,11 @@ h5py = "^3.7.0"
 h5py-cache = "^1.0"
 pyvis = ">=0.2.1,<0.4.0"
 lyon = { git = "https://github.com/sciforce/lyon.git", rev = "91dd700" }
-serial = "^0.0.97"
+#serial = "^0.0.97"
 click = "^8.1.3"
 sphinxcontrib-mermaid = {version = "^0.7.1", extras = ["docs"], optional = true}
 poetryup = "^0.10.0"
-#pyseries = {extras = ["experiment", "docs"], version = "^1.0.26"}
+pyseries = {extras = ["experiment", "docs"], version = "^1.0.26"}
 
 [tool.poetry.dev-dependencies]
 black = "^22.8.0"
