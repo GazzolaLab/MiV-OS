@@ -5,7 +5,6 @@ import sys
 from logging import Logger
 
 import h5py
-import h5py_cache
 import numpy as np
 from h5py._hl.files import File
 from numpy import bytes_
@@ -474,9 +473,7 @@ def write(
         **hdoutfile** (HDF5): File to which the data has been written
 
     """
-    hdoutfile = h5py_cache.File(
-        filename, "w", libver="latest", chunk_cache_mem_size=1024**3
-    )
+    hdoutfile = h5py.File(filename, "w", libver="latest", rdcc_nbytes=1024**3)
 
     _GROUPS_ = data["_GROUPS_"].keys()
 
