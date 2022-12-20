@@ -15,6 +15,7 @@ Signals
   :toctree: _toctree/StatisticsAPI
 
   signal_to_noise
+  spike_amplitude_to_background_noise
 
 Spikestamps Statistics
 ----------------------
@@ -22,10 +23,10 @@ Spikestamps Statistics
 .. autosummary::
   :nosignatures:
   :toctree: _toctree/StatisticsAPI
-  
+
   firing_rates
   interspike_intervals
-  coefficient_variation 
+  coefficient_variation
   binned_spiketrain
   fano_factor
 

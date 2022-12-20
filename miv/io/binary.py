@@ -6,7 +6,13 @@ Raw Data Loader
 ###############
 
 """
-__all__ = ["load_continuous_data", "load_recording", "oebin_read", "apply_channel_mask"]
+__all__ = [
+    "load_continuous_data",
+    "load_recording",
+    "oebin_read",
+    "apply_channel_mask",
+    "load_ttl_event",
+]
 
 from typing import Any, Dict, List, Optional, Sequence, Set, Union
 
@@ -73,8 +79,6 @@ def bits_to_voltage(signal: SignalType, channel_info: Sequence[Dict[str, Any]]):
         recorded_unit = pq.Quantity([1], channel_info[channel]["units"])
         unit_conversion = (recorded_unit / resultant_unit).simplified
         signal[:, channel] *= bit_to_volt_conversion * unit_conversion
-        if "ADC" in channel_info[channel]["channel_name"]:
-            signal[:, channel] *= 10**6
     return signal
 
 
@@ -97,16 +101,126 @@ def oebin_read(file_path: str):
     return info
 
 
-def load_recording(
+def load_ttl_event(
     folder: str,
-    channel_mask: Optional[Set[int]] = None,
+    return_sample_numbers: bool = False,
+):
+    """
+    Loads TTL event data recorded by Open Ephys as numpy arrays.
+
+    `Reference: OpenEphys TTL data structure <https://open-ephys.github.io/gui-docs/User-Manual/Recording-data/Binary-format.html#events>`_
+
+    The path should contain:
+
+    - states.npy: N 16-bit integers, indicating ON/OFF (channel number)
+    - sample_numbers.npy: N 64-bit integers, sample number during acquisition.
+    - timestamps.npy: N 64-bit floats, global timestamps
+    - full_words.npy: N 64-bit integer, TTL word of current state of all lines.
+
+    Extra data are retrieved from:
+
+    - structure.oebin: number of channels and sampling rate.
+
+    Parameters
+    ----------
+    folder: str
+        Folder containing the subfolder 'experiment1'.
+    return_sample_numbers: bool
+        If set to true, also return sample_numbers that can be used to re-calculate
+        synchronization between time series. (default=False)
+
+    Returns
+    -------
+    states : np.ndarray
+        Numpy integer array, indicating ON/OFF state. (+- channel number)
+    full_words : np.ndarray
+        Numpy integer array, consisting current state of all lines.
+    timestamps : TimestampsType
+        Numpy float array. Global timestamps in seconds. Relative to start
+        of the Record Node's main data stream.
+    sampling_rate: float
+        Recorded sampling rate
+    initial_state: int
+        Initial TTL state across lines.
+    sample_numbers: Optional[np.ndarray]
+        Return if `return_sample_numbers` is true. Return array of sample numbers that
+        records sampled clock count. Typically used to synchronize time array.
+
+    Raises
+    ------
+    AssertionError
+        No events recorded in data.
+
+    """
+
+    # Check TTL event recorded
+    info_file: str = os.path.join(folder, "structure.oebin")
+    info: Dict[str, Any] = oebin_read(info_file)
+    version = info["GUI version"]
+    assert "events" in info.keys(), "No events recorded (TTL)."
+    ttl_info = [
+        data
+        for data in info["events"]
+        if "TTL Input" in data["channel_name"] or "TTL events" in data["channel_name"]
+    ]
+    assert len(ttl_info) > 0, "No events recorded (TTL)."
+    assert (
+        len(ttl_info) == 1
+    ), "Multiple TTL input is found, which is not supported yet. (TODO)"
+    ttl_info = ttl_info[0]
+
+    # Data Structure (OpenEphys Structure)
+    v_major, v_minor, v_sub = map(int, version.split("."))
+    if v_major == 0 and v_minor <= 5 and v_sub == 4:  # Legacy file name before 0.6.0
+        file_states = "channel_states.npy"
+        file_timestamps = "timestamps.npy"
+        file_sample_numbers = "channels.npy"
+        file_full_words = "full_words.npy"
+    elif v_major == 0 and v_minor <= 5:  # Legacy file name before 0.6.0
+        file_states = "states.npy"
+        file_timestamps = "synchronized_timestamps.npy"
+        file_sample_numbers = "timestamps.npy"
+        file_full_words = "full_words.npy"
+    else:
+        file_states = "states.npy"
+        file_timestamps = "timestamps.npy"
+        file_sample_numbers = "sample_numbers.npy"
+        file_full_words = "full_words.npy"
+    file_path = os.path.join(folder, "events", ttl_info["folder_name"])
+
+    states = np.load(os.path.join(file_path, file_states)).astype(np.int16)
+    sample_numbers = np.load(os.path.join(file_path, file_sample_numbers)).astype(
+        np.int64
+    )
+    timestamps = np.load(os.path.join(file_path, file_timestamps)).astype(np.float64)
+    full_words = np.load(os.path.join(file_path, file_full_words)).astype(np.int64)
+
+    # Load from structure.oebin file
+    sampling_rate: float = ttl_info["sample_rate"]
+    initial_state: int = ttl_info["initial_state"] if "initial_state" in ttl_info else 0
+
+    if return_sample_numbers:
+        return (
+            states,
+            full_words,
+            timestamps,
+            sampling_rate,
+            initial_state,
+            sample_numbers,
+        )
+    else:
+        return states, full_words, timestamps, sampling_rate, initial_state
+
+
+def load_recording(
+    folder: str, channel_mask: Optional[Set[int]] = None, start_at_zero: bool = True
 ):
     """
     Loads data recorded by Open Ephys in Binary format as numpy memmap.
     The path should contain
 
     - continuous/<processor name>/continuous.dat: signal (cannot have multiple file)
-    - continuous/<processor name>/timestamps.dat: timestamps
+    - continuous/<processor name>/timestamps.npy: timestamps
     - structure.oebin: number of channels and sampling rate.
 
     Parameters
@@ -115,6 +229,9 @@ def load_recording(
         folder containing at least the subfolder 'experiment1'.
     channel_mask: Set[int], optional
         Channel index list to ignore in import (default=None)
+    start_at_zero : bool
+        If True, the timestamps is adjusted to start at zero.
+        Note, recorded timestamps might not start at zero for some reason.
 
     Returns
     -------
@@ -129,7 +246,9 @@ def load_recording(
 
     """
 
-    file_path: List[str] = glob(os.path.join(folder, "**", "*.dat"), recursive=True)
+    file_path: List[str] = glob(
+        os.path.join(folder, "**", "continuous.dat"), recursive=True
+    )
     assert (
         len(file_path) == 1
     ), f"There should be only one 'continuous.dat' file. (There exists {file_path})"
@@ -142,7 +261,9 @@ def load_recording(
     # channel_info: Dict[str, Any] = info["continuous"][0]["channels"]
 
     # TODO: maybe need to support multiple continuous.dat files in the future
-    signal, timestamps = load_continuous_data(file_path[0], num_channels, sampling_rate)
+    signal, timestamps = load_continuous_data(
+        file_path[0], num_channels, sampling_rate, dtype=np.float32
+    )
 
     # To Voltage
     signal = bits_to_voltage(signal, info["continuous"][0]["channels"])
@@ -153,6 +274,10 @@ def load_recording(
     if channel_mask:
         signal = apply_channel_mask(signal, channel_mask)
 
+    # Adjust timestamps to start from zero
+    if start_at_zero and not np.isclose(timestamps[0], 0.0):
+        timestamps -= timestamps[0]
+
     return signal, timestamps, sampling_rate
 
 
@@ -161,7 +286,8 @@ def load_continuous_data(
     num_channels: int,
     sampling_rate: float,
     timestamps_path: Optional[str] = None,
-    start_at_zero: bool = True,
+    dtype: Optional[np.dtype] = None,
+    _recorded_dtype: Union[np.dtype, str] = "int16",
 ):
     """
     Load single continous data file and return timestamps and raw data in numpy array.
@@ -185,9 +311,11 @@ def load_continuous_data(
         If None, first check if the file "timestamps.npy" exists on the same directory.
         If the file doesn't exist, we deduce the timestamps based on the sampling rate
         and the length of the data.
-    start_at_zero : bool
-        If True, the timestamps is adjusted to start at zero.
-        Note, recorded timestamps might not start at zero for some reason.
+    dtype: Optional[np.dtype]
+        If None, skip data-type conversion. If the filesize is too large, it is advisable
+        to keep `dtype=None` and convert slice by slice. (default=None)
+    _recorded_dtype: Union[np.dtype, str]
+        Recorded data type. (default="int16")
 
     Returns
     -------
@@ -205,9 +333,13 @@ def load_continuous_data(
     """
 
     # Read raw data signal
-    raw_data: np.ndarray = np.memmap(data_path, dtype="int16", mode="c")
+    raw_data: np.ndarray = np.memmap(
+        data_path, dtype=_recorded_dtype, mode="r", order="C"
+    )
     length = raw_data.size // num_channels
-    raw_data = np.reshape(raw_data, (length, num_channels)).astype("float32")
+    raw_data = raw_data.reshape(length, num_channels)
+    if dtype is not None:
+        raw_data = raw_data.astype(dtype)
 
     # Get timestamps_path
     if timestamps_path is None:
@@ -216,13 +348,11 @@ def load_continuous_data(
 
     # Get timestamps
     if os.path.exists(timestamps_path):
-        timestamps = np.array(np.load(timestamps_path), dtype=np.float64)
+        timestamps = np.asarray(
+            np.load(timestamps_path)
+        )  # TODO: check if npy file includes dtype. else, add "dtype=np.float32"
         timestamps /= float(sampling_rate)
     else:  # If timestamps_path doesn't exist, deduce the stamps
         timestamps = np.array(range(0, length)) / sampling_rate
 
-    # Adjust timestamps to start from zero
-    if start_at_zero and not np.isclose(timestamps[0], 0.0):
-        timestamps -= timestamps[0]
-
-    return np.array(raw_data), timestamps
+    return raw_data, timestamps

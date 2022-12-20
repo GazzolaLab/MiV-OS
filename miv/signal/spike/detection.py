@@ -64,6 +64,7 @@ class ThresholdCutoff:
         sampling_rate: float,
         units: Union[str, pq.UnitTime] = "sec",
         progress_bar: bool = True,
+        return_neotype: bool = True,
     ) -> List[SpikestampsType]:
         """Execute threshold-cutoff method and return spike stamps
 
@@ -79,6 +80,9 @@ class ThresholdCutoff:
             (default='sec')
         progress_bar : bool
             Toggle progress bar (default=True)
+        return_neotype : bool
+            If true, return spiketrains in neo.Spiketrains (default=True)
+            If false, return list of numpy-type spiketrains.
 
         Returns
         -------
@@ -101,12 +105,18 @@ class ThresholdCutoff:
             spikes = self.align_to_minimum(
                 array, sampling_rate, crossings, self.search_range
             )
-            spikestamp = spikes / sampling_rate
+            spikestamp = spikes / sampling_rate + timestamps.min()
             # Convert spikestamp to neo.SpikeTrain (for plotting)
-            spiketrain = neo.SpikeTrain(
-                spikestamp, units=units, t_stop=timestamps.max()
-            )
-            spiketrain_list.append(spiketrain)
+            if return_neotype:
+                spiketrain = neo.SpikeTrain(
+                    spikestamp,
+                    units=units,
+                    t_stop=timestamps.max(),
+                    t_start=timestamps.min(),
+                )
+                spiketrain_list.append(spiketrain)
+            else:
+                spiketrain_list.append(spikestamp.astype(np.float_))
         return spiketrain_list
 
     def compute_spike_threshold(
@@ -133,17 +143,25 @@ class ThresholdCutoff:
         spike_threshold = -cutoff * noise_mid
         return spike_threshold
 
-    def detect_threshold_crossings(self, signal, fs, threshold, dead_time):
+    def detect_threshold_crossings(
+        self, signal: SignalType, fs: float, threshold: float, dead_time: float
+    ):
         """
         Detect threshold crossings in a signal with dead time and return them as an array
 
         The signal transitions from a sample above the threshold to a sample below the threshold for a detection and
         the last detection has to be more than dead_time apart from the current one.
 
-        :param signal: The signal as a 1-dimensional numpy array
-        :param fs: The sampling frequency in Hz
-        :param threshold: The threshold for the signal
-        :param dead_time: The dead time in seconds.
+        Parameters
+        ----------
+        signal : SignalType
+            The signal as a 1-dimensional numpy array
+        fs : float
+            The sampling frequency in Hz
+        threshold : float
+            The threshold for the signal
+        dead_time : float
+            The dead time in seconds.
         """
         dead_time_idx = dead_time * fs
         threshold_crossings = np.diff((signal <= threshold).astype(int) > 0).nonzero()[

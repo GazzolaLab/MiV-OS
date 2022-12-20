@@ -7,6 +7,7 @@ from typing import Any, Dict, Optional, Tuple, Union
 
 import os
 
+import matplotlib
 import matplotlib.pyplot as plt
 import neo
 import numpy as np
@@ -25,7 +26,7 @@ from miv.typing import SignalType, SpikestampsType
 def extract_waveforms(
     signal: SignalType,
     spikestamps: SpikestampsType,
-    channel: int,
+    channel: Optional[int],
     sampling_rate: float,
     pre: pq.Quantity = 0.001 * pq.s,
     post: pq.Quantity = 0.002 * pq.s,
@@ -39,8 +40,8 @@ def extract_waveforms(
         The signal as a 2-dimensional numpy array (length, num_channel)
     spikestamps : SpikestampsType
         The sample index of all spikes as a 1-dim numpy array
-    channel : int
-        Interested channel
+    channel : Optional[int]
+        Interested channel. If None, assume signal and spikestamps are single channel.
     sampling_rate : float
         The sampling frequency in Hz
     pre : pq.Quantity
@@ -54,18 +55,28 @@ def extract_waveforms(
         Return stacks of spike cutout; shape(n_spikes, width).
 
     """
-    # TODO: Refactor this part
-    signal = signal[:, channel]
-    spikestamps = spikestamps[channel]
+    if channel is not None:
+        signal = signal[:, channel]
+        spikestamps = spikestamps[channel]
 
     cutouts = []
     pre_idx = int(pre * sampling_rate)
     post_idx = int(post * sampling_rate)
 
+    assert (
+        pre_idx + post_idx > 0
+    ), "Set larger pre/post duration. pre+post duration must be more than 1/sampling_rate."
+
     # Padding signal
     signal = np.pad(signal, ((pre_idx, post_idx),), constant_values=0)
     for time in spikestamps:
         index = int(round(time * sampling_rate))
+        if index >= signal.shape[0] or index + post_idx + pre_idx >= signal.shape[0]:
+            raise IndexError(
+                "The width of the spike exceeded the signal. "
+                "Either timestamp exceeded the maximum time recorded, or "
+                "post duration is too large."
+            )
         # if index - pre_idx >= 0 and index + post_idx <= signal.shape[0]:
         #    cutout = signal[(index - pre_idx) : (index + post_idx)]
         #    cutouts.append(cutout)
@@ -82,6 +93,7 @@ def plot_waveforms(
     post: float = 0.002,
     n_spikes: Optional[int] = 100,
     color: str = "k",  # TODO: change typing to matplotlib color
+    ax: Optional[matplotlib.axes.Axes] = None,
     plot_kwargs: Dict[Any, Any] = None,
 ) -> plt.Figure:
     """
@@ -101,6 +113,8 @@ def plot_waveforms(
         The number of cutouts to plot. None to plot all. (Default: 100)
     color : str
         The line color as a pyplot line/marker style. (Default: 'k'=black)
+    ax : Optional[matplotlib.axes.Axes]
+        Use provided axes to plot. If none, create new figure.
     plot_kwargs : Dict[Any, Any]
         Addtional keyword-arguments for matplotlib.pyplot.plot.
     """
@@ -113,9 +127,11 @@ def plot_waveforms(
 
     # TODO: Need to match unit
     time_in_us = np.arange(-pre * 1000, post * 1000, 1e3 / sampling_rate)
-    fig = plt.figure()
+
+    fig = plt.gcf()
+    ax = ax or plt.gca()
     for i in range(n_spikes):
-        plt.plot(
+        ax.plot(
             time_in_us,
             cutouts[
                 i,
@@ -125,7 +141,7 @@ def plot_waveforms(
             alpha=0.3,
             **plot_kwargs,
         )
-    plt.xlabel("Time (ms)")
-    plt.ylabel("Voltage (uV)")
-    plt.title("Cutouts")
+    ax.set_xlabel("Time (ms)")
+    ax.set_ylabel("Voltage (uV)")
+    ax.set_title("Cutouts")
     return fig

@@ -30,6 +30,7 @@ from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, Un
 
 import logging
 import os
+import pickle
 from collections.abc import MutableSequence
 from contextlib import contextmanager
 from glob import glob
@@ -37,7 +38,7 @@ from glob import glob
 import matplotlib.pyplot as plt
 import numpy as np
 
-from miv.io.binary import load_continuous_data, load_recording
+from miv.io.binary import load_continuous_data, load_recording, load_ttl_event
 from miv.signal.filter.protocol import FilterProtocol
 from miv.signal.spike.protocol import SpikeDetectionProtocol
 from miv.statistics import firing_rates
@@ -91,10 +92,21 @@ class Data:
         data_path: str,
     ):
         self.data_path: str = data_path
-        self.analysis_path: str = os.path.join(data_path, "analysis")
+        self._analysis_path: str = os.path.join(data_path, "analysis")
         self.masking_channel_set: Set[int] = set()
 
-        os.makedirs(self.analysis_path, exist_ok=True)
+        os.makedirs(self._analysis_path, exist_ok=True)
+
+    @property
+    def analysis_path(self):
+        """Default sub-directory path to save analysis results"""
+        return self._analysis_path
+
+    @analysis_path.setter
+    def analysis_path(self, path):
+        if not os.path.isdir(path):
+            os.makedirs(path)
+        self._analysis_path = path
 
     def save_figure(
         self,
@@ -110,6 +122,8 @@ class Data:
         figure : plt.Figure
         group : str
         filename : str
+        savefig_kwargs : Optional[Dict[Any, Any]]
+            Additional parameters to pass to `plt.savefig`.
         """
         if savefig_kwargs is None:
             savefig_kwargs = {}
@@ -121,10 +135,55 @@ class Data:
         plt.figure(figure)
         plt.savefig(filepath, **savefig_kwargs)
 
+    def save_data(
+        self,
+        data,
+        filename: str,
+        pkl_kwargs: Optional[Dict[Any, any]] = None,
+    ):
+        """Save analysis data into sub-directory
+
+        Parameters
+        ----------
+        data :
+        filename : str
+        pkl_kwargs : Optional[Dict[Any, Any]]
+            Additional parameters to pass to `plt.savefig`.
+        """
+        pkl_kwargs = pkl_kwargs or {}
+        filepath = os.path.join(self.analysis_path, filename + ".pkl")
+        with open(filepath, "wb") as output_file:
+            pickle.dump(data, output_file, **pkl_kwargs)
+
+    def load_data(
+        self,
+        filename: str,
+        pkl_kwargs: Optional[Dict[Any, any]] = None,
+    ):
+        """Quick load pickled data (data saved using `save_data`)
+
+        Parameters
+        ----------
+        filename : str
+        pkl_kwargs : Optional[Dict[Any, Any]]
+            Additional parameters to pass to `plt.savefig`.
+        """
+        pkl_kwargs = pkl_kwargs or {}
+        filepath = os.path.join(self.analysis_path, filename + ".pkl")
+        with open(filepath, "rb") as output_file:
+            data = pickle.load(output_file, **pkl_kwargs)
+        return data
+
     @contextmanager
-    def load(self):
+    def load(self, start_at_zero: bool = False):
         """
         Context manager for loading data instantly.
+
+        Parameters
+        ----------
+        start_at_zero : bool
+            If set to True, time first timestamps will be shifted to zero. To achieve synchronized
+            timestamps with other recordings/events, set this to False.
 
         Examples
         --------
@@ -151,12 +210,18 @@ class Data:
             raise FileNotFoundError("Data directory does not have all necessary files.")
         try:
             signal, timestamps, sampling_rate = load_recording(
-                self.data_path, self.masking_channel_set
+                self.data_path, self.masking_channel_set, start_at_zero=start_at_zero
             )
             yield signal, timestamps, sampling_rate
         finally:
             del timestamps
             del signal
+
+    def load_ttl_event(self):
+        """
+        Load TTL event data if data contains. Detail implementation is :func:`here <miv.io.binary.load_ttl_event>`.
+        """
+        return load_ttl_event(self.data_path)
 
     def set_channel_mask(self, channel_id: Iterable[int]):
         """

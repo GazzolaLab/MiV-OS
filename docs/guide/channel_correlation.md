@@ -9,9 +9,12 @@ kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
   name: python3
+file_format: mystnb
+mystnb:
+  execution_mode: 'off'
 ---
 
-# Channel-wise Signal Correlation
+# Channel-wise Correlation
 
 Here is the example script of cross-correlation analysis using `Elephant` package.
 
