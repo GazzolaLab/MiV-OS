@@ -47,7 +47,7 @@ jobs:
       - name: Install dependencies
         run: |
           #poetry lock --no-update
-          poetry install -E "docs experiment"
+          poetry install --all-extras
       # Test MiV-OS using pytest
       - name: Run tests
         run: |
@@ -86,7 +86,7 @@ jobs:
       - name: Install dependencies
         run: |
           #poetry lock --no-update
-          poetry install -E "docs experiment"
+          poetry install --all-extras
       # Set environment variables for coverage test. Coverage test is done using python 3.8
       - name: Run style checks
         run: |
