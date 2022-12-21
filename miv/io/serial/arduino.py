@@ -14,7 +14,7 @@ import time
 import serial
 
 
-def list_serial_ports():
+def list_serial_ports():  # pragma: no cover
     """list serial communication ports available"""
     from serial.tools.list_ports import main
 
