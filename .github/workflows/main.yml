@@ -25,25 +25,26 @@ jobs:
           shell: bash
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4.2.0
-        with:
-          python-version: ${{ matrix.python-version }}
-      - uses: FedericoCarboni/setup-ffmpeg@v2
-        id: setup-ffmpeg
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:
           virtualenvs-in-project: true
-      - name: Set up cache
-        uses: actions/cache@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4.2.0
         with:
-          path: ${{ matrix.path }}
-          key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}-${{ hashFiles('poetry.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+          python-version: ${{ matrix.python-version }}
+          cache: 'poetry'
+      - uses: FedericoCarboni/setup-ffmpeg@v2
+        id: setup-ffmpeg
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Set up cache
+      #   uses: actions/cache@v3
+      #   with:
+      #     path: ${{ matrix.path }}
+      #     key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}-${{ hashFiles('poetry.lock') }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-pip-
       - name: Install dependencies
         run: |
 <<<<<<< HEAD
@@ -104,25 +105,26 @@ jobs:
             path: ~/Library/Caches/pip
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4.2.0
-        with:
-          python-version: ${{ matrix.python-version }}
-      - uses: FedericoCarboni/setup-ffmpeg@v2
-        id: setup-ffmpeg
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:
           virtualenvs-in-project: true
-      - name: Set up cache
-        uses: actions/cache@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4.2.0
         with:
-          path: ${{ matrix.path }}
-          key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}-${{ hashFiles('poetry.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+          python-version: ${{ matrix.python-version }}
+          cache: 'poetry'
+      - uses: FedericoCarboni/setup-ffmpeg@v2
+        id: setup-ffmpeg
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Set up cache
+      #   uses: actions/cache@v3
+      #   with:
+      #     path: ${{ matrix.path }}
+      #     key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}-${{ hashFiles('poetry.lock') }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-pip-
       - name: Install dependencies
         run: |
 <<<<<<< HEAD
