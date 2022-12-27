@@ -1,1 +1,1 @@
-from miv.core.spiketrain import *
+from miv.core.spikestamps import *
