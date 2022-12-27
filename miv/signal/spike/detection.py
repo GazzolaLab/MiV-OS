@@ -30,6 +30,7 @@ import numpy as np
 import quantities as pq
 from tqdm import tqdm
 
+from miv.core import Spikestamps
 from miv.typing import SignalType, SpikestampsType, TimestampsType
 
 
@@ -65,7 +66,7 @@ class ThresholdCutoff:
         units: Union[str, pq.UnitTime] = "sec",
         progress_bar: bool = True,
         return_neotype: bool = True,
-    ) -> List[SpikestampsType]:
+    ) -> SpikestampsType:
         """Execute threshold-cutoff method and return spike stamps
 
         Parameters
@@ -117,7 +118,7 @@ class ThresholdCutoff:
                 spiketrain_list.append(spiketrain)
             else:
                 spiketrain_list.append(spikestamp.astype(np.float_))
-        return spiketrain_list
+        return Spikestamps(spiketrain_list)
 
     def compute_spike_threshold(
         self, signal: SignalType, cutoff: float = 5.0, use_mad: bool = True

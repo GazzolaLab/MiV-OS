@@ -13,15 +13,16 @@ class Spikestamps(UserList):
     Represents spikes emitted by the same unit in a period of times.
     """
 
-    def __init__(self, num_channels: Optional[int] = None):
+    def __init__(self, iterable):
         super().__init__()
-        if num_channels is not None and isinstance(num_channels, int):
-            self.data = [[] for _ in range(num_channels)]
+        self.data = iterable
 
     def __setitem__(self, index, item):
         self.data[index] = item
 
     def insert(self, index, item):
+        if index > len(self.data) or index < 0:
+            raise IndexError("Index out of range")
         self.data.insert(index, item)
 
     def append(self, item):
