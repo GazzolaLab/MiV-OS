@@ -18,3 +18,4 @@ omit =
     # omit anything in a .local directory anywhere
     */.local/*
 	  setup.py
+      miv/io/intan/rhs.py # not part of the dev target
