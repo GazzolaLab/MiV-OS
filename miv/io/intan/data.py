@@ -121,7 +121,7 @@ class DataIntan(Data):
             raise FileNotFoundError("Data directory does not have all necessary files.")
         files = self.get_recording_files()
         # Get sampling rate from setting file
-        setting_path = os.path.join(os.path.dirname(files[0]), "settings.xml")
+        setting_path = os.path.join(self.data_path, "settings.xml")
         sampling_rate = int(ET.parse(setting_path).getroot().attrib["SampleRateHertz"])
         # Read each files
         for filename in tqdm(files, disable=not progress_bar):
@@ -154,13 +154,10 @@ class DataIntan(Data):
         """
 
         continuous_dat_paths = self.get_recording_files()
-        print(continuous_dat_paths)
         if len(continuous_dat_paths) == 0:
             logging.warning("At least one .rhs file must exist in the data path.")
             return False
-        if not os.path.exists(
-            os.path.join(os.path.dirname(self.data_path), "settings.xml")
-        ):
+        if not os.path.exists(os.path.join(self.data_path, "settings.xml")):
             logging.warning("Missing settings.xml in the data path.")
             return False
         return True

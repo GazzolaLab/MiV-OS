@@ -12,7 +12,7 @@ import numpy as np
 
 
 # Define plural function
-def plural(n):
+def plural(n):  # pragma: no cover
     """Utility function to optionally pluralize words based on the value of n."""
 
     if n == 1:
@@ -22,7 +22,7 @@ def plural(n):
 
 
 # Define read_qstring function
-def read_qstring(fid):
+def read_qstring(fid):  # pragma: no cover
     """Read Qt style QString.
 
     The first 32-bit unsigned number indicates the length of the string (in bytes).
@@ -53,7 +53,7 @@ def read_qstring(fid):
 
 
 # Define read_header function
-def read_header(fid):
+def read_header(fid):  # pragma: no cover
     """Reads the Intan File Format header from the given file."""
 
     # Check 'magic number' at beginning of file to make sure this is an Intan
@@ -360,7 +360,7 @@ def read_header(fid):
 
 
 # Define notch_filter function
-def notch_filter(input, f_sample, f_notch, bandwidth):
+def notch_filter(input, f_sample, f_notch, bandwidth):  # pragma: no cover
     """Implements a notch filter (e.g., for 50 or 60 Hz) on vector 'input'.
 
     f_sample = sample rate of data (input Hz or Samples/sec)
@@ -411,7 +411,7 @@ def notch_filter(input, f_sample, f_notch, bandwidth):
 
 
 # Define find_channel_in_group function
-def find_channel_in_group(channel_name, signal_group):
+def find_channel_in_group(channel_name, signal_group):  # pragma: no cover
     for count, this_channel in enumerate(signal_group):
         if this_channel["custom_channel_name"] == channel_name:
             return True, count
@@ -419,7 +419,7 @@ def find_channel_in_group(channel_name, signal_group):
 
 
 # Define find_channel_in_header function
-def find_channel_in_header(channel_name, header):
+def find_channel_in_header(channel_name, header):  # pragma: no cover
 
     # Look through all present signal groups
 
@@ -507,7 +507,7 @@ def find_channel_in_header(channel_name, header):
 
 
 # Define get_bytes_per_data_block function
-def get_bytes_per_data_block(header):
+def get_bytes_per_data_block(header):  # pragma: no cover
     """Calculates the number of bytes in each 128-sample datablock."""
     N = 128  # n of amplifier samples
     # Each data block contains N amplifier samples.
@@ -541,7 +541,7 @@ def get_bytes_per_data_block(header):
 
 
 # Define read_one_data_block function
-def read_one_data_block(data, header, indices, fid):
+def read_one_data_block(data, header, indices, fid):  # pragma: no cover
     """Reads one 128-sample data block from fid into data, at the location indicated by indices."""
 
     data["t"][indices["amplifier"] : (indices["amplifier"] + 128)] = np.array(
@@ -606,7 +606,7 @@ def read_one_data_block(data, header, indices, fid):
 
 
 # Define data_to_result function
-def data_to_result(header, data, data_present):
+def data_to_result(header, data, data_present):  # pragma: no cover
     """Moves the header and data (if present) into a common object."""
 
     result = {}
@@ -659,7 +659,7 @@ def data_to_result(header, data, data_present):
 
 
 # Define plot_channel function
-def plot_channel(channel_name, result):
+def plot_channel(channel_name, result):  # pragma: no cover
     # Find channel that corresponds to this name
     channel_found, signal_type, signal_index = find_channel_in_header(
         channel_name, result
@@ -726,7 +726,7 @@ def plot_channel(channel_name, result):
 
 
 # Define load_file function
-def load_file(filename):
+def load_file(filename):  # pragma: no cover
     # Start timing
     tic = time.time()
 
@@ -992,7 +992,7 @@ def load_file(filename):
 
 
 # Define function print_all_channel_names
-def print_all_channel_names(result):
+def print_all_channel_names(result):  # pragma: no cover
 
     # Print all amplifier_channels
     if "amplifier_channels" in result:
@@ -1036,6 +1036,6 @@ def print_all_channel_names(result):
 
 
 # Define function print_names_in_group
-def print_names_in_group(signal_group):
+def print_names_in_group(signal_group):  # pragma: no cover
     for this_channel in signal_group:
         logging.info(this_channel["custom_channel_name"])
