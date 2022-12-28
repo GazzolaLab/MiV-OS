@@ -31,15 +31,11 @@ class DataProtocol(Protocol):
     def analysis_path(self) -> None:
         ...
 
-    def load(
-        self, start_at_zero: bool = False
-    ) -> Tuple[SignalType, TimestampsType, int]:
+    def load(self, *args) -> Tuple[SignalType, TimestampsType, int]:
         """Context manager for loading data instantly."""
         ...
 
-    def load_fragments(
-        self, start_at_zero: bool, num_fragments: int, progress_bar=False
-    ) -> Generator[SignalType, TimestampsType, int]:
+    def load_fragments(self, *args) -> Generator[SignalType, TimestampsType, int]:
         """Iterator to load data fragmentally. Use to load large file size data."""
         ...
 
