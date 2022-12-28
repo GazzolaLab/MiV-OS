@@ -1,6 +1,6 @@
 __doc__ = """
 
-Module (OpenEphys)
+Module (Intan)
 ##################
 
 """

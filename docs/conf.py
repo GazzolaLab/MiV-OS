@@ -49,6 +49,7 @@ extensions = [
     "numpydoc",
     # "myst_parser", # Moving onto jupyter-notebook style
     "myst_nb",
+    "IPython.sphinxext.ipython_console_highlighting",  # TODO: remove once Ipython updates above 8.7.0 (https://github.com/spatialaudio/nbsphinx/issues/687)
 ]
 
 myst_enable_extensions = [
@@ -69,6 +70,8 @@ templates_path = ["_templates"]
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = [
     "README.md",  # File reserved to explain how documentationing works.
+    "_build",
+    "**.ipynb_checkpoints",
 ]
 
 autodoc_default_options = {
