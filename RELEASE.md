@@ -1,3 +1,38 @@
+# Release Note (version 0.2.3)
+
+## What's Changed
+
+### Features
+
+* Intan RHS data load module by @skim0119 in https://github.com/GazzolaLab/MiV-OS/pull/179
+* Support fragment load for large file size.
+* MiV native `miv.Spikestamps` datatime with extended 'merge' feature.
+* Support for OpenEphys version 0.5.4 file structure.
+* Add array type return for spiketrain during spikedetection.
+* Add `spike_amplitude_to_background_noise` statistics.
+* New protocol for `Data` module prot
+
+## Minor
+
+- bug: zero spikerate
+- docs: update on SNR tools
+- test: unittests on SNR features
+- test: unittests on BSA coding module
+- test: unittests on arduino module
+- test: unittests on StimJim module
+- test: unittests on geometry protocol
+- test: unittests on OE TTL event readout
+- test: more unittests on butter-bandpass module
+- git-action: use python-action cache for poetry
+- git-action: remove windows test with cache
+
+## Dependencies
+
+- deprecated: removed h5py_cache
+- pyseries -> pyserial dependency
+
+**Full Changelog**: https://github.com/GazzolaLab/MiV-OS/compare/v0.2.2...v0.2.3
+
 # Release Note (version 0.2.2)
 
 ## What's Changed
