@@ -43,6 +43,9 @@ def firing_rates(
     """
     rates = []
     for spikestamp in spiketrains:
+        if len(spikestamp) == 0:
+            rates.append(0)
+            continue
         mfr = elephant.statistics.mean_firing_rate(spikestamp)
         if isinstance(mfr, pq.quantity.Quantity):
             mfr = mfr.magnitude

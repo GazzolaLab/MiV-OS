@@ -1,26 +1,22 @@
 __doc__ = """
 
+Data Manager
+############
+
+.. autoclass:: DataManager
+   :members:
+
+Module (OpenEphys)
+##################
+
 .. Note::
     We expect the data structure to follow the default format
     exported from OpenEphys system:
     `format <https://open-ephys.atlassian.net/wiki/spaces/OEW/pages/491632/Data+format>`_.
 
-.. Note::
-    For simple experiments, you may prefer to use :ref:`api/io:Raw Data Loader`.
-    However, we generally recommend to use ``Data`` or ``DataManager`` for
-    handling data, especially when the size of the raw data is large.
-
-Module
-######
-
 .. currentmodule:: miv.io.data
 
 .. autoclass:: Data
-   :members:
-
-----------------------
-
-.. autoclass:: DataManager
    :members:
 
 """
@@ -39,6 +35,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from miv.io.binary import load_continuous_data, load_recording, load_ttl_event
+from miv.io.protocol import DataProtocol
 from miv.signal.filter.protocol import FilterProtocol
 from miv.signal.spike.protocol import SpikeDetectionProtocol
 from miv.statistics import firing_rates
@@ -226,7 +223,7 @@ class Data:
         self, start_at_zero: bool = False, num_fragments: int = 1, progress_bar=False
     ):
         """
-        Context manager for loading data instantly.
+        Iterator to load data fragmentally.
 
         Parameters
         ----------
@@ -524,7 +521,7 @@ class DataManager(MutableSequence):
 
     def __init__(self, data_collection_path: str):
         self.data_collection_path = data_collection_path
-        self.data_list: List[Data] = []
+        self.data_list: List[DataProtocol] = []
 
         # From the path get data paths and create data objects
         self._load_data_paths()
@@ -534,7 +531,7 @@ class DataManager(MutableSequence):
         return [data.data_path for data in self.data_list]
 
     # Queries
-    def query_path_name(self, query_path) -> Iterable[Data]:
+    def query_path_name(self, query_path) -> Iterable[DataProtocol]:
         return list(filter(lambda d: query_path in d.data_path, self.data_list))
 
     # DataManager Representation
@@ -686,7 +683,7 @@ class DataManager(MutableSequence):
 
     def auto_channel_mask_with_correlation_matrix(
         self,
-        spontaneous_data: Data,
+        spontaneous_data: DataProtocol,
         filter: FilterProtocol,
         detector: SpikeDetectionProtocol,
         omit_experiments: Optional[Iterable[int]] = None,
