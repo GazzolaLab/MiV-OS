@@ -12,14 +12,14 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.8"]
-        os: [ubuntu-latest, macos-latest] # Run macos tests if really required, since they charge 10 times more for macos
+        os: [ubuntu-latest, macos-latest]
         include:
           - os: ubuntu-latest
             path: ~/.cache/pip
           - os: macos-latest
             path: ~/Library/Caches/pip
-          - os: windows-latest
-            path: ~\AppData\Local\pip\Cache
+          #- os: windows-latest
+          #  path: ~\AppData\Local\pip\Cache
     defaults:
       run:
         shell: bash
