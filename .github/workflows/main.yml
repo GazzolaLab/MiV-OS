@@ -11,43 +11,44 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10"]
-        os: [ubuntu-latest, macos-latest, windows-latest] # Run macos tests if really required, since they charge 10 times more for macos
+        python-version: ["3.8"]
+        os: [ubuntu-latest, macos-latest]
         include:
           - os: ubuntu-latest
             path: ~/.cache/pip
           - os: macos-latest
             path: ~/Library/Caches/pip
-          - os: windows-latest
-            path: ~\AppData\Local\pip\Cache
+          #- os: windows-latest
+          #  path: ~\AppData\Local\pip\Cache
     defaults:
       run:
         shell: bash
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4.4.0
-        with:
-          python-version: ${{ matrix.python-version }}
-      - uses: FedericoCarboni/setup-ffmpeg@v2
-        id: setup-ffmpeg
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:
           virtualenvs-in-project: true
-      - name: Set up cache
-        uses: actions/cache@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4.4.0
         with:
-          path: ${{ matrix.path }}
-          key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}-${{ hashFiles('poetry.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+          python-version: ${{ matrix.python-version }}
+          cache: 'poetry'
+      - uses: FedericoCarboni/setup-ffmpeg@v2
+        id: setup-ffmpeg
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Set up cache
+      #   uses: actions/cache@v3
+      #   with:
+      #     path: ${{ matrix.path }}
+      #     key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}-${{ hashFiles('poetry.lock') }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-pip-
       - name: Install dependencies
         run: |
-          poetry lock --no-update
-          poetry install -E "docs experiment"
+          #poetry lock --no-update
+          poetry install --all-extras
       # Test MiV-OS using pytest
       - name: Run tests
         run: |
@@ -64,29 +65,30 @@ jobs:
             path: ~/Library/Caches/pip
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4.4.0
-        with:
-          python-version: ${{ matrix.python-version }}
-      - uses: FedericoCarboni/setup-ffmpeg@v2
-        id: setup-ffmpeg
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:
           virtualenvs-in-project: true
-      - name: Set up cache
-        uses: actions/cache@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4.4.0
         with:
-          path: ${{ matrix.path }}
-          key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}-${{ hashFiles('poetry.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+          python-version: ${{ matrix.python-version }}
+          cache: 'poetry'
+      - uses: FedericoCarboni/setup-ffmpeg@v2
+        id: setup-ffmpeg
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Set up cache
+      #   uses: actions/cache@v3
+      #   with:
+      #     path: ${{ matrix.path }}
+      #     key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}-${{ hashFiles('poetry.lock') }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-pip-
       - name: Install dependencies
         run: |
-          poetry lock --no-update
-          poetry install -E "docs experiment"
+          #poetry lock --no-update
+          poetry install --all-extras
       # Set environment variables for coverage test. Coverage test is done using python 3.8
       - name: Run style checks
         run: |

@@ -5,9 +5,8 @@ jupytext:
     format_name: myst
     format_version: 0.13
     jupytext_version: 1.13.8
+file_format: mystnb
 kernelspec:
-  display_name: Python 3.10.4 64-bit
-  language: python
   name: python3
 ---
 

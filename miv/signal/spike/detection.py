@@ -30,6 +30,7 @@ import numpy as np
 import quantities as pq
 from tqdm import tqdm
 
+from miv.core import Spikestamps
 from miv.typing import SignalType, SpikestampsType, TimestampsType
 
 
@@ -65,7 +66,7 @@ class ThresholdCutoff:
         units: Union[str, pq.UnitTime] = "sec",
         progress_bar: bool = True,
         return_neotype: bool = True,
-    ) -> List[SpikestampsType]:
+    ) -> SpikestampsType:
         """Execute threshold-cutoff method and return spike stamps
 
         Parameters
@@ -117,7 +118,7 @@ class ThresholdCutoff:
                 spiketrain_list.append(spiketrain)
             else:
                 spiketrain_list.append(spikestamp.astype(np.float_))
-        return spiketrain_list
+        return Spikestamps(spiketrain_list)
 
     def compute_spike_threshold(
         self, signal: SignalType, cutoff: float = 5.0, use_mad: bool = True
@@ -143,17 +144,25 @@ class ThresholdCutoff:
         spike_threshold = -cutoff * noise_mid
         return spike_threshold
 
-    def detect_threshold_crossings(self, signal, fs, threshold, dead_time):
+    def detect_threshold_crossings(
+        self, signal: SignalType, fs: float, threshold: float, dead_time: float
+    ):
         """
         Detect threshold crossings in a signal with dead time and return them as an array
 
         The signal transitions from a sample above the threshold to a sample below the threshold for a detection and
         the last detection has to be more than dead_time apart from the current one.
 
-        :param signal: The signal as a 1-dimensional numpy array
-        :param fs: The sampling frequency in Hz
-        :param threshold: The threshold for the signal
-        :param dead_time: The dead time in seconds.
+        Parameters
+        ----------
+        signal : SignalType
+            The signal as a 1-dimensional numpy array
+        fs : float
+            The sampling frequency in Hz
+        threshold : float
+            The threshold for the signal
+        dead_time : float
+            The dead time in seconds.
         """
         dead_time_idx = dead_time * fs
         threshold_crossings = np.diff((signal <= threshold).astype(int) > 0).nonzero()[

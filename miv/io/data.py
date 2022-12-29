@@ -1,26 +1,22 @@
 __doc__ = """
 
+Data Manager
+############
+
+.. autoclass:: DataManager
+   :members:
+
+Module (OpenEphys)
+##################
+
 .. Note::
     We expect the data structure to follow the default format
     exported from OpenEphys system:
     `format <https://open-ephys.atlassian.net/wiki/spaces/OEW/pages/491632/Data+format>`_.
 
-.. Note::
-    For simple experiments, you may prefer to use :ref:`api/io:Raw Data Loader`.
-    However, we generally recommend to use ``Data`` or ``DataManager`` for
-    handling data, especially when the size of the raw data is large.
-
-Module
-######
-
 .. currentmodule:: miv.io.data
 
 .. autoclass:: Data
-   :members:
-
-----------------------
-
-.. autoclass:: DataManager
    :members:
 
 """
@@ -39,6 +35,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from miv.io.binary import load_continuous_data, load_recording, load_ttl_event
+from miv.io.protocol import DataProtocol
 from miv.signal.filter.protocol import FilterProtocol
 from miv.signal.spike.protocol import SpikeDetectionProtocol
 from miv.statistics import firing_rates
@@ -208,14 +205,65 @@ class Data:
         # TODO: Not sure this is safe implementation
         if not self.check_path_validity():
             raise FileNotFoundError("Data directory does not have all necessary files.")
+        timestamps, signal = None, None
         try:
-            signal, timestamps, sampling_rate = load_recording(
-                self.data_path, self.masking_channel_set, start_at_zero=start_at_zero
+            signal, timestamps, sampling_rate = next(
+                load_recording(
+                    self.data_path,
+                    self.masking_channel_set,
+                    start_at_zero=start_at_zero,
+                )
             )
             yield signal, timestamps, sampling_rate
         finally:
             del timestamps
             del signal
+
+    def load_fragments(
+        self, start_at_zero: bool = False, num_fragments: int = 1, progress_bar=False
+    ):
+        """
+        Iterator to load data fragmentally.
+
+        Parameters
+        ----------
+        start_at_zero : bool
+            If set to True, time first timestamps will be shifted to zero. To achieve synchronized
+            timestamps with other recordings/events, set this to False.
+        num_fragments : int
+            Instead of loading entire data at once, split the data into `num_fragment`
+            number of subdata to process separately. (default=1)
+        progress_bar : bool
+            Visible progress bar
+
+        Examples
+        --------
+            >>> data = Data(data_path)
+            >>> for data.load_fragments(10) as (signal, timestamps, sampling_rate):
+            ...     ...
+
+        Returns
+        -------
+        signal : SignalType, neo.core.AnalogSignal
+            The length of the first axis `signal.shape[0]` correspond to the length of the
+            signal, while second axis `signal.shape[1]` correspond to the number of channels.
+        timestamps : TimestampsType, numpy array
+        sampling_rate : float
+
+        Raises
+        ------
+        FileNotFoundError
+            If some key files are missing.
+        """
+        if not self.check_path_validity():
+            raise FileNotFoundError("Data directory does not have all necessary files.")
+        yield from load_recording(
+            self.data_path,
+            self.masking_channel_set,
+            start_at_zero=start_at_zero,
+            num_fragments=num_fragments,
+            progress_bar=progress_bar,
+        )
 
     def load_ttl_event(self):
         """
@@ -473,7 +521,7 @@ class DataManager(MutableSequence):
 
     def __init__(self, data_collection_path: str):
         self.data_collection_path = data_collection_path
-        self.data_list: List[Data] = []
+        self.data_list: List[DataProtocol] = []
 
         # From the path get data paths and create data objects
         self._load_data_paths()
@@ -483,7 +531,7 @@ class DataManager(MutableSequence):
         return [data.data_path for data in self.data_list]
 
     # Queries
-    def query_path_name(self, query_path) -> Iterable[Data]:
+    def query_path_name(self, query_path) -> Iterable[DataProtocol]:
         return list(filter(lambda d: query_path in d.data_path, self.data_list))
 
     # DataManager Representation
@@ -635,7 +683,7 @@ class DataManager(MutableSequence):
 
     def auto_channel_mask_with_correlation_matrix(
         self,
-        spontaneous_data: Data,
+        spontaneous_data: DataProtocol,
         filter: FilterProtocol,
         detector: SpikeDetectionProtocol,
         omit_experiments: Optional[Iterable[int]] = None,
