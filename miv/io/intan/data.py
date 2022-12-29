@@ -60,7 +60,7 @@ class DataIntan(Data):
 
         Examples
         --------
-            >>> data = Data(data_path)
+            >>> data = DataIntan(data_path)
             >>> with data.load() as (signal, timestamps, sampling_rate):
             ...     ...
 
@@ -123,6 +123,7 @@ class DataIntan(Data):
         if not self.check_path_validity():
             raise FileNotFoundError("Data directory does not have all necessary files.")
         files = self.get_recording_files()
+        files.sort()
         # Get sampling rate from setting file
         setting_path = os.path.join(self.data_path, "settings.xml")
         sampling_rate = int(ET.parse(setting_path).getroot().attrib["SampleRateHertz"])
