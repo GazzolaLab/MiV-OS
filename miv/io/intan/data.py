@@ -3,6 +3,9 @@ __doc__ = """
 Module (Intan)
 ##################
 
+.. autoclass:: DataIntan
+   :members:
+
 """
 __all__ = ["DataIntan"]
 
