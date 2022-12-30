@@ -122,13 +122,14 @@ def plot_waveforms(
     n_spikes = min(n_spikes, cutouts.shape[0])
 
     if not plot_kwargs:
-        plot_kwargs = {}
+        plot_kwargs = {"alpha": 0.3, "linewidth": 1}
 
     # TODO: Need to match unit
     time_in_us = np.arange(-pre * 1000, post * 1000, 1e3 / sampling_rate)
 
     fig = plt.gcf()
-    ax = ax or plt.gca()
+    if ax is None:
+        ax = plt.gca()
     for i in range(n_spikes):
         ax.plot(
             time_in_us,
@@ -136,8 +137,6 @@ def plot_waveforms(
                 i,
             ],
             color,
-            linewidth=1,
-            alpha=0.3,
             **plot_kwargs,
         )
     ax.set_xlabel("Time (ms)")
