@@ -93,6 +93,7 @@ def plot_waveforms(
     n_spikes: Optional[int] = 100,
     color: str = "k",  # TODO: change typing to matplotlib color
     ax: Optional[matplotlib.axes.Axes] = None,
+    return_time: bool = False,
     plot_kwargs: Dict[Any, Any] = None,
 ) -> plt.Figure:
     """
@@ -125,14 +126,14 @@ def plot_waveforms(
         plot_kwargs = {"alpha": 0.3, "linewidth": 1}
 
     # TODO: Need to match unit
-    time_in_us = np.arange(-pre * 1000, post * 1000, 1e3 / sampling_rate)
+    time = np.arange(-pre * 1000, post * 1000, 1e3 / sampling_rate)
 
     fig = plt.gcf()
     if ax is None:
         ax = plt.gca()
     for i in range(n_spikes):
         ax.plot(
-            time_in_us,
+            time,
             cutouts[
                 i,
             ],
@@ -142,4 +143,6 @@ def plot_waveforms(
     ax.set_xlabel("Time (ms)")
     ax.set_ylabel("Voltage (uV)")
     ax.set_title("Cutouts")
+    if return_time:
+        return fig, time
     return fig

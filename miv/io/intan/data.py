@@ -83,6 +83,26 @@ class DataIntan(Data):
         FileNotFoundError
             If some key files are missing.
         """
+        yield from self._generator_by_channel_name("amplifier_data")
+
+    def get_stimulation(self, progress_bar=False):
+        """
+        Load stimulation recorded data.
+        """
+        signals, timestamps = [], []
+        for signal, timestamp, sampling_rate in self._generator_by_channel_name(
+            "stim_data", progress_bar
+        ):
+            signals.append(signal)
+            timestamps.append(timestamp)
+
+        return (
+            np.concatenate(signals, axis=0),
+            np.concatenate(timestamps),
+            sampling_rate,
+        )
+
+    def _generator_by_channel_name(self, name: str, progress_bar: bool = False):
         if not self.check_path_validity():
             raise FileNotFoundError("Data directory does not have all necessary files.")
         files = self.get_recording_files()
@@ -94,18 +114,10 @@ class DataIntan(Data):
         for filename in tqdm(files, disable=not progress_bar):
             result, data_present = rhs.load_file(filename)
             assert data_present, f"Data does not present: {filename=}."
-            assert not hasattr(
-                result, "amplifier_channels"
-            ), f"No active channel in the file ({filename=})."
+            assert not hasattr(result, name), f"No {name} in the file ({filename=})."
 
             # signal_group = result["amplifier_channels"]
-            yield result["amplifier_data"].T, result["t"], sampling_rate
-
-    def load_event(self):
-        """
-        Load event data.
-        """
-        raise NotImplementedError  # TODO
+            yield np.asarray(result[name]).T, np.asarray(result["t"]), sampling_rate
 
     def check_path_validity(self):
         """
