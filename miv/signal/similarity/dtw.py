@@ -1,4 +1,26 @@
-__doc__ = """Dynamic time warping modules. """
+__doc__ = """
+
+One could also take additional steps to fine-adjust the shape of the spikes for clustering and classification tasks
+
+Dynamic time warping
+####################
+
+Dynamic time warping is a similarity metrics that accounts for the temporal dilatation and shift in multiple sequences of data [1]_ [wiki]_ [dtaidistance]_.
+
+The tooll is available with the sorting extension: `pip install miv-os[sortingExtension]`.
+
+References & Footnotes
+======================
+
+.. [1] John Thomasa, Jing Jina, Justin Dauwelsa, Sydney S. Cashb, and M. Brandon Westoverb. (2018), Clustering of Interictal Spikes by Dynamic Time Warping and Affinity Propagation. IEEE Int Conf Acoust Speech Signal Process (2018 March), https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5842698/pdf/nihms946113.pdf
+.. [wiki] https://en.wikipedia.org/wiki/Dynamic_time_warping
+.. [dtaidistance] https://dtaidistance.readthedocs.io/en/latest/
+
+.. currentmodule:: miv.signal.similarity
+
+.. autofunction:: dynamic_time_warping_distance_matrix
+
+"""
 __all__ = ["dynamic_time_warping_distance_matrix"]
 import os
 import sys
