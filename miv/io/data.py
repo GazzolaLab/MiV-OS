@@ -213,6 +213,17 @@ class Data:
         plt.figure(figure)
         plt.savefig(filepath, **savefig_kwargs)
 
+    def has_data(self, filename: str):
+        """Check if the analysis data already saved
+
+        Parameters
+        ----------
+        filename : str
+            File name to check
+        """
+        filepath = os.path.join(self.analysis_path, filename + ".pkl")
+        return os.path.exists(filepath)
+
     def save_data(
         self,
         data,
