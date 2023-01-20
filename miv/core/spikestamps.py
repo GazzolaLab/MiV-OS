@@ -38,3 +38,9 @@ class Spikestamps(UserList):
                 self.data[idx].extend(array)
         else:
             self.data.extend(item for item in other)
+
+    def get_last_spikestamp(self):
+        return max([data[-1] for data in self.data if len(data) > 0])
+
+    def get_first_spikestamp(self):
+        return min([data[0] for data in self.data if len(data) > 0])
