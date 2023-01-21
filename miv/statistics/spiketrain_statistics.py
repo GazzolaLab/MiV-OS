@@ -154,7 +154,7 @@ def peri_stimulus_time(spike_list: List[SpikestampsType]):
 
 
 def binned_spiketrain(
-    spiketrain: np.ndarray,
+    spiketrain: SpikestampsType,
     t_start: float,
     t_end: float,
     bin_size: float,
@@ -186,13 +186,10 @@ def binned_spiketrain(
     assert bin_size > 0, "bin size should be greater than 0"
     n_bins = int(np.ceil((t_end - t_start) / bin_size))
     time = t_start + (np.arange(n_bins + 1) * bin_size)
-    if isinstance(spiketrain, np.ndarray) or isinstance(spiketrain, list):
-        spike = spiketrain
-    elif isinstance(spiketrain, neo.core.SpikeTrain):
-        spike = spiketrain.magnitude
+    if isinstance(spiketrain, neo.core.SpikeTrain):
+        bins = np.digitize(spiketrain.magnitude, time)
     else:
-        raise TypeError(f"type {type(spiketrain)} is not supported.")
-    bins = np.digitize(spike, time)
+        bins = np.digitize(spiketrain, time)
     bincount = np.bincount(bins, minlength=n_bins + 2)[1:-1]
     if return_count:
         bin_spike = bincount
