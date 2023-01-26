@@ -5,6 +5,8 @@ __all__ = [
     "peri_stimulus_time",
     "binned_spiketrain",
     "fano_factor",
+    "decay_spike_counts",
+    "spike_counts_with_kernel",
 ]
 
 from typing import Any, Dict, Iterable, List, Optional, Union
@@ -242,3 +244,67 @@ def fano_factor(
     fano_fac = np.var(bin_array) / np.mean(bin_array)
 
     return fano_fac
+
+
+def decay_spike_counts(
+    spiketrain, probe_times, amplitude=1.0, decay_rate=5, batchsize=256
+):
+    """
+    decay_spike_counts.
+
+    Both spiketrain and probe_times should be a 1-d array representing time.
+
+    Parameters
+    ----------
+    spiketrain :
+        spiketrain
+    probe_times :
+        probe_times
+    amplitude :
+        amplitude
+    decay_rate :
+        decay_rate
+    batchsize :
+        batchsize
+    """
+    if len(spiketrain) == 0:
+        return np.zeros_like(probe_times)
+    batchsize = min(spiketrain.shape[0], batchsize)
+    num_sections = spiketrain.shape[0] // batchsize + (
+        1 if spiketrain.shape[0] % batchsize > 0 else 0
+    )
+
+    result = np.zeros_like(probe_times)
+    for subspiketrain in np.array_split(spiketrain, num_sections):
+        exponent = (
+            np.tile(probe_times, (len(subspiketrain), 1)) - subspiketrain[:, None]
+        )
+        mask = exponent < 0
+        exponent[mask] = 0
+        decay_count = np.exp(-decay_rate * exponent)
+        decay_count[mask] = 0
+        result += decay_count.sum(axis=0)
+    return result
+
+
+def spike_counts_with_kernel(spiketrain, probe_times, kernel, batchsize=32):
+    if len(spiketrain) == 0:
+        return np.zeros_like(probe_times)
+
+    batchsize = min(spiketrain.shape[0], batchsize)
+    num_sections = spiketrain.shape[0] // batchsize + (
+        1 if spiketrain.shape[0] % batchsize > 0 else 0
+    )
+
+    result = np.zeros_like(probe_times)
+    for subspiketrain in np.array_split(spiketrain, num_sections):
+        exponent = (
+            np.tile(probe_times, (len(subspiketrain), 1)) - subspiketrain[:, None]
+        )
+        mask = exponent < 0
+        exponent[mask] = 0
+        decay_count = kernel(exponent)
+        # decay_count = np.exp(-decay_rate * exponent)
+        decay_count[mask] = 0
+        result += decay_count.sum(axis=0)
+    return result
