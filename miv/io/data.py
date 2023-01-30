@@ -132,6 +132,17 @@ class Data:
         plt.figure(figure)
         plt.savefig(filepath, **savefig_kwargs)
 
+    def has_data(self, filename: str):
+        """Check if the analysis data already saved
+
+        Parameters
+        ----------
+        filename : str
+            File name to check
+        """
+        filepath = os.path.join(self.analysis_path, filename + ".pkl")
+        return os.path.exists(filepath)
+
     def save_data(
         self,
         data,
@@ -542,9 +553,14 @@ class DataManager(MutableSequence):
             f"Total {len(data_path_list)} recording found. There are {invalid_count} invalid paths."
         )
 
-    def _get_experiment_paths(self) -> Iterable[str]:
+    def _get_experiment_paths(self, sort: bool = True) -> Iterable[str]:
         """
         Get experiment paths.
+
+        Parameters
+        ----------
+        sort : bool
+            Sort the output data paths
 
         Returns
         -------
@@ -561,6 +577,8 @@ class DataManager(MutableSequence):
                 and os.path.isdir(path)
             ):
                 path_list.append(path)
+        if sort:
+            path_list = sorted(path_list)
         return path_list
 
     def save(self, tag: str, format: str):  # pragma: no cover
