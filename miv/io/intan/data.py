@@ -54,44 +54,7 @@ class DataIntan(Data):
     """
 
     @contextmanager
-    def load(self):
-        """
-        Context manager for loading data instantly.
-
-        Examples
-        --------
-            >>> data = DataIntan(data_path)
-            >>> with data.load() as (signal, timestamps, sampling_rate):
-            ...     ...
-
-        Returns
-        -------
-        signal : SignalType, neo.core.AnalogSignal
-            The length of the first axis `signal.shape[0]` correspond to the length of the
-            signal, while second axis `signal.shape[1]` correspond to the number of channels.
-        timestamps : TimestampsType, numpy array
-        sampling_rate : float
-
-        Raises
-        ------
-        FileNotFoundError
-            If some key files are missing.
-
-        """
-        try:
-            signals, timestamps = [], []
-            for signal, timestamp, sampling_rate in self.load_fragments():
-                signals.append(signal)
-                timestamps.append(timestamp)
-
-            yield np.concatenate(signals, axis=0), np.concatenate(
-                timestamps
-            ), sampling_rate
-        finally:
-            del signals
-            del timestamps
-
-    def load_fragments(self, progress_bar=False):
+    def load(self, progress_bar=False):
         """
         Iterator to load data fragmentally.
         This function loads each file separately.
@@ -104,7 +67,7 @@ class DataIntan(Data):
         Examples
         --------
             >>> data = Data(data_path)
-            >>> for data.load_fragments(10) as (signal, timestamps, sampling_rate):
+            >>> for data.load(10) as (signal, timestamps, sampling_rate):
             ...     ...
 
         Returns
