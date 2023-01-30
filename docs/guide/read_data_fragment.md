@@ -51,13 +51,13 @@ def preprocess(data, filter:FilterProtocol, detector:SpikeDetectionProtocol):
 
 ## Read Data Fragmentally
 
-Instead of `data.load()`, try `data.load_fragments(num_fragments)` which internally splits the large datafile into
+Instead of `data.load()`, try `data.load(num_fragments)` which internally splits the large datafile into
 number of fragmented data.
 
 ```{code-cell} ipython3
 num_fragments = 100
 total_spikestamps = Spikestamps([])
-for data in tqdm(data.load_fragments(num_fragments=num_fragments), total=num_fragments):
+for data in tqdm(data.load(num_fragments=num_fragments), total=num_fragments):
     spikestamp = preprocess(data, pre_filter, spike_detection)
     total_spikestamps.extend(spikestamp)
 ```
@@ -76,7 +76,7 @@ with mp.Pool() as pool:
         tqdm(
             pool.imap(
                 partial(preprocess, filter=pre_filter, detector=spike_detection),
-                data.load_fragments(num_fragments=num_fragments),
+                data.load(num_fragments=num_fragments),
             ),
             total=num_fragments,
         )

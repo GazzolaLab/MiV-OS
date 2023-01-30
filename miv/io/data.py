@@ -253,54 +253,7 @@ class Data:
         return data
 
     @contextmanager
-    def load(self, start_at_zero: bool = False):
-        """
-        Context manager for loading data instantly.
-
-        Parameters
-        ----------
-        start_at_zero : bool
-            If set to True, time first timestamps will be shifted to zero. To achieve synchronized
-            timestamps with other recordings/events, set this to False.
-
-        Examples
-        --------
-            >>> data = Data(data_path)
-            >>> with data.load() as (signal, timestamps, sampling_rate):
-            ...     ...
-
-        Returns
-        -------
-        signal : SignalType, neo.core.AnalogSignal
-            The length of the first axis `signal.shape[0]` correspond to the length of the
-            signal, while second axis `signal.shape[1]` correspond to the number of channels.
-        timestamps : TimestampsType, numpy array
-        sampling_rate : float
-
-        Raises
-        ------
-        FileNotFoundError
-            If some key files are missing.
-
-        """
-        # TODO: Not sure this is safe implementation
-        if not self.check_path_validity():
-            raise FileNotFoundError("Data directory does not have all necessary files.")
-        timestamps, signal = None, None
-        try:
-            signal, timestamps, sampling_rate = next(
-                load_recording(
-                    self.data_path,
-                    self.masking_channel_set,
-                    start_at_zero=start_at_zero,
-                )
-            )
-            yield signal, timestamps, sampling_rate
-        finally:
-            del timestamps
-            del signal
-
-    def load_fragments(
+    def load(
         self, start_at_zero: bool = False, num_fragments: int = 1, progress_bar=False
     ):
         """
@@ -320,7 +273,7 @@ class Data:
         Examples
         --------
             >>> data = Data(data_path)
-            >>> for data.load_fragments(10) as (signal, timestamps, sampling_rate):
+            >>> for data.load(10) as (signal, timestamps, sampling_rate):
             ...     ...
 
         Returns
@@ -336,6 +289,7 @@ class Data:
         FileNotFoundError
             If some key files are missing.
         """
+        # TODO: Not sure this is safe implementation
         if not self.check_path_validity():
             raise FileNotFoundError("Data directory does not have all necessary files.")
         yield from load_recording(
