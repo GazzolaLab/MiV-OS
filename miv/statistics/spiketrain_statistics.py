@@ -5,6 +5,8 @@ __all__ = [
     "peri_stimulus_time",
     "binned_spiketrain",
     "fano_factor",
+    "decay_spike_counts",
+    "spike_counts_with_kernel",
 ]
 
 from typing import Any, Dict, Iterable, List, Optional, Union
@@ -154,8 +156,7 @@ def peri_stimulus_time(spike_list: List[SpikestampsType]):
 
 
 def binned_spiketrain(
-    spiketrains: SpikestampsType,
-    channel: float,
+    spiketrain: SpikestampsType,
     t_start: float,
     t_end: float,
     bin_size: float,
@@ -164,13 +165,10 @@ def binned_spiketrain(
     """
     Forms a binned spiketrain using the spiketrain
 
-
     Parameters
     ----------
-    spiketrains : SpikestampsType
-        Single spike-stamps
-    channel : float
-        electrode/channel
+    spiketrain : SpikestampsType
+        Single spike-stamp
     t_start : float
         Binning start time
     t_end : float
@@ -190,14 +188,10 @@ def binned_spiketrain(
     assert bin_size > 0, "bin size should be greater than 0"
     n_bins = int(np.ceil((t_end - t_start) / bin_size))
     time = t_start + (np.arange(n_bins + 1) * bin_size)
-    spiketrain = spiketrains[channel]
-    if isinstance(spiketrain, np.ndarray):
-        spike = spiketrain
-    elif isinstance(spiketrain, neo.core.SpikeTrain):
-        spike = spiketrain.magnitude
+    if isinstance(spiketrain, neo.core.SpikeTrain):
+        bins = np.digitize(spiketrain.magnitude, time)
     else:
-        raise TypeError(f"type {type(spiketrain)} is not supported.")
-    bins = np.digitize(spike, time)
+        bins = np.digitize(spiketrain, time)
     bincount = np.bincount(bins, minlength=n_bins + 2)[1:-1]
     if return_count:
         bin_spike = bincount
@@ -250,3 +244,67 @@ def fano_factor(
     fano_fac = np.var(bin_array) / np.mean(bin_array)
 
     return fano_fac
+
+
+def decay_spike_counts(
+    spiketrain, probe_times, amplitude=1.0, decay_rate=5, batchsize=256
+):
+    """
+    decay_spike_counts.
+
+    Both spiketrain and probe_times should be a 1-d array representing time.
+
+    Parameters
+    ----------
+    spiketrain :
+        spiketrain
+    probe_times :
+        probe_times
+    amplitude :
+        amplitude
+    decay_rate :
+        decay_rate
+    batchsize :
+        batchsize
+    """
+    if len(spiketrain) == 0:
+        return np.zeros_like(probe_times)
+    batchsize = min(spiketrain.shape[0], batchsize)
+    num_sections = spiketrain.shape[0] // batchsize + (
+        1 if spiketrain.shape[0] % batchsize > 0 else 0
+    )
+
+    result = np.zeros_like(probe_times)
+    for subspiketrain in np.array_split(spiketrain, num_sections):
+        exponent = (
+            np.tile(probe_times, (len(subspiketrain), 1)) - subspiketrain[:, None]
+        )
+        mask = exponent < 0
+        exponent[mask] = 0
+        decay_count = np.exp(-decay_rate * exponent)
+        decay_count[mask] = 0
+        result += decay_count.sum(axis=0)
+    return result
+
+
+def spike_counts_with_kernel(spiketrain, probe_times, kernel, batchsize=32):
+    if len(spiketrain) == 0:
+        return np.zeros_like(probe_times)
+
+    batchsize = min(spiketrain.shape[0], batchsize)
+    num_sections = spiketrain.shape[0] // batchsize + (
+        1 if spiketrain.shape[0] % batchsize > 0 else 0
+    )
+
+    result = np.zeros_like(probe_times)
+    for subspiketrain in np.array_split(spiketrain, num_sections):
+        exponent = (
+            np.tile(probe_times, (len(subspiketrain), 1)) - subspiketrain[:, None]
+        )
+        mask = exponent < 0
+        exponent[mask] = 0
+        decay_count = kernel(exponent)
+        # decay_count = np.exp(-decay_rate * exponent)
+        decay_count[mask] = 0
+        result += decay_count.sum(axis=0)
+    return result
