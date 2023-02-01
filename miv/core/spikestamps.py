@@ -39,6 +39,9 @@ class Spikestamps(UserList):
         else:
             self.data.extend(item for item in other)
 
+    def get_count(self):
+        return [len(data) for data in self.data]
+
     def get_last_spikestamp(self):
         return max([data[-1] for data in self.data if len(data) > 0])
 

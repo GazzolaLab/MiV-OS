@@ -111,7 +111,7 @@ def spike_triggered_average_plot(
     assert (
         window_length < np.shape(signal[:, channel_x])[0] / 2
     ), "Window cannot be longer than signal length"
-    spike = binned_spiketrain(spiketrains, channel_x, 0, n, dt)
+    spike = binned_spiketrain(spiketrains[channel_x], 0, n, dt)
     lfp = signal[:, channel_x]
     spike_times = np.where(spike == 1)[0]
     spike_len = np.shape(spike_times)[0]
