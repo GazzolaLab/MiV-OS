@@ -134,8 +134,7 @@ Please follow these steps to have your contribution considered by the maintainer
 ```bash
 make test
 ```
-3. You can use this [template][pr-template] to create pull request.
-4. After you submit your pull request, verify that all status checks are passing <details><summary>What if the status checks are failing?</summary>If a status check is failing, and you believe that the failure is unrelated to your change, please leave a comment on the pull request explaining why you believe the failure is unrelated. A maintainer will re-run the status check for you. If we conclude that the failure was a false positive, then we will open an issue to track that problem with our status check suite.</details>
+3. After you submit your pull request, verify that all status checks are passing <details><summary>What if the status checks are failing?</summary>If a status check is failing, and you believe that the failure is unrelated to your change, please leave a comment on the pull request explaining why you believe the failure is unrelated. A maintainer will re-run the status check for you. If we conclude that the failure was a false positive, then we will open an issue to track that problem with our status check suite.</details>
 
 The reviewer(s) may ask you to complete additional tests or changes before your pull request can be accepted.
 
@@ -169,5 +168,3 @@ If you are interested in contributing or modifying the documentation, please ref
 
 [numpydoc-guideline]: https://numpydoc.readthedocs.io/en/latest/format.html
 [docs-readme]: https://github.com/GazzolaLab/MiV-OS/blob/master/docs/README.md
-
-[pr-template]: https://github.com/GazzolaLab/MiV-OS/blob/main/.github/PULL_REQUEST_TEMPLATE/feature.md
