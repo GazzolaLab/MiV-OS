@@ -5,6 +5,8 @@
 Fixes # (issue)
 Related PRs # (pull requests)
 
+@mentions of the person or team responsible for reviewing proposed changes.
+
 ## Type of change
 
 Please delete options that are not relevant.
