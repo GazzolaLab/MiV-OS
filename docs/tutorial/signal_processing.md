@@ -50,6 +50,17 @@ dataset.tree()
 
 You should be able to check the data structure by running `dataset.tree()`.
 
+### 1.1 Read Data Fragmentally
+
+If you have a long recording, instead of `data.load()`, try `data.load(num_fragments)`. This internally splits the large datafile into `num_fragments` of fragmented data.
+
+```{code-cell} ipython3
+num_fragments = 100
+total_spikestamps = Spikestamps([])
+for data in tqdm(data.load(num_fragments=num_fragments), total=num_fragments):
+    spikestamp = preprocess(data, pre_filter, spike_detection)
+    total_spikestamps.extend(spikestamp)
+```
 
 ## 2. Filtering Raw Signal
 
