@@ -203,7 +203,7 @@ def binned_spiketrain(
 
 def fano_factor(
     spiketrains: SpikestampsType,
-    channel: float,
+    channel: float,  # TODO: the function should be independent of channel.
     t_start: float,
     t_end: float,
     n_bins: float,
@@ -230,9 +230,11 @@ def fano_factor(
         fanofactor for the specified channel and conditions
 
     """
-    assert t_start < t_end, "End time cannot be smaller or equal to start time"
+    assert (
+        t_start < t_end
+    ), f"End time {t_end} cannot be smaller or equal to start time {t_start}."
     assert n_bins > 0, "Number of bins should be a positive integer"
-    bin_spike = binned_spiketrain(spiketrains, channel, t_start, t_end, 0.002)
+    bin_spike = binned_spiketrain(spiketrains[channel], t_start, t_end, 0.002)
     assert np.sum(bin_spike) != 0, "The channel has no spikes"
     large_bin = []
     bin_length = np.int32(np.size(bin_spike) / n_bins)
