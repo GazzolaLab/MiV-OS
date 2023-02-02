@@ -368,7 +368,7 @@ def load_continuous_data(
         timestamps = np.asarray(
             np.load(timestamps_path)
         )  # TODO: check if npy file includes dtype. else, add "dtype=np.float32"
-        timestamps /= float(sampling_rate)
+        # timestamps /= float(sampling_rate)  # TODO(beyond 0.3.0) As of OpenEphys 0.6, this line is no-longer necessary.
     else:  # If timestamps_path doesn't exist, deduce the stamps
         timestamps = np.array(range(0, length)) / sampling_rate
 
