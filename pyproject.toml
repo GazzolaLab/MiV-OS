@@ -71,6 +71,7 @@ lyon = { git = "https://github.com/sciforce/lyon.git", rev = "91dd700" }
 click = "^8.1.3"
 sphinxcontrib-mermaid = {version = "^0.7.1", extras = ["docs"], optional = true}
 pyserial = {version = "^3.5", extras = ["experiment"]}
+numba = "^0.56.4"
 
 [tool.poetry.dev-dependencies]
 black = "^22.8.0"
