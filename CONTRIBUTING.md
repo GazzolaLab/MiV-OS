@@ -126,7 +126,7 @@ If you are interested in hearing more, please contact one of our the maintainer.
 
 ### Pull requests
 
-Please follow these steps to have your contribution considered by the maintainers
+Please follow these steps to have your contribution considered by the maintainers:
 
 1. Follow the [styleguides](#styleguides)
 2. Before you submit your pull request run [pytests](https://pypi.org/project/pytest/) and make sure that all tests pass. In order to run pytest, run the following line from the top directory:
