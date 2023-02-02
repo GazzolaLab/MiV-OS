@@ -62,6 +62,29 @@ for data in tqdm(data.load(num_fragments=num_fragments), total=num_fragments):
     total_spikestamps.extend(spikestamp)
 ```
 
+### 1.2 Using Multiprocessing
+
+You can use multiprocessing module as following.
+
+```{code-cell} ipython3
+import multiprocessing as mp
+
+num_fragments = 100
+total_spikestamps = Spikestamps([])
+with mp.Pool() as pool:
+    results = list(
+        tqdm(
+            pool.imap(
+                partial(preprocess, filter=pre_filter, detector=spike_detection),
+                data.load(num_fragments=num_fragments),
+            ),
+            total=num_fragments,
+        )
+    )
+    for spikestamp in results:
+        total_spikestamps.extend(spikestamp)
+```
+
 ## 2. Filtering Raw Signal
 
 +++
