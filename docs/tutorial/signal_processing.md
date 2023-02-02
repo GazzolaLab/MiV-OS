@@ -55,6 +55,23 @@ You should be able to check the data structure by running `dataset.tree()`.
 If you have a long recording, instead of `data.load()`, try `data.load(num_fragments)`. This internally splits the large datafile into `num_fragments` of fragmented data.
 
 ```{code-cell} ipython3
+
+pre_filter = FilterCollection(tag="Filter Example").append(
+    ButterBandpass(lowcut=300, highcut=3000, order=4)
+)
+spike_detection = ThresholdCutoff()
+def preprocess(data, filter:FilterProtocol, detector:SpikeDetectionProtocol):
+    signal, timestamps, sampling_rate = data
+    timestamps *= sampling_rate  # Still not sure about this part...
+    filtered_signal = filter(signal, sampling_rate)
+    spiketrains = detector(
+        filtered_signal,
+        timestamps,
+        sampling_rate,
+        return_neotype=False,
+        progress_bar=False,
+    )
+    return spiketrains
 num_fragments = 100
 total_spikestamps = Spikestamps([])
 for data in tqdm(data.load(num_fragments=num_fragments), total=num_fragments):
