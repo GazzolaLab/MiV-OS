@@ -98,7 +98,6 @@ import logging
 import os
 import pickle
 from collections.abc import MutableSequence
-from contextlib import contextmanager
 from glob import glob
 
 import numpy as np
