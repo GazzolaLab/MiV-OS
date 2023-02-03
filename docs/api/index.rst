@@ -6,6 +6,7 @@ API Documentation
    :caption: API
 
    io
+   core
    signal
    sorting
    statistics

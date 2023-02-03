@@ -98,7 +98,7 @@ class MockDataGenerator:
 
         # Expected timestamps
         sampling_rate = 30000
-        expected_timestamps = timestamps / sampling_rate
+        expected_timestamps = timestamps
 
         return dirname, expected_data, expected_timestamps, sampling_rate
 

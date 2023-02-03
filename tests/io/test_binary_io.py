@@ -94,7 +94,7 @@ def test_load_continuous_data_temp_file_with_timestamps_shift(
         num_channels,
         freq,
     )
-    np.testing.assert_allclose(out_timestamps, timestamps / freq)
+    np.testing.assert_allclose(out_timestamps, timestamps)
     np.testing.assert_allclose(raw_data, signal)
 
 
@@ -193,6 +193,6 @@ def test_load_recording_readout_without_mask_with_shift(create_mock_data_file):
     np.testing.assert_allclose(out_data, expected_data)
     np.testing.assert_allclose(
         out_timestamps,
-        (sampling_rate * expected_timestamps - np.pi) / sampling_rate,
+        expected_timestamps - np.pi,
         rtol=2e-7,
     )
