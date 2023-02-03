@@ -182,7 +182,6 @@ class Data:
             data = pickle.load(output_file, **pkl_kwargs)
         return data
 
-    @contextmanager
     def load(
         self, start_at_zero: bool = False, num_fragments: int = 1, progress_bar=False
     ):
