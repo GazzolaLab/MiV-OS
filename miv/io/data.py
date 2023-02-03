@@ -28,7 +28,6 @@ import logging
 import os
 import pickle
 from collections.abc import MutableSequence
-from contextlib import contextmanager
 from glob import glob
 
 import matplotlib.pyplot as plt
