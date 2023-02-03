@@ -147,7 +147,6 @@ class MockData(Data):
 
         self.signal = np.transpose(self.signal)
 
-    @contextmanager
     def load(self):
         yield self.signal, self.times, self.sampling_rate
 
@@ -169,7 +168,6 @@ class MockSpontaneousData(Data):
 
         self.signal = np.transpose(self.signal)
 
-    @contextmanager
     def load(self):
         yield self.signal, self.times, self.sampling_rate
 
