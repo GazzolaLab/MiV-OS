@@ -15,8 +15,6 @@ import logging
 import os
 import pickle
 import xml.etree.ElementTree as ET
-from collections.abc import MutableSequence
-from contextlib import contextmanager
 from glob import glob
 
 import matplotlib.pyplot as plt
@@ -25,8 +23,6 @@ from tqdm import tqdm
 
 import miv.io.intan.rhs as rhs
 from miv.io.data import Data
-from miv.signal.filter.protocol import FilterProtocol
-from miv.signal.spike.protocol import SpikeDetectionProtocol
 from miv.typing import SignalType
 
 
@@ -53,16 +49,10 @@ class DataIntan(Data):
         data_path : str
     """
 
-    @contextmanager
-    def load(self, progress_bar=False):
+    def load(self):
         """
         Iterator to load data fragmentally.
         This function loads each file separately.
-
-        Parameters
-        ----------
-        progress_bar : bool
-            Visible progress bar
 
         Examples
         --------
@@ -83,6 +73,7 @@ class DataIntan(Data):
         FileNotFoundError
             If some key files are missing.
         """
+
         yield from self._generator_by_channel_name("amplifier_data")
 
     def get_stimulation(self, progress_bar=False):
