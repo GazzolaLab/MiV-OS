@@ -146,7 +146,7 @@ class MockData(Data):
 
         self.signal = np.transpose(self.signal)
 
-    def load(self):
+    def load(self, num_fragments=1):
         yield self.signal, self.times, self.sampling_rate
 
 
@@ -167,7 +167,7 @@ class MockSpontaneousData(Data):
 
         self.signal = np.transpose(self.signal)
 
-    def load(self):
+    def load(self, num_fragments=1):
         yield self.signal, self.times, self.sampling_rate
 
 

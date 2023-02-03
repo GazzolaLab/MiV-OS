@@ -182,26 +182,26 @@ class Data:
         return data
 
     def load(
-        self, start_at_zero: bool = False, num_fragments: int = 1, progress_bar=False
+        self, num_fragments: int = 1, start_at_zero: bool = False, progress_bar=False
     ):
         """
         Iterator to load data fragmentally.
 
         Parameters
         ----------
-        start_at_zero : bool
-            If set to True, time first timestamps will be shifted to zero. To achieve synchronized
-            timestamps with other recordings/events, set this to False.
         num_fragments : int
             Instead of loading entire data at once, split the data into `num_fragment`
             number of subdata to process separately. (default=1)
+        start_at_zero : bool
+            If set to True, time first timestamps will be shifted to zero. To achieve synchronized
+            timestamps with other recordings/events, set this to False.
         progress_bar : bool
             Visible progress bar
 
         Examples
         --------
             >>> data = Data(data_path)
-            >>> for data.load(10) as (signal, timestamps, sampling_rate):
+            >>> for data.load(num_fragments=10) as (signal, timestamps, sampling_rate):
             ...     ...
 
         Returns
@@ -377,7 +377,7 @@ class Data:
         """
 
         result = []
-        with self.load() as (sig, times, samp):
+        for sig, times, samp in self.load(num_fragments=1):
             start_time = times[0] + offset
             starting_index = int(offset * samp)
 
@@ -638,7 +638,7 @@ class DataManager(MutableSequence):
         """
 
         for data in self.data_list:
-            with data.load() as (sig, times, samp):
+            for sig, times, samp in data.load(num_fragments=1):
                 mask_list = []
 
                 filtered_signal = filter(sig, samp)
