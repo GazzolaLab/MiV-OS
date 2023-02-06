@@ -1,3 +1,4 @@
+import multiprocessing as mp
 import os
 import sys
 from glob import glob
@@ -6,7 +7,6 @@ import click
 import matplotlib.cm as cm
 import matplotlib.colors as colors
 import matplotlib.pyplot as plt
-import muptiprocessing as mp
 import numpy as np
 import scipy as sp
 from tqdm import tqdm
