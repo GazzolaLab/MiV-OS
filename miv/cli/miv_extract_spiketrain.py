@@ -1,3 +1,4 @@
+import logging
 import multiprocessing as mp
 import os
 import sys
@@ -78,6 +79,8 @@ def main(path, tools, nproc, num_fragments, use_mpi, chunksize):
                 ):
                     total_spikestamps.extend(spikestamp)
             data.save_data(total_spikestamps, "spiketrain")
+
+            logging.info(f"Pre-processing {p} done.")
 
 
 if __name__ == "__main__":
