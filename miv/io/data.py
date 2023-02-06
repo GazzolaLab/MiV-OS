@@ -22,7 +22,18 @@ Module (OpenEphys)
 """
 __all__ = ["Data", "DataManager"]
 
-from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Union,
+)
 
 import logging
 import os
@@ -39,6 +50,9 @@ from miv.signal.filter.protocol import FilterProtocol
 from miv.signal.spike.protocol import SpikeDetectionProtocol
 from miv.statistics import firing_rates
 from miv.typing import SignalType
+
+if TYPE_CHECKING:
+    from mpi4py import MPI
 
 
 class Data:
@@ -182,7 +196,11 @@ class Data:
         return data
 
     def load(
-        self, num_fragments: int = 1, start_at_zero: bool = False, progress_bar=False
+        self,
+        num_fragments: int = 1,
+        start_at_zero: bool = False,
+        progress_bar=False,
+        mpi_comm: Optional["MPI.COMM_WORLD"] = None,
     ):
         """
         Iterator to load data fragmentally.
@@ -197,6 +215,11 @@ class Data:
             timestamps with other recordings/events, set this to False.
         progress_bar : bool
             Visible progress bar
+        mpi_comm: Optional[MPI.COMM_WORLD]
+            (Experimental Feature) If the load is executed in MPI environment, user can pass
+            MPI.COMM_WORLD to split the load.
+            For example, if num_fragments=100, rank=2, and size=10, this function will only iterate
+            the fragment 20-29 out of 0-100.
 
         Examples
         --------
@@ -220,11 +243,22 @@ class Data:
         # TODO: Not sure this is safe implementation
         if not self.check_path_validity():
             raise FileNotFoundError("Data directory does not have all necessary files.")
+
+        start_index = None
+        end_index = None
+        if mpi_comm is not None:
+            rank = mpi_comm.Get_rank()
+            size = mpi_comm.Get_size()
+            tasks = np.array_split(np.arange(num_fragments), size)[rank]
+            start_index = tasks.min()
+            end_index = tasks.max() + 1
         yield from load_recording(
             self.data_path,
             self.masking_channel_set,
             start_at_zero=start_at_zero,
             num_fragments=num_fragments,
+            start_index=start_index,
+            end_index=end_index,
             progress_bar=progress_bar,
         )
 

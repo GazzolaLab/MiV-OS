@@ -219,6 +219,8 @@ def load_recording(
     channel_mask: Optional[Set[int]] = None,
     start_at_zero: bool = True,
     num_fragments: int = 1,
+    start_index: Optional[int] = None,
+    end_index: Optional[int] = None,
     dtype: np.dtype = np.float32,
     verbose: bool = False,
     progress_bar: bool = False,
@@ -243,6 +245,14 @@ def load_recording(
     num_fragments : int
         Instead of loading entire data at once, split the data into `num_fragment`
         number of subdata to process separately. (default=1)
+    start_index : Optional[int]
+        Start index of the fragments. It is useful when you want to submit MPI processing.
+        For example, one can submit num_fragments=10, start_index=3 to process 3-9 fragments.
+        (Zero-indexing)
+    end_index : Optional[int]
+        End index of the fragments. It is useful when you want to submit MPI processing.
+        For example, one can submit num_fragments=10, end_index=5 to process 0-5 fragments.
+        (Zero-indexing)
     dtype: np.dtype
         If None, skip data-type conversion. If the filesize is too large, it is advisable
         to keep `dtype=None` and convert slice by slice. (default=float32)
@@ -278,8 +288,12 @@ def load_recording(
 
     # TODO: maybe need to support multiple continuous.dat files in the future
     signal, timestamps = load_continuous_data(file_path[0], num_channels, sampling_rate)
-    fragmented_signal = np.array_split(signal, num_fragments, axis=0)
-    fragmented_timestamps = np.array_split(timestamps, num_fragments)
+    fragmented_signal = np.array_split(signal, num_fragments, axis=0)[
+        start_index:end_index
+    ]
+    fragmented_timestamps = np.array_split(timestamps, num_fragments)[
+        start_index:end_index
+    ]
     for frag_id in tqdm(range(num_fragments), disable=not progress_bar):
         _signal = fragmented_signal[frag_id]
         _timestamps = fragmented_timestamps[frag_id]
