@@ -82,3 +82,12 @@ class Spikestamps(UserList):
     def get_first_spikestamp(self):
         """Return timestamps of the first spike in this spikestamps"""
         return min([data[0] for data in self.data if len(data) > 0])
+
+    def get_view(self, tstart: float, tend: float):
+        """Truncate array and only includes spikestamps between tstart and tend."""
+        return Spikestamps(
+            [
+                np.array(sorted(list(filter(lambda x: tstart <= x <= tend, arr))))
+                for arr in self.data
+            ]
+        )
