@@ -39,6 +39,9 @@ class SpikeFeatureExtractionProtocol(Protocol):
     def __repr__(self) -> str:
         ...
 
+    def project(self, *args, **kwargs) -> tuple:
+        ...
+
 
 class UnsupervisedFeatureClusteringProtocol(Protocol):
     def __repr__(self) -> str:

@@ -8,8 +8,8 @@ from enum import Enum
 import numpy as np
 import pytest
 
-# from miv.typing import FilterProtocol, SpikeDetectionProtocol
 from miv.io.data import Data, DataManager
+from tests.spike.cutout.test_cutout import MockSpikeCutout
 
 
 class SignalGeneratorType(Enum):
@@ -148,6 +148,26 @@ class MockData(Data):
 
     def load(self, num_fragments=1):
         yield self.signal, self.times, self.sampling_rate
+
+
+class AdvancedMockData(Data):
+    def __init__(self):
+        self.masking_channel_set: Set[int] = set()
+
+        self.sampling_rate = 30000
+        self.times = np.linspace(start=0, stop=self.sampling_rate * 70, num=70)
+
+        self.signal = np.ndarray((6, 70))
+        self.signal[0] = 1000 * MockSpikeCutout(0, 0, 0, length=70).cutout
+        self.signal[1] = 1000 * MockSpikeCutout(1, 1, 0, length=70).cutout
+        self.signal[2] = 1000 * MockSpikeCutout(2, 2, 0, length=70).cutout
+        self.signal[3] = 1000 * MockSpikeCutout(0, 0, 0, length=70).cutout
+        self.signal[4] = 1000 * MockSpikeCutout(1, 1, 0, length=70).cutout
+        self.signal[5] = 1000 * MockSpikeCutout(2, 2, 0, length=70).cutout
+
+    @contextmanager
+    def load(self):
+        yield np.transpose(self.signal), self.times, self.sampling_rate
 
 
 # This MockSpontaneousData class generates signals with 5 channels that all look like

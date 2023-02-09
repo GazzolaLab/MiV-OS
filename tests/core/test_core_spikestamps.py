@@ -1,5 +1,6 @@
 from collections import UserList
 
+import numpy as np
 import pytest
 
 from miv.core import Spikestamps
@@ -70,3 +71,27 @@ def test_spikestamps_extend():
         [13, 14, 15],
         [16, 17, 18],
     ]
+
+
+@pytest.mark.parametrize(
+    "array, tstart, tend, expected_truncated_arr",
+    [
+        (np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]), 3, 8, np.array([3, 4, 5, 6, 7, 8])),
+        (
+            np.array([0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]),
+            0.3,
+            0.8,
+            np.array([0.3, 0.4, 0.5, 0.6, 0.7, 0.8]),
+        ),
+    ],
+)
+def test_spikestamps_window_truncation(array, tstart, tend, expected_truncated_arr):
+    # Test case with integer numbers
+    spikestamps = Spikestamps([array])
+    truncated_arr = spikestamps.get_view(tstart, tend).data[0]
+
+    np.testing.assert_equal(truncated_arr, expected_truncated_arr)  # Check accuracy
+    assert np.all(np.isin(truncated_arr, array))  # Check all elements are included
+    np.testing.assert_equal(
+        np.sort(truncated_arr), truncated_arr
+    )  # Check the result is sorted array

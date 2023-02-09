@@ -17,6 +17,7 @@ from sklearn.decomposition import PCA
 from sklearn.mixture import GaussianMixture
 from sklearn.preprocessing import StandardScaler
 
+from miv.signal.spike.cutout import ChannelSpikeCutout, SpikeCutout
 from miv.typing import SignalType, SpikestampsType
 
 # TODO: Modularize the entire process.
