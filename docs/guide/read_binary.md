@@ -32,31 +32,33 @@ import numpy as np
 
 from tqdm import tqdm
 
-from miv.io import load_continuous_data_file
+from miv.io import load_continuous_data
+from miv.signal.filter import ButterBandpass
+from miv.signal.spike import ThresholdCutoff
+from miv.core import Spikestamps
 ```
 
 ## Import Data
 
-To read
+Since raw data does not contain the meta-data of recording, user must specify number of channels and sampling rate.
 
 ```{code-cell} ipython3
-file_path: str = "<Path to binary file>"
+file_path: str    = "data_16bit.bin"  # Path to binary file
 num_channels: int = 512
 sampling_rate:int = 20_000
-raw_signal, timestamps = load_continuous_data(filepath, num_channels=num_channels, sampling_rate=sampling_rate)
+```
+
+To read the binary file, use `load_continuous_data` function from `miv.io`.
+
+```{code-cell} ipython3
+raw_signal, timestamps = load_continuous_data(file_path, num_channels=num_channels, sampling_rate=sampling_rate)
 print(raw_signal.shape)  # (num_samples, num_channels)
+print(timestamps.shape)  # (num_samples)
 ```
 
 ## Prepare Spike Detection
 
 For demonstration, lets use a simple bandpass filter with threshold detection to get spikestamps.
-
-```{code-cell} ipython3
-:tags: [hide-cell]
-
-from miv.signal.filter import ButterBandpass
-from miv.signal.spike import ThresholdCutoff
-```
 
 ```{code-cell} ipython3
 pre_filter = ButterBandpass(lowcut=300, highcut=3000, order=5)
@@ -68,16 +70,18 @@ spike_detection = ThresholdCutoff()
 To iterate segment of large dataset, it is recommended to use `np.array_split` which returns array `view` of partial segment.
 
 ```{code-cell} ipython3
-total_spiketrain = None
-n_split = 1000
+total_spiketrain = Spikestamps([])
 
+# Split data into fragment of 1 minute recordings
+n_split = timestamps.shape[0] // sampling_rate // 60  # Split for each 1 minute (60 seconds) of data
 raw_signal_split = np.array_split(raw_signal, n_split, axis=0)
 timestamps_split = np.array_split(timestamps, n_split)
-for signal_seg, timestamps_seg in tqdm(zip(raw_signal_split, timestamps_split)):
+
+# Process
+for signal_seg, timestamps_seg in tqdm(zip(raw_signal_split, timestamps_split), total=n_split):
     filtered_signal = pre_filter(signal_seg, sampling_rate=sampling_rate)
-    spks = spike_detection(filtered_signal, timestamps, sampling_rate=sampling_rate, progress_bar=False)
-    if total_spiketrain:
-        total_spiketrain.merge(spks)
-    else:
-        total_spiketrain = spks
+    spks = spike_detection(filtered_signal, timestamps_seg, sampling_rate=sampling_rate, progress_bar=False)
+    total_spiketrain.extend(spks)
+    
+print(total_spiketrain.get_count())
 ```

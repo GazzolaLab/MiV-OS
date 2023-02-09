@@ -94,7 +94,7 @@ def test_load_continuous_data_temp_file_with_timestamps_shift(
         num_channels,
         freq,
     )
-    np.testing.assert_allclose(out_timestamps, timestamps / freq)
+    np.testing.assert_allclose(out_timestamps, timestamps)
     np.testing.assert_allclose(raw_data, signal)
 
 
@@ -150,7 +150,7 @@ def test_load_recording_assertion_single_data_file(num_channels, signal_length, 
     with pytest.raises(
         AssertionError, match=r"(?=.*temp1.*)(?=.*temp2.*)(?=There should be only one)"
     ):
-        load_recording(dirname)
+        next(load_recording(dirname))
 
 
 def test_bits_to_voltage():
@@ -172,8 +172,8 @@ def test_load_recording_readout_without_mask(create_mock_data_file):
     # TODO: Refactor into fixture mock data
     dirname, expected_data, expected_timestamps, sampling_rate = create_mock_data_file
 
-    out_data, out_timestamps, out_sampling_rate = load_recording(
-        dirname, start_at_zero=False
+    out_data, out_timestamps, out_sampling_rate = next(
+        load_recording(dirname, start_at_zero=False)
     )
 
     assert sampling_rate == out_sampling_rate
@@ -185,14 +185,14 @@ def test_load_recording_readout_without_mask_with_shift(create_mock_data_file):
     # TODO: Refactor into fixture mock data
     dirname, expected_data, expected_timestamps, sampling_rate = create_mock_data_file
 
-    out_data, out_timestamps, out_sampling_rate = load_recording(
-        dirname, start_at_zero=True
+    out_data, out_timestamps, out_sampling_rate = next(
+        load_recording(dirname, start_at_zero=True)
     )
 
     assert sampling_rate == out_sampling_rate
     np.testing.assert_allclose(out_data, expected_data)
     np.testing.assert_allclose(
         out_timestamps,
-        (sampling_rate * expected_timestamps - np.pi) / sampling_rate,
+        expected_timestamps - np.pi,
         rtol=2e-7,
     )

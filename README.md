@@ -58,7 +58,6 @@ We ask that any publications which use MiV-OS package to cite the following pape
 _Names arranged alphabetically_
 - Arman Tekinalp
 - Andrew Dou
-- Austin Ellis-Mohr
 - [Frithjof Gressmann](https://github.com/frthjf)
 - Gaurav Upadhyay
 - [Seung Hyun Kim](https://github.com/skim0119)
@@ -69,7 +68,7 @@ _Names arranged alphabetically_
 [link-project-website]: https://mindinvitro.illinois.edu/
 [link-docs-status]: https://miv-os.readthedocs.io/en/latest/?badge=latest
 [link-CI]: https://github.com/GazzolaLab/MiV-OS/actions
-[link-LICENSE]: https://github.com/GazzolaLab/MiV-OS/blob/main/LICENSE
+[link-LICENSE]: https://opensource.org/licenses/MIT
 [link-pypi]: https://badge.fury.io/py/MiV-OS
 [link-pepy-download-count]: https://pepy.tech/project/MiV-OS
 [link-codecov]: https://codecov.io/gh/GazzolaLab/MiV-OS
@@ -78,7 +77,7 @@ _Names arranged alphabetically_
 
 [badge-docs-status]: https://readthedocs.org/projects/miv-os/badge/?version=latest
 [badge-CI]: https://github.com/GazzolaLab/MiV-OS/workflows/CI/badge.svg
-[badge-LICENSE]: https://img.shields.io/apm/l/atomic-design-ui.svg?style=flat
+[badge-LICENSE]: https://img.shields.io/badge/License-MIT-yellow.svg
 [badge-pypi]: https://badge.fury.io/py/MiV-OS.svg
 [badge-pepy-download-count]: https://pepy.tech/badge/MiV-OS
 [badge-codecov]: https://codecov.io/gh/GazzolaLab/MiV-OS/branch/main/graph/badge.svg?token=OM5LYWF5KP

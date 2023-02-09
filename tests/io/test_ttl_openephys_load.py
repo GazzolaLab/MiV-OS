@@ -1,10 +1,9 @@
 import numpy as np
 
 from miv.io.binary import load_ttl_event
-from tests.io.mock_data import test_TTL_data
 
 
-def test_load_ttl_event(test_TTL_data):
+def test_load_ttl_event(test_TTL_data):  # TODO: no flake8 F811
     (
         tmp_path,
         expected_states,

@@ -1,48 +1,58 @@
 __doc__ = """
 
+Data Manager
+############
+
+.. autoclass:: DataManager
+   :members:
+
+Module (OpenEphys)
+##################
+
 .. Note::
     We expect the data structure to follow the default format
     exported from OpenEphys system:
     `format <https://open-ephys.atlassian.net/wiki/spaces/OEW/pages/491632/Data+format>`_.
-
-.. Note::
-    For simple experiments, you may prefer to use :ref:`api/io:Raw Data Loader`.
-    However, we generally recommend to use ``Data`` or ``DataManager`` for
-    handling data, especially when the size of the raw data is large.
-
-Module
-######
 
 .. currentmodule:: miv.io.data
 
 .. autoclass:: Data
    :members:
 
-----------------------
-
-.. autoclass:: DataManager
-   :members:
-
 """
 __all__ = ["Data", "DataManager"]
 
-from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Union,
+)
 
 import logging
 import os
 import pickle
 from collections.abc import MutableSequence
-from contextlib import contextmanager
 from glob import glob
 
 import matplotlib.pyplot as plt
 import numpy as np
 
 from miv.io.binary import load_continuous_data, load_recording, load_ttl_event
+from miv.io.protocol import DataProtocol
 from miv.signal.filter.protocol import FilterProtocol
 from miv.signal.spike.protocol import SpikeDetectionProtocol
 from miv.statistics import firing_rates
 from miv.typing import SignalType
+
+if TYPE_CHECKING:
+    from mpi4py import MPI
 
 
 class Data:
@@ -135,6 +145,17 @@ class Data:
         plt.figure(figure)
         plt.savefig(filepath, **savefig_kwargs)
 
+    def has_data(self, filename: str):
+        """Check if the analysis data already saved
+
+        Parameters
+        ----------
+        filename : str
+            File name to check
+        """
+        filepath = os.path.join(self.analysis_path, filename + ".pkl")
+        return os.path.exists(filepath)
+
     def save_data(
         self,
         data,
@@ -174,21 +195,36 @@ class Data:
             data = pickle.load(output_file, **pkl_kwargs)
         return data
 
-    @contextmanager
-    def load(self, start_at_zero: bool = False):
+    def load(
+        self,
+        num_fragments: int = 1,
+        start_at_zero: bool = False,
+        progress_bar=False,
+        mpi_comm: Optional["MPI.COMM_WORLD"] = None,
+    ):
         """
-        Context manager for loading data instantly.
+        Iterator to load data fragmentally.
 
         Parameters
         ----------
+        num_fragments : int
+            Instead of loading entire data at once, split the data into `num_fragment`
+            number of subdata to process separately. (default=1)
         start_at_zero : bool
             If set to True, time first timestamps will be shifted to zero. To achieve synchronized
             timestamps with other recordings/events, set this to False.
+        progress_bar : bool
+            Visible progress bar
+        mpi_comm: Optional[MPI.COMM_WORLD]
+            (Experimental Feature) If the load is executed in MPI environment, user can pass
+            MPI.COMM_WORLD to split the load.
+            For example, if num_fragments=100, rank=2, and size=10, this function will only iterate
+            the fragment 20-29 out of 0-100.
 
         Examples
         --------
             >>> data = Data(data_path)
-            >>> with data.load() as (signal, timestamps, sampling_rate):
+            >>> for data.load(num_fragments=10) as (signal, timestamps, sampling_rate):
             ...     ...
 
         Returns
@@ -203,19 +239,28 @@ class Data:
         ------
         FileNotFoundError
             If some key files are missing.
-
         """
         # TODO: Not sure this is safe implementation
         if not self.check_path_validity():
             raise FileNotFoundError("Data directory does not have all necessary files.")
-        try:
-            signal, timestamps, sampling_rate = load_recording(
-                self.data_path, self.masking_channel_set, start_at_zero=start_at_zero
-            )
-            yield signal, timestamps, sampling_rate
-        finally:
-            del timestamps
-            del signal
+
+        start_index = None
+        end_index = None
+        if mpi_comm is not None:
+            rank = mpi_comm.Get_rank()
+            size = mpi_comm.Get_size()
+            tasks = np.array_split(np.arange(num_fragments), size)[rank]
+            start_index = tasks.min()
+            end_index = tasks.max() + 1
+        yield from load_recording(
+            self.data_path,
+            self.masking_channel_set,
+            start_at_zero=start_at_zero,
+            num_fragments=num_fragments,
+            start_index=start_index,
+            end_index=end_index,
+            progress_bar=progress_bar,
+        )
 
     def load_ttl_event(self):
         """
@@ -366,7 +411,7 @@ class Data:
         """
 
         result = []
-        with self.load() as (sig, times, samp):
+        for sig, times, samp in self.load(num_fragments=1):
             start_time = times[0] + offset
             starting_index = int(offset * samp)
 
@@ -473,7 +518,7 @@ class DataManager(MutableSequence):
 
     def __init__(self, data_collection_path: str):
         self.data_collection_path = data_collection_path
-        self.data_list: List[Data] = []
+        self.data_list: List[DataProtocol] = []
 
         # From the path get data paths and create data objects
         self._load_data_paths()
@@ -483,7 +528,7 @@ class DataManager(MutableSequence):
         return [data.data_path for data in self.data_list]
 
     # Queries
-    def query_path_name(self, query_path) -> Iterable[Data]:
+    def query_path_name(self, query_path) -> Iterable[DataProtocol]:
         return list(filter(lambda d: query_path in d.data_path, self.data_list))
 
     # DataManager Representation
@@ -540,9 +585,14 @@ class DataManager(MutableSequence):
             f"Total {len(data_path_list)} recording found. There are {invalid_count} invalid paths."
         )
 
-    def _get_experiment_paths(self) -> Iterable[str]:
+    def _get_experiment_paths(self, sort: bool = True) -> Iterable[str]:
         """
         Get experiment paths.
+
+        Parameters
+        ----------
+        sort : bool
+            Sort the output data paths
 
         Returns
         -------
@@ -559,6 +609,8 @@ class DataManager(MutableSequence):
                 and os.path.isdir(path)
             ):
                 path_list.append(path)
+        if sort:
+            path_list = sorted(path_list)
         return path_list
 
     def save(self, tag: str, format: str):  # pragma: no cover
@@ -620,7 +672,7 @@ class DataManager(MutableSequence):
         """
 
         for data in self.data_list:
-            with data.load() as (sig, times, samp):
+            for sig, times, samp in data.load(num_fragments=1):
                 mask_list = []
 
                 filtered_signal = filter(sig, samp)
@@ -635,7 +687,7 @@ class DataManager(MutableSequence):
 
     def auto_channel_mask_with_correlation_matrix(
         self,
-        spontaneous_data: Data,
+        spontaneous_data: DataProtocol,
         filter: FilterProtocol,
         detector: SpikeDetectionProtocol,
         omit_experiments: Optional[Iterable[int]] = None,

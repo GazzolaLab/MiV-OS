@@ -28,8 +28,10 @@ class StimjimSerial(ArduinoSerial):
     All ampere-units are in micro.
     """
 
-    def __init__(self, output0_mode=1, output1_mode=3, high_v=4500, low_v=0, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(
+        self, port, output0_mode=1, output1_mode=3, high_v=4500, low_v=0, **kwargs
+    ):
+        super().__init__(port, **kwargs)
         self.output0_mode = output0_mode
         self.output1_mode = output1_mode
         self.high_v_1 = high_v
@@ -72,6 +74,9 @@ class StimjimSerial(ArduinoSerial):
         pulse_length: int = 10_000,
         reverse: bool = False,
     ) -> List[str]:
+        """
+        Convert a spiketrain into a series of strings that can be sent to the Stimjim device.
+        """
         spiketrain = np.insert(spiketrain, 0, 0)
         spiketrain = np.append(spiketrain, t_max)
         gaps = np.diff(spiketrain).astype(np.int_)
@@ -79,7 +84,7 @@ class StimjimSerial(ArduinoSerial):
             gaps = gaps[::-1]
         if np.any(gaps < pulse_length):
             raise ValueError(
-                f"Gap between pulse must be larger than pulse length. {spiketrain}"
+                f"Gap between pulse {gaps} must be larger than pulse length {pulse_length}. {spiketrain}"
             )
 
         # String functions

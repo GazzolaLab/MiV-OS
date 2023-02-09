@@ -43,9 +43,8 @@ First **create the fork repository and clone** to your local machine.
 We recommend using python version above 3.8.0.
 
 ```bash
-conda create --name miv-dev
+conda create -n miv-dev python=3.10.8
 conda activate miv-dev
-conda install python==3.8
 ```
 
 3. Setup [`poetry`](https://python-poetry.org) and `dependencies`!
@@ -57,6 +56,8 @@ make pre-commit-install
 ```
 
 If you are planning to contribute on documentation, extra dependencies can be installed using `poetry install -E docs`. The detail instruction is included [here](https://github.com/GazzolaLab/MiV-OS/blob/main/docs/README.md).
+
+> Depending on the OS, setting up `Poetry` might require adding `export PATH="$HOME/.local/bin:$PATH"` to __.bashrc__ or __.zshrc__. See [here, part 3](https://python-poetry.org/docs/#installing-with-the-official-installer).
 
 4. Now your working environment is set!
 
@@ -133,6 +134,8 @@ Please follow these steps to have your contribution considered by the maintainer
 ```bash
 make test
 ```
+
+> To run the full test, you need all extra dependencies: `poetry install --all-extras`
 
 3. After you submit your pull request, verify that all status checks are passing <details><summary>What if the status checks are failing?</summary>If a status check is failing, and you believe that the failure is unrelated to your change, please leave a comment on the pull request explaining why you believe the failure is unrelated. A maintainer will re-run the status check for you. If we conclude that the failure was a false positive, then we will open an issue to track that problem with our status check suite.</details>
 

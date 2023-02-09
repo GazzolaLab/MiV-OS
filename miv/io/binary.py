@@ -16,6 +16,7 @@ __all__ = [
 
 from typing import Any, Dict, List, Optional, Sequence, Set, Union
 
+import logging
 import os
 from ast import literal_eval
 from glob import glob
@@ -23,6 +24,7 @@ from glob import glob
 import neo
 import numpy as np
 import quantities as pq
+from tqdm import tqdm
 
 from miv.typing import SignalType, TimestampsType
 
@@ -213,7 +215,15 @@ def load_ttl_event(
 
 
 def load_recording(
-    folder: str, channel_mask: Optional[Set[int]] = None, start_at_zero: bool = True
+    folder: str,
+    channel_mask: Optional[Set[int]] = None,
+    start_at_zero: bool = True,
+    num_fragments: int = 1,
+    start_index: Optional[int] = None,
+    end_index: Optional[int] = None,
+    dtype: np.dtype = np.float32,
+    verbose: bool = False,
+    progress_bar: bool = False,
 ):
     """
     Loads data recorded by Open Ephys in Binary format as numpy memmap.
@@ -232,6 +242,22 @@ def load_recording(
     start_at_zero : bool
         If True, the timestamps is adjusted to start at zero.
         Note, recorded timestamps might not start at zero for some reason.
+    num_fragments : int
+        Instead of loading entire data at once, split the data into `num_fragment`
+        number of subdata to process separately. (default=1)
+    start_index : Optional[int]
+        Start index of the fragments. It is useful when you want to submit MPI processing.
+        For example, one can submit num_fragments=10, start_index=3 to process 3-9 fragments.
+        (Zero-indexing)
+    end_index : Optional[int]
+        End index of the fragments. It is useful when you want to submit MPI processing.
+        For example, one can submit num_fragments=10, end_index=5 to process 0-5 fragments.
+        (Zero-indexing)
+    dtype: np.dtype
+        If None, skip data-type conversion. If the filesize is too large, it is advisable
+        to keep `dtype=None` and convert slice by slice. (default=float32)
+    verbose: bool
+        Include logging.info messages for intermediate progresses. (default=False)
 
     Returns
     -------
@@ -261,24 +287,35 @@ def load_recording(
     # channel_info: Dict[str, Any] = info["continuous"][0]["channels"]
 
     # TODO: maybe need to support multiple continuous.dat files in the future
-    signal, timestamps = load_continuous_data(
-        file_path[0], num_channels, sampling_rate, dtype=np.float32
-    )
+    signal, timestamps = load_continuous_data(file_path[0], num_channels, sampling_rate)
+    fragmented_signal = np.array_split(signal, num_fragments, axis=0)[
+        start_index:end_index
+    ]
+    fragmented_timestamps = np.array_split(timestamps, num_fragments)[
+        start_index:end_index
+    ]
+    for frag_id in tqdm(range(num_fragments), disable=not progress_bar):
+        _signal = fragmented_signal[frag_id]
+        _timestamps = fragmented_timestamps[frag_id]
+        if _signal.shape[0] > 6.0e6:
+            logging.warn(
+                "The recording data is too long. Consider using more num_fragments."
+            )
+        _signal = _signal.astype(dtype)
+        if verbose:
+            logging.info("Cast done")
 
-    # To Voltage
-    signal = bits_to_voltage(signal, info["continuous"][0]["channels"])
-    # signal = neo.core.AnalogSignal(
-    #    signal*pq.uV, sampling_rate=sampling_rate * pq.Hz
-    # )
+        # To Voltage
+        _signal = bits_to_voltage(_signal, info["continuous"][0]["channels"])
 
-    if channel_mask:
-        signal = apply_channel_mask(signal, channel_mask)
+        if channel_mask:
+            _signal = apply_channel_mask(_signal, channel_mask)
 
-    # Adjust timestamps to start from zero
-    if start_at_zero and not np.isclose(timestamps[0], 0.0):
-        timestamps -= timestamps[0]
+        # Adjust timestamps to start from zero
+        if start_at_zero and not np.isclose(_timestamps[0], 0.0):
+            _timestamps -= _timestamps[0]
 
-    return signal, timestamps, sampling_rate
+        yield _signal, _timestamps, sampling_rate
 
 
 def load_continuous_data(
@@ -286,7 +323,6 @@ def load_continuous_data(
     num_channels: int,
     sampling_rate: float,
     timestamps_path: Optional[str] = None,
-    dtype: Optional[np.dtype] = None,
     _recorded_dtype: Union[np.dtype, str] = "int16",
 ):
     """
@@ -311,9 +347,6 @@ def load_continuous_data(
         If None, first check if the file "timestamps.npy" exists on the same directory.
         If the file doesn't exist, we deduce the timestamps based on the sampling rate
         and the length of the data.
-    dtype: Optional[np.dtype]
-        If None, skip data-type conversion. If the filesize is too large, it is advisable
-        to keep `dtype=None` and convert slice by slice. (default=None)
     _recorded_dtype: Union[np.dtype, str]
         Recorded data type. (default="int16")
 
@@ -338,8 +371,6 @@ def load_continuous_data(
     )
     length = raw_data.size // num_channels
     raw_data = raw_data.reshape(length, num_channels)
-    if dtype is not None:
-        raw_data = raw_data.astype(dtype)
 
     # Get timestamps_path
     if timestamps_path is None:
@@ -351,7 +382,7 @@ def load_continuous_data(
         timestamps = np.asarray(
             np.load(timestamps_path)
         )  # TODO: check if npy file includes dtype. else, add "dtype=np.float32"
-        timestamps /= float(sampling_rate)
+        # timestamps /= float(sampling_rate)  # TODO(beyond 0.3.0) As of OpenEphys 0.6, this line is no-longer necessary.
     else:  # If timestamps_path doesn't exist, deduce the stamps
         timestamps = np.array(range(0, length)) / sampling_rate
 

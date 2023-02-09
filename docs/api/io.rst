@@ -7,6 +7,8 @@ Python Data Managing
 
 .. automodule:: miv.io.data
 
+.. automodule:: miv.io.intan.data
+
 .. automodule:: miv.io.binary
    :members:
 
