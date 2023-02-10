@@ -15,8 +15,6 @@ import logging
 import os
 import pickle
 import xml.etree.ElementTree as ET
-from collections.abc import MutableSequence
-from contextlib import contextmanager
 from glob import glob
 
 import matplotlib.pyplot as plt
@@ -24,10 +22,12 @@ import numpy as np
 from tqdm import tqdm
 
 import miv.io.intan.rhs as rhs
-from miv.io.data import Data
-from miv.signal.filter.protocol import FilterProtocol
-from miv.signal.spike.protocol import SpikeDetectionProtocol
+from miv.io.data import Data, DataManager
 from miv.typing import SignalType
+
+
+class DataManagerIntan(DataManager):
+    pass
 
 
 class DataIntan(Data):
@@ -53,58 +53,15 @@ class DataIntan(Data):
         data_path : str
     """
 
-    @contextmanager
     def load(self):
-        """
-        Context manager for loading data instantly.
-
-        Examples
-        --------
-            >>> data = DataIntan(data_path)
-            >>> with data.load() as (signal, timestamps, sampling_rate):
-            ...     ...
-
-        Returns
-        -------
-        signal : SignalType, neo.core.AnalogSignal
-            The length of the first axis `signal.shape[0]` correspond to the length of the
-            signal, while second axis `signal.shape[1]` correspond to the number of channels.
-        timestamps : TimestampsType, numpy array
-        sampling_rate : float
-
-        Raises
-        ------
-        FileNotFoundError
-            If some key files are missing.
-
-        """
-        try:
-            signals, timestamps = [], []
-            for signal, timestamp, sampling_rate in self.load_fragments():
-                signals.append(signal)
-                timestamps.append(timestamp)
-
-            yield np.concatenate(signals, axis=0), np.concatenate(
-                timestamps
-            ), sampling_rate
-        finally:
-            del signals
-            del timestamps
-
-    def load_fragments(self, progress_bar=False):
         """
         Iterator to load data fragmentally.
         This function loads each file separately.
 
-        Parameters
-        ----------
-        progress_bar : bool
-            Visible progress bar
-
         Examples
         --------
             >>> data = Data(data_path)
-            >>> for data.load_fragments(10) as (signal, timestamps, sampling_rate):
+            >>> for data.load(10) as (signal, timestamps, sampling_rate):
             ...     ...
 
         Returns
@@ -120,6 +77,27 @@ class DataIntan(Data):
         FileNotFoundError
             If some key files are missing.
         """
+
+        yield from self._generator_by_channel_name("amplifier_data")
+
+    def get_stimulation(self, progress_bar=False):
+        """
+        Load stimulation recorded data.
+        """
+        signals, timestamps = [], []
+        for signal, timestamp, sampling_rate in self._generator_by_channel_name(
+            "stim_data", progress_bar
+        ):
+            signals.append(signal)
+            timestamps.append(timestamp)
+
+        return (
+            np.concatenate(signals, axis=0),
+            np.concatenate(timestamps),
+            sampling_rate,
+        )
+
+    def _generator_by_channel_name(self, name: str, progress_bar: bool = False):
         if not self.check_path_validity():
             raise FileNotFoundError("Data directory does not have all necessary files.")
         files = self.get_recording_files()
@@ -131,18 +109,10 @@ class DataIntan(Data):
         for filename in tqdm(files, disable=not progress_bar):
             result, data_present = rhs.load_file(filename)
             assert data_present, f"Data does not present: {filename=}."
-            assert not hasattr(
-                result, "amplifier_channels"
-            ), f"No active channel in the file ({filename=})."
+            assert not hasattr(result, name), f"No {name} in the file ({filename=})."
 
             # signal_group = result["amplifier_channels"]
-            yield result["amplifier_data"].T, result["t"], sampling_rate
-
-    def load_event(self):
-        """
-        Load event data.
-        """
-        raise NotImplementedError  # TODO
+            yield np.asarray(result[name]).T, np.asarray(result["t"]), sampling_rate
 
     def check_path_validity(self):
         """

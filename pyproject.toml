@@ -5,7 +5,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "MiV-OS"
-version = "0.2.3"
+version = "0.2.4"
 description = "Python software for analysis and computing framework used in MiV project."
 readme = "README.md"
 authors = ["GazzolaLab <skim449@illinois.edu>"]
@@ -31,12 +31,13 @@ classifiers = [
 # ...
 include = ["miv/py.typed"]
 packages = [
-    { include = "miv" }
+    { include = "miv" },
 ]
 
 
 [tool.poetry.scripts]  # TODO: query `scripts` directory
-convert_open_ephys_to_miv = "scripts.convert_open_ephys_to_miv:main"
+convert_open_ephys_to_miv = "miv.cli.convert_open_ephys_to_miv:main"
+miv_extract_spiketrain = "miv.cli.miv_extract_spiketrain:main"
 
 
 [tool.poetry.dependencies]
@@ -53,31 +54,32 @@ seaborn = ">=0.11.2,<0.13.0"
 tqdm = "^4.64.0"
 numpy = "^1.23.2"
 viziphant = "^0.2.0"
-Sphinx = {version = "^4.5.0", optional = true, extras = ["docs"]}
-pydata-sphinx-theme = {version = ">=0.9,<0.13", optional = true, extras = ["docs"]}
-readthedocs-sphinx-search = {version = "^0.1.2", optional = true, extras = ["docs"]}
-sphinx-autodoc-typehints = {version = "^1.19.1", optional = true, extras = ["docs"]}
-myst-parser = {version = "^0.17.2", optional = true, extras = ["docs"]}
-numpydoc = {version = "^1.4.0", optional = true, extras = ["docs"]}
-sphinx-togglebutton = {version = "^0.3.2", optional = true, extras = ["docs"]}
-sphinx-copybutton = {version = "^0.5.0", optional = true, extras = ["docs"]}
-myst-nb = {version = "^0.15.0", optional = true, extras = ["docs"]}
+Sphinx = {version = "^4.5.0", optional = true}
+pydata-sphinx-theme = {version = ">=0.9,<0.13", optional = true}
+readthedocs-sphinx-search = {version = "^0.1.2", optional = true}
+sphinx-autodoc-typehints = {version = "^1.19.1", optional = true}
+myst-parser = {version = "^0.17.2", optional = true}
+numpydoc = {version = "^1.4.0", optional = true}
+sphinx-togglebutton = {version = "^0.3.2", optional = true}
+sphinx-copybutton = {version = "^0.5.0", optional = true}
+sphinxcontrib-mermaid = {version = "^0.7.1", optional = true}
+myst-nb = {version = "^0.15.0", optional = true}
 pyinform = "^0.2.0"
 graphviz = "^0.20.1"
 Pillow = "9.1.1"
 h5py = "^3.7.0"
 pyvis = ">=0.2.1,<0.4.0"
-lyon = { git = "https://github.com/sciforce/lyon.git", rev = "91dd700" }
+lyon = { git = "https://github.com/sciforce/lyon.git", rev = "91dd700", optional = true}
 click = "^8.1.3"
-sphinxcontrib-mermaid = {version = "^0.7.1", extras = ["docs"], optional = true}
-pyserial = {version = "^3.5", extras = ["experiment"]}
+pyserial = {version = "^3.5", optional = true}
+numba = "^0.56.4"
 
 [tool.poetry.dev-dependencies]
 black = "^22.8.0"
 isort = {extras = ["colors"], version = "^5.10.1"}
 mypy = "^0.982"
 mypy-extensions = "^0.4.3"
-pre-commit = "^2.20.0"
+pre-commit = "^2.21.0"
 pydocstyle = "^6.1.1"
 pylint = "^2.15.0"
 pytest = "^7.1.3"
@@ -106,6 +108,18 @@ experiment = [
 ]
 
 
+
+[tool.poetry.group.sortingExtension.dependencies]
+dtaidistance = "^2.3.10"
+scikit-learn-extra = "^0.2.0"
+
+
+[tool.poetry.group.algorithmExtension.dependencies]
+rupture = "^1.4.5"
+
+
+[tool.poetry.group.mpi.dependencies]
+mpi4py = "^3.1.4"
 
 [tool.black]
 # https://github.com/psf/black

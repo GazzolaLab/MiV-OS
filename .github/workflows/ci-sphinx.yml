@@ -26,13 +26,13 @@ jobs:
           submodules: recursive
       - name: Setup Poetry
         uses: snok/install-poetry@v1
+      - uses: mpi4py/setup-mpi@v1
       - name: Poetry install docs dependencies
         run: |
             poetry --version
             poetry config virtualenvs.in-project true
             #poetry config virtualenvs.create false
-            poetry lock --no-update
-            poetry install -E "docs experiment"
+            poetry install --all-extras
       - name: Sphinx Build Check
         run: |
             source .venv/bin/activate

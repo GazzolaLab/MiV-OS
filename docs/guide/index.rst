@@ -7,6 +7,7 @@ Here we provide number of example scripts using `MiV` tools. Some examples provi
    :maxdepth: 2
    :caption: Analysis
 
+   change_detection
    channel_correlation
    granger_causality_psd_cpsd_coherence
    burst_analysis
@@ -25,7 +26,6 @@ Here we provide number of example scripts using `MiV` tools. Some examples provi
    :caption: Data / Data Structure
 
    sample_datasets
-   read_data_fragment
    data_structure/hdf5_based_data_format
    read_TTL_events
    read_binary

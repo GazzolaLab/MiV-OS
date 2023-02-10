@@ -3,7 +3,6 @@ from typing import Iterable, Optional, Set
 import enum
 import json
 import os
-from contextlib import contextmanager
 from enum import Enum
 
 import numpy as np
@@ -98,7 +97,7 @@ class MockDataGenerator:
 
         # Expected timestamps
         sampling_rate = 30000
-        expected_timestamps = timestamps / sampling_rate
+        expected_timestamps = timestamps
 
         return dirname, expected_data, expected_timestamps, sampling_rate
 
@@ -147,8 +146,7 @@ class MockData(Data):
 
         self.signal = np.transpose(self.signal)
 
-    @contextmanager
-    def load(self):
+    def load(self, num_fragments=1):
         yield self.signal, self.times, self.sampling_rate
 
 
@@ -169,8 +167,7 @@ class MockSpontaneousData(Data):
 
         self.signal = np.transpose(self.signal)
 
-    @contextmanager
-    def load(self):
+    def load(self, num_fragments=1):
         yield self.signal, self.times, self.sampling_rate
 
 
