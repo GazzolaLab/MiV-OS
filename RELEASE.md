@@ -1,3 +1,25 @@
+# Release Note (version 0.2.4)
+
+## What's Changed
+
+### Features
+
+* Dynamic Time Warping for sorting and clustering by @skim0119 in https://github.com/GazzolaLab/MiV-OS/pull/181
+* Make `load_fragments` to be default behavior for `load` by @eunice-chan in https://github.com/GazzolaLab/MiV-OS/pull/190
+* Add more features for `miv.core.Spikestamps`: time-window view, first/last spikestamps, and spike counter
+
+### Documentation
+
+* update raw-binary file pre-processing by @skim0119 in https://github.com/GazzolaLab/MiV-OS/pull/191
+* Update read_TTL_events guide by @skim0119 in https://github.com/GazzolaLab/MiV-OS/pull/187
+* how to use change-point detection algorithm by @skim0119 in https://github.com/GazzolaLab/MiV-OS/pull/193
+
+## New Contributors
+
+* @eunice-chan made their first contribution in https://github.com/GazzolaLab/MiV-OS/pull/190
+
+**Full Changelog**: https://github.com/GazzolaLab/MiV-OS/compare/v0.2.3...V0.2.4
+
 # Release Note (version 0.2.3)
 
 ## What's Changed
