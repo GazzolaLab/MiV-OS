@@ -56,7 +56,7 @@ from miv.statistics import firing_rates
 from miv.typing import SignalType
 
 if TYPE_CHECKING:
-    from mpi4py import MPI
+    import mpi4py
 
 
 class Data:
@@ -204,7 +204,7 @@ class Data:
         num_fragments: int = 1,
         start_at_zero: bool = False,
         progress_bar=False,
-        mpi_comm: MPI.COMM_WORLD | None = None,
+        mpi_comm: mpi4py.MPI.COMM_WORLD | None = None,
     ):
         """
         Iterator to load data fragmentally.
