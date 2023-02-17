@@ -1773,7 +1773,13 @@ python-versions = "*"
 
 [[package]]
 name = "pyupgrade"
+<<<<<<< HEAD
 version = "2.38.2"
+||||||| parent of b0923a9 (build(deps-dev): bump pyupgrade from 2.38.4 to 3.2.2)
+version = "2.38.4"
+=======
+version = "3.2.2"
+>>>>>>> b0923a9 (build(deps-dev): bump pyupgrade from 2.38.4 to 3.2.2)
 description = "A tool to automatically upgrade syntax for newer versions."
 category = "dev"
 optional = false
@@ -2719,6 +2725,7 @@ python-versions = ">=3.8,<3.11"
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 content-hash = "c82756f9aece433c0f876702d6135b69c6e1cef264c4e25a639db9db2897bdb8"
 ||||||| parent of 2b91000 (add pyvis)
 content-hash = "4433e7a1bde1194a3eb7173975840bb9ba86d4ddc36b3b71d45e22a695ad36a2"
@@ -2830,6 +2837,11 @@ content-hash = "d49962cf3799cac1cf32dc7e8068aecb1332a7f6bb715b1c4ae295ff27454728
 =======
 content-hash = "ae446edeb1c5594df699acbdfffb81c0a8868aaebcb92989601ec04acb49c935"
 >>>>>>> 9d9a6ca (build(deps): bump poetryup from 0.10.0 to 0.12.3)
+||||||| parent of b0923a9 (build(deps-dev): bump pyupgrade from 2.38.4 to 3.2.2)
+content-hash = "ae446edeb1c5594df699acbdfffb81c0a8868aaebcb92989601ec04acb49c935"
+=======
+content-hash = "0558c0c72ace8c08ca1838cb2173d61252277153440c8f7081703c0ef3405327"
+>>>>>>> b0923a9 (build(deps-dev): bump pyupgrade from 2.38.4 to 3.2.2)
 
 [metadata.files]
 alabaster = [
@@ -5244,8 +5256,16 @@ pytz = [
     {file = "pytz-2022.2.1.tar.gz", hash = "sha256:cea221417204f2d1a2aa03ddae3e867921971d0d76f14d87abb4414415bbdcf5"},
 ]
 pyupgrade = [
+<<<<<<< HEAD
     {file = "pyupgrade-2.38.2-py2.py3-none-any.whl", hash = "sha256:41bb9a9fd48fe57163b0dacffff433d6d5a63a0f7c2402918917b5f1a533342b"},
     {file = "pyupgrade-2.38.2.tar.gz", hash = "sha256:a5d778c9de0b53975c6a9eac2d0df5adfad244a9f7d7993d8a114223ebbda367"},
+||||||| parent of b0923a9 (build(deps-dev): bump pyupgrade from 2.38.4 to 3.2.2)
+    {file = "pyupgrade-2.38.4-py2.py3-none-any.whl", hash = "sha256:944ff993c396ddc2b9012eb3de4cda138eb4c149b22c6c560d4c8bfd0e180982"},
+    {file = "pyupgrade-2.38.4.tar.gz", hash = "sha256:1eb43a49f416752929741ba4d706bf3f33593d3cac9bdc217fc1ef55c047c1f4"},
+=======
+    {file = "pyupgrade-3.2.2-py2.py3-none-any.whl", hash = "sha256:16c0e3a6ac2d83cd0fd30c138af5504918c59d584344f60a15d5f8009b11a0ed"},
+    {file = "pyupgrade-3.2.2.tar.gz", hash = "sha256:6bfa246fb9d94e490fad37980bcfc05b9494183ff29d9100ef4f7f22a952ce67"},
+>>>>>>> b0923a9 (build(deps-dev): bump pyupgrade from 2.38.4 to 3.2.2)
 ]
 pyvis = [
     {file = "pyvis-0.3.0.tar.gz", hash = "sha256:7b83d93f43cfe5627262cb6571cb8ba8ba189dbcb6a86f4ab901e9d958ecf1ee"},
