@@ -205,6 +205,7 @@ sphinxcontrib-mermaid = {version = "^0.7.1", extras = ["docs"]}
 sphinxcontrib-mermaid = {version = "^0.7.1", extras = ["docs"]}
 =======
 sphinxcontrib-mermaid = {version = "^0.7.1", extras = ["docs"], optional = true}
+<<<<<<< HEAD
 >>>>>>> e337c51 (fix pywavelet)
 poetryup = "^0.10.0"
 <<<<<<< HEAD
@@ -220,6 +221,11 @@ importlib = {version = "^1.0.4", extras = ["docs"], optional = true}
 =======
 >>>>>>> 8bd1248 (remove importlib)
 ||||||| parent of da9063c (change: port serial package)
+||||||| parent of 9d9a6ca (build(deps): bump poetryup from 0.10.0 to 0.12.3)
+poetryup = "^0.10.0"
+=======
+poetryup = ">=0.10,<0.13"
+>>>>>>> 9d9a6ca (build(deps): bump poetryup from 0.10.0 to 0.12.3)
 #pyseries = {extras = ["experiment", "docs"], version = "^1.0.26"}
 =======
 pyseries = {extras = ["experiment", "docs"], version = "^1.0.26"}

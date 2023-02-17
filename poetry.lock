@@ -604,12 +604,18 @@ qtconsole = ["qtconsole"]
 test = ["pytest (<7.1)", "pytest-asyncio", "testpath"]
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 test_extra = ["curio", "matplotlib (!=3.2.0)", "nbformat", "numpy (>=1.19)", "pandas", "pytest (<7.1)", "pytest-asyncio", "testpath", "trio"]
 ||||||| parent of b34ddda (build(deps): bump neo from 0.10.2 to 0.11.1)
 test_extra = ["curio", "matplotlib (!=3.2.0)", "nbformat", "numpy (>=1.19)", "pandas", "pytest (<7.1)", "pytest-asyncio", "testpath", "trio"]
 =======
 test-extra = ["curio", "matplotlib (!=3.2.0)", "nbformat", "numpy (>=1.19)", "pandas", "pytest (<7.1)", "pytest-asyncio", "testpath", "trio"]
 >>>>>>> b34ddda (build(deps): bump neo from 0.10.2 to 0.11.1)
+||||||| parent of 9d9a6ca (build(deps): bump poetryup from 0.10.0 to 0.12.3)
+test_extra = ["curio", "matplotlib (!=3.2.0)", "nbformat", "numpy (>=1.19)", "pandas", "pytest (<7.1)", "pytest-asyncio", "testpath", "trio"]
+=======
+test-extra = ["curio", "matplotlib (!=3.2.0)", "nbformat", "numpy (>=1.19)", "pandas", "pytest (<7.1)", "pytest-asyncio", "testpath", "trio"]
+>>>>>>> 9d9a6ca (build(deps): bump poetryup from 0.10.0 to 0.12.3)
 
 [[package]]
 name = "iso8601"
@@ -741,11 +747,17 @@ testing = ["nbdime", "coverage", "ipykernel", "jupytext", "matplotlib", "nbforma
 =======
 ||||||| parent of b34ddda (build(deps): bump neo from 0.10.2 to 0.11.1)
 cli = ["click-log"]
+<<<<<<< HEAD
 code_style = ["pre-commit (>=2.12,<3.0)"]
 =======
 cli = ["click-log"]
 code-style = ["pre-commit (>=2.12,<3.0)"]
 >>>>>>> b34ddda (build(deps): bump neo from 0.10.2 to 0.11.1)
+||||||| parent of 9d9a6ca (build(deps): bump poetryup from 0.10.0 to 0.12.3)
+code_style = ["pre-commit (>=2.12,<3.0)"]
+=======
+code-style = ["pre-commit (>=2.12,<3.0)"]
+>>>>>>> 9d9a6ca (build(deps): bump poetryup from 0.10.0 to 0.12.3)
 rtd = ["jupytext", "myst-nb (>=0.12.3,<0.13.0)", "nbdime", "sphinx-book-theme (>=0.1.1,<0.2.0)", "sphinx-copybutton"]
 testing = ["coverage", "ipykernel", "jupytext", "matplotlib", "nbdime", "nbformat (>=5.1)", "numpy", "pandas", "pytest (>=6,<7)", "pytest-cov", "pytest-regressions", "sympy"]
 >>>>>>> c02d34e (add mermaid)
@@ -864,7 +876,7 @@ testing = ["pytest-regressions", "pytest-cov", "pytest", "coverage"]
 rtd = ["sphinx-book-theme", "sphinx-design", "sphinx-copybutton", "sphinx", "pyyaml", "myst-parser", "attrs"]
 ||||||| parent of b34ddda (build(deps): bump neo from 0.10.2 to 0.11.1)
 benchmarking = ["psutil", "pytest", "pytest-benchmark (>=3.2,<4.0)"]
-code_style = ["pre-commit (==2.6)"]
+code-style = ["pre-commit (==2.6)"]
 compare = ["commonmark (>=0.9.1,<0.10.0)", "markdown (>=3.3.6,<3.4.0)", "mistletoe (>=0.8.1,<0.9.0)", "mistune (>=2.0.2,<2.1.0)", "panflute (>=2.1.3,<2.2.0)"]
 linkify = ["linkify-it-py (>=1.0,<2.0)"]
 plugins = ["mdit-py-plugins"]
@@ -967,6 +979,7 @@ markdown-it-py = ">=1.0.0,<3.0.0"
 
 [package.extras]
 <<<<<<< HEAD
+<<<<<<< HEAD
 testing = ["pytest-regressions", "pytest-cov", "pytest (>=3.6,<4)", "coverage"]
 rtd = ["sphinx-book-theme (>=0.1.0,<0.2.0)", "myst-parser (>=0.14.0,<0.15.0)"]
 code_style = ["pre-commit (==2.6)"]
@@ -979,6 +992,15 @@ code-style = ["pre-commit (==2.6)"]
 rtd = ["myst-parser (>=0.14.0,<0.15.0)", "sphinx-book-theme (>=0.1.0,<0.2.0)"]
 testing = ["coverage", "pytest (>=3.6,<4)", "pytest-cov", "pytest-regressions"]
 >>>>>>> b34ddda (build(deps): bump neo from 0.10.2 to 0.11.1)
+||||||| parent of 9d9a6ca (build(deps): bump poetryup from 0.10.0 to 0.12.3)
+code_style = ["pre-commit"]
+rtd = ["attrs", "myst-parser (>=0.16.1,<0.17.0)", "sphinx-book-theme (>=0.1.0,<0.2.0)"]
+testing = ["coverage", "pytest", "pytest-cov", "pytest-regressions"]
+=======
+code-style = ["pre-commit"]
+rtd = ["attrs", "myst-parser (>=0.16.1,<0.17.0)", "sphinx-book-theme (>=0.1.0,<0.2.0)"]
+testing = ["coverage", "pytest", "pytest-cov", "pytest-regressions"]
+>>>>>>> 9d9a6ca (build(deps): bump poetryup from 0.10.0 to 0.12.3)
 
 [[package]]
 name = "mdurl"
@@ -1274,8 +1296,8 @@ python-versions = ">=3.8"
 
 [package.dependencies]
 numpy = [
-    {version = ">=1.21.0", markers = "python_version >= \"3.10\""},
     {version = ">=1.20.3", markers = "python_version < \"3.10\""},
+    {version = ">=1.21.0", markers = "python_version >= \"3.10\""},
 ]
 python-dateutil = ">=2.8.1"
 pytz = ">=2020.1"
@@ -1368,7 +1390,7 @@ dev = ["tox", "pre-commit"]
 
 [[package]]
 name = "poetryup"
-version = "0.10.0"
+version = "0.12.3"
 description = "Update dependencies and bump their version in the pyproject.toml file"
 category = "main"
 optional = false
@@ -2110,6 +2132,7 @@ sphinx = ">=1.8"
 
 [package.extras]
 <<<<<<< HEAD
+<<<<<<< HEAD
 rtd = ["sphinx-book-theme", "myst-nb", "ipython", "sphinx"]
 code_style = ["pre-commit (==2.12.1)"]
 <<<<<<< HEAD
@@ -2122,6 +2145,11 @@ code_style = ["pre-commit (==2.12.1)"]
 =======
 code-style = ["pre-commit (==2.12.1)"]
 >>>>>>> b34ddda (build(deps): bump neo from 0.10.2 to 0.11.1)
+||||||| parent of 9d9a6ca (build(deps): bump poetryup from 0.10.0 to 0.12.3)
+code_style = ["pre-commit (==2.12.1)"]
+=======
+code-style = ["pre-commit (==2.12.1)"]
+>>>>>>> 9d9a6ca (build(deps): bump poetryup from 0.10.0 to 0.12.3)
 rtd = ["ipython", "myst-nb", "sphinx", "sphinx-book-theme"]
 >>>>>>> c02d34e (add mermaid)
 ||||||| parent of ea9cc8e (build(deps-dev): bump flake8 from 4.0.1 to 5.0.4)
@@ -2690,6 +2718,7 @@ python-versions = ">=3.8,<3.11"
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 content-hash = "c82756f9aece433c0f876702d6135b69c6e1cef264c4e25a639db9db2897bdb8"
 ||||||| parent of 2b91000 (add pyvis)
 content-hash = "4433e7a1bde1194a3eb7173975840bb9ba86d4ddc36b3b71d45e22a695ad36a2"
@@ -2796,6 +2825,11 @@ content-hash = "fed47006405c7fa3f4a14cee8ce443308766fb3261622fb9a02b7f99c6767d0f
 =======
 content-hash = "8dcc6b7be874599f015cdea0f709ab8ebdbc84c1f0d4a9ba25dd4c5c87f8cd6a"
 >>>>>>> b34ddda (build(deps): bump neo from 0.10.2 to 0.11.1)
+||||||| parent of 9d9a6ca (build(deps): bump poetryup from 0.10.0 to 0.12.3)
+content-hash = "d49962cf3799cac1cf32dc7e8068aecb1332a7f6bb715b1c4ae295ff27454728"
+=======
+content-hash = "ae446edeb1c5594df699acbdfffb81c0a8868aaebcb92989601ec04acb49c935"
+>>>>>>> 9d9a6ca (build(deps): bump poetryup from 0.10.0 to 0.12.3)
 
 [metadata.files]
 alabaster = [
@@ -4913,6 +4947,18 @@ pluggy = [
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
+||||||| parent of 9d9a6ca (build(deps): bump poetryup from 0.10.0 to 0.12.3)
+poetryup = [
+    {file = "poetryup-0.10.0-py3-none-any.whl", hash = "sha256:af6cd699c82b37908e11a48001e20bd7f33d9c66a77dc627ecace269a21463d2"},
+    {file = "poetryup-0.10.0.tar.gz", hash = "sha256:63c524fa4372eb16bd023384de657c9fee673dcc568aded9e116a9a5c9ba752a"},
+]
+=======
+poetryup = [
+    {file = "poetryup-0.12.3-py3-none-any.whl", hash = "sha256:fb8349a18ac6498e65654129a421248e9577f157e89bae592cf7e95dfddd1ba9"},
+    {file = "poetryup-0.12.3.tar.gz", hash = "sha256:772eb5d625193630637f927cd5982b9d1393aecd5ffd7b8b2a3a7b9066160009"},
+]
+>>>>>>> 9d9a6ca (build(deps): bump poetryup from 0.10.0 to 0.12.3)
 pre-commit = [
     {file = "pre_commit-2.20.0-py2.py3-none-any.whl", hash = "sha256:51a5ba7c480ae8072ecdb6933df22d2f812dc897d5fe848778116129a681aac7"},
     {file = "pre_commit-2.20.0.tar.gz", hash = "sha256:a978dac7bc9ec0bcee55c18a277d553b0f419d259dadb4b9418ff2d00eb43959"},
