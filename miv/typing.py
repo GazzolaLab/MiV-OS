@@ -15,3 +15,5 @@ SignalType = Union[
 TimestampsType = np.ndarray
 SpikestampsType = Union[np.ndarray, neo.core.SpikeTrain, miv.core.datatype.Spikestamps]
 SpiketrainType = np.ndarray  # non-sparse boolean
+
+DataTypes = Union[SignalType, SpikestampsType]

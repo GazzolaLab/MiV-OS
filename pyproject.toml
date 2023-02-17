@@ -164,13 +164,14 @@ python_version = 3.8
 pretty = true
 show_traceback = true
 color_output = true
+strict = true
 
 # allow_redefinition = false
 # check_untyped_defs = false  # TODO: Disabled cuz it might be to harsh condition, but open to discussion.
 # disallow_any_generics = false
 # disallow_incomplete_defs = true
 ignore_missing_imports = true
-# implicit_reexport = false
+implicit_reexport = true
 # no_implicit_optional = true
 show_column_numbers = true
 show_error_codes = true
