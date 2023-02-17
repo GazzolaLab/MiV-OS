@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 __doc__ = """
 
 Data Manager
@@ -20,8 +22,10 @@ Module (OpenEphys)
    :members:
 
 """
+
 __all__ = ["Data", "DataManager"]
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -97,6 +101,10 @@ from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, Un
 ||||||| parent of 9aa831b (add spiketrain extractor cli)
 from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, Union
 =======
+||||||| parent of 2d55ca1 (add future annotation)
+=======
+
+>>>>>>> 2d55ca1 (add future annotation)
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -190,7 +198,7 @@ class Data:
     ):
         self.data_path: str = data_path
         self._analysis_path: str = os.path.join(data_path, "analysis")
-        self.masking_channel_set: Set[int] = set()
+        self.masking_channel_set: set[int] = set()
 
         os.makedirs(self._analysis_path, exist_ok=True)
 
@@ -210,7 +218,7 @@ class Data:
         figure: plt.Figure,
         group: str,
         filename: str,
-        savefig_kwargs: Optional[Dict[Any, Any]] = None,
+        savefig_kwargs: dict[Any, Any] | None = None,
     ):
         """Save figure in analysis sub-directory
 
@@ -247,7 +255,7 @@ class Data:
         self,
         data,
         filename: str,
-        pkl_kwargs: Optional[Dict[Any, any]] = None,
+        pkl_kwargs: dict[Any, any] | None = None,
     ):
         """Save analysis data into sub-directory
 
@@ -266,7 +274,7 @@ class Data:
     def load_data(
         self,
         filename: str,
-        pkl_kwargs: Optional[Dict[Any, any]] = None,
+        pkl_kwargs: dict[Any, any] | None = None,
     ):
         """Quick load pickled data (data saved using `save_data`)
 
@@ -287,7 +295,7 @@ class Data:
         num_fragments: int = 1,
         start_at_zero: bool = False,
         progress_bar=False,
-        mpi_comm: Optional["MPI.COMM_WORLD"] = None,
+        mpi_comm: MPI.COMM_WORLD | None = None,
     ):
         """
         Iterator to load data fragmentally.
@@ -385,7 +393,7 @@ class Data:
 
     def _auto_channel_mask_with_correlation_matrix(
         self,
-        spontaneous_binned: Dict[str, Any],
+        spontaneous_binned: dict[str, Any],
         filter: FilterProtocol,
         detector: SpikeDetectionProtocol,
         offset: float = 0,
@@ -466,7 +474,7 @@ class Data:
         detector: SpikeDetectionProtocol,
         offset: float = 0,
         bins_per_second: float = 100,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Performs spike detection and return a binned 2D matrix with columns being the
         binned number of spikes from each channel.
@@ -605,7 +613,7 @@ class DataManager(MutableSequence):
 
     def __init__(self, data_collection_path: str):
         self.data_collection_path = data_collection_path
-        self.data_list: List[DataProtocol] = []
+        self.data_list: list[DataProtocol] = []
 
         # From the path get data paths and create data objects
         self._load_data_paths()
@@ -777,9 +785,9 @@ class DataManager(MutableSequence):
         spontaneous_data: DataProtocol,
         filter: FilterProtocol,
         detector: SpikeDetectionProtocol,
-        omit_experiments: Optional[Iterable[int]] = None,
+        omit_experiments: Iterable[int] | None = None,
         spontaneous_offset: float = 0,
-        exp_offsets: Optional[Iterable[float]] = None,
+        exp_offsets: Iterable[float] | None = None,
         bins_per_second: float = 100,
     ):
         """
@@ -815,10 +823,10 @@ class DataManager(MutableSequence):
             the result (see jupyter notebook demo).
         """
 
-        omit_experiments_list: List[float] = (
+        omit_experiments_list: list[float] = (
             list(omit_experiments) if omit_experiments else []
         )
-        exp_offsets_list: List[float] = list(exp_offsets) if exp_offsets else []
+        exp_offsets_list: list[float] = list(exp_offsets) if exp_offsets else []
 
         if spontaneous_offset < 0:
             spontaneous_offset = 0
