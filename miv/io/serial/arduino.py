@@ -22,8 +22,10 @@ def list_serial_ports():
 
 
 class ArduinoSerial:
-    # Stimjim compatible
-    #   - Baudrate: 112500
+    """
+    Stimjim compatible
+      - Baudrate: 112500
+    """
 
     def __init__(self, port: str, baudrate: int = 112500):
         self.serial_port = self._setup_serial(baudrate, port)
@@ -51,8 +53,18 @@ class ArduinoSerial:
         )
         if verbose:
             print(f"{serial_port_name=} {baudrate=}")
-        self._wait()
+        self.wait()
         return serial_port
+
+    @property
+    def is_open(self):
+        return self.serial_port.is_open
+
+    def open(self):
+        self.serial_port.open()
+
+    def close(self):
+        self.serial_port.close()
 
     def send(
         self,
@@ -77,7 +89,7 @@ class ArduinoSerial:
         eol_character :
             eol_character
         """
-        if self.serial_port.inWaiting() > 0 and not self._message_complete:
+        if self.serial_port.in_waiting() > 0 and not self._message_complete:
             x = self.serial_port.read().decode("utf-8")  # decode needed for Python3
 
             if self._data_started:
@@ -94,9 +106,9 @@ class ArduinoSerial:
             self._message_complete = False
             return self._data_buf
         else:
-            return "XXX"
+            return "ready"
 
-    def _wait(self, verbose: bool = False):
+    def wait(self, verbose: bool = False):
         """
         Allows time for Arduino launch. It also ensures that any bytes left
         over from a previous message are discarded
@@ -105,7 +117,8 @@ class ArduinoSerial:
             print("Waiting for Arduino to reset")
 
         msg = ""
+        prev_msg = ""
         while msg.lower().find("ready") == -1:
             msg = self.receive()
-            if not (msg == "XXX"):
-                print(msg)
+            prev_msg = msg
+        return prev_msg
