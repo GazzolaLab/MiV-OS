@@ -164,9 +164,15 @@ pyvis = ">=0.2.1,<0.4.0"
 lyon = { git = "https://github.com/sciforce/lyon.git", rev = "91dd700" }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> 0732327 (dependency add: lyon)
 ||||||| parent of f74e222 (add click)
 =======
+||||||| parent of da9063c (change: port serial package)
+serial = "^0.0.97"
+=======
+#serial = "^0.0.97"
+>>>>>>> da9063c (change: port serial package)
 click = "^8.1.3"
 >>>>>>> f74e222 (add click)
 ||||||| parent of 5c64b36 (add how-to use stimjim)
@@ -203,6 +209,7 @@ sphinxcontrib-mermaid = {version = "^0.7.1", extras = ["docs"], optional = true}
 poetryup = "^0.10.0"
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> 44e0442 (add poetryup)
 ||||||| parent of 7ae0e8a (bump up version)
 =======
@@ -212,6 +219,11 @@ importlib = {version = "^1.0.4", extras = ["docs"], optional = true}
 importlib = {version = "^1.0.4", extras = ["docs"], optional = true}
 =======
 >>>>>>> 8bd1248 (remove importlib)
+||||||| parent of da9063c (change: port serial package)
+#pyseries = {extras = ["experiment", "docs"], version = "^1.0.26"}
+=======
+pyseries = {extras = ["experiment", "docs"], version = "^1.0.26"}
+>>>>>>> da9063c (change: port serial package)
 
 [tool.poetry.dev-dependencies]
 black = "^22.8.0"
