@@ -79,29 +79,37 @@ convert_open_ephys_to_miv = "scripts.convert_open_ephys_to_miv:main"
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"
-scipy = "^1.8.1"
+scipy = "^1.9.0"
 elephant = "^0.11.1"
-matplotlib = "^3.5.2"
+matplotlib = "^3.5.3"
 neo = "^0.10.2"
-pandas = "^1.4.2"
+pandas = "^1.4.3"
 PyWavelets = "^1.3.0"
 quantities = "^0.13.0"
-scikit-learn = "^1.1.1"
+scikit-learn = "^1.1.2"
 seaborn = "^0.11.2"
 tqdm = "^4.64.0"
-numpy = "^1.22.4"
+numpy = "^1.23.2"
 viziphant = "^0.2.0"
 Sphinx = {version = "^4.5.0", optional = true, extras = ["docs"]}
+<<<<<<< HEAD
 pydata-sphinx-theme = {version = "^0.9.0", optional = true, extras = ["docs"]}
+||||||| parent of 44e0442 (add poetryup)
+sphinx-rtd-theme = {version = "^1.0.0", optional = true, extras = ["docs"]}
+sphinx-book-theme = {version = "^0.3.2", optional = true, extras = ["docs"]}
+=======
+sphinx-rtd-theme = {version = "^1.0.0", optional = true, extras = ["docs"]}
+sphinx-book-theme = {version = "^0.3.3", optional = true, extras = ["docs"]}
+>>>>>>> 44e0442 (add poetryup)
 readthedocs-sphinx-search = {version = "^0.1.2", optional = true, extras = ["docs"]}
-sphinx-autodoc-typehints = {version = "^1.18.1", optional = true, extras = ["docs"]}
+sphinx-autodoc-typehints = {version = "^1.19.1", optional = true, extras = ["docs"]}
 myst-parser = {version = "^0.17.2", optional = true, extras = ["docs"]}
-numpydoc = {version = "^1.3.1", optional = true, extras = ["docs"]}
-sphinx-togglebutton = {version = "^0.3.1", optional = true, extras = ["docs"]}
+numpydoc = {version = "^1.4.0", optional = true, extras = ["docs"]}
+sphinx-togglebutton = {version = "^0.3.2", optional = true, extras = ["docs"]}
 sphinx-copybutton = {version = "^0.5.0", optional = true, extras = ["docs"]}
 myst-nb = {version = "^0.15.0", optional = true, extras = ["docs"]}
 pyinform = "^0.2.0"
-graphviz = "^0.20"
+graphviz = "^0.20.1"
 Pillow = "9.1.1"
 <<<<<<< HEAD
 h5py = "^3.7.0"
@@ -115,6 +123,7 @@ pyvis = "^0.2.1"
 ||||||| parent of 0732327 (dependency add: lyon)
 =======
 lyon = { git = "https://github.com/sciforce/lyon.git", rev = "91dd700" }
+<<<<<<< HEAD
 <<<<<<< HEAD
 >>>>>>> 0732327 (dependency add: lyon)
 ||||||| parent of f74e222 (add click)
@@ -139,18 +148,28 @@ click = "^8.1.3"
 click = "^8.1.3"
 sphinxcontrib-mermaid = {version = "^0.7.1", extras = ["docs"]}
 >>>>>>> c02d34e (add mermaid)
+||||||| parent of 44e0442 (add poetryup)
+=======
+poetryup = "^0.10.0"
+>>>>>>> 44e0442 (add poetryup)
 
 [tool.poetry.dev-dependencies]
-black = "^22.3.0"
+black = "^22.6.0"
 isort = {extras = ["colors"], version = "^5.10.1"}
 mypy = "^0.950"
 mypy-extensions = "^0.4.3"
-pre-commit = "^2.19.0"
+pre-commit = "^2.20.0"
 pydocstyle = "^6.1.1"
+<<<<<<< HEAD
 pylint = "^2.15.0"
+||||||| parent of 44e0442 (add poetryup)
+pylint = "^2.13.9"
+=======
+pylint = "^2.14.5"
+>>>>>>> 44e0442 (add poetryup)
 pytest = "^7.1.2"
-pyupgrade = "^2.32.1"
-coverage = "^6.3.3"
+pyupgrade = "^2.37.3"
+coverage = "^6.4.4"
 pytest-html = "^3.1.1"
 pytest-cov = "^3.0.0"
 flake8 = "^5.0.4"
