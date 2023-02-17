@@ -19,6 +19,7 @@ name = "MiV-OS"
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 version = "0.0.6"
 >>>>>>> 7eaf12a (update project version)
 ||||||| parent of ecd8a31 (bump up version)
@@ -56,6 +57,11 @@ version = "0.2.1"
 =======
 version = "0.2.2"
 >>>>>>> 6547b5f (update: bump version)
+||||||| parent of 4da4e74 (add pyserial in experimental extras)
+version = "0.2.2"
+=======
+version = "0.2.3"
+>>>>>>> 4da4e74 (add pyserial in experimental extras)
 description = "Python software for analysis and computing framework used in MiV project."
 readme = "README.md"
 authors = ["GazzolaLab <skim449@illinois.edu>"]
@@ -311,7 +317,7 @@ docs = [
 ]
 experiment = [
   "lyon",
-  "pyseries"
+  "pyserial"
 ]
 
 
