@@ -381,6 +381,10 @@ experiment = [
 
 
 
+[tool.poetry.group.sortingExtension.dependencies]
+dtaidistance = "^2.3.10"
+scikit-learn-extra = "^0.2.0"
+
 [tool.black]
 # https://github.com/psf/black
 target-version = ["py38"]
