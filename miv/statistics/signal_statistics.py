@@ -3,7 +3,7 @@ __all__ = ["signal_to_noise", "spike_amplitude_to_background_noise"]
 import numpy as np
 
 from miv.typing import SignalType, SpikestampsType
-from miv.visualization import extract_waveforms
+from miv.visualization.waveform import extract_waveforms
 
 
 def signal_to_noise(signal: SignalType, axis: int = 0, ddof: int = 0):
