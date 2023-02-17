@@ -25,6 +25,26 @@ jobs:
           shell: bash
     steps:
       - uses: actions/checkout@v3
+<<<<<<< HEAD
+||||||| parent of 8f2ec68 (build(deps): bump actions/setup-python from 4.2.0 to 4.4.0)
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4.2.0
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: FedericoCarboni/setup-ffmpeg@v2
+        id: setup-ffmpeg
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+=======
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4.4.0
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: FedericoCarboni/setup-ffmpeg@v2
+        id: setup-ffmpeg
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+>>>>>>> 8f2ec68 (build(deps): bump actions/setup-python from 4.2.0 to 4.4.0)
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:
@@ -105,6 +125,26 @@ jobs:
             path: ~/Library/Caches/pip
     steps:
       - uses: actions/checkout@v3
+<<<<<<< HEAD
+||||||| parent of 8f2ec68 (build(deps): bump actions/setup-python from 4.2.0 to 4.4.0)
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4.2.0
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: FedericoCarboni/setup-ffmpeg@v2
+        id: setup-ffmpeg
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+=======
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4.4.0
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: FedericoCarboni/setup-ffmpeg@v2
+        id: setup-ffmpeg
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+>>>>>>> 8f2ec68 (build(deps): bump actions/setup-python from 4.2.0 to 4.4.0)
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:
