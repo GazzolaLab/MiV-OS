@@ -1484,7 +1484,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
 [[package]]
 name = "pydata-sphinx-theme"
-version = "0.9.0"
+version = "0.12.0"
 description = "Bootstrap-based Sphinx theme from the PyData community"
 category = "main"
 optional = true
@@ -1494,9 +1494,11 @@ python-versions = ">=3.7"
 beautifulsoup4 = "*"
 docutils = "!=0.17.0"
 packaging = "*"
-sphinx = ">=4.0.2"
+pygments = ">=2.7"
+sphinx = ">=4.2"
 
 [package.extras]
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -1548,8 +1550,13 @@ doc = ["jupyter-sphinx", "myst-parser", "numpy", "numpydoc", "pandas", "plotly",
 test = ["pydata-sphinx-theme", "pytest"]
 =======
 coverage = ["codecov", "pydata-sphinx-theme[test]", "pytest-cov"]
+||||||| parent of 05026b9 (build(deps): bump pydata-sphinx-theme from 0.9.0 to 0.12.0)
+coverage = ["codecov", "pydata-sphinx-theme[test]", "pytest-cov"]
+=======
+coverage = ["codecov", "colorama", "pydata-sphinx-theme[test]", "pytest-cov"]
+>>>>>>> 05026b9 (build(deps): bump pydata-sphinx-theme from 0.9.0 to 0.12.0)
 dev = ["nox", "pre-commit", "pydata-sphinx-theme[coverage]", "pyyaml"]
-doc = ["jupyter_sphinx", "myst-parser", "numpy", "numpydoc", "pandas", "plotly", "pytest", "pytest-regressions", "sphinx-design", "sphinx-sitemap", "sphinxext-rediraffe", "xarray"]
+doc = ["ablog", "jupyter_sphinx", "linkify-it-py", "matplotlib", "myst-nb", "nbsphinx", "numpy", "numpydoc", "pandas", "plotly", "pytest", "pytest-regressions", "rich", "sphinx-copybutton", "sphinx-design", "sphinx-sitemap", "sphinx-togglebutton", "sphinxext-rediraffe", "xarray"]
 test = ["pydata-sphinx-theme[doc]", "pytest"]
 >>>>>>> f1997e2 (build(deps): bump joblib from 1.1.0 to 1.2.0)
 ||||||| parent of 66e6f4c (build(deps-dev): bump black from 22.6.0 to 22.8.0)
@@ -2726,6 +2733,7 @@ python-versions = ">=3.8,<3.11"
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 content-hash = "c82756f9aece433c0f876702d6135b69c6e1cef264c4e25a639db9db2897bdb8"
 ||||||| parent of 2b91000 (add pyvis)
 content-hash = "4433e7a1bde1194a3eb7173975840bb9ba86d4ddc36b3b71d45e22a695ad36a2"
@@ -2842,6 +2850,11 @@ content-hash = "ae446edeb1c5594df699acbdfffb81c0a8868aaebcb92989601ec04acb49c935
 =======
 content-hash = "0558c0c72ace8c08ca1838cb2173d61252277153440c8f7081703c0ef3405327"
 >>>>>>> b0923a9 (build(deps-dev): bump pyupgrade from 2.38.4 to 3.2.2)
+||||||| parent of 05026b9 (build(deps): bump pydata-sphinx-theme from 0.9.0 to 0.12.0)
+content-hash = "0558c0c72ace8c08ca1838cb2173d61252277153440c8f7081703c0ef3405327"
+=======
+content-hash = "7abf931adebbdc3792eed77c1d8ddced659d94450c536426cc71fe15af263acb"
+>>>>>>> 05026b9 (build(deps): bump pydata-sphinx-theme from 0.9.0 to 0.12.0)
 
 [metadata.files]
 alabaster = [
@@ -5066,8 +5079,8 @@ pycparser = [
     {file = "pycparser-2.21.tar.gz", hash = "sha256:e644fdec12f7872f86c58ff790da456218b10f863970249516d60a5eaca77206"},
 ]
 pydata-sphinx-theme = [
-    {file = "pydata_sphinx_theme-0.9.0-py3-none-any.whl", hash = "sha256:b22b442a6d6437e5eaf0a1f057169ffcb31eaa9f10be7d5481a125e735c71c12"},
-    {file = "pydata_sphinx_theme-0.9.0.tar.gz", hash = "sha256:03598a86915b596f4bf80bef79a4d33276a83e670bf360def699dbb9f99dc57a"},
+    {file = "pydata_sphinx_theme-0.12.0-py3-none-any.whl", hash = "sha256:c17dbab67a3774f06f34f6378e896fcd0668cc8b5da1c1ba017e65cf1df0af58"},
+    {file = "pydata_sphinx_theme-0.12.0.tar.gz", hash = "sha256:7a07c3ac1fb1cfbb5f7d1e147a9500fb120e329d610e0fa2caac4a645141bdd9"},
 ]
 pydocstyle = [
     {file = "pydocstyle-6.1.1-py3-none-any.whl", hash = "sha256:6987826d6775056839940041beef5c08cc7e3d71d63149b48e36727f70144dc4"},
