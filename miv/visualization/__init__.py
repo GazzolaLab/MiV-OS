@@ -2,7 +2,14 @@ from miv.visualization.causality import *
 from miv.visualization.connectivity_plot import *
 from miv.visualization.event import *
 from miv.visualization.fft_domain import *
+<<<<<<< HEAD
 from miv.visualization.raw_signal import *
+||||||| parent of 6010457 (Update __init__.py)
+from miv.visualization.spike_triggered_avg import *
+=======
+from miv.visualization.spike_triggered_avg import *
+from miv.visualization.raw_signal import *
+>>>>>>> 6010457 (Update __init__.py)
 from miv.visualization.waveform import *
 
 # TODO:
