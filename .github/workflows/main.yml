@@ -54,10 +54,15 @@ jobs:
         run: |
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
           make ci
 ||||||| parent of adf8021 (Adopt pyproject.toml and poetry packaging system)
           make ci
 =======
+||||||| parent of baecea5 (add venv activate)
+=======
+          source $VENV
+>>>>>>> baecea5 (add venv activate)
           make test
 <<<<<<< HEAD
 <<<<<<< HEAD
