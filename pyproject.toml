@@ -244,8 +244,14 @@ pyseries = {extras = ["experiment", "docs"], version = "^1.0.26"}
 =======
 sphinxcontrib-mermaid = {version = "^0.7.1", extras = ["docs"], optional = true}
 poetryup = ">=0.10,<0.13"
+<<<<<<< HEAD
 pyseries = {optional = true, extras = ["experiment", "docs"], version = "^1.0.26"}
 >>>>>>> 4e9cbe7 (update dependency locks)
+||||||| parent of f1bc2bb (fix ci: dependencies for extras)
+pyseries = {optional = true, extras = ["experiment", "docs"], version = "^1.0.26"}
+=======
+pyserial = {optional = true, extras = ["experiment", "docs"], version = "^3.5"}
+>>>>>>> f1bc2bb (fix ci: dependencies for extras)
 
 [tool.poetry.dev-dependencies]
 black = "^22.8.0"
