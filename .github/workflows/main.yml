@@ -46,8 +46,14 @@ jobs:
             ${{ runner.os }}-pip-
       - name: Install dependencies
         run: |
+<<<<<<< HEAD
           source $VENV
           poetry lock --no-update
+||||||| parent of d78b37b (remove updating poetry lock inside the github-action)
+          poetry lock --no-update
+=======
+          #poetry lock --no-update
+>>>>>>> d78b37b (remove updating poetry lock inside the github-action)
           poetry install -E "docs experiment"
       # Test MiV-OS using pytest
       - name: Run tests
@@ -114,6 +120,7 @@ jobs:
       - name: Install dependencies
         run: |
 <<<<<<< HEAD
+<<<<<<< HEAD
           poetry config virtualenvs.in-project true
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -131,6 +138,11 @@ jobs:
 >>>>>>> 2220e8a (update windows poetry ci)
           poetry lock --no-update
 >>>>>>> e32dd97 (CI: lock befofre dependency installation)
+||||||| parent of d78b37b (remove updating poetry lock inside the github-action)
+          poetry lock --no-update
+=======
+          #poetry lock --no-update
+>>>>>>> d78b37b (remove updating poetry lock inside the github-action)
           poetry install -E "docs experiment"
 >>>>>>> 3e4af02 (update experiment dependencies installation)
       # Set environment variables for coverage test. Coverage test is done using python 3.8
