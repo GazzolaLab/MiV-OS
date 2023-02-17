@@ -100,7 +100,12 @@ h5py-cache = "^1.0"
 ||||||| parent of 2b91000 (add pyvis)
 =======
 pyvis = "^0.2.1"
+<<<<<<< HEAD
 >>>>>>> 2b91000 (add pyvis)
+||||||| parent of 0732327 (dependency add: lyon)
+=======
+lyon = { git = "https://github.com/sciforce/lyon.git", rev = "91dd700" }
+>>>>>>> 0732327 (dependency add: lyon)
 
 [tool.poetry.dev-dependencies]
 black = "^22.3.0"
