@@ -27,12 +27,19 @@ Module
 __all__ = ["Data", "DataManager"]
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 from typing import Any, Callable, Iterable, List, Optional, Set
 ||||||| parent of 2f9efba (update: analysis figure save)
 from typing import Any, Optional, Iterable, Callable, List, Set
 =======
 from typing import Any, Optional, Iterable, Callable, List, Set, Dict
 >>>>>>> 2f9efba (update: analysis figure save)
+||||||| parent of 63a4820 (add channel mask modifying functions in data.py and implement auto channel mask with no-spike channels)
+from typing import Any, Callable, Dict, Iterable, List, Optional, Set
+=======
+from sqlite3 import Timestamp
+from typing import Any, Callable, Dict, Iterable, List, Optional, Set
+>>>>>>> 63a4820 (add channel mask modifying functions in data.py and implement auto channel mask with no-spike channels)
 
 import logging
 import os
@@ -46,6 +53,8 @@ import matplotlib.pyplot as plt
 
 from miv.io.binary import load_continuous_data, load_recording
 from miv.signal.filter.protocol import FilterProtocol
+from miv.signal.spike import ThresholdCutoff
+from miv.statistics import spikestamps_statistics
 from miv.typing import SignalType
 
 
@@ -191,6 +200,30 @@ class Data:
 
         """
         self.masking_channel_set.update(channel_id)
+
+    
+    def clear_channel_mask(self):
+        """
+        Clears all present channel masks.
+        """
+
+        self.masking_channel_set.update([])
+
+        
+    def add_channel_mask(self, channel_id: Iterable[int]):
+        """
+        Put mask on more channels.
+
+        Parameters
+        ----------
+        channel_id : Iterable[int], list
+            List of channel id that will be added to the mask
+        """
+        self.masking_channel_set.update(self.masking_channel_set.union(channel_id))
+
+
+
+
 
     def save(self, tag: str, format: str):  # TODO
         assert tag == "continuous", "You cannot alter raw data, change the data tag"
@@ -386,3 +419,36 @@ class DataManager(MutableSequence):
             self.data_list.insert(idx, data)
         else:
             logging.warning("Invalid data cannot be loaded to the DataManager.")
+
+
+    def auto_channel_mask(self, spike_rate_threshold: float = 2):
+        """
+        Perform automatic channel masking.
+
+        Parameters
+        ----------
+        spike_rate_threshold : float
+            spike rate threshold (spike per sec) for filtering channels with no spikes
+        
+        """
+        # 1. Channels with no spikes should be masked
+        # Using experiment 1 (spontaneous) for spike detection parameter
+
+
+        detector = ThresholdCutoff()
+        for data in self.data_list:
+            with data.load() as (sig, times, samp):
+                noSpikeChannelList = []
+                spiketrains = detector(sig, times, samp)
+                spiketrainsStats = spikestamps_statistics(spiketrains)
+                
+                for channel in range(len(spiketrainsStats)):
+                    channelSpikeRate = spiketrainsStats['rates'][channel]
+
+                    if channelSpikeRate < spike_rate_threshold:
+                        noSpikeChannelList.append(channel)
+                
+                data.add_channel_mask(noSpikeChannelList)
+
+
+        self.masking_channel_set.update(self.masking_channel_set)
