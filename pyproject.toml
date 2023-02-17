@@ -158,11 +158,16 @@ sphinxcontrib-mermaid = {version = "^0.7.1", extras = ["docs"]}
 =======
 poetryup = "^0.10.0"
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> 44e0442 (add poetryup)
 ||||||| parent of 7ae0e8a (bump up version)
 =======
 importlib = {version = "^1.0.4", extras = ["docs"], optional = true}
 >>>>>>> 7ae0e8a (bump up version)
+||||||| parent of 8bd1248 (remove importlib)
+importlib = {version = "^1.0.4", extras = ["docs"], optional = true}
+=======
+>>>>>>> 8bd1248 (remove importlib)
 
 [tool.poetry.dev-dependencies]
 black = "^22.8.0"
