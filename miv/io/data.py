@@ -32,6 +32,7 @@ __all__ = ["Data", "DataManager"]
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 from typing import Any, Callable, Iterable, List, Optional, Set
 ||||||| parent of 2f9efba (update: analysis figure save)
 from typing import Any, Optional, Iterable, Callable, List, Set
@@ -85,6 +86,11 @@ import statistics
 >>>>>>> 058da41 (:construction: change case convention, set filter and detector as parameters, change oneOverBinSize to bins_per_second)
 from typing import Any, Callable, Dict, Iterable, List, Optional, Set
 >>>>>>> 63a4820 (add channel mask modifying functions in data.py and implement auto channel mask with no-spike channels)
+||||||| parent of 06148c5 (update _auto_channel_mask parameter typing)
+from typing import Any, Callable, Dict, Iterable, List, Optional, Set
+=======
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union, Set
+>>>>>>> 06148c5 (update _auto_channel_mask parameter typing)
 
 import logging
 import os
@@ -255,7 +261,7 @@ class Data:
 
     def _auto_channel_mask(
         self,
-        spontaneous_binned,
+        spontaneous_binned : Tuple[Iterable[Iterable[int]], int, List[int]],
         filter: FilterProtocol,
         detector: SpikeDetectionProtocol,
         offset: float = 0,
@@ -622,9 +628,9 @@ class DataManager(MutableSequence):
         spontaneous_data: Data,
         filter: FilterProtocol,
         detector: SpikeDetectionProtocol,
-        omit_experiments: list[int] = [],
+        omit_experiments: Iterable[int] = [],
         spontaneous_offset: float = 0,
-        exp_offsets: list[float] = [],
+        exp_offsets: Iterable[float] = [],
         bins_per_second: float = 100,
     ):
         """
