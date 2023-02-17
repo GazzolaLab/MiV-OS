@@ -177,6 +177,7 @@ lyon = { git = "https://github.com/sciforce/lyon.git", rev = "91dd700" }
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> 0732327 (dependency add: lyon)
 ||||||| parent of f74e222 (add click)
 =======
@@ -185,6 +186,10 @@ serial = "^0.0.97"
 =======
 #serial = "^0.0.97"
 >>>>>>> da9063c (change: port serial package)
+||||||| parent of 2b1432b (remove optional pyserial)
+#serial = "^0.0.97"
+=======
+>>>>>>> 2b1432b (remove optional pyserial)
 click = "^8.1.3"
 <<<<<<< HEAD
 >>>>>>> f74e222 (add click)
@@ -245,6 +250,7 @@ pyseries = {extras = ["experiment", "docs"], version = "^1.0.26"}
 >>>>>>> da9063c (change: port serial package)
 ||||||| parent of 4e9cbe7 (update dependency locks)
 sphinxcontrib-mermaid = {version = "^0.7.1", extras = ["docs"], optional = true}
+<<<<<<< HEAD
 poetryup = ">=0.10,<0.13"
 pyseries = {extras = ["experiment", "docs"], version = "^1.0.26"}
 =======
@@ -258,6 +264,12 @@ pyseries = {optional = true, extras = ["experiment", "docs"], version = "^1.0.26
 =======
 pyserial = {optional = true, extras = ["experiment", "docs"], version = "^3.5"}
 >>>>>>> f1bc2bb (fix ci: dependencies for extras)
+||||||| parent of 2b1432b (remove optional pyserial)
+poetryup = ">=0.10,<0.13"
+pyserial = {optional = true, extras = ["experiment", "docs"], version = "^3.5"}
+=======
+pyserial = {version = "^3.5", extras = ["experiment"]}
+>>>>>>> 2b1432b (remove optional pyserial)
 
 [tool.poetry.dev-dependencies]
 black = "^22.8.0"
