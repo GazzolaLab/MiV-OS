@@ -16,7 +16,7 @@ Module (OpenEphys)
     exported from OpenEphys system:
     `format <https://open-ephys.atlassian.net/wiki/spaces/OEW/pages/491632/Data+format>`_.
 
-.. currentmodule:: miv.io.data
+.. currentmodule:: miv.io.openephys.data
 
 .. autoclass:: Data
    :members:

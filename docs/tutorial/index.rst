@@ -6,6 +6,7 @@ Tutorial
    :caption: How to Start
 
    installation
+   core_concept
 
 .. toctree::
    :maxdepth: 2

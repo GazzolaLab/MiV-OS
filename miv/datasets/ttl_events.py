@@ -7,7 +7,7 @@ import os
 import numpy as np
 
 from miv.datasets.utils import get_file
-from miv.io import DataManager
+from miv.io.openephys import DataManager
 
 
 def load_data():  # pragma: no cover
