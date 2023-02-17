@@ -30,6 +30,7 @@ __all__ = ["Data", "DataManager"]
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 from typing import Any, Callable, Iterable, List, Optional, Set
 ||||||| parent of 2f9efba (update: analysis figure save)
 from typing import Any, Optional, Iterable, Callable, List, Set
@@ -48,6 +49,11 @@ from copy import copy
 >>>>>>> 74f7a47 (restructure auto_channel_mask, now takes spontaneous data as parameter and enables offsetting recordings)
 ||||||| parent of d928e04 (Data.auto_cannel_mask: change mean threshold to three-sigma threshold)
 =======
+||||||| parent of 689b6bf (fix redundant imports)
+from asyncio.windows_events import NULL
+from copy import copy
+=======
+>>>>>>> 689b6bf (fix redundant imports)
 import statistics
 >>>>>>> d928e04 (Data.auto_cannel_mask: change mean threshold to three-sigma threshold)
 ||||||| parent of 6c6937e (Revert "Data.auto_cannel_mask: change mean threshold to three-sigma threshold")
@@ -80,25 +86,17 @@ import os
 from collections.abc import MutableSequence
 from contextlib import contextmanager
 from glob import glob
-from unittest import result
 
 import numpy as np
-from scipy.fft import fft, ifft
 
 import matplotlib.pyplot as plt
 
 from miv.io.binary import load_continuous_data, load_recording
 from miv.signal.filter.protocol import FilterProtocol
 from miv.signal.spike.protocol import SpikeDetectionProtocol
-from miv.signal.spike import ThresholdCutoff
 from miv.statistics import firing_rates
 from miv.typing import SignalType
-from miv.signal.filter import ButterBandpass
 
-import elephant
-import neo
-
-from tqdm import tqdm
 
 class Data:
     """Single data unit handler.
@@ -267,7 +265,7 @@ class Data:
     def auto_channel_mask(self,
                           spontaneous_binned,
                           filter: FilterProtocol,
-                          detector: ThresholdCutoff,
+                          detector: SpikeDetectionProtocol,
                           offset: float = 0,
                           bins_per_second: float = 100):
         """
@@ -281,7 +279,7 @@ class Data:
             [2]: array of indices of empty channels
         filter : FilterProtocol
             Filter that is applied to the signal before masking.
-        detector : ThresholdCutoff
+        detector : SpikeDetectionProtocol
             Spike detector that extracts spikes from the signals.
         offset : float
             The trimmed time in seconds at the front of the signal (default = 0).
