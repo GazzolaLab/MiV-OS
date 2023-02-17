@@ -122,7 +122,12 @@ lyon = { git = "https://github.com/sciforce/lyon.git", rev = "91dd700" }
 =======
 lyon = { git = "https://github.com/sciforce/lyon.git", optional = true, extras = ["experiment"], rev = "91dd700" }
 pyseries = {extras = ["experiment", "docs"], version = "^1.0.26"}
+<<<<<<< HEAD
 >>>>>>> 5c64b36 (add how-to use stimjim)
+||||||| parent of faedd21 (add pyserial)
+=======
+serial = "^0.0.97"
+>>>>>>> faedd21 (add pyserial)
 
 [tool.poetry.dev-dependencies]
 black = "^22.3.0"
