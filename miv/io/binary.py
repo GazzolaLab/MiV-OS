@@ -331,4 +331,18 @@ def load_continuous_data(
     else:  # If timestamps_path doesn't exist, deduce the stamps
         timestamps = np.array(range(0, length)) / sampling_rate
 
+<<<<<<< HEAD
     return np.array(raw_data), timestamps
+||||||| parent of d882164 (return array of timestamps)
+    # Adjust timestamps to start from zero
+    if start_at_zero and not np.isclose(timestamps[0], 0.0):
+        timestamps -= timestamps[0]
+
+    return np.array(raw_data), timestamps
+=======
+    # Adjust timestamps to start from zero
+    if start_at_zero and not np.isclose(timestamps[0], 0.0):
+        timestamps -= timestamps[0]
+
+    return np.array(raw_data), np.array(timestamps)
+>>>>>>> d882164 (return array of timestamps)
