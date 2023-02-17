@@ -64,7 +64,13 @@ jobs:
         with:
           virtualenvs-in-project: true
       - name: Set up Python ${{ matrix.python-version }}
+<<<<<<< HEAD
         uses: actions/setup-python@v4.2.0
+||||||| parent of 446de37 (build(deps): bump actions/setup-python from 4.4.0 to 4.5.0)
+        uses: actions/setup-python@v4.4.0
+=======
+        uses: actions/setup-python@v4.5.0
+>>>>>>> 446de37 (build(deps): bump actions/setup-python from 4.4.0 to 4.5.0)
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'poetry'
@@ -164,7 +170,13 @@ jobs:
         with:
           virtualenvs-in-project: true
       - name: Set up Python ${{ matrix.python-version }}
+<<<<<<< HEAD
         uses: actions/setup-python@v4.2.0
+||||||| parent of 446de37 (build(deps): bump actions/setup-python from 4.4.0 to 4.5.0)
+        uses: actions/setup-python@v4.4.0
+=======
+        uses: actions/setup-python@v4.5.0
+>>>>>>> 446de37 (build(deps): bump actions/setup-python from 4.4.0 to 4.5.0)
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'poetry'
