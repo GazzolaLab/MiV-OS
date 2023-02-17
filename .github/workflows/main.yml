@@ -40,6 +40,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 <<<<<<< HEAD
+<<<<<<< HEAD
 ||||||| parent of 8f2ec68 (build(deps): bump actions/setup-python from 4.2.0 to 4.4.0)
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4.2.0
@@ -59,6 +60,10 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 >>>>>>> 8f2ec68 (build(deps): bump actions/setup-python from 4.2.0 to 4.4.0)
+||||||| parent of 4b06b81 (add mpi in github action)
+=======
+      - uses: mpi4py/setup-mpi@v1
+>>>>>>> 4b06b81 (add mpi in github action)
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:
@@ -146,6 +151,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 <<<<<<< HEAD
+<<<<<<< HEAD
 ||||||| parent of 8f2ec68 (build(deps): bump actions/setup-python from 4.2.0 to 4.4.0)
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4.2.0
@@ -165,6 +171,10 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 >>>>>>> 8f2ec68 (build(deps): bump actions/setup-python from 4.2.0 to 4.4.0)
+||||||| parent of 4b06b81 (add mpi in github action)
+=======
+      - uses: mpi4py/setup-mpi@v1
+>>>>>>> 4b06b81 (add mpi in github action)
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:
