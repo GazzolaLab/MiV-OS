@@ -16,19 +16,14 @@ jobs:
             path: ~/Library/Caches/pip
           - os: windows-latest
             path: ~\AppData\Local\pip\Cache
-
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2.2.2
         with:
           python-version: ${{ matrix.python-version }}
-
-      - name: Install poetry
-        run: |
-          make poetry-download
-          export PATH="/Users/runner/.local/bin:$PATH"
-
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
       - name: Set up cache
         uses: actions/cache@v3
         with:
@@ -40,11 +35,9 @@ jobs:
         run: |
           poetry config virtualenvs.in-project true
           poetry install
-
       - name: Run style checks
         run: |
           make check-codestyle
-
       - name: Run tests
         run: |
 <<<<<<< HEAD
@@ -54,6 +47,7 @@ jobs:
           make ci
 =======
           make test
+<<<<<<< HEAD
 >>>>>>> adf8021 (Adopt pyproject.toml and poetry packaging system)
 
 ||||||| parent of 4aa15ba (fix:main yml codecoverage)
@@ -63,6 +57,10 @@ jobs:
           pytest
 
 >>>>>>> 4aa15ba (fix:main yml codecoverage)
+||||||| parent of ef09392 (Use GitHub action for poetry installation)
+
+=======
+>>>>>>> ef09392 (Use GitHub action for poetry installation)
       # Set environment variables for coverage test. Coverage test is done using python 3.8
       # Test MiV-OS using pytest
       - name: Test MiV-OS using pytest
