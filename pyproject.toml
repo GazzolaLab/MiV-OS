@@ -94,8 +94,13 @@ myst-nb = {version = "^0.15.0", optional = true, extras = ["docs"]}
 pyinform = "^0.2.0"
 graphviz = "^0.20"
 Pillow = "9.1.1"
+<<<<<<< HEAD
 h5py = "^3.7.0"
 h5py-cache = "^1.0"
+||||||| parent of 2b91000 (add pyvis)
+=======
+pyvis = "^0.2.1"
+>>>>>>> 2b91000 (add pyvis)
 
 [tool.poetry.dev-dependencies]
 black = "^22.3.0"
