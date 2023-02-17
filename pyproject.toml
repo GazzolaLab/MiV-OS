@@ -135,6 +135,7 @@ seaborn = ">=0.11.2,<0.13.0"
 tqdm = "^4.64.0"
 numpy = "^1.23.2"
 viziphant = "^0.2.0"
+<<<<<<< HEAD
 Sphinx = {version = "^4.5.0", optional = true, extras = ["docs"]}
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -158,6 +159,28 @@ numpydoc = {version = "^1.4.0", optional = true, extras = ["docs"]}
 sphinx-togglebutton = {version = "^0.3.2", optional = true, extras = ["docs"]}
 sphinx-copybutton = {version = "^0.5.0", optional = true, extras = ["docs"]}
 myst-nb = {version = "^0.15.0", optional = true, extras = ["docs"]}
+||||||| parent of e659de2 (update lock file)
+Sphinx = {version = "^4.5.0", optional = true, extras = ["docs"]}
+pydata-sphinx-theme = {version = ">=0.9,<0.13", optional = true, extras = ["docs"]}
+readthedocs-sphinx-search = {version = "^0.1.2", optional = true, extras = ["docs"]}
+sphinx-autodoc-typehints = {version = "^1.19.1", optional = true, extras = ["docs"]}
+myst-parser = {version = "^0.17.2", optional = true, extras = ["docs"]}
+numpydoc = {version = "^1.4.0", optional = true, extras = ["docs"]}
+sphinx-togglebutton = {version = "^0.3.2", optional = true, extras = ["docs"]}
+sphinx-copybutton = {version = "^0.5.0", optional = true, extras = ["docs"]}
+myst-nb = {version = "^0.15.0", optional = true, extras = ["docs"]}
+=======
+Sphinx = {version = "^4.5.0", optional = true}
+pydata-sphinx-theme = {version = ">=0.9,<0.13", optional = true}
+readthedocs-sphinx-search = {version = "^0.1.2", optional = true}
+sphinx-autodoc-typehints = {version = "^1.19.1", optional = true}
+myst-parser = {version = "^0.17.2", optional = true}
+numpydoc = {version = "^1.4.0", optional = true}
+sphinx-togglebutton = {version = "^0.3.2", optional = true}
+sphinx-copybutton = {version = "^0.5.0", optional = true}
+sphinxcontrib-mermaid = {version = "^0.7.1", optional = true}
+myst-nb = {version = "^0.15.0", optional = true}
+>>>>>>> e659de2 (update lock file)
 pyinform = "^0.2.0"
 graphviz = "^0.20.1"
 Pillow = "9.1.1"
@@ -183,6 +206,7 @@ h5py-cache = "^1.0"
 =======
 >>>>>>> c8acc57 (remove h5py_cache as it is deprecated, merged to h5py)
 pyvis = ">=0.2.1,<0.4.0"
+<<<<<<< HEAD
 >>>>>>> 5532eac (build(deps): bump pyvis from 0.2.1 to 0.3.0)
 lyon = { git = "https://github.com/sciforce/lyon.git", rev = "91dd700" }
 <<<<<<< HEAD
@@ -201,7 +225,13 @@ serial = "^0.0.97"
 #serial = "^0.0.97"
 =======
 >>>>>>> 2b1432b (remove optional pyserial)
+||||||| parent of e659de2 (update lock file)
+lyon = { git = "https://github.com/sciforce/lyon.git", rev = "91dd700" }
+=======
+lyon = { git = "https://github.com/sciforce/lyon.git", rev = "91dd700", optional = true}
+>>>>>>> e659de2 (update lock file)
 click = "^8.1.3"
+<<<<<<< HEAD
 <<<<<<< HEAD
 >>>>>>> f74e222 (add click)
 ||||||| parent of 5c64b36 (add how-to use stimjim)
@@ -281,6 +311,12 @@ pyserial = {optional = true, extras = ["experiment", "docs"], version = "^3.5"}
 =======
 pyserial = {version = "^3.5", extras = ["experiment"]}
 >>>>>>> 2b1432b (remove optional pyserial)
+||||||| parent of e659de2 (update lock file)
+sphinxcontrib-mermaid = {version = "^0.7.1", extras = ["docs"], optional = true}
+pyserial = {version = "^3.5", extras = ["experiment"]}
+=======
+pyserial = {version = "^3.5", optional = true}
+>>>>>>> e659de2 (update lock file)
 
 [tool.poetry.dev-dependencies]
 black = "^22.8.0"
