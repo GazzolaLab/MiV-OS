@@ -2,8 +2,8 @@ from __future__ import annotations
 
 __doc__ = """
 
-Data Manager
-############
+Data Manager (OpenEphys)
+########################
 
 .. autoclass:: DataManager
    :members:
