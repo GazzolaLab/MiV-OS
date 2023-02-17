@@ -314,9 +314,14 @@ pyserial = {version = "^3.5", extras = ["experiment"]}
 ||||||| parent of e659de2 (update lock file)
 sphinxcontrib-mermaid = {version = "^0.7.1", extras = ["docs"], optional = true}
 pyserial = {version = "^3.5", extras = ["experiment"]}
+<<<<<<< HEAD
 =======
 pyserial = {version = "^3.5", optional = true}
 >>>>>>> e659de2 (update lock file)
+||||||| parent of c8f9a44 (dep: add numba)
+=======
+numba = "^0.56.4"
+>>>>>>> c8f9a44 (dep: add numba)
 
 [tool.poetry.dev-dependencies]
 black = "^22.8.0"
