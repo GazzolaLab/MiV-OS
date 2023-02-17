@@ -106,9 +106,15 @@ from glob import glob
 
 import numpy as np
 
+<<<<<<< HEAD
 import matplotlib.pyplot as plt
 
 from miv.io.binary import load_continuous_data, load_recording
+||||||| parent of 3366171 (feature: add ttl loader)
+from miv.io.binary import load_continuous_data, load_recording
+=======
+from miv.io.binary import load_continuous_data, load_recording, load_ttl_event
+>>>>>>> 3366171 (feature: add ttl loader)
 from miv.signal.filter.protocol import FilterProtocol
 from miv.signal.spike.protocol import SpikeDetectionProtocol
 from miv.statistics import firing_rates
@@ -228,6 +234,12 @@ class Data:
         finally:
             del timestamps
             del signal
+
+    def load_ttl_event(self):
+        """
+        Load TTL event data if data contains. Detail implementation is :func:`here <miv.io.binary.load_ttl_event>`.
+        """
+        return load_ttl_event(self.data_path)
 
     def set_channel_mask(self, channel_id: Iterable[int]):
         """
