@@ -42,7 +42,12 @@ from asyncio.windows_events import NULL
 =======
 from asyncio.windows_events import NULL
 from copy import copy
+<<<<<<< HEAD
 >>>>>>> 74f7a47 (restructure auto_channel_mask, now takes spontaneous data as parameter and enables offsetting recordings)
+||||||| parent of d928e04 (Data.auto_cannel_mask: change mean threshold to three-sigma threshold)
+=======
+import statistics
+>>>>>>> d928e04 (Data.auto_cannel_mask: change mean threshold to three-sigma threshold)
 from typing import Any, Callable, Dict, Iterable, List, Optional, Set
 =======
 ||||||| parent of 6127f95 (fix for loop index error)
@@ -298,12 +303,13 @@ class Data:
         for chan in range(num_channels):
             dot_products.append(correlation_matrix[chan][chan+num_channels])
         mean = np.mean(dot_products)
+        threshold = mean + 3*statistics.stdev(dot_products)
 
         mask_list = []
         for chan in range(len(dot_products)):
-            if (dot_products[chan] > mean):
+            if (dot_products[chan] > threshold):
                 mask_list.append(chan)
-        self.add_channel_mask(mask_list)
+        self.add_channel_mask(np.concatenate((exp_binned[2], mask_list)))
 
     
     def get_binned_matrix(self, 
@@ -333,8 +339,9 @@ class Data:
 
         Returns
         -------
-        (binned_matrix, num_bins)
+        {binned_matrix, num_bins, empty_mask}
         *binned_matrix* has columns as channels
+        *empty_mask* contains indices of empty channels
         """
         
         result = []
@@ -349,10 +356,16 @@ class Data:
             filtered_sig = filter(trimmed_signal, samp)
             spiketrains = detector(filtered_sig, trimmed_times, samp)
 
+            # mask out empty channels
+            empty_mask = []
+            num_channels = len(spiketrains)
+            for chan in range(num_channels):
+                if (len(spiketrains[chan]) == 0):
+                    empty_mask.append(chan)
+
             bins_array = np.arange(start=start_time, stop=trimmed_times[-1], step=1/bins_per_second)
             num_bins = len(bins_array)
 
-            num_channels = len(spiketrains)
             for chan in range(num_channels):
                 spike_counts = np.zeros(shape=num_bins+1, dtype=int)
 
@@ -361,7 +374,7 @@ class Data:
                     spike_counts[bin_index] += 1
 
                 result.append(spike_counts)
-        return [np.transpose(result), num_bins]
+        return [np.transpose(result), num_bins, empty_mask]
 
 
 
