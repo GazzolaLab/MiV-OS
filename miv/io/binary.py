@@ -252,7 +252,9 @@ def load_recording(
     # channel_info: Dict[str, Any] = info["continuous"][0]["channels"]
 
     # TODO: maybe need to support multiple continuous.dat files in the future
-    signal, timestamps = load_continuous_data(file_path[0], num_channels, sampling_rate)
+    signal, timestamps = load_continuous_data(
+        file_path[0], num_channels, sampling_rate, dtype=np.float32
+    )
 
     # To Voltage
     signal = bits_to_voltage(signal, info["continuous"][0]["channels"])
@@ -275,6 +277,7 @@ def load_continuous_data(
     num_channels: int,
     sampling_rate: float,
     timestamps_path: Optional[str] = None,
+    dtype: Optional[np.dtype] = None,
 ):
     """
     Load single continous data file and return timestamps and raw data in numpy array.
@@ -298,6 +301,9 @@ def load_continuous_data(
         If None, first check if the file "timestamps.npy" exists on the same directory.
         If the file doesn't exist, we deduce the timestamps based on the sampling rate
         and the length of the data.
+    dtype: Optional[np.dtype]
+        If None, skip data-type conversion. If the filesize is too large, it is advisable
+        to keep `dtype=None` and convert slice by slice.
 
     Returns
     -------
@@ -317,7 +323,9 @@ def load_continuous_data(
     # Read raw data signal
     raw_data: np.ndarray = np.memmap(data_path, dtype="int16", mode="c")
     length = raw_data.size // num_channels
-    raw_data = np.reshape(raw_data, (length, num_channels)).astype(np.float32)
+    raw_data = raw_data.reshape(length, num_channels)
+    if dtype is not None:
+        raw_data = raw_data.astype(dtype)
 
     # Get timestamps_path
     if timestamps_path is None:
@@ -326,11 +334,12 @@ def load_continuous_data(
 
     # Get timestamps
     if os.path.exists(timestamps_path):
-        timestamps = np.array(np.load(timestamps_path), dtype=np.float32)
+        timestamps = np.asarray(np.load(timestamps_path), dtype=np.float32)
         timestamps /= float(sampling_rate)
     else:  # If timestamps_path doesn't exist, deduce the stamps
         timestamps = np.array(range(0, length)) / sampling_rate
 
+<<<<<<< HEAD
 <<<<<<< HEAD
     return np.array(raw_data), timestamps
 ||||||| parent of d882164 (return array of timestamps)
@@ -346,3 +355,8 @@ def load_continuous_data(
 
     return np.array(raw_data), np.array(timestamps)
 >>>>>>> d882164 (return array of timestamps)
+||||||| parent of 9244326 (update: adjust raw data readout to avoid casting)
+    return np.array(raw_data), np.array(timestamps)
+=======
+    return raw_data, timestamps
+>>>>>>> 9244326 (update: adjust raw data readout to avoid casting)
