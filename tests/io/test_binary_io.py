@@ -1,14 +1,14 @@
+import os
+import tempfile
+
+import numpy as np
 import pytest
 
-import tempfile
-import os
-import numpy as np
-
 from miv.io.binary import (
+    apply_channel_mask,
     load_continuous_data,
     load_recording,
     oebin_read,
-    apply_channel_mask,
 )
 
 

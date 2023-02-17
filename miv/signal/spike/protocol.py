@@ -4,12 +4,12 @@ __all__ = [
     "UnsupervisedFeatureClusteringProtocol",
 ]
 
-from typing import Protocol, Union, Any, Iterable
+from typing import Any, Iterable, Protocol, Union
 
-import numpy as np
 import neo.core
+import numpy as np
 
-from miv.typing import SignalType, TimestampsType, SpikestampsType
+from miv.typing import SignalType, SpikestampsType, TimestampsType
 
 
 class SpikeDetectionProtocol(Protocol):

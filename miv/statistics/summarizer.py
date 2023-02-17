@@ -40,15 +40,16 @@ elephant.statistics
 """
 __all__ = ["spikestamps_statistics"]
 
-from typing import Any, Optional, Iterable, Union, Dict
-import numpy as np
-import matplotlib.pyplot as plt
+from typing import Any, Dict, Iterable, Optional, Union
+
 import datetime
+
+import elephant.statistics
+import matplotlib.pyplot as plt
+import neo
+import numpy as np
 import scipy
 import scipy.signal
-
-import neo
-import elephant.statistics
 
 
 # FIXME: For now, we provide the free function for simple usage. For more

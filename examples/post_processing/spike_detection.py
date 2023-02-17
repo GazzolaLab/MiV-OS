@@ -1,19 +1,18 @@
 import os
+
+import matplotlib.pyplot as plt
+import neo
 import numpy as np
 import quantities as pq
+from viziphant.rasterplot import rasterplot_rates
 
 from miv.io import load_data
 from miv.signal.filter import butter_bandpass_filter
 from miv.signal.spike import (
+    align_to_minimum,
     compute_spike_threshold,
     detect_threshold_crossings,
-    align_to_minimum,
 )
-
-import neo
-from viziphant.rasterplot import rasterplot_rates
-
-import matplotlib.pyplot as plt
 
 
 def main():

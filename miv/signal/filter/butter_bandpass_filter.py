@@ -3,11 +3,10 @@ __all__ = ["ButterBandpass"]
 
 from dataclasses import dataclass
 
+import matplotlib.pyplot as plt
 import numpy as np
 import numpy.typing as npt
-
 import scipy.signal as sps
-import matplotlib.pyplot as plt
 
 from miv.typing import SignalType
 

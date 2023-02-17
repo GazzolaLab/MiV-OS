@@ -1,13 +1,10 @@
-from typing import runtime_checkable
-from typing import Protocol, Any
-
-import pytest
+from typing import Any, Protocol, runtime_checkable
 
 import numpy as np
+import pytest
 
-from miv.signal.filter import FilterProtocol, FilterCollection
+from miv.signal.filter import FilterCollection, FilterProtocol
 from tests.filter.mock_filter import mock_filter_list, mock_nonfilter_list
-
 from tests.filter.test_filter_protocol import RuntimeFilterProtocol
 
 

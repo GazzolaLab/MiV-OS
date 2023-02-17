@@ -1,6 +1,7 @@
 from typing import Any, Iterable
 
 import numpy as np
+
 from miv.signal.filter import FilterProtocol
 
 

@@ -20,14 +20,17 @@ Signal Filter
 """
 __all__ = ["FilterCollection"]
 
-from typing import Union, List
-import numpy as np
-import numpy.typing as npt
+from typing import TYPE_CHECKING, List
 
 from collections.abc import MutableSequence
 
+import numpy as np
+import numpy.typing as npt
+
 from miv.typing import SignalType
-from miv.signal.filter import FilterProtocol
+
+if TYPE_CHECKING:
+    from miv.signal.filter import FilterProtocol
 
 
 class FilterCollection(MutableSequence):
