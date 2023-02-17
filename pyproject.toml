@@ -184,9 +184,15 @@ myst-nb = {version = "^0.15.0", optional = true}
 >>>>>>> e659de2 (update lock file)
 pyinform = "^0.2.0"
 graphviz = "^0.20.1"
+<<<<<<< HEAD
 Pillow = "9.1.1"
 <<<<<<< HEAD
 <<<<<<< HEAD
+||||||| parent of 76700db (build(deps): bump pillow from 9.1.1 to 9.3.0)
+Pillow = "9.1.1"
+=======
+Pillow = "9.3.0"
+>>>>>>> 76700db (build(deps): bump pillow from 9.1.1 to 9.3.0)
 h5py = "^3.7.0"
 <<<<<<< HEAD
 h5py-cache = "^1.0"
