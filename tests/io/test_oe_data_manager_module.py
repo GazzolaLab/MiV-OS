@@ -4,7 +4,7 @@ import pathlib
 import numpy as np
 import pytest
 
-from miv.io import Data, DataManager
+from miv.io.openephys import Data, DataManager
 from tests.io.mock_data import MockDataGenerator
 
 

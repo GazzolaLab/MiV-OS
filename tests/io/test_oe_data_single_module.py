@@ -4,7 +4,7 @@ import pathlib
 import numpy as np
 import pytest
 
-from miv.io import Data
+from miv.io.openephys import Data
 from tests.io.mock_data import fixture_create_mock_data_file
 
 

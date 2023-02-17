@@ -30,7 +30,7 @@ import numpy as np
 import quantities as pq
 from tqdm import tqdm
 
-from miv.core import Spikestamps
+from miv.core.datatype import Spikestamps
 from miv.typing import SignalType, SpikestampsType, TimestampsType
 
 

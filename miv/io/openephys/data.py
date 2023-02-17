@@ -48,7 +48,7 @@ from glob import glob
 import matplotlib.pyplot as plt
 import numpy as np
 
-from miv.io.binary import load_continuous_data, load_recording, load_ttl_event
+from miv.io.openephys.binary import load_continuous_data, load_recording, load_ttl_event
 from miv.io.protocol import DataProtocol
 from miv.signal.filter.protocol import FilterProtocol
 from miv.signal.spike.protocol import SpikeDetectionProtocol
