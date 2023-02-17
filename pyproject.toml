@@ -158,6 +158,7 @@ Pillow = "9.1.1"
 <<<<<<< HEAD
 <<<<<<< HEAD
 h5py = "^3.7.0"
+<<<<<<< HEAD
 h5py-cache = "^1.0"
 ||||||| parent of 2b91000 (add pyvis)
 =======
@@ -171,6 +172,10 @@ pyvis = "^0.2.1"
 ||||||| parent of 5532eac (build(deps): bump pyvis from 0.2.1 to 0.3.0)
 pyvis = "^0.2.1"
 =======
+||||||| parent of c8acc57 (remove h5py_cache as it is deprecated, merged to h5py)
+h5py-cache = "^1.0"
+=======
+>>>>>>> c8acc57 (remove h5py_cache as it is deprecated, merged to h5py)
 pyvis = ">=0.2.1,<0.4.0"
 >>>>>>> 5532eac (build(deps): bump pyvis from 0.2.1 to 0.3.0)
 lyon = { git = "https://github.com/sciforce/lyon.git", rev = "91dd700" }
