@@ -42,6 +42,7 @@ jobs:
       - name: Install dependencies
         run: |
           poetry config virtualenvs.in-project true
+          poetry lock --no-update
           poetry install -E "docs experiment"
       # Test MiV-OS using pytest
       - name: Run tests
@@ -102,11 +103,16 @@ jobs:
         run: |
           poetry config virtualenvs.in-project true
 <<<<<<< HEAD
+<<<<<<< HEAD
           poetry install
 >>>>>>> 2550c2a (update: github action config)
 ||||||| parent of 3e4af02 (update experiment dependencies installation)
           poetry install
 =======
+||||||| parent of e32dd97 (CI: lock befofre dependency installation)
+=======
+          poetry lock --no-update
+>>>>>>> e32dd97 (CI: lock befofre dependency installation)
           poetry install -E "docs experiment"
 >>>>>>> 3e4af02 (update experiment dependencies installation)
       # Set environment variables for coverage test. Coverage test is done using python 3.8
