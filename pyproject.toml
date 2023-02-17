@@ -111,7 +111,12 @@ pyvis = "^0.2.1"
 ||||||| parent of 0732327 (dependency add: lyon)
 =======
 lyon = { git = "https://github.com/sciforce/lyon.git", rev = "91dd700" }
+<<<<<<< HEAD
 >>>>>>> 0732327 (dependency add: lyon)
+||||||| parent of f74e222 (add click)
+=======
+click = "^8.1.3"
+>>>>>>> f74e222 (add click)
 
 [tool.poetry.dev-dependencies]
 black = "^22.3.0"
