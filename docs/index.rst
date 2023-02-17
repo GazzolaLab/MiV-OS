@@ -24,6 +24,7 @@ If you are interested in contributing to this project, we prepared contribution 
    :caption: Overview
 
 <<<<<<< HEAD
+<<<<<<< HEAD
    overview/about
    overview/references
    Contribution <https://github.com/GazzolaLab/MiV-OS/blob/main/CONTRIBUTING.md>
@@ -120,6 +121,11 @@ If you are interested in contributing to this project, we prepared contribution 
    Gazzola Lab <https://mattia-lab.com/>
 =======
    overview/index
+||||||| parent of 5b530f8 (update shared doc submodule)
+   overview/index
+=======
+   MiV-Shared-Docs/overview/index
+>>>>>>> 5b530f8 (update shared doc submodule)
    tutorial/index
    guide/index
    api/index
