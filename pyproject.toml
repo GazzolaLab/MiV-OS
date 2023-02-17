@@ -385,6 +385,10 @@ experiment = [
 dtaidistance = "^2.3.10"
 scikit-learn-extra = "^0.2.0"
 
+
+[tool.poetry.group.algorithmExtension.dependencies]
+rupture = "^1.4.5"
+
 [tool.black]
 # https://github.com/psf/black
 target-version = ["py38"]
