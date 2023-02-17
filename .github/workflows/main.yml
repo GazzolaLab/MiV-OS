@@ -91,8 +91,16 @@ jobs:
       # General PyTest for all matrix strategy
       - name: PyTest and MyPy
         run: |
+<<<<<<< HEAD
           make ci
 
+||||||| parent of 4aa15ba (fix:main yml codecoverage)
+          pytest
+
+=======
+          pytest
+
+>>>>>>> 4aa15ba (fix:main yml codecoverage)
       # Set environment variables for coverage test. Coverage test is done using python 3.8
       # Test MiV-OS using pytest
       - name: Test MiV-OS using pytest
@@ -100,6 +108,6 @@ jobs:
         run: |
           if [[ "${{ matrix.python-version }}" == "3.8" ]]; then
             echo "CODECOV_TOKEN=4e35faf2-dc6b-442c-99f3-90d088ccd9f6" >> $GITHUB_ENV
-            python3 -m pytest --cov=MiV-OS --cov-report=xml
+            python3 -m pytest --cov=miv --cov-report=xml
             codecov
           fi
