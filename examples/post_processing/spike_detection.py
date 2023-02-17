@@ -6,6 +6,7 @@ import numpy as np
 import quantities as pq
 from viziphant.rasterplot import rasterplot_rates
 
+<<<<<<< HEAD
 from miv.io import load_data
 from miv.signal.filter import butter_bandpass_filter
 from miv.signal.spike import (
@@ -13,6 +14,19 @@ from miv.signal.spike import (
     compute_spike_threshold,
     detect_threshold_crossings,
 )
+||||||| parent of 6ae1418 (update spike detection example script)
+from miv.io import load_data
+from miv.signal.filter import butter_bandpass_filter
+from miv.signal.spike import (
+    compute_spike_threshold,
+    detect_threshold_crossings,
+    align_to_minimum,
+)
+=======
+from miv.io import Data, DataManager
+from miv.signal.filter import ButterBandpass
+from miv.signal.spike import ThresholdCutoff
+>>>>>>> 6ae1418 (update spike detection example script)
 
 
 def main():
@@ -20,34 +34,23 @@ def main():
 
     # Load dataset from OpenEphys recording
     folder_path: str = "~/Open Ephys/2022-03-10-16-19-09"  # Data Path
-    dataset = load_data(folder_path, device="OpenEphys")
+    data_manager = DataManager(folder_path)
 
     # Get signal and rate(hz)
-    #   signal     : np.array, shape(N, N_channels)
-    #   rate       : float
-    record_node: int = dataset.get_nodes[0]
-    recording = dataset[record_node]["experiment1"]["recording1"]
-    signal, _, rate = recording.continuous["100"]
-    # time = recording.continuous["100"].timestamp / rate
-    num_channels = signal.shape[1]
+    #   signal        : np.array, shape(N, N_channels)
+    #   timestamps    : np.array
+    #   sampling_rate : float
+    with data_manager[0].load() as (signal, timestamps, sampling_rate):
+        # Butter bandpass filter
+        bandpass_filter = ButterBandpass(300, 3000, order=5)
+        signal = bandpass_filter(signal, sampling_rate)
 
-    # Butter bandpass filter
-    signal = butter_bandpass_filter(signal, lowcut=300, highcut=3000, fs=rate, order=5)
-
-    # Spike detection for each channel
-    spiketrain_list = []
-    for channel in range(num_channels):
-        # Spike Detection: get spikestamp
-        spike_threshold = compute_spike_threshold(signal)
-        crossings = detect_threshold_crossings(signal, rate, spike_threshold, 0.003)
-        spikes = align_to_minimum(signal, rate, crossings, 0.002)
-        spikestamp = spikes / rate
-        # Convert spikestamp to neo.SpikeTrain (for plotting)
-        spiketrain = neo.SpikeTrain(spikestamp, units="sec")
-        spiketrain_list.append(spiketrain)
+        # Spike Detection
+        detector = ThresholdCutoff(cutoff=4.5)
+        spiketrains = detector(signal, timestamps, sampling_rate)
 
     # Plot
-    rasterplot_rates(spiketrain_list)
+    rasterplot_rates(spiketrains)
 
 
 if __name__ == "__main__":
