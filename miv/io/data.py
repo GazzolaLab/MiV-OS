@@ -31,6 +31,7 @@ __all__ = ["Data", "DataManager"]
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 from typing import Any, Callable, Iterable, List, Optional, Set
 ||||||| parent of 2f9efba (update: analysis figure save)
 from typing import Any, Optional, Iterable, Callable, List, Set
@@ -64,6 +65,10 @@ import statistics
 =======
 import statistics
 >>>>>>> 732c4e6 (simplify calculation, re-add empty channel filter)
+||||||| parent of a1ef815 (format for poetry)
+import statistics
+=======
+>>>>>>> a1ef815 (format for poetry)
 from typing import Any, Callable, Dict, Iterable, List, Optional, Set
 =======
 ||||||| parent of 6127f95 (fix for loop index error)
@@ -83,6 +88,7 @@ from typing import Any, Callable, Dict, Iterable, List, Optional, Set
 
 import logging
 import os
+import statistics
 from collections.abc import MutableSequence
 from contextlib import contextmanager
 from glob import glob
