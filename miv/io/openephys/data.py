@@ -2,8 +2,8 @@ from __future__ import annotations
 
 __doc__ = """
 
-Data Manager
-############
+Data Manager (OpenEphys)
+########################
 
 .. autoclass:: DataManager
    :members:
@@ -16,7 +16,7 @@ Module (OpenEphys)
     exported from OpenEphys system:
     `format <https://open-ephys.atlassian.net/wiki/spaces/OEW/pages/491632/Data+format>`_.
 
-.. currentmodule:: miv.io.data
+.. currentmodule:: miv.io.openephys.data
 
 .. autoclass:: Data
    :members:
@@ -48,7 +48,7 @@ from glob import glob
 import matplotlib.pyplot as plt
 import numpy as np
 
-from miv.io.binary import load_continuous_data, load_recording, load_ttl_event
+from miv.io.openephys.binary import load_continuous_data, load_recording, load_ttl_event
 from miv.io.protocol import DataProtocol
 from miv.signal.filter.protocol import FilterProtocol
 from miv.signal.spike.protocol import SpikeDetectionProtocol

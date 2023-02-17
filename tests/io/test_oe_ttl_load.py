@@ -1,6 +1,6 @@
 import numpy as np
 
-from miv.io.binary import load_ttl_event
+from miv.io.openephys.binary import load_ttl_event
 
 
 def test_load_ttl_event(test_TTL_data):  # TODO: no flake8 F811

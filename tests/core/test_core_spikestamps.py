@@ -3,7 +3,7 @@ from collections import UserList
 import numpy as np
 import pytest
 
-from miv.core import Spikestamps
+from miv.core.datatype import Spikestamps
 
 
 def test_spikestamps_init():

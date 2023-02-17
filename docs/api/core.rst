@@ -1,5 +1,7 @@
-**************************************
-Core Data Structures (:mod:`miv.core`)
-**************************************
+***********************************************
+Core Data Structures (:mod:`miv.core.datatype`)
+***********************************************
 
-.. automodule:: miv.core.spikestamps
+.. automodule:: miv.core.datatype.spikestamps
+
+.. automodule:: miv.core.datatype.signal

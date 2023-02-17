@@ -5,11 +5,11 @@ IO Module (:mod:`miv.io`)
 Python Data Managing
 ====================
 
-.. automodule:: miv.io.data
+.. automodule:: miv.io.openephys.data
 
 .. automodule:: miv.io.intan.data
 
-.. automodule:: miv.io.binary
+.. automodule:: miv.io.openephys.binary
    :members:
 
 External Datafile (H5)
@@ -17,6 +17,11 @@ External Datafile (H5)
 
 .. automodule:: miv.io.file
    :members:
+
+External Datafile (ASDF)
+========================
+
+.. automodule:: miv.io.asdf.DataASDF
 
 Serial Communication Helper
 ===========================

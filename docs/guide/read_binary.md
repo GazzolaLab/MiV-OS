@@ -35,7 +35,7 @@ from tqdm import tqdm
 from miv.io import load_continuous_data
 from miv.signal.filter import ButterBandpass
 from miv.signal.spike import ThresholdCutoff
-from miv.core import Spikestamps
+from miv.core.datatype import Spikestamps
 ```
 
 ## Import Data
@@ -82,6 +82,6 @@ for signal_seg, timestamps_seg in tqdm(zip(raw_signal_split, timestamps_split), 
     filtered_signal = pre_filter(signal_seg, sampling_rate=sampling_rate)
     spks = spike_detection(filtered_signal, timestamps_seg, sampling_rate=sampling_rate, progress_bar=False)
     total_spiketrain.extend(spks)
-    
+
 print(total_spiketrain.get_count())
 ```

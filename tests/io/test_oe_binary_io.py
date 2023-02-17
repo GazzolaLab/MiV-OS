@@ -4,7 +4,7 @@ import tempfile
 import numpy as np
 import pytest
 
-from miv.io.binary import (
+from miv.io.openephys.binary import (
     apply_channel_mask,
     bits_to_voltage,
     load_continuous_data,

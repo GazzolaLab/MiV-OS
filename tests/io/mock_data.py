@@ -9,7 +9,7 @@ import numpy as np
 import pytest
 
 # from miv.typing import FilterProtocol, SpikeDetectionProtocol
-from miv.io.data import Data, DataManager
+from miv.io.openephys.data import Data, DataManager
 
 
 class SignalGeneratorType(Enum):

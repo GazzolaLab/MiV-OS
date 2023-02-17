@@ -43,7 +43,7 @@ sys.path.append('../..')
 ```{code-cell} ipython3
 :tags: [remove-cell]
 
-from miv.io import load_continuous_data_file
+from miv.io.openephys import load_continuous_data_file
 
 datapath = '2022-03-10_16-19-09/Record Node 104/spontaneous/recording1/continuous/Rhythm_FPGA-100.0/continuous.dat'
 rate = 30_000

@@ -22,7 +22,7 @@ import numpy as np
 from tqdm import tqdm
 
 import miv.io.intan.rhs as rhs
-from miv.io.data import Data, DataManager
+from miv.io.openephys.data import Data, DataManager
 from miv.typing import SignalType
 
 
