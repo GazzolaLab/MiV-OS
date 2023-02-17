@@ -4,76 +4,8 @@ requires = ["poetry_core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
-<<<<<<< HEAD
-name = "miv"
-version = "0.0.3"
-||||||| parent of 7eaf12a (update project version)
-name = "miv"
-version = "0.0.5"
-=======
 name = "MiV-OS"
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-version = "0.0.6"
->>>>>>> 7eaf12a (update project version)
-||||||| parent of ecd8a31 (bump up version)
-version = "0.0.6"
-=======
-version = "0.1.0"
->>>>>>> ecd8a31 (bump up version)
-||||||| parent of 19d44bb (update version)
-version = "0.0.6"
-=======
-version = "0.0.6.post1"
->>>>>>> 19d44bb (update version)
-||||||| parent of bf95d89 (add pyinform dependency)
-version = "0.1.0"
-=======
-version = "0.1.1"
->>>>>>> bf95d89 (add pyinform dependency)
-||||||| parent of 42864b8 (poetry dependency version update)
-version = "0.1.1"
-=======
-version = "0.1.2"
->>>>>>> 42864b8 (poetry dependency version update)
-||||||| parent of 9c2ed09 (update release)
-version = "0.1.2"
-=======
-version = "0.2.0"
->>>>>>> 9c2ed09 (update release)
-||||||| parent of 7ae0e8a (bump up version)
-version = "0.2.0"
-=======
-version = "0.2.1"
->>>>>>> 7ae0e8a (bump up version)
-||||||| parent of 6547b5f (update: bump version)
-version = "0.2.1"
-=======
-version = "0.2.2"
->>>>>>> 6547b5f (update: bump version)
-||||||| parent of 4da4e74 (add pyserial in experimental extras)
-version = "0.2.2"
-=======
-version = "0.2.3"
->>>>>>> 4da4e74 (add pyserial in experimental extras)
-||||||| parent of 0560986 (bump up version)
-version = "0.2.3"
-=======
-version = "0.2.4"
->>>>>>> 0560986 (bump up version)
-||||||| parent of ab4697f (bump version)
-version = "0.2.4"
-=======
 version = "0.3.0"
->>>>>>> ab4697f (bump version)
 description = "Python software for analysis and computing framework used in MiV project."
 readme = "README.md"
 authors = ["GazzolaLab <skim449@illinois.edu>"]
@@ -112,71 +44,16 @@ miv_extract_spiketrain = "miv.cli.miv_extract_spiketrain:main"
 python = ">=3.8,<3.11"
 scipy = "^1.9.1"
 elephant = "^0.11.1"
-<<<<<<< HEAD
-matplotlib = "^3.5.3"
-neo = "^0.10.2"
-pandas = "^1.4.4"
-PyWavelets = "1.3.0"
-||||||| parent of b34ddda (build(deps): bump neo from 0.10.2 to 0.11.1)
 matplotlib = "^3.5.2"
-neo = "^0.10.2"
+neo = ">=0.11.0,<0.12.0"
 pandas = "^1.4.2"
 PyWavelets = "^1.3.0"
-=======
-matplotlib = "^3.5.2"
-neo = ">=0.10.2,<0.12.0"
-pandas = "^1.4.2"
-PyWavelets = "^1.3.0"
->>>>>>> b34ddda (build(deps): bump neo from 0.10.2 to 0.11.1)
 quantities = "^0.13.0"
-<<<<<<< HEAD
-scikit-learn = "^1.1.2"
-seaborn = "^0.11.2"
-||||||| parent of fc236b6 (build(deps): bump seaborn from 0.11.2 to 0.12.0)
-scikit-learn = "^1.1.1"
-seaborn = "^0.11.2"
-=======
 scikit-learn = "^1.1.1"
 seaborn = ">=0.11.2,<0.13.0"
->>>>>>> fc236b6 (build(deps): bump seaborn from 0.11.2 to 0.12.0)
 tqdm = "^4.64.0"
 numpy = "^1.23.2"
 viziphant = "^0.2.0"
-<<<<<<< HEAD
-Sphinx = {version = "^4.5.0", optional = true, extras = ["docs"]}
-<<<<<<< HEAD
-<<<<<<< HEAD
-pydata-sphinx-theme = {version = "^0.9.0", optional = true, extras = ["docs"]}
-||||||| parent of 44e0442 (add poetryup)
-sphinx-rtd-theme = {version = "^1.0.0", optional = true, extras = ["docs"]}
-sphinx-book-theme = {version = "^0.3.2", optional = true, extras = ["docs"]}
-=======
-sphinx-rtd-theme = {version = "^1.0.0", optional = true, extras = ["docs"]}
-sphinx-book-theme = {version = "^0.3.3", optional = true, extras = ["docs"]}
->>>>>>> 44e0442 (add poetryup)
-||||||| parent of 05026b9 (build(deps): bump pydata-sphinx-theme from 0.9.0 to 0.12.0)
-pydata-sphinx-theme = {version = "^0.9.0", optional = true, extras = ["docs"]}
-=======
-pydata-sphinx-theme = {version = ">=0.9,<0.13", optional = true, extras = ["docs"]}
->>>>>>> 05026b9 (build(deps): bump pydata-sphinx-theme from 0.9.0 to 0.12.0)
-readthedocs-sphinx-search = {version = "^0.1.2", optional = true, extras = ["docs"]}
-sphinx-autodoc-typehints = {version = "^1.19.1", optional = true, extras = ["docs"]}
-myst-parser = {version = "^0.17.2", optional = true, extras = ["docs"]}
-numpydoc = {version = "^1.4.0", optional = true, extras = ["docs"]}
-sphinx-togglebutton = {version = "^0.3.2", optional = true, extras = ["docs"]}
-sphinx-copybutton = {version = "^0.5.0", optional = true, extras = ["docs"]}
-myst-nb = {version = "^0.15.0", optional = true, extras = ["docs"]}
-||||||| parent of e659de2 (update lock file)
-Sphinx = {version = "^4.5.0", optional = true, extras = ["docs"]}
-pydata-sphinx-theme = {version = ">=0.9,<0.13", optional = true, extras = ["docs"]}
-readthedocs-sphinx-search = {version = ">=0.1.2,<0.3.0", optional = true, extras = ["docs"]}
-sphinx-autodoc-typehints = {version = "^1.19.1", optional = true, extras = ["docs"]}
-myst-parser = {version = "^0.17.2", optional = true, extras = ["docs"]}
-numpydoc = {version = "^1.4.0", optional = true, extras = ["docs"]}
-sphinx-togglebutton = {version = "^0.3.2", optional = true, extras = ["docs"]}
-sphinx-copybutton = {version = "^0.5.0", optional = true, extras = ["docs"]}
-myst-nb = {version = "^0.15.0", optional = true, extras = ["docs"]}
-=======
 Sphinx = {version = "^4.5.0", optional = true}
 pydata-sphinx-theme = {version = ">=0.9,<0.13", optional = true}
 readthedocs-sphinx-search = {version = "^0.1.2", optional = true}
@@ -187,154 +64,15 @@ sphinx-togglebutton = {version = "^0.3.2", optional = true}
 sphinx-copybutton = {version = "^0.5.0", optional = true}
 sphinxcontrib-mermaid = {version = "^0.7.1", optional = true}
 myst-nb = {version = "^0.15.0", optional = true}
->>>>>>> e659de2 (update lock file)
 pyinform = "^0.2.0"
 graphviz = "^0.20.1"
-<<<<<<< HEAD
-Pillow = "9.1.1"
-<<<<<<< HEAD
-<<<<<<< HEAD
-||||||| parent of 76700db (build(deps): bump pillow from 9.1.1 to 9.3.0)
-Pillow = "9.1.1"
-=======
 Pillow = "9.3.0"
->>>>>>> 76700db (build(deps): bump pillow from 9.1.1 to 9.3.0)
 h5py = "^3.7.0"
-<<<<<<< HEAD
-h5py-cache = "^1.0"
-||||||| parent of 2b91000 (add pyvis)
-=======
-pyvis = "^0.2.1"
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
->>>>>>> 2b91000 (add pyvis)
-||||||| parent of 0732327 (dependency add: lyon)
-=======
-||||||| parent of 5532eac (build(deps): bump pyvis from 0.2.1 to 0.3.0)
-pyvis = "^0.2.1"
-=======
-||||||| parent of c8acc57 (remove h5py_cache as it is deprecated, merged to h5py)
-h5py-cache = "^1.0"
-=======
->>>>>>> c8acc57 (remove h5py_cache as it is deprecated, merged to h5py)
 pyvis = ">=0.2.1,<0.4.0"
-<<<<<<< HEAD
->>>>>>> 5532eac (build(deps): bump pyvis from 0.2.1 to 0.3.0)
-lyon = { git = "https://github.com/sciforce/lyon.git", rev = "91dd700" }
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
->>>>>>> 0732327 (dependency add: lyon)
-||||||| parent of f74e222 (add click)
-=======
-||||||| parent of da9063c (change: port serial package)
-serial = "^0.0.97"
-=======
-#serial = "^0.0.97"
->>>>>>> da9063c (change: port serial package)
-||||||| parent of 2b1432b (remove optional pyserial)
-#serial = "^0.0.97"
-=======
->>>>>>> 2b1432b (remove optional pyserial)
-||||||| parent of e659de2 (update lock file)
-lyon = { git = "https://github.com/sciforce/lyon.git", rev = "91dd700" }
-=======
 lyon = { git = "https://github.com/sciforce/lyon.git", rev = "91dd700", optional = true}
->>>>>>> e659de2 (update lock file)
 click = "^8.1.3"
-<<<<<<< HEAD
-<<<<<<< HEAD
->>>>>>> f74e222 (add click)
-||||||| parent of 5c64b36 (add how-to use stimjim)
-lyon = { git = "https://github.com/sciforce/lyon.git", rev = "91dd700" }
-=======
-lyon = { git = "https://github.com/sciforce/lyon.git", optional = true, extras = ["experiment"], rev = "91dd700" }
-||||||| parent of 69fedc0 (fix: action for publication)
-lyon = { git = "https://github.com/sciforce/lyon.git", optional = true, extras = ["experiment"], rev = "91dd700" }
-=======
-lyon = { version = "^1.0.0", optional = true, extras = ["experiment"] }
->>>>>>> 69fedc0 (fix: action for publication)
-pyseries = {extras = ["experiment", "docs"], version = "^1.0.26"}
-<<<<<<< HEAD
->>>>>>> 5c64b36 (add how-to use stimjim)
-||||||| parent of faedd21 (add pyserial)
-=======
-serial = "^0.0.97"
-<<<<<<< HEAD
->>>>>>> faedd21 (add pyserial)
-||||||| parent of c02d34e (add mermaid)
-click = "^8.1.3"
-=======
-click = "^8.1.3"
-<<<<<<< HEAD
-sphinxcontrib-mermaid = {version = "^0.7.1", extras = ["docs"]}
->>>>>>> c02d34e (add mermaid)
-||||||| parent of 44e0442 (add poetryup)
-=======
-||||||| parent of e337c51 (fix pywavelet)
-sphinxcontrib-mermaid = {version = "^0.7.1", extras = ["docs"]}
-=======
-sphinxcontrib-mermaid = {version = "^0.7.1", extras = ["docs"], optional = true}
-<<<<<<< HEAD
->>>>>>> e337c51 (fix pywavelet)
-poetryup = "^0.10.0"
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
->>>>>>> 44e0442 (add poetryup)
-||||||| parent of 7ae0e8a (bump up version)
-=======
-importlib = {version = "^1.0.4", extras = ["docs"], optional = true}
->>>>>>> 7ae0e8a (bump up version)
-||||||| parent of 8bd1248 (remove importlib)
-importlib = {version = "^1.0.4", extras = ["docs"], optional = true}
-=======
->>>>>>> 8bd1248 (remove importlib)
-||||||| parent of da9063c (change: port serial package)
-||||||| parent of 9d9a6ca (build(deps): bump poetryup from 0.10.0 to 0.12.3)
-poetryup = "^0.10.0"
-=======
-poetryup = ">=0.10,<0.13"
->>>>>>> 9d9a6ca (build(deps): bump poetryup from 0.10.0 to 0.12.3)
-#pyseries = {extras = ["experiment", "docs"], version = "^1.0.26"}
-=======
-pyseries = {extras = ["experiment", "docs"], version = "^1.0.26"}
->>>>>>> da9063c (change: port serial package)
-||||||| parent of 4e9cbe7 (update dependency locks)
-sphinxcontrib-mermaid = {version = "^0.7.1", extras = ["docs"], optional = true}
-<<<<<<< HEAD
-poetryup = ">=0.10,<0.13"
-pyseries = {extras = ["experiment", "docs"], version = "^1.0.26"}
-=======
-sphinxcontrib-mermaid = {version = "^0.7.1", extras = ["docs"], optional = true}
-poetryup = ">=0.10,<0.13"
-<<<<<<< HEAD
-pyseries = {optional = true, extras = ["experiment", "docs"], version = "^1.0.26"}
->>>>>>> 4e9cbe7 (update dependency locks)
-||||||| parent of f1bc2bb (fix ci: dependencies for extras)
-pyseries = {optional = true, extras = ["experiment", "docs"], version = "^1.0.26"}
-=======
-pyserial = {optional = true, extras = ["experiment", "docs"], version = "^3.5"}
->>>>>>> f1bc2bb (fix ci: dependencies for extras)
-||||||| parent of 2b1432b (remove optional pyserial)
-poetryup = ">=0.10,<0.13"
-pyserial = {optional = true, extras = ["experiment", "docs"], version = "^3.5"}
-=======
-pyserial = {version = "^3.5", extras = ["experiment"]}
->>>>>>> 2b1432b (remove optional pyserial)
-||||||| parent of e659de2 (update lock file)
-sphinxcontrib-mermaid = {version = "^0.7.1", extras = ["docs"], optional = true}
-pyserial = {version = "^3.5", extras = ["experiment"]}
-<<<<<<< HEAD
-=======
 pyserial = {version = "^3.5", optional = true}
->>>>>>> e659de2 (update lock file)
-||||||| parent of c8f9a44 (dep: add numba)
-=======
 numba = "^0.56.4"
->>>>>>> c8f9a44 (dep: add numba)
 
 [tool.poetry.dev-dependencies]
 black = "^22.8.0"
@@ -343,38 +81,10 @@ mypy = "^0.982"
 mypy-extensions = "^0.4.3"
 pre-commit = "^2.21.0"
 pydocstyle = "^6.1.1"
-<<<<<<< HEAD
 pylint = "^2.15.0"
-<<<<<<< HEAD
-<<<<<<< HEAD
-||||||| parent of 44e0442 (add poetryup)
-pylint = "^2.13.9"
-=======
-pylint = "^2.14.5"
->>>>>>> 44e0442 (add poetryup)
-pytest = "^7.1.2"
-||||||| parent of 7ae0e8a (bump up version)
-pytest = "^7.1.2"
-=======
-pytest = "^7.1.3"
->>>>>>> 7ae0e8a (bump up version)
-pyupgrade = "^2.37.3"
-coverage = "^6.4.4"
-||||||| parent of 2863c84 (build(deps-dev): bump pytest from 7.1.2 to 7.1.3)
-pytest = "^7.1.2"
-pyupgrade = "^2.32.1"
-coverage = "^6.3.3"
-=======
 pytest = "^7.1.3"
 pyupgrade = "^3.2.2"
-<<<<<<< HEAD
-coverage = "^6.3.3"
->>>>>>> 2863c84 (build(deps-dev): bump pytest from 7.1.2 to 7.1.3)
-||||||| parent of 7ece4a5 (build(deps-dev): bump coverage from 6.5.0 to 7.0.0)
-coverage = "^6.3.3"
-=======
 coverage = "^7.0.0"
->>>>>>> 7ece4a5 (build(deps-dev): bump coverage from 6.5.0 to 7.0.0)
 pytest-html = "^3.1.1"
 pytest-cov = "^4.0.0"
 flake8 = "^5.0.4"

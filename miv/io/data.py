@@ -25,86 +25,7 @@ Module (OpenEphys)
 
 __all__ = ["Data", "DataManager"]
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-from typing import Any, Callable, Iterable, List, Optional, Set
-||||||| parent of 2f9efba (update: analysis figure save)
-from typing import Any, Optional, Iterable, Callable, List, Set
-=======
-from typing import Any, Optional, Iterable, Callable, List, Set, Dict
->>>>>>> 2f9efba (update: analysis figure save)
-||||||| parent of 63a4820 (add channel mask modifying functions in data.py and implement auto channel mask with no-spike channels)
-||||||| parent of 74f7a47 (restructure auto_channel_mask, now takes spontaneous data as parameter and enables offsetting recordings)
-from asyncio.windows_events import NULL
-=======
-from asyncio.windows_events import NULL
-from copy import copy
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
->>>>>>> 74f7a47 (restructure auto_channel_mask, now takes spontaneous data as parameter and enables offsetting recordings)
-||||||| parent of d928e04 (Data.auto_cannel_mask: change mean threshold to three-sigma threshold)
-=======
-||||||| parent of 689b6bf (fix redundant imports)
-from asyncio.windows_events import NULL
-from copy import copy
-=======
->>>>>>> 689b6bf (fix redundant imports)
-import statistics
->>>>>>> d928e04 (Data.auto_cannel_mask: change mean threshold to three-sigma threshold)
-||||||| parent of 6c6937e (Revert "Data.auto_cannel_mask: change mean threshold to three-sigma threshold")
-import statistics
-=======
->>>>>>> 6c6937e (Revert "Data.auto_cannel_mask: change mean threshold to three-sigma threshold")
-||||||| parent of 732c4e6 (simplify calculation, re-add empty channel filter)
-=======
-import statistics
->>>>>>> 732c4e6 (simplify calculation, re-add empty channel filter)
-||||||| parent of a1ef815 (format for poetry)
-import statistics
-=======
->>>>>>> a1ef815 (format for poetry)
-from typing import Any, Callable, Dict, Iterable, List, Optional, Set
-=======
-||||||| parent of 6127f95 (fix for loop index error)
-=======
-from asyncio.windows_events import NULL
-<<<<<<< HEAD
->>>>>>> 6127f95 (fix for loop index error)
-from sqlite3 import Timestamp
-import statistics
-||||||| parent of 058da41 (:construction: change case convention, set filter and detector as parameters, change oneOverBinSize to bins_per_second)
-from sqlite3 import Timestamp
-import statistics
-=======
->>>>>>> 058da41 (:construction: change case convention, set filter and detector as parameters, change oneOverBinSize to bins_per_second)
-from typing import Any, Callable, Dict, Iterable, List, Optional, Set
->>>>>>> 63a4820 (add channel mask modifying functions in data.py and implement auto channel mask with no-spike channels)
-||||||| parent of 06148c5 (update _auto_channel_mask parameter typing)
-from typing import Any, Callable, Dict, Iterable, List, Optional, Set
-=======
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union, Set
->>>>>>> 06148c5 (update _auto_channel_mask parameter typing)
-||||||| parent of 00d372d (update: typing)
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union, Set
-=======
-from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, Union
->>>>>>> 00d372d (update: typing)
-||||||| parent of 9aa831b (add spiketrain extractor cli)
-from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, Union
-=======
-||||||| parent of 2d55ca1 (add future annotation)
-=======
 
->>>>>>> 2d55ca1 (add future annotation)
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -117,7 +38,6 @@ from typing import (
     Tuple,
     Union,
 )
->>>>>>> 9aa831b (add spiketrain extractor cli)
 
 import logging
 import os
@@ -125,22 +45,11 @@ import pickle
 from collections.abc import MutableSequence
 from glob import glob
 
+import matplotlib.pyplot as plt
 import numpy as np
 
-<<<<<<< HEAD
-import matplotlib.pyplot as plt
-
-from miv.io.binary import load_continuous_data, load_recording
-||||||| parent of 3366171 (feature: add ttl loader)
-from miv.io.binary import load_continuous_data, load_recording
-=======
 from miv.io.binary import load_continuous_data, load_recording, load_ttl_event
-<<<<<<< HEAD
->>>>>>> 3366171 (feature: add ttl loader)
-||||||| parent of b67b024 (update: data protocol and description)
-=======
 from miv.io.protocol import DataProtocol
->>>>>>> b67b024 (update: data protocol and description)
 from miv.signal.filter.protocol import FilterProtocol
 from miv.signal.spike.protocol import SpikeDetectionProtocol
 from miv.statistics import firing_rates

@@ -1,9 +1,9 @@
 __all__ = ["MedianFilter"]
 
-from typing import Optional, Union, Tuple
+from typing import Optional, Tuple, Union
 
-from dataclasses import dataclass
 import logging
+from dataclasses import dataclass
 
 import numpy as np
 import numpy.typing as npt
