@@ -73,6 +73,7 @@ lyon = { git = "https://github.com/sciforce/lyon.git", rev = "91dd700", optional
 click = "^8.1.3"
 pyserial = {version = "^3.5", optional = true}
 numba = "^0.56.4"
+machinable = "^4.0"
 
 [tool.poetry.dev-dependencies]
 black = "^22.8.0"
