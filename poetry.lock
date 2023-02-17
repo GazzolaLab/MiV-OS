@@ -13040,6 +13040,33 @@ files = [
 ]
 
 [[package]]
+name = "mpi4py"
+version = "3.1.4"
+description = "Python bindings for MPI"
+category = "dev"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
+files = [
+    {file = "mpi4py-3.1.4-cp27-cp27m-win32.whl", hash = "sha256:1f5f5560211e5b02c388a4e9521acdc5c6ab076e18a60109dc4bcbdb26f0e506"},
+    {file = "mpi4py-3.1.4-cp27-cp27m-win_amd64.whl", hash = "sha256:878ee8c66f3cb4aced2d9d6bde2bbcb5d17d1f90ad0b7407f57e993f6c849a16"},
+    {file = "mpi4py-3.1.4-cp310-cp310-win32.whl", hash = "sha256:6a7c9dfd1d051aeb1c5c9cc37d8997701732e2e1780f4e188c29c443f6feb6b8"},
+    {file = "mpi4py-3.1.4-cp310-cp310-win_amd64.whl", hash = "sha256:d939c895ae97256e80ef6e6d626f51bea187d68ab54dd772971fb134632e7ee6"},
+    {file = "mpi4py-3.1.4-cp311-cp311-win32.whl", hash = "sha256:f37859af5a318d1af07d3b51714fd36b7674e7368191578cfd96165136279f2d"},
+    {file = "mpi4py-3.1.4-cp311-cp311-win_amd64.whl", hash = "sha256:5785eecf65669fa97e258d087a86e5b2c5e4dd2b5140e9aee14917cadfe3c876"},
+    {file = "mpi4py-3.1.4-cp35-cp35m-win32.whl", hash = "sha256:9ed1b189f859337acc49c2a12a7e13cb2ef3309ce3486b986b082078c4e7493e"},
+    {file = "mpi4py-3.1.4-cp35-cp35m-win_amd64.whl", hash = "sha256:a0c7f5cee1ffc19d0d145b24eb06997962fe0a07e3019abf5e1575fb43c4ac03"},
+    {file = "mpi4py-3.1.4-cp36-cp36m-win32.whl", hash = "sha256:4fac4ea098f877ac2d53e6c08f12e84161b960238725ec65795cb4ca391a0649"},
+    {file = "mpi4py-3.1.4-cp36-cp36m-win_amd64.whl", hash = "sha256:6ad6318092adc2bda1567b651d8977f2e418312557cda900805f929f6ccd93b9"},
+    {file = "mpi4py-3.1.4-cp37-cp37m-win32.whl", hash = "sha256:32b46ed9d4691ea790d77dde6c5489abd6a4cf6f8e61c35871924c2170bcb7fb"},
+    {file = "mpi4py-3.1.4-cp37-cp37m-win_amd64.whl", hash = "sha256:152e68aeae40279ca435d15487303159fe3d229337f204141ea805c67b4fbbc3"},
+    {file = "mpi4py-3.1.4-cp38-cp38-win32.whl", hash = "sha256:bc102ec71939bff487af247f727216a05c45930d931db3f5b206fad9bfcba9c0"},
+    {file = "mpi4py-3.1.4-cp38-cp38-win_amd64.whl", hash = "sha256:6721a23a2a8ef5a2841ba64926e8e4be0a559344557eef0b2e81821283d56fd1"},
+    {file = "mpi4py-3.1.4-cp39-cp39-win32.whl", hash = "sha256:9e3075e06cea9556cae6562d9194d2c6278c6c8f66af36d8094fb2f77392a90f"},
+    {file = "mpi4py-3.1.4-cp39-cp39-win_amd64.whl", hash = "sha256:56c79531fc9af9a099c413f38efb20503a84b8355d72a63f0297399f474d88c9"},
+    {file = "mpi4py-3.1.4.tar.gz", hash = "sha256:17858f2ebc623220d0120d1fa8d428d033dde749c4bc35b33d81a66ad7f93480"},
+]
+
+[[package]]
 name = "mypy"
 version = "0.982"
 description = "Optional static typing for Python"
@@ -19810,6 +19837,7 @@ python-versions = ">=3.8,<3.11"
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 content-hash = "9c1572d57154883afafdfaf183e936a95dd1d2408a04bb63885dffdea523df2f"
 >>>>>>> 00582bd (doc: fix errors and warnings in sphinx build)
 ||||||| parent of e659de2 (update lock file)
@@ -19848,3 +19876,8 @@ lock-version = "2.0"
 python-versions = ">=3.8,<3.11"
 content-hash = "7f672b2c21ae579051bf2f23f149ca7b219b80e7078bf2299a0448c3436ea476"
 >>>>>>> 3073288 (build(deps): bump readthedocs-sphinx-search from 0.1.2 to 0.2.0)
+||||||| parent of 47cfac1 (dep: mpi4py in group mpi)
+content-hash = "58c6e68755f9cb9f99e9198a4392d598cbece6f8c8c9f9eb2aa583ecdf025557"
+=======
+content-hash = "9e02735a23668bdbc3808804fb665f1ac44eca1d9a8764ffaaa423adefec0f0b"
+>>>>>>> 47cfac1 (dep: mpi4py in group mpi)
