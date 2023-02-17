@@ -1,1 +1,1 @@
-from miv.core.spikestamps import *
+from miv.core.datatype.spikestamps import *
