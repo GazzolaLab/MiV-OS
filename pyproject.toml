@@ -21,6 +21,7 @@ name = "MiV-OS"
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 version = "0.0.6"
 >>>>>>> 7eaf12a (update project version)
 ||||||| parent of ecd8a31 (bump up version)
@@ -68,6 +69,11 @@ version = "0.2.3"
 =======
 version = "0.2.4"
 >>>>>>> 0560986 (bump up version)
+||||||| parent of ab4697f (bump version)
+version = "0.2.4"
+=======
+version = "0.3.0"
+>>>>>>> ab4697f (bump version)
 description = "Python software for analysis and computing framework used in MiV project."
 readme = "README.md"
 authors = ["GazzolaLab <skim449@illinois.edu>"]
