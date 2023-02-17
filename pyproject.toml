@@ -99,6 +99,7 @@ packages = [
 
 [tool.poetry.scripts]  # TODO: query `scripts` directory
 convert_open_ephys_to_miv = "scripts.convert_open_ephys_to_miv:main"
+miv_extract_spiketrain = "scripts.miv_extract_spiketrain:main"
 
 
 [tool.poetry.dependencies]
