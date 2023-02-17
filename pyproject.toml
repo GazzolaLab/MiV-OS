@@ -15,6 +15,7 @@ name = "MiV-OS"
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 version = "0.0.6"
 >>>>>>> 7eaf12a (update project version)
 ||||||| parent of ecd8a31 (bump up version)
@@ -32,6 +33,11 @@ version = "0.1.0"
 =======
 version = "0.1.1"
 >>>>>>> bf95d89 (add pyinform dependency)
+||||||| parent of 42864b8 (poetry dependency version update)
+version = "0.1.1"
+=======
+version = "0.1.2"
+>>>>>>> 42864b8 (poetry dependency version update)
 description = "Python software for analysis and computing framework used in MiV project."
 readme = "README.md"
 authors = ["GazzolaLab <skim449@illinois.edu>"]
@@ -39,7 +45,7 @@ license = "MIT"
 repository = "https://github.com/GazzolaLab/MiV-OS"
 homepage = "https://mindinvitro.illinois.edu"
 documentation = "https://miv-os.readthedocs.io"
-keywords = []
+keywords = ["neuroscience", "statistics", "data-analysis", "electrophysiology", "neurophysiology"]
 
 # Pypi classifiers: https://pypi.org/classifiers/
 classifiers = [
