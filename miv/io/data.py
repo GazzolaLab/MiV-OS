@@ -28,6 +28,7 @@ __all__ = ["Data", "DataManager"]
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 from typing import Any, Callable, Iterable, List, Optional, Set
 ||||||| parent of 2f9efba (update: analysis figure save)
 from typing import Any, Optional, Iterable, Callable, List, Set
@@ -37,6 +38,10 @@ from typing import Any, Optional, Iterable, Callable, List, Set, Dict
 ||||||| parent of 63a4820 (add channel mask modifying functions in data.py and implement auto channel mask with no-spike channels)
 from typing import Any, Callable, Dict, Iterable, List, Optional, Set
 =======
+||||||| parent of 6127f95 (fix for loop index error)
+=======
+from asyncio.windows_events import NULL
+>>>>>>> 6127f95 (fix for loop index error)
 from sqlite3 import Timestamp
 from typing import Any, Callable, Dict, Iterable, List, Optional, Set
 >>>>>>> 63a4820 (add channel mask modifying functions in data.py and implement auto channel mask with no-spike channels)
@@ -57,6 +62,7 @@ from miv.signal.spike import ThresholdCutoff
 from miv.statistics import spikestamps_statistics
 from miv.typing import SignalType
 
+import neo
 
 class Data:
     """Single data unit handler.
@@ -107,6 +113,7 @@ class Data:
         self.data_path: str = data_path
         self.analysis_path: str = os.path.join(data_path, "analysis")
         self.masking_channel_set: Set[int] = set()
+        self.spiketrains: list[neo.SpikestampsType] = NULL
 
         os.makedirs(self.analysis_path, exist_ok=True)
 
@@ -434,7 +441,6 @@ class DataManager(MutableSequence):
         # 1. Channels with no spikes should be masked
         # Using experiment 1 (spontaneous) for spike detection parameter
 
-
         detector = ThresholdCutoff()
         for data in self.data_list:
             with data.load() as (sig, times, samp):
@@ -442,7 +448,7 @@ class DataManager(MutableSequence):
                 spiketrains = detector(sig, times, samp)
                 spiketrainsStats = spikestamps_statistics(spiketrains)
                 
-                for channel in range(len(spiketrainsStats)):
+                for channel in range(len(spiketrainsStats['rates'])):
                     channelSpikeRate = spiketrainsStats['rates'][channel]
 
                     if channelSpikeRate < spike_rate_threshold:
