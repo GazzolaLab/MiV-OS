@@ -1,3 +1,15 @@
+# Release Note (version 0.2.0)
+
+[Milestone](https://github.com/GazzolaLab/MiV-OS/issues/30)
+
+## What's Changed
+
+* Connectivity visualization by @Gauravu2 in https://github.com/GazzolaLab/MiV-OS/pull/82
+* Audio encoding (Lyon's Ear Model + BSA) by @skim0119 in https://github.com/GazzolaLab/MiV-OS/pull/91
+* Update Tests
+
+**Full Changelog**: https://github.com/GazzolaLab/MiV-OS/compare/v0.1.2...v0.2.0
+
 # Release Note (version 0.1.2)
 
 ## What's Changed
