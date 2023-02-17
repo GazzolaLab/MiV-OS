@@ -33,6 +33,7 @@ __all__ = ["Data", "DataManager"]
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 from typing import Any, Callable, Iterable, List, Optional, Set
 ||||||| parent of 2f9efba (update: analysis figure save)
 from typing import Any, Optional, Iterable, Callable, List, Set
@@ -91,6 +92,11 @@ from typing import Any, Callable, Dict, Iterable, List, Optional, Set
 =======
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union, Set
 >>>>>>> 06148c5 (update _auto_channel_mask parameter typing)
+||||||| parent of 00d372d (update: typing)
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union, Set
+=======
+from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, Union
+>>>>>>> 00d372d (update: typing)
 
 import logging
 import os
@@ -261,7 +267,7 @@ class Data:
 
     def _auto_channel_mask(
         self,
-        spontaneous_binned : Tuple[Iterable[Iterable[int]], int, List[int]],
+        spontaneous_binned: Tuple[np.ndarray, int, List[int]],
         filter: FilterProtocol,
         detector: SpikeDetectionProtocol,
         offset: float = 0,
@@ -464,7 +470,7 @@ class DataManager(MutableSequence):
 
     def __init__(self, data_collection_path: str):
         self.data_collection_path = data_collection_path
-        self.data_list: Iterable[Data] = []
+        self.data_list: List[Data] = []
 
         # From the path get data paths and create data objects
         self._load_data_paths()
@@ -630,7 +636,7 @@ class DataManager(MutableSequence):
         detector: SpikeDetectionProtocol,
         omit_experiments: Iterable[int] = [],
         spontaneous_offset: float = 0,
-        exp_offsets: Iterable[float] = [],
+        exp_offsets: List[float] = [],
         bins_per_second: float = 100,
     ):
         """
@@ -647,12 +653,12 @@ class DataManager(MutableSequence):
             Filter that is applied to the signals before detecting spikes.
         detector : SpikeDetectionProtocol
             Spike detector that is used to extract spikes from the filtered signal.
-        omit_experiments: Iterable[int], optional
+        omit_experiments: Optional[Iterable[int]]
             Integer array of experiment indices (0-based) to omit.
         spontaneous_offset: float, optional
             Postive time offset for the spontaneous experiment (default = 0).
             A negative value will be converted to 0.
-        exp_offsets: Iterable[float], optional
+        exp_offsets: Optional[List[float]]
             Positive float array of time offsets for each experiment (default = 0).
             Negative values will be converted to 0.
         bins_per_second : float, default=100
