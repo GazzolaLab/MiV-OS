@@ -22,7 +22,7 @@ class Signal(SupportMultiprocessing):
     """
     Contiguous array of raw signal type.
 
-    [signal length, n channels]
+    [signal length, number of channels]
     """
 
     data: SignalType
