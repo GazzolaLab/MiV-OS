@@ -12,15 +12,15 @@ import numpy as np
 import scipy as sp
 from tqdm import tqdm
 
-from miv.core import Spikestamps
-from miv.signal.filter import ButterBandpass, FilterCollection, MedianFilter
+from miv.core.operator import Operator
+from miv.core.datatype import Spikestamps
+from miv.signal.filter import ButterBandpass
 from miv.signal.spike import ThresholdCutoff
 
 
 def preprocessing(data):
     signal, timestamps, sampling_rate = data
-    signal_filter = ButterBandpass(400, 1500, order=4)
-    spike_detection = ThresholdCutoff(cutoff=5)
+
     filtered_signal = signal_filter(signal, sampling_rate)
     spikestamp = spike_detection(
         filtered_signal,
@@ -61,25 +61,22 @@ def preprocessing(data):
 )
 @click.option("--chunksize", default=1, help="Number of chunks for multiprocessing")
 def main(path, tools, nproc, num_fragments, use_mpi, chunksize):
+    signal_filter:Operator = ButterBandpass(400, 1500, order=4)
+    spike_detection:Operator = ThresholdCutoff(cutoff=5)
+    preprocessing:Operator = signal_filter >> spike_detection
     # Select tools
     if tools == "OpenEphys":
         # If OpenEphys is selected, process all recordings in the set.
-        from miv.io import DataManager
+        from miv.io.openephys import DataManager
 
         raise NotImplementedError
     elif tools == "Intan":
         from miv.io.intan import DataIntan
 
         for p in path:
-            total_spikestamps = Spikestamps([])
-            data = DataIntan(p)
-            with mp.Pool(nproc) as pool:
-                for spikestamp in pool.imap(
-                    preprocessing, data.load(), chunksize=chunksize
-                ):
-                    total_spikestamps.extend(spikestamp)
-            data.save_data(total_spikestamps, "spiketrain")
-
+            data:Operator = DataIntan(p)
+            pipeline = data >> preprocessing
+            pipeline.run(num_processors=nproc)
             logging.info(f"Pre-processing {p} done.")
 
 
