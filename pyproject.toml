@@ -75,7 +75,7 @@ pyserial = {version = "^3.5", optional = true}
 numba = "^0.56.4"
 
 [tool.poetry.dev-dependencies]
-black = "^22.8.0"
+black = "^23.1.0"
 isort = {extras = ["colors"], version = "^5.10.1"}
 mypy = "^0.982"
 mypy-extensions = "^1.0.0"
