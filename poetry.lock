@@ -2910,14 +2910,22 @@ cffi = {version = "*", markers = "implementation_name == \"pypy\""}
 
 [[package]]
 name = "quantities"
-version = "0.13.0"
+version = "0.14.1"
 description = "Support for physical quantities with units, based on numpy"
 category = "main"
 optional = false
-python-versions = "*"
+python-versions = ">=3.8"
 files = [
-    {file = "quantities-0.13.0.tar.gz", hash = "sha256:0fde20115410de21cefa786f3aeae69c1b51bb19ee492190324c1da705e61a81"},
+    {file = "quantities-0.14.1-py3-none-any.whl", hash = "sha256:b2edf67b8c2a28aa3bbe096f9fc3ec3ab83fc3192997373641cddab32bea2f72"},
+    {file = "quantities-0.14.1.tar.gz", hash = "sha256:efeafffc0c0364f891a9327239cd12496bccb55cd037a6d1bf44de706f722877"},
 ]
+
+[package.dependencies]
+numpy = ">=1.19"
+
+[package.extras]
+doc = ["sphinx"]
+test = ["pytest", "wheel"]
 
 [[package]]
 name = "readthedocs-sphinx-search"
@@ -3785,4 +3793,4 @@ experiment = ["lyon", "pyserial"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<3.11"
-content-hash = "eee7bff04a98c567ddce794e7dac77b0f191adc524a1e22868008179b13ddf89"
+content-hash = "de463e599c1a923ac6f2a5c3e8dc0b54343d0a7ff43044706f623ddf366c2982"
