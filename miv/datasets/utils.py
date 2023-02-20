@@ -11,9 +11,9 @@ import shutil
 import tarfile
 import urllib
 import zipfile
+from urllib.request import urlopen
 
 import numpy as np
-from six.moves.urllib.request import urlopen
 from tqdm import tqdm
 
 
@@ -24,6 +24,7 @@ def get_file(
     file_hash: Optional[str] = None,
     archive_format: Optional[str] = "zip",
     cache_dir: str = "datasets",
+    progbar_disable: bool = False,
 ):
     """
     Downloads a file from a URL if it not already in the directory.
@@ -61,6 +62,8 @@ def get_file(
     cache_dir : str
         Location to store files. If not given, file will be installed in "datasets".
         (default="datasets")
+    progbar_disable : bool
+        Disable progress bar. (default=False)
 
     Returns
     -------
@@ -92,7 +95,7 @@ def get_file(
         error_msg = "URL fetch failure on {}: {} -- {}"
         try:
             try:
-                _url_retrieve(file_url, filepath)
+                _url_retrieve(file_url, filepath, progbar_disable)
             except urllib.error.HTTPError as e:  # pragma: no cover
                 raise Exception(error_msg.format(file_url, e.code, e.msg))
             except urllib.error.URLError as e:  # pragma: no cover

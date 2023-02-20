@@ -8,11 +8,14 @@ from dataclasses import dataclass
 import numpy as np
 import numpy.typing as npt
 
+from miv.core.datatype import Signal
+from miv.core.operator import OperatorMixin
+from miv.core.wrapper import wrap_generator_to_generator
 from miv.typing import SignalType
 
 
-@dataclass(frozen=True)
-class MedianFilter:
+@dataclass
+class MedianFilter(OperatorMixin):
     """Median filter with threshold
 
     If the signal exceed the threshold, the value is replaced by median of neighboring
@@ -38,11 +41,10 @@ class MedianFilter:
     k: Union[int, Tuple[int, int]] = 20
     tag: str = ""
 
+    @wrap_generator_to_generator
     def __call__(
         self,
         signal: SignalType,
-        *args,
-        **kwargs,
     ) -> SignalType:
         """__call__.
 
@@ -77,3 +79,4 @@ class MedianFilter:
             logging.warning(
                 "Threshold is less than 50.0 uV, which could alter the spike signal"
             )
+        super().__init__()

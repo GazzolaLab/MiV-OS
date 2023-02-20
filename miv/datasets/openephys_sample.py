@@ -10,7 +10,7 @@ from miv.datasets.utils import get_file
 from miv.io.openephys import DataManager
 
 
-def load_data():  # pragma: no cover
+def load_data(progbar_disable: bool = False):  # pragma: no cover
     """
     Loads the sample recorded data from OpenEphys aquisition system. `Direct Download <https://uofi.box.com/shared/static/daagmwebzfdl1jjgfhjzzhof2if44m04.zip>`_
 
@@ -61,6 +61,7 @@ def load_data():  # pragma: no cover
         fname=file,
         file_hash=file_hash,
         archive_format="zip",
+        progbar_disable=progbar_disable,
     )
     experiment = DataManager(path)
     experiment.tree()

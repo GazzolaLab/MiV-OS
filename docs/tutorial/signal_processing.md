@@ -36,7 +36,7 @@ We will be using the recording from OpenEphys data aquisition system.
 
 ```{code-cell}
 # Download the sample data
-path:str = load_data().data_collection_path
+path:str = load_data(progbar_disable=True).data_collection_path
 print(path)
 ```
 
@@ -61,8 +61,20 @@ Following example pass recorded signal into bandpass filter and LFP filter, and 
 
 ```{code-cell} ipython3
 # Build analysis pipeline
-pipeline = dataset >> bandpass_filter >> spike_detection
-dataset >> lfp_filter
+data >> bandpass_filter >> spike_detection
+data >> lfp_filter
+```
+
+To visualize the flow structure, we can use `.summarize()` method starting from any operator:
+
+```{code-cell} ipython3
+print(data.summarize())
+```
+
+To finalize the analysis, we can create a `Pipeline` object and run.
+
+```{code-cell} ipython3
+pipeline = Pipeline(data)
 pipeline.run(save_path="results/")  # Save outcome into "results" directory
 ```
 
@@ -99,11 +111,10 @@ pipeline = Pipeline(data)
 
 ### Visualize Pipeline
 
-We provide `pipeline.summarize()` method to illustrate the processing pipeline.
-The method `summarize()` returns string of pipeline summary in text format.
+We provide `pipeline.summarize()` method to print the order of processing operations.
 
 ```{code-cell} ipython3
-pipeline.summary()
+print(pipeline.summarize())
 ```
 
 ## Rasterplot Visualization
