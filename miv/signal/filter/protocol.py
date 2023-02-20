@@ -7,6 +7,7 @@ from typing import Callable, Optional, Protocol, Union
 import numpy as np
 import numpy.typing as npt
 
+from miv.core.datatype import Signal
 from miv.typing import SignalType
 
 
@@ -15,12 +16,11 @@ class FilterProtocol(Protocol):
 
     tag: str = ""
 
-    def __call__(self, array: SignalType, sampling_rate: float, **kwargs) -> SignalType:
+    def __call__(self, array: Signal) -> Signal:
         """User can apply the filter by directly calling.
         Parameters
         ----------
-        array : SignalType {"numpy.ndarray", "neo.core.AnalogSignal"}
-        samping_rate : float
+        array : Signal
         """
         ...
 

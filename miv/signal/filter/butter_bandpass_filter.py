@@ -1,6 +1,8 @@
 __doc__ = ""
 __all__ = ["ButterBandpass"]
 
+from typing import Optional
+
 from dataclasses import dataclass
 
 import matplotlib.pyplot as plt
@@ -8,11 +10,14 @@ import numpy as np
 import numpy.typing as npt
 import scipy.signal as sps
 
+from miv.core.datatype import Signal
+from miv.core.operator import OperatorMixin
+from miv.core.wrapper import wrap_generator_to_generator
 from miv.typing import SignalType
 
 
-@dataclass(frozen=True)
-class ButterBandpass:
+@dataclass
+class ButterBandpass(OperatorMixin):
     """Classical bandpass filter using `scipy` butterworth filter
 
     Parameters
@@ -32,55 +37,53 @@ class ButterBandpass:
         If set to bandpass or bandstop, the critical frequency is '[lowcut, highcut]'.
     """
 
-    lowcut: float
-    highcut: float
+    lowcut: Optional[float] = None
+    highcut: Optional[float] = None
     order: int = 5
     tag: str = ""
     btype: str = "bandpass"
 
-    def __call__(
-        self,
-        signal: SignalType,
-        sampling_rate: float,
-        **kwargs,
-    ) -> SignalType:
+    @wrap_generator_to_generator
+    def __call__(self, signal: Signal) -> Signal:
         """__call__.
 
         Parameters
         ----------
         signal : SignalType
             signal
-        sampling_rate : float
-            sampling_rate
 
         Returns
         -------
-        SignalType
+        Signal
 
         """
-        b, a = self._butter_bandpass(sampling_rate)
-        y = signal.copy()
-        if len(signal.shape) == 1:
-            y = sps.lfilter(b, a, signal)
-        elif len(signal.shape) == 2:
-            for ch in range(signal.shape[1]):
-                y[:, ch] = sps.lfilter(b, a, signal[:, ch])
-        else:
-            raise ValueError(
-                "This filter can be only applied to 1D (signal) or 2D array (signal, channel)"
-            )
-        return y
+        rate = signal.rate
+        b, a = self._butter_bandpass(rate)
+        y = signal.data.copy()
+        num_channel = signal.number_of_channels
+        for ch in range(num_channel):
+            y[:, ch] = sps.lfilter(b, a, signal.data[:, ch])
+        return Signal(data=y, timestamps=signal.timestamps, rate=rate)
 
     def __post_init__(self):
-        assert (
-            self.lowcut < self.highcut
-        ), f"{self.lowcut=} should be lower than {self.highcut=}."
+        if self.lowcut is not None and self.highcut is not None:
+            assert (
+                self.lowcut < self.highcut
+            ), f"{self.lowcut=} should be lower than {self.highcut=}."
+            assert (
+                min(self.lowcut, self.highcut) > 0
+            ), "Filter critical frequencies must be greater than 0"
+        elif self.lowcut is not None:
+            assert self.lowcut > 0, "Filter frequencies must be greater than 0"
+        elif self.highcut is not None:
+            assert self.highcut > 0, "Filter frequencies must be greater than 0"
         assert self.order > 0 and isinstance(
             self.order, int
         ), f"Filter {self.order} must be an nonnegative integer."
         assert (
-            min(self.lowcut, self.highcut) > 0
-        ), "Filter critical frequencies must be greater than 0"
+            self.lowcut is not None or self.highcut is not None
+        ), "Filtering frequency cannot be both None"
+        super().__init__()
 
     def _butter_bandpass(self, sampling_rate: float):
         nyq = 0.5 * sampling_rate
