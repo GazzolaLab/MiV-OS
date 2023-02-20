@@ -242,9 +242,10 @@ def load_recording(
     start_at_zero : bool
         If True, the timestamps is adjusted to start at zero.
         Note, recorded timestamps might not start at zero for some reason.
-    num_fragments : int
+    num_fragments : Optional[int]
         Instead of loading entire data at once, split the data into `num_fragment`
-        number of subdata to process separately. (default=1)
+        number of subdata to process separately. By default, num_fragments is set
+        to split the recording into 1 minute segments. (default=None)
     start_index : Optional[int]
         Start index of the fragments. It is useful when you want to submit MPI processing.
         For example, one can submit num_fragments=10, start_index=3 to process 3-9 fragments.
@@ -288,6 +289,8 @@ def load_recording(
 
     # TODO: maybe need to support multiple continuous.dat files in the future
     signal, timestamps = load_continuous_data(file_path[0], num_channels, sampling_rate)
+    if num_fragments is None:
+        num_fragments = max(timestamps.shape[0] // sampling_rate // (60 + 1), 1)
     fragmented_signal = np.array_split(signal, num_fragments, axis=0)[
         start_index:end_index
     ]

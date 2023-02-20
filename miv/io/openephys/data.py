@@ -48,6 +48,8 @@ from glob import glob
 import matplotlib.pyplot as plt
 import numpy as np
 
+from miv.core.datatype import Signal
+from miv.core.operator import DataLoaderMixin
 from miv.io.openephys.binary import load_continuous_data, load_recording, load_ttl_event
 from miv.io.protocol import DataProtocol
 from miv.signal.filter.protocol import FilterProtocol
@@ -56,10 +58,12 @@ from miv.statistics import firing_rates
 from miv.typing import SignalType
 
 if TYPE_CHECKING:
+    import pathlib
+
     import mpi4py
 
 
-class Data:
+class Data(DataLoaderMixin):
     """Single data unit handler.
 
     Each data unit that contains single recording. This class provides useful tools,
@@ -105,6 +109,7 @@ class Data:
         self,
         data_path: str,
     ):
+        super().__init__()
         self.data_path: str = data_path
         self._analysis_path: str = os.path.join(data_path, "analysis")
         self.masking_channel_set: set[int] = set()
@@ -201,19 +206,19 @@ class Data:
 
     def load(
         self,
-        num_fragments: int = 1,
+        num_fragments: int | None = None,
         start_at_zero: bool = False,
         progress_bar=False,
-        mpi_comm: mpi4py.MPI.COMM_WORLD | None = None,
+        mpi_comm: mpi4py.MPI.Intercomm | None = None,
     ):
         """
         Iterator to load data fragmentally.
 
         Parameters
         ----------
-        num_fragments : int
+        num_fragments : Optional[int]
             Instead of loading entire data at once, split the data into `num_fragment`
-            number of subdata to process separately. (default=1)
+            number of subdata to process separately. (default=None)
         start_at_zero : bool
             If set to True, time first timestamps will be shifted to zero. To achieve synchronized
             timestamps with other recordings/events, set this to False.
@@ -256,7 +261,7 @@ class Data:
             tasks = np.array_split(np.arange(num_fragments), size)[rank]
             start_index = tasks.min()
             end_index = tasks.max() + 1
-        yield from load_recording(
+        for signal, timestamps, rate in load_recording(
             self.data_path,
             self.masking_channel_set,
             start_at_zero=start_at_zero,
@@ -264,7 +269,8 @@ class Data:
             start_index=start_index,
             end_index=end_index,
             progress_bar=progress_bar,
-        )
+        ):
+            yield Signal(data=signal, timestamps=timestamps, rate=rate)
 
     def load_ttl_event(self):
         """
@@ -448,23 +454,6 @@ class Data:
             "empty_channels": empty_channels,
         }
 
-    def save(self, tag: str, format: str):  # pragma: no cover
-        # TODO
-        assert tag == "continuous", "You cannot alter raw data, change the data tag"
-        # save_path = os.path.join(self.data_path, tag)
-
-        if format == "dat":
-            ...
-        elif format == "npz":
-            ...
-        elif format == "neo":
-            ...
-        else:
-            raise NotImplementedError(
-                "Format type " + format + " is not implemented.\n",
-                "Please choose  one of the supported formats: dat, npz, neo",
-            )
-
     def check_path_validity(self):
         """
         Check if necessary files exist in the directory.
@@ -521,11 +510,18 @@ class DataManager(MutableSequence):
     """
 
     def __init__(self, data_collection_path: str):
-        self.data_collection_path = data_collection_path
+        super().__init__()
+        self.data_collection_path: str | pathlib.Path = data_collection_path
         self.data_list: list[DataProtocol] = []
 
         # From the path get data paths and create data objects
         self._load_data_paths()
+
+    def __call__(self):
+        pass
+
+    def run(self) -> Signal:
+        pass
 
     @property
     def data_path_list(self) -> Iterable[str]:
@@ -536,8 +532,7 @@ class DataManager(MutableSequence):
         return list(filter(lambda d: query_path in d.data_path, self.data_list))
 
     # DataManager Representation
-    # TODO: Display data structure
-    def tree(self):  # pragma: no cover
+    def tree(self) -> None:  # pragma: no cover
         """
         Pretty-print available recordings in DataManager in tree format.
 
@@ -757,7 +752,7 @@ class DataManager(MutableSequence):
             filter, detector, spontaneous_offset, bins_per_second
         )
 
-        for (exp_index, data) in enumerate(self.data_list):
+        for exp_index, data in enumerate(self.data_list):
             if not (exp_index in omit_experiments_list):
                 data._auto_channel_mask_with_correlation_matrix(
                     spontaneous_binned,
