@@ -77,7 +77,7 @@ numba = "^0.56.4"
 [tool.poetry.dev-dependencies]
 black = "^22.8.0"
 isort = {extras = ["colors"], version = "^5.10.1"}
-mypy = "^0.982"
+mypy = "^1.0"
 mypy-extensions = "^1.0.0"
 pre-commit = "^3.0.4"
 pydocstyle = "^6.1.1"
