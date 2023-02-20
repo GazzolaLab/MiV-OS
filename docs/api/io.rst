@@ -2,15 +2,18 @@
 IO Module (:mod:`miv.io`)
 **************************************
 
-Python Data Managing
-====================
+Open Ephys
+==========
 
 .. automodule:: miv.io.openephys.data
 
-.. automodule:: miv.io.intan.data
-
 .. automodule:: miv.io.openephys.binary
    :members:
+
+Intan
+=====
+
+.. automodule:: miv.io.intan.data
 
 External Datafile (H5)
 ======================

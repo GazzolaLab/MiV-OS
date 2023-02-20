@@ -11,24 +11,33 @@ kernelspec:
   name: python3
 file_format: mystnb
 mystnb:
-  execution_mode: 'off'
+  execution_mode: 'cache'
 ---
 
 # Introduction : Quick Start
 
-Here is a quick-start example of how to start using `MiV-OS`.
-We demonstrate how to build analysis pipeline for recorded electrophysiology data.
+Here is a quick-start example of how to build electrophysiology analysis pipelines using `MiV-OS`.
 
 ```{code-cell} ipython3
+:tags: [hide-cell]
 import numpy as np
-import quantities import pq
+import quantities as pq
 
+from miv.core.operator import Operator, DataLoader
+from miv.core.pipeline import Pipeline
 from miv.io.openephys import Data, DataManager
 from miv.signal.filter import ButterBandpass, MedianFilter
 from miv.signal.spike import ThresholdCutoff
 
-import neo
-from viziphant.rasterplot import rasterplot_rates
+from miv.datasets.openephys_sample import load_data
+```
+
+We will be using the recording from OpenEphys data aquisition system.
+
+```{code-cell}
+# Download the sample data
+path:str = load_data().data_collection_path
+print(path)
 ```
 
 ## Analysis Pipeline
@@ -36,11 +45,14 @@ from viziphant.rasterplot import rasterplot_rates
 The analysis starts by creating operation modules.
 
 ```{code-cell} ipython3
-# Create operation modules:
-dataset = DataManager(data_collection_path="2022-03-10_16-19-09")
-bandpass_filter = ButterBandpass(lowcut=300, highcut=3000, order=4)
-lfp_filter = ButterBandpass(highcut=3000, order=2, btype='lowpass')
-spike_detection = ThresholdCutoff(cutoff=4.0, use_mad=True, dead_time=0.002)
+# Create data modules:
+dataset: DataManager = DataManager(data_collection_path=path)
+data: DataLoader = dataset[0]
+
+# Create operator modules:
+bandpass_filter: Operator = ButterBandpass(lowcut=300, highcut=3000, order=4)
+lfp_filter: Operator = ButterBandpass(highcut=3000, order=2, btype='lowpass')
+spike_detection: Operator = ThresholdCutoff(cutoff=4.0, use_mad=True, dead_time=0.002)
 ```
 
 Next, the chain of analysis pipeline can be built using `>>` operator.
@@ -51,19 +63,18 @@ Following example pass recorded signal into bandpass filter and LFP filter, and 
 # Build analysis pipeline
 pipeline = dataset >> bandpass_filter >> spike_detection
 dataset >> lfp_filter
-pipeline.run()
-pipeline.export("results/")  # Save outcome into "results" directory
+pipeline.run(save_path="results/")  # Save outcome into "results" directory
 ```
 
 ```{note}
 Internally the data is splitted into 1 minute fragments to process by default. To change the value, check API documentation (here)[miv.io.protocol.DataProtocol].
 ```
 
-To access the result from specific module, you can query using `pipeline.get` method.
-For some operations with large output result, the query might returns fragmented result.
+To access the result from specific module, you can query using `.output` property.
+For some operations with large output result, the query might returns a generator for fragmented result.
 
 ```{code-cell} ipython3
-filtered_signal = pipeline.query(bandpass_filter)
+filtered_signal = bandpass_filter.output
 ```
 
 ```{note}
@@ -78,33 +89,26 @@ You can check the list of all provided filters [here](../api/signal).
 
 ### Filter Collection
 
-Such structure allow us to easily create sequence of filters.
-To define a multiple filters together try:
+This allows us to easily construct a sequence of filters:
 
 ```{code-cell} ipython3
 median_filter = MedianFilter(threshold=100 * pq.mV)
-filter_set = median_filter >> bandpass_filter
-pipeline = dataset >> filter_set
+data >> median_filter >> bandpass_filter
+pipeline = Pipeline(data)
 ```
 
 ### Visualize Pipeline
 
-We provide `pipeline.summarize()` and `pipeline.visualize()` method to illustrate the processing pipeline.
-The method `summarize()` returns string of pipeline summary in text format, and `visualize()` returns graphical figure (`matplotlib.pyplot.Figure`).
+We provide `pipeline.summarize()` method to illustrate the processing pipeline.
+The method `summarize()` returns string of pipeline summary in text format.
 
 ```{code-cell} ipython3
 pipeline.summary()
-```
-
-```{code-cell} ipython3
-pipeline.visualize()
-plt.show()
 ```
 
 ## Rasterplot Visualization
 
 ```{code-cell} ipython3
 # Plot
-spiketrains = pipeline.query(spike_detection)
-rasterplot_rates(spiketrains)
+spike_detection.plot(show=True)
 ```
