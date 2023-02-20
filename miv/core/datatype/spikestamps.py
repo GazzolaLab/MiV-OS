@@ -9,7 +9,7 @@ Spikestamps
 
 __all__ = ["Spikestamps"]
 
-from typing import Optional
+from typing import List, Optional
 
 from collections import UserList
 
@@ -22,8 +22,10 @@ class Spikestamps(UserList):
     Represents spikes emitted by the same unit in a period of times.
     """
 
-    def __init__(self, iterable):
+    def __init__(self, iterable: Optional[List] = None):
         super().__init__()
+        if iterable is None:
+            iterable = []
         self.data = iterable
 
     def __setitem__(self, index, item):

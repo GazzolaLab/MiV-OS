@@ -28,3 +28,10 @@ class Signal(SupportMultiprocessing):
     data: SignalType
     timestamps: TimestampsType
     rate: int = 30_000
+
+    @property
+    def number_of_channels(self) -> int:
+        return self.data.shape[1]
+
+    def __getitem__(self, i: int) -> SignalType:
+        return self.data[:, i]  # TODO: Fix to row-major
