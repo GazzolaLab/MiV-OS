@@ -4,6 +4,7 @@ __all__ = ["Operator", "DataLoader", "DataLoaderMixin", "OperatorMixin"]
 from typing import Callable, Generator, List, Optional, Protocol, Union
 
 import functools
+import itertools
 import pathlib
 from dataclasses import dataclass
 
@@ -12,6 +13,36 @@ from miv.core.operator.cachable import DataclassCachableMixin, _Cachable
 from miv.core.operator.callback import _Callback
 from miv.core.operator.chainable import BaseChainingMixin, _Chainable
 from miv.core.policy import VanillaRunner, _Runnable, _RunnerProtocol
+
+
+def MixinOperators(func):
+    return func
+
+
+@MixinOperators
+def get_methods_from_feature_classes_by_startswith_str(self, method_name: str):
+    methods = [
+        [
+            v
+            for (k, v) in cls.__dict__.items()
+            if k.startswith(method_name) and method_name != k
+        ]
+        for cls in self.__class__.__mro__
+    ]
+    return list(itertools.chain.from_iterable(methods))
+
+
+@MixinOperators
+def get_methods_from_feature_classes_by_endswith_str(self, method_name: str):
+    methods = [
+        [
+            v
+            for (k, v) in cls.__dict__.items()
+            if k.endswith(method_name) and method_name != k
+        ]
+        for cls in self.__class__.__mro__
+    ]
+    return list(itertools.chain.from_iterable(methods))
 
 
 class Operator(
@@ -122,3 +153,17 @@ class OperatorMixin(BaseChainingMixin, DataclassCachableMixin):
 
     def callback_after_run(self):
         pass
+
+    def plot(
+        self,
+        show: bool = False,
+        save_path: Optional[pathlib.Path] = None,
+        dry_run: bool = False,
+    ):
+        plotters = get_methods_from_feature_classes_by_startswith_str(self, "plot")
+        if dry_run:
+            for plotter in plotters:
+                print(f"dry run: {plotter}")
+            return
+        for plotter in plotters:
+            plotter(self, self.output, show, save_path)

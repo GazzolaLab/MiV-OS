@@ -21,21 +21,25 @@ Code Example::
 """
 __all__ = ["ThresholdCutoff"]
 
-from typing import Iterable, List, Union
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
+import pathlib
 from dataclasses import dataclass
 
+import matplotlib.pyplot as plt
 import neo
 import numpy as np
 import quantities as pq
 from tqdm import tqdm
 
-from miv.core.datatype import Spikestamps
+from miv.core.datatype import Signal, Spikestamps
+from miv.core.operator import OperatorMixin
+from miv.core.wrapper import wrap_generator_to_generator, wrap_output_generator_collapse
 from miv.typing import SignalType, SpikestampsType, TimestampsType
 
 
 @dataclass
-class ThresholdCutoff:
+class ThresholdCutoff(OperatorMixin):
     """ThresholdCutoff
     Spike sorting step by step guide is well documented `here <http://www.scholarpedia.org/article/Spike_sorting>`_.
 
@@ -50,33 +54,6 @@ class ThresholdCutoff:
         use_mad : bool
             (default=False)
         tag : str
-    """
-
-    dead_time: float = 0.003
-    search_range: float = 0.002
-    cutoff: float = 5.0
-    use_mad: bool = True
-    tag: str = "Threshold Cutoff Spike Detection"
-
-    def __call__(
-        self,
-        signal: SignalType,
-        timestamps: TimestampsType,
-        sampling_rate: float,
-        units: Union[str, pq.UnitTime] = "sec",
-        progress_bar: bool = True,
-        return_neotype: bool = True,
-    ) -> SpikestampsType:
-        """Execute threshold-cutoff method and return spike stamps
-
-        Parameters
-        ----------
-        signal : SignalType
-            signal
-        timestamps : TimestampsType
-            timestamps
-        sampling_rate : float
-            sampling_rate
         units : Union[str, pq.UnitTime]
             (default='sec')
         progress_bar : bool
@@ -84,6 +61,25 @@ class ThresholdCutoff:
         return_neotype : bool
             If true, return spiketrains in neo.Spiketrains (default=True)
             If false, return list of numpy-type spiketrains.
+    """
+
+    dead_time: float = 0.003
+    search_range: float = 0.002
+    cutoff: float = 5.0
+    use_mad: bool = True
+    tag: str = "Threshold Cutoff Spike Detection"
+    progress_bar: bool = False
+    units: Union[str, pq.UnitTime] = "sec"
+    return_neotype: bool = False  # TODO: Remove, shift to spikestamps datatype
+
+    @wrap_output_generator_collapse(Spikestamps)
+    @wrap_generator_to_generator
+    def __call__(self, signal: SignalType) -> SpikestampsType:
+        """Execute threshold-cutoff method and return spike stamps
+
+        Parameters
+        ----------
+        signal : Signal
 
         Returns
         -------
@@ -92,26 +88,26 @@ class ThresholdCutoff:
         """
         # Spike detection for each channel
         spiketrain_list = []
-        num_channels = signal.shape[1]  # type: ignore
-        for channel in tqdm(range(num_channels), disable=not progress_bar):
-            array = signal[:, channel]  # type: ignore
+        num_channels = signal.number_of_channels  # type: ignore
+        timestamps = signal.timestamps
+        rate = signal.rate
+        for channel in tqdm(range(num_channels), disable=not self.progress_bar):
+            array = signal[channel]  # type: ignore
 
             # Spike Detection: get spikestamp
             spike_threshold = self.compute_spike_threshold(
                 array, cutoff=self.cutoff, use_mad=self.use_mad
             )
             crossings = self.detect_threshold_crossings(
-                array, sampling_rate, spike_threshold, self.dead_time
+                array, rate, spike_threshold, self.dead_time
             )
-            spikes = self.align_to_minimum(
-                array, sampling_rate, crossings, self.search_range
-            )
-            spikestamp = spikes / sampling_rate + timestamps.min()
+            spikes = self.align_to_minimum(array, rate, crossings, self.search_range)
+            spikestamp = spikes / rate + timestamps.min()
             # Convert spikestamp to neo.SpikeTrain (for plotting)
-            if return_neotype:
+            if self.return_neotype:
                 spiketrain = neo.SpikeTrain(
                     spikestamp,
-                    units=units,
+                    units=self.units,  # TODO: make this compatible to other units
                     t_stop=timestamps.max(),
                     t_start=timestamps.min(),
                 )
@@ -120,9 +116,14 @@ class ThresholdCutoff:
                 spiketrain_list.append(spikestamp.astype(np.float_))
         return Spikestamps(spiketrain_list)
 
+    def __post_init__(self):
+        super().__init__()
+
     def compute_spike_threshold(
         self, signal: SignalType, cutoff: float = 5.0, use_mad: bool = True
-    ) -> float:  # TODO: make this function compatible to array of cutoffs (for each channel)
+    ) -> (
+        float
+    ):  # TODO: make this function compatible to array of cutoffs (for each channel)
         """
         Returns the threshold for the spike detection given an array of signal.
 
@@ -205,3 +206,21 @@ class ThresholdCutoff:
             self.get_next_minimum(signal, t, search_end) for t in threshold_crossings
         ]
         return np.array(aligned_spikes)
+
+    def plot_spiketrain(
+        self,
+        spikestamps,
+        show: bool = False,
+        save_path: Optional[pathlib.Path] = None,
+        ax: Optional[plt.Axes] = None,
+    ) -> plt.Axes:
+        if ax is None:
+            fig, ax = plt.subplots()
+        ax.eventplot(spikestamps, color="k")
+        ax.set_xlabel("Time (s)")
+        ax.set_ylabel("Channel")
+        if save_path is not None:
+            plt.savefig(save_path)
+        if show:
+            plt.show()
+        return ax
