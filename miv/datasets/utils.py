@@ -95,7 +95,7 @@ def get_file(
         error_msg = "URL fetch failure on {}: {} -- {}"
         try:
             try:
-                _url_retrieve(file_url, filepath, progbar_disable)
+                _url_retrieve(file_url, filepath, progbar_disable=progbar_disable)
             except urllib.error.HTTPError as e:  # pragma: no cover
                 raise Exception(error_msg.format(file_url, e.code, e.msg))
             except urllib.error.URLError as e:  # pragma: no cover
