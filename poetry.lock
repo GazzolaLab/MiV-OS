@@ -2921,14 +2921,14 @@ files = [
 
 [[package]]
 name = "readthedocs-sphinx-search"
-version = "0.1.2"
+version = "0.2.0"
 description = "Sphinx extension to enable search as you type for docs hosted on Read the Docs."
 category = "main"
 optional = true
 python-versions = ">=3.6"
 files = [
-    {file = "readthedocs-sphinx-search-0.1.2.tar.gz", hash = "sha256:66d950fadcc044a082816763c766d3ebc7130cb84caeabbffa239368dc5124fe"},
-    {file = "readthedocs_sphinx_search-0.1.2-py3-none-any.whl", hash = "sha256:f3eacbebf766c0b12342462959913d4c5b2de1763f790a46563f719cd910f0f7"},
+    {file = "readthedocs-sphinx-search-0.2.0.tar.gz", hash = "sha256:fb7eda7e1493fdbd77dd5f3951286a68bfa3cf3bb17dd73ecaf4214ffb0d26e6"},
+    {file = "readthedocs_sphinx_search-0.2.0-py3-none-any.whl", hash = "sha256:5fbfbd6587cffde92829d3571d888f86d2fa9ae71d26c1e28e1c0ae2a7d6a2bc"},
 ]
 
 [[package]]
@@ -3785,4 +3785,4 @@ experiment = ["lyon", "pyserial"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<3.11"
-content-hash = "eee7bff04a98c567ddce794e7dac77b0f191adc524a1e22868008179b13ddf89"
+content-hash = "1bbe3089d4925f0749c25ce77d3125ad3cb1ea3022f44ee9236994178787cea4"
