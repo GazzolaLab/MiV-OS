@@ -7,6 +7,8 @@ from typing import Callable, Iterator, List, Optional, Protocol, Set, Union
 import functools
 import itertools
 
+import matplotlib.pyplot as plt
+
 from miv.core.datatype import DataTypes
 
 SelfChain = TypeVar("SelfChain", bound="_Chainable")
@@ -19,6 +21,10 @@ class _Chainable(Protocol):
             - Forward direction defines execution order
             - Backward direction defines dependency order
     """
+
+    @property
+    def tag(self) -> str:
+        ...
 
     def __rshift__(self, right: SelfChain) -> SelfChain:
         ...
@@ -79,6 +85,39 @@ class BaseChainingMixin:
             order.append((depth, current))
         return self._text_visualize_hierarchy(order)
 
+    def visualize(self, show: bool = False) -> None:
+        import networkx as nx
+
+        G = nx.DiGraph()
+
+        # BFS
+        visited = []
+        next_list = [self]
+        while next_list:
+            v = next_list.pop()
+            visited.append(v)
+            for node in itertools.chain(v.iterate_downstream()):
+                G.add_edge(v.tag, node.tag)
+                if node in visited or node in next_list:
+                    continue
+                visited.append(node)
+                next_list.append(node)
+
+        # Draw the graph
+        # TODO: Balance layout
+        # TODO: On edge, label the argument order
+        pos = nx.spring_layout(G, seed=200)
+        nx.draw_networkx_nodes(G, pos, node_size=500, alpha=0.8)
+        nx.draw_networkx_edges(G, pos, width=2, arrows=True)
+        nx.draw_networkx_labels(G, pos, font_size=12, font_family="sans-serif")
+
+        # Display the graph
+        plt.margins(x=0.4)
+        plt.axis("off")
+        if show:
+            plt.show()
+        return G
+
     def _text_visualize_hierarchy(self, string_list, prefix="|__ "):
         output = []
         for i, item in enumerate(string_list):
@@ -99,17 +138,15 @@ class BaseChainingMixin:
             for node in itertools.chain(v.iterate_downstream(), v.iterate_upstream()):
                 if node in visited or node in next_list:
                     continue
-                visited.append(node)
                 next_list.append(node)
         return visited
 
     def topological_sort(self):
         """Topological sort of the topology."""
+        # TODO: Make it free function
         # TODO: Find loop detection
         # Mark all the vertices as not visited
         all_nodes = self._get_full_topology()
-        n_nodes = len(all_nodes)
-        visited = [False] * n_nodes
         visited = []
 
         stack = []

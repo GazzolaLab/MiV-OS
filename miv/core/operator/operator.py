@@ -25,7 +25,7 @@ def get_methods_from_feature_classes_by_startswith_str(self, method_name: str):
         [
             v
             for (k, v) in cls.__dict__.items()
-            if k.startswith(method_name) and method_name != k
+            if k.startswith(method_name) and method_name != k and callable(v)
         ]
         for cls in self.__class__.__mro__
     ]
@@ -38,7 +38,7 @@ def get_methods_from_feature_classes_by_endswith_str(self, method_name: str):
         [
             v
             for (k, v) in cls.__dict__.items()
-            if k.endswith(method_name) and method_name != k
+            if k.endswith(method_name) and method_name != k and callable(v)
         ]
         for cls in self.__class__.__mro__
     ]
@@ -73,6 +73,8 @@ class DataLoader(
     _Runnable,
     Protocol,
 ):
+    """ """
+
     def load(self) -> Generator[DataTypes, None, None]:
         ...
 
@@ -91,15 +93,13 @@ class DataLoaderMixin(BaseChainingMixin):
 
     @property
     def output(self) -> List[DataTypes]:
-        if self._output is None:
-            raise RuntimeError(f"{self} is not yet executed.")
+        self._output = self.load()
         return self._output
 
     def run(self, dry_run: bool = False) -> None:
         if dry_run:
             print("Dry run: ", self.__class__.__name__)
             return
-        self._output = self.load()
 
     def callback_before_run(self):
         pass
@@ -133,6 +133,7 @@ class OperatorMixin(BaseChainingMixin, DataclassCachableMixin):
 
     @property
     def output(self) -> List[DataTypes]:
+        # FIXME: Run graph upstream? what about the order??
         if self._output is None:
             raise RuntimeError(f"{self} is not yet executed.")
         return self._output
@@ -166,4 +167,4 @@ class OperatorMixin(BaseChainingMixin, DataclassCachableMixin):
                 print(f"dry run: {plotter}")
             return
         for plotter in plotters:
-            plotter(self, self.output, show, save_path)
+            plotter(self, self.output, show=show, save_path=save_path)

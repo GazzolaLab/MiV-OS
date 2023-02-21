@@ -14,9 +14,12 @@ class Pipeline:
         self,
         save_path: Optional[Union[str, pathlib.Path]] = None,
         dry_run: bool = False,
+        verbose: bool = False,
     ):
         # TODO: implement save_path
         for node in self.execution_order:
+            if verbose:
+                print("Running: ", node)
             node.run(dry_run=dry_run)
 
     def summarize(self):

@@ -72,7 +72,7 @@ spks = spike_detection(filtered_signal, timestamps, sampling_rate=30_000, progre
 ```{code-cell} ipython3
 :tags: [hide-cell]
 
-from miv.visualization import extract_waveforms, plot_waveforms
+from miv.signal.events import ExtractWaveforms
 ```
 
 ```{code-cell} ipython3

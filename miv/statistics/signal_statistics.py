@@ -2,8 +2,8 @@ __all__ = ["signal_to_noise", "spike_amplitude_to_background_noise"]
 
 import numpy as np
 
+from miv.signal.events.waveform import ExtractWaveforms
 from miv.typing import SignalType, SpikestampsType
-from miv.visualization.waveform import extract_waveforms
 
 
 def signal_to_noise(signal: SignalType, axis: int = 0, ddof: int = 0):
@@ -50,6 +50,9 @@ def spike_amplitude_to_background_noise(
         spikestamps
     ), f"The number of channel for given signal {signal.shape[1]} is not equal to the number of channels in spikestamps {len(spikestamps)}."
 
+    extract_waveforms = ExtractWaveforms(plot_n_spikes=None)
+    cutouts = extract_waveforms(signal, spikestamps)
+
     num_channels = signal.shape[1]
     snr = np.empty(num_channels)
     for channel in range(num_channels):
@@ -57,7 +60,6 @@ def spike_amplitude_to_background_noise(
         if len(spikestamps[channel]) == 0:
             snr[channel] = np.nan
             continue
-        cutouts = extract_waveforms(signal, spikestamps, channel, sampling_rate)
         mean_spike_amplitude = np.mean([np.max(np.abs(cutout)) for cutout in cutouts])
 
         # Compute background noise

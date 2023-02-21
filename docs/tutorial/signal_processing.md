@@ -14,9 +14,9 @@ mystnb:
   execution_mode: 'cache'
 ---
 
-# Introduction : Quick Start
+# Introduction
 
-Here is a quick-start example of how to build electrophysiology analysis pipelines using `MiV-OS`.
+## Getting Started with Electrophysiology Analysis Pipelines using `MiV-OS`
 
 In this tutorial, I will provide you with a quick-start example that demonstrates how to construct electrophysiology analysis pipelines utilizing `MiV-OS`. By the end of this tutorial, you will have gained a better understanding of how to apply this package to your own electrophysiology experiments.
 
@@ -84,7 +84,7 @@ This will run the operations specified in the pipeline and generate the desired 
 The results can be saved to a specified directory by passing the path to the save_path argument.
 
 ```{code-cell} ipython3
-pipeline = Pipeline(data)
+pipeline = Pipeline(spike_detection)  # Create a pipeline object to get `spike_detection` output
 pipeline.run(save_path="results/")  # Save outcome into "results" directory
 ```
 
@@ -115,7 +115,7 @@ For instance, the following code block shows how to construct a median filter fo
 ```{code-cell} ipython3
 median_filter = MedianFilter(threshold=100 * pq.mV)
 data >> median_filter >> bandpass_filter
-pipeline = Pipeline(data)
+pipeline = Pipeline(bandpass_filter)
 ```
 
 In this example, we first create a `MedianFilter` module with a specified threshold of 100 mV, and then pass the output from this module into the `bandpass_filter` module.

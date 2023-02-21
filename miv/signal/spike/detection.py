@@ -215,8 +215,8 @@ class ThresholdCutoff(OperatorMixin):
         ax: Optional[plt.Axes] = None,
     ) -> plt.Axes:
         if ax is None:
-            fig, ax = plt.subplots()
-        ax.eventplot(spikestamps, color="k")
+            fig, ax = plt.subplots(figsize=(16, 6))
+        ax.eventplot(spikestamps, color="r")
         ax.set_xlabel("Time (s)")
         ax.set_ylabel("Channel")
         if save_path is not None:

@@ -15,8 +15,10 @@ from collections import UserList
 
 import numpy as np
 
+from miv.core.datatype.collapsable import CollapseExtendableMixin
 
-class Spikestamps(UserList):
+
+class Spikestamps(UserList, CollapseExtendableMixin):
     """List of array of spike times
 
     Represents spikes emitted by the same unit in a period of times.

@@ -108,11 +108,14 @@ class Data(DataLoaderMixin):
     def __init__(
         self,
         data_path: str,
+        tag: str = "data",
     ):
         super().__init__()
         self.data_path: str = data_path
         self._analysis_path: str = os.path.join(data_path, "analysis")
         self.masking_channel_set: set[int] = set()
+
+        self.tag: str = f"{tag}"
 
         os.makedirs(self._analysis_path, exist_ok=True)
 

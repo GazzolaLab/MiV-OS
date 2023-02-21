@@ -19,20 +19,6 @@ DFT Plot
       plot_frequency_domain
       plot_spectral
 
-Spike Waveform Overlap
-----------------------
-
-.. currentmodule:: miv.visualization
-
-.. automodule:: miv.visualization.waveform
-
-   .. autosummary::
-      :nosignatures:
-      :toctree: _toctree/VisualizationAPI
-
-      extract_waveforms
-      plot_waveforms
-
 Causality Analysis
 ------------------
 
