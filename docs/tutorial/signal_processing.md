@@ -14,9 +14,9 @@ mystnb:
   execution_mode: 'cache'
 ---
 
-# Introduction
+# Introduction: `MiV-OS` Pipeline
 
-## Getting Started with Electrophysiology Analysis Pipelines using `MiV-OS`
+## Electrophysiology Analysis Pipelines
 
 In this tutorial, I will provide you with a quick-start example that demonstrates how to construct electrophysiology analysis pipelines utilizing `MiV-OS`. By the end of this tutorial, you will have gained a better understanding of how to apply this package to your own electrophysiology experiments.
 
@@ -24,6 +24,8 @@ In this tutorial, I will provide you with a quick-start example that demonstrate
 :tags: [hide-cell]
 import numpy as np
 import quantities as pq
+
+import matplotlib.pyplot as plt
 
 from miv.core.operator import Operator, DataLoader
 from miv.core.pipeline import Pipeline
@@ -102,10 +104,20 @@ If the output result is large, the query might return a `Python generator` for f
 The following example demonstrates how to retrieve the output from the bandpass_filter module:
 
 ```{code-cell} ipython3
-filtered_signal = bandpass_filter.output
+filtered_signal = next(bandpass_filter.output)  # Next is used to retrieve the first fragment of the output
+print(filtered_signal.shape)
+
+time = filtered_signal.timestamps
+elctrode = filtered_signal.data[:, 11]
+
+plt.figure(figsize=(10, 5))
+plt.plot(time, elctrode)
+plt.xlabel("Time (s)")
+plt.ylabel("Voltage (mV)")
+plt.show()
 ```
 
-You can then use the filtered_signal variable to perform additional analysis or to visualize the filtered signal.
+You can then use the `filtered_signal` variable to perform additional analysis or to visualize the filtered signal.
 
 ### Filter Collection
 

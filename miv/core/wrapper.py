@@ -1,11 +1,12 @@
 import types
-from typing import Union
+from typing import Protocol, Union
 
 import functools
 import inspect
 from collections import UserList
 
 from miv.core.datatype import DataTypes, Extendable
+from miv.core.operator.operator import Operator
 
 
 def wrap_generator_to_generator(func):
@@ -18,17 +19,29 @@ def wrap_generator_to_generator(func):
 
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
-        self = args[0]
+        self: Operator = args[0]
         is_all_generator = all(inspect.isgenerator(arg) for arg in args[1:])
         if is_all_generator:
 
             def generator_func(*args, **kwargs):
-                for zip_arg in zip(*args):
-                    yield func(self, *zip_arg, **kwargs)
+                if self.cacher.check_cached():
+                    yield from self.cacher.load_cached()
+                else:
+                    for idx, zip_arg in enumerate(zip(*args)):
+                        result = func(self, *zip_arg, **kwargs)
+                        self.cacher.save_cache(result, idx)
+                        yield result
+                    else:
+                        self.cacher.save_config()
 
             return generator_func(*(args[1:]), **kwargs)
         else:
-            return func(*args, **kwargs)
+            if self.cacher.check_cached():
+                return next(self.cacher.load_cached())
+            else:
+                result = func(*args, **kwargs)
+                self.cacher.save_cache(result)
+            return result
 
     return wrapper
 

@@ -9,7 +9,7 @@ Signal
 
 __all__ = ["Signal"]
 
-from typing import Optional
+from typing import Optional, Tuple
 
 from dataclasses import dataclass
 
@@ -40,7 +40,7 @@ class Signal(SupportMultiprocessing):
 
     @property
     def number_of_channels(self) -> int:
-        return self.data.shape[1]
+        return self.data.shape[self._CHANNELAXIS]
 
     def __getitem__(self, i: int) -> SignalType:
         return self.data[:, i]  # TODO: Fix to row-major
@@ -50,6 +50,10 @@ class Signal(SupportMultiprocessing):
 
     def get_end_time(self):
         return self.timestamps.max()
+
+    @property
+    def shape(self) -> Tuple[int, int]:
+        return self.data.shape
 
     def append(self, value) -> None:
         assert value.shape[self._SIGNALAXIS] == self.data.shape[self._SIGNALAXIS]
