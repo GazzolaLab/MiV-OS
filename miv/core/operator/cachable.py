@@ -2,7 +2,7 @@ __doc__ = """
 """
 __all__ = ["_Cachable", "DataclassCacher"]
 
-from typing import Generator, Literal, Protocol, Union
+from typing import Any, Generator, Literal, Protocol, Union
 
 import collections
 import dataclasses
@@ -21,22 +21,28 @@ CACHE_POLICY = Literal["AUTO", "ON", "OFF"]
 
 class _CacherProtocol(Protocol):
     @property
+    def cache_dir(self) -> Union[str, pathlib.Path]:
+        ...
+
+    @property
     def config_filename(self) -> Union[str, pathlib.Path]:
         ...
 
-    def load_cache(self) -> bool:
+    def cache_filename(self) -> Union[str, pathlib.Path]:
         ...
 
-    def save_cache(self) -> bool:
+    def load_cached(self) -> Generator[Any, None, None]:
+        """Load the cached values."""
         ...
 
-    def _compile_configuration_as_dict(self) -> dict:
+    def save_cache(self, values: Any, idx: int) -> bool:
         ...
 
-    def _load_configuration_from_cache(self) -> dict:
+    def save_config(self) -> None:
         ...
 
-    def check_cached_configuration(self) -> bool:
+    def check_cached(self) -> bool:
+        """Check if the current configuration is the same as the cached one."""
         ...
 
 
@@ -45,13 +51,57 @@ class _Cachable(Protocol):
     def cacher(self) -> _CacherProtocol:
         ...
 
+    def set_caching_policy(self, policy: CACHE_POLICY) -> None:
+        ...
+
+    def run(self, cache_dir: Union[str, pathlib.Path]) -> None:
+        ...
+
+
+class SkipCache:
+    """
+    Always run without saving.
+    """
+
+    def __init__(self, parent, cache_dir: Union[str, pathlib.Path]):
+        super().__init__()
+
+    @property
+    def config_filename(self) -> str:
+        raise NotImplementedError(
+            "If you are using SkipCache, you should not be calling this method."
+        )
+
+    def cache_filename(self, idx) -> str:
+        raise NotImplementedError(
+            "If you are using SkipCache, you should not be calling this method."
+        )
+
+    def check_cached(self) -> bool:
+        return False
+
+    def save_config(self):
+        raise NotImplementedError(
+            "If you are using SkipCache, you should not be calling this method."
+        )
+
+    def load_cached(self):
+        raise NotImplementedError(
+            "If you are using SkipCache, you should not be calling this method."
+        )
+
+    def save_cache(self, values, idx):
+        raise NotImplementedError(
+            "If you are using SkipCache, you should not be calling this method."
+        )
+
 
 class DataclassCacher:
-    def __init__(self, parent, cache_dir: Union[str, pathlib.Path]):
+    def __init__(self, parent):
         super().__init__()
         self.cache_policy: CACHE_POLICY = "AUTO"  # TODO: make this a property
         self.parent = parent
-        self.cache_dir = cache_dir
+        self.cache_dir = None  # TODO: Public. Make proper setter
 
     @property
     def config_filename(self) -> str:

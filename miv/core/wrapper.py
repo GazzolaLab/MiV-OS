@@ -41,6 +41,7 @@ def wrap_generator_to_generator(func):
             else:
                 result = func(*args, **kwargs)
                 self.cacher.save_cache(result)
+                self.cacher.save_config()
             return result
 
     return wrapper

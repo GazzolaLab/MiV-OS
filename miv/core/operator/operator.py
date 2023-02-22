@@ -10,7 +10,7 @@ import pathlib
 from dataclasses import dataclass
 
 from miv.core.datatype import DataTypes
-from miv.core.operator.cachable import DataclassCacher, _Cachable
+from miv.core.operator.cachable import DataclassCacher, _Cachable, _CacherProtocol
 from miv.core.operator.callback import _Callback
 from miv.core.operator.chainable import BaseChainingMixin, _Chainable
 from miv.core.policy import VanillaRunner, _Runnable, _RunnerProtocol
@@ -130,7 +130,10 @@ class OperatorMixin(BaseChainingMixin):
         self.analysis_path = os.path.join("results", self.tag.replace(" ", "_"))
 
         self.runner = VanillaRunner()
-        self.cacher = DataclassCacher(self, self.analysis_path)
+        self.cacher = DataclassCacher(self)
+
+    def set_caching_policy(self, cacher: _CacherProtocol):
+        self.cacher = cacher(self)
 
     def receive(self) -> List[DataTypes]:
         return [node.output for node in self.iterate_upstream()]
@@ -143,8 +146,15 @@ class OperatorMixin(BaseChainingMixin):
         self.run()
         return self._output  # TODO: Just use upstream caller instead of .output
 
-    def run(self, dry_run: bool = False) -> None:
+    def run(
+        self,
+        save_path: Union[str, pathlib.Path] = "results",
+        dry_run: bool = False,
+        cache_dir: Union[str, pathlib.Path] = ".cache",
+    ) -> None:
         # Execute the module
+        self.cacher.cache_dir = os.path.join(save_path, cache_dir)
+
         args: List[DataTypes] = self.receive()  # Receive data from upstream
         if dry_run:
             print("Dry run: ", self.__class__.__name__)
