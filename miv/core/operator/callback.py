@@ -11,10 +11,16 @@ class _Callback(Protocol):
     def __lshift__(self, right: SelfCallback) -> SelfCallback:
         ...
 
-    def callback_before_run(self, **kwargs):
+    def receive(self):
         ...
 
-    def callback_after_run(self, **kwargs):
+    def output(self):
+        ...
+
+    def callback_before_run(self):
+        ...
+
+    def callback_after_run(self):
         ...
 
 
@@ -30,13 +36,18 @@ class BaseCallbackMixin:
         ):  # TODO: need better way to prepend callbacks
             self._callback_before_run.append(right)
             return self
+        if right.__name__.startswith(
+            "plot_"
+        ):  # TODO: need better way to prepend callbacks
+            self._callback_before_run.append(right)
+            return self
         self._callback_after_run.append(right)
         return self
 
-    def callback_before_run(self, inputs):
+    def callback_before_run(self):
         for callback in self._callback_before_run:
-            callback(self, *inputs)
+            callback(self, self.receive())
 
-    def callback_after_run(self, inputs):
+    def callback_after_run(self):
         for callback in self._callback_after_run:
-            callback(self, *inputs)
+            callback(self, self.output)

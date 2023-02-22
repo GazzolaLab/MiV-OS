@@ -121,7 +121,9 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin):
         super().__init__()
         self._output: Optional[DataTypes] = None
         assert self.tag != ""
-        self.analysis_path = os.path.join("results", self.tag.replace(" ", "_"))
+        self.analysis_path = os.path.join(
+            "results", self.tag.replace(" ", "_")
+        )  # Default analysis path
 
         self.runner = VanillaRunner()
         self.cacher = DataclassCacher(self)
@@ -137,35 +139,48 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin):
         # FIXME: Run graph upstream? what about the order??
         if self._output is None:
             raise RuntimeError(f"{self} is not yet executed.")
-        self.run()
+        self._execute()
         return self._output  # TODO: Just use upstream caller instead of .output
+
+    def _execute(self):
+        args: List[DataTypes] = self.receive()  # Receive data from upstream
+        if len(args) == 0:
+            self._output = self.runner(self.__call__)
+        else:
+            self._output = self.runner(self.__call__, args)
 
     def run(
         self,
         save_path: Union[str, pathlib.Path] = "results",
         dry_run: bool = False,
         cache_dir: Union[str, pathlib.Path] = ".cache",
+        enable_callback: bool = True,
     ) -> None:
         # Execute the module
-        self.cacher.cache_dir = os.path.join(save_path, cache_dir)
+        self.analysis_path = os.path.join(save_path, self.tag.replace(" ", "_"))
+        self.cacher.cache_dir = os.path.join(self.analysis_path, cache_dir)
 
-        args: List[DataTypes] = self.receive()  # Receive data from upstream
-        self.callback_before_run(args)
+        if enable_callback:
+            self.callback_before_run()
+
         if dry_run:
             print("Dry run: ", self.__class__.__name__)
             return
-        if len(args) == 0:
-            self._output = self.runner(self.__call__)
-        else:
-            self._output = self.runner(self.__call__, args)
-        self.callback_after_run(self._output)
+        self._execute()
+
+        # Post Processing
+        if enable_callback:
+            self.callback_after_run()
 
     def plot(
         self,
         show: bool = False,
-        save_path: Optional[pathlib.Path] = None,
+        save_path: Optional[Union[bool, str, pathlib.Path]] = None,
         dry_run: bool = False,
     ):
+        if save_path is True:
+            os.makedirs(self.analysis_path, exist_ok=True)
+            save_path = self.analysis_path
         plotters = get_methods_from_feature_classes_by_startswith_str(self, "plot")
         if dry_run:
             for plotter in plotters:

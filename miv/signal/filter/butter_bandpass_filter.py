@@ -3,6 +3,7 @@ __all__ = ["ButterBandpass"]
 
 from typing import Optional
 
+import os
 from dataclasses import dataclass
 
 import matplotlib.pyplot as plt
@@ -87,37 +88,42 @@ class ButterBandpass(OperatorMixin):
 
     def _butter_bandpass(self, sampling_rate: float):
         nyq = 0.5 * sampling_rate
-        low = self.lowcut / nyq
-        high = self.highcut / nyq
         if self.btype in ["bandpass", "bandstop"]:
+            low = self.lowcut / nyq
+            high = self.highcut / nyq
             critical_frequency = [low, high]
         elif self.btype == "highpass":
-            critical_frequency = low
+            critical_frequency = self.lowcut / nyq
         elif self.btype == "lowpass":
-            critical_frequency = high
+            critical_frequency = self.highcut / nyq
         else:
             raise ValueError("Unknown btype: %s" % self.btype)
         b, a = sps.butter(self.order, critical_frequency, btype=self.btype)
         return b, a
 
-    def plot_frequency_response(self, sampling_rate: float):
-        """plot_frequency_response
+    # def plot_frequency_response(self, signal:Signal, show=False, save_path=None):
+    #     """plot_frequency_response
 
-        Parameters
-        ----------
-        sampling_rate : float
+    #     Parameters
+    #     ----------
+    #     signal : Signal
 
-        Returns
-        -------
-        plt.Figure
-        """
-        b, a = self._butter_bandpass(sampling_rate)
-        w, h = sps.freqs(b, a)
-        fig = plt.figure()
-        plt.semilogx(w, 20 * np.log10(abs(h)))
-        plt.title(
-            f"Butterworth filter (order{self.order}) frequency response [{self.lowcut},{self.highcut}]"
-        )
-        plt.xlabel("Frequency")
-        plt.ylabel("Amplitude")
-        return fig
+    #     Returns
+    #     -------
+    #     plt.Figure
+    #     """
+    #     sampling_rate = next(signal).rate
+    #     b, a = self._butter_bandpass(sampling_rate)
+    #     w, h = sps.freqs(b, a)
+    #     fig = plt.figure()
+    #     plt.semilogx(w, 20 * np.log10(abs(h)))
+    #     plt.title(
+    #         f"Butterworth filter (order{self.order}) frequency response [{self.lowcut},{self.highcut}]"
+    #     )
+    #     plt.xlabel("Frequency")
+    #     plt.ylabel("Amplitude")
+    #     if show:
+    #         plt.show()
+    #     if save_path is not None:
+    #         fig.savefig(os.path.join(save_path, 'filter_frequency_response.png'))
+    #     return fig

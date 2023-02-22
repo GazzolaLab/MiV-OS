@@ -48,6 +48,10 @@ class _CacherProtocol(Protocol):
 
 class _Cachable(Protocol):
     @property
+    def analysis_path(self) -> Union[str, pathlib.Path]:
+        ...
+
+    @property
     def cacher(self) -> _CacherProtocol:
         ...
 
