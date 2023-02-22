@@ -11,7 +11,7 @@ from dataclasses import dataclass
 
 from miv.core.datatype import DataTypes
 from miv.core.operator.cachable import DataclassCacher, _Cachable, _CacherProtocol
-from miv.core.operator.callback import _Callback
+from miv.core.operator.callback import BaseCallbackMixin, _Callback
 from miv.core.operator.chainable import BaseChainingMixin, _Chainable
 from miv.core.policy import VanillaRunner, _Runnable, _RunnerProtocol
 
@@ -83,7 +83,7 @@ class DataLoader(
         ...
 
 
-class DataLoaderMixin(BaseChainingMixin):
+class DataLoaderMixin(BaseChainingMixin, BaseCallbackMixin):
     """ """
 
     def __init__(self):
@@ -102,14 +102,8 @@ class DataLoaderMixin(BaseChainingMixin):
             print("Dry run: ", self.__class__.__name__)
             return
 
-    def callback_before_run(self):
-        pass
 
-    def callback_after_run(self):
-        pass
-
-
-class OperatorMixin(BaseChainingMixin):
+class OperatorMixin(BaseChainingMixin, BaseCallbackMixin):
     """
     Behavior includes:
         - Whenever "run()" method is executed:
@@ -156,6 +150,7 @@ class OperatorMixin(BaseChainingMixin):
         self.cacher.cache_dir = os.path.join(save_path, cache_dir)
 
         args: List[DataTypes] = self.receive()  # Receive data from upstream
+        self.callback_before_run(args)
         if dry_run:
             print("Dry run: ", self.__class__.__name__)
             return
@@ -163,12 +158,7 @@ class OperatorMixin(BaseChainingMixin):
             self._output = self.runner(self.__call__)
         else:
             self._output = self.runner(self.__call__, args)
-
-    def callback_before_run(self):
-        pass
-
-    def callback_after_run(self):
-        pass
+        self.callback_after_run(self._output)
 
     def plot(
         self,

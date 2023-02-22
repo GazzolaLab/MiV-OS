@@ -4,9 +4,10 @@ from typing import Protocol, Union
 import functools
 import inspect
 from collections import UserList
+from dataclasses import dataclass, make_dataclass
 
 from miv.core.datatype import DataTypes, Extendable
-from miv.core.operator.operator import Operator
+from miv.core.operator.operator import Operator, OperatorMixin
 
 
 def wrap_generator_to_generator(func):
@@ -81,6 +82,29 @@ def wrap_output_generator_collapse(*datatype_args: Union[DataTypes, Extendable])
     return wrapper_gen
 
 
+def miv_function(name, **params):
+    """
+    Decorator to convert a function into a MIV operator.
+    """
+
+    def decorator(func):
+        LambdaClass = make_dataclass(
+            name,
+            [k for k in params.keys()],
+            namespace={
+                "__call__": func,
+                "__post_init__": lambda self: super(OperatorMixin, self).__init__(),
+            },
+            bases=(OperatorMixin,),
+        )
+        LambdaClass.__name__ = name
+        obj = LambdaClass(**params)
+        obj.tag = name
+        return obj
+
+    return decorator
+
+
 def test_output_generator_collapse():
     def bar():
         yield 1
@@ -139,6 +163,18 @@ def test_wrap_generator():
     assert tuple(a(bar(), bar())) == (2, 4, 6)
 
 
+def test_wrap_miv_function():
+    @miv_function("testTag", a=1, b=2)
+    def func(self, c):
+        print("here")
+        print(c)
+
+    print(func)
+    print(func.__dir__())
+    print(func(1))
+
+
 if __name__ == "__main__":
-    test_wrap_generator()
-    test_output_generator_collapse()
+    # test_wrap_generator()
+    # test_output_generator_collapse()
+    test_wrap_miv_function()
