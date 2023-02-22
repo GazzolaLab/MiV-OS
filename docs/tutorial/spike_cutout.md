@@ -14,7 +14,10 @@ mystnb:
   execution_mode: 'cache'
 ---
 
-# Spike Cutout Visualization
+# Spike Cutout View
+
+In this tutorial, we will learn how to extract spike cutouts from a signal using the `ExtractWaveforms` module.
+This example demonstrate how to handle the module that takes multiple inputs.
 
 ```{code-cell} ipython3
 :tags: [hide-cell]
@@ -44,7 +47,6 @@ We use `bandpass_filter` and the `spike_detection`, using the `ButterBandpass` a
 ```{code-cell} ipython3
 # Create operator modules:
 bandpass_filter: Operator = ButterBandpass(lowcut=300, highcut=3000, order=4, tag="bandpass")
-bandpass_filter2: Operator = ButterBandpass(lowcut=300, highcut=3000, order=4, tag="bandpass2")
 spike_detection: Operator = ThresholdCutoff(cutoff=4.0, use_mad=True, dead_time=0.002, tag="spikes")
 ```
 
@@ -67,8 +69,7 @@ With these operators created, we can now build our pipeline by chaining them tog
 We will start with the `bandpass_filter`, followed by the `spike_detection`, and finally the `extract_waveforms` operator.
 
 ```{code-cell} ipython3
-data >> bandpass_filter2 >> spike_detection
-data >> bandpass_filter
+data >> bandpass_filter >> spike_detection
 bandpass_filter >> extract_waveforms
 spike_detection >> extract_waveforms
 ```
@@ -91,7 +92,7 @@ We can then create a `Pipeline` object and run it to execute the processing step
 pipeline = Pipeline(extract_waveforms)
 print(pipeline.summarize())
 
-pipeline.run(verbose=True)
+pipeline.run()
 ```
 
 ## Plot Spike Cutouts

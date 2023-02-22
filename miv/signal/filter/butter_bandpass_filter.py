@@ -40,7 +40,7 @@ class ButterBandpass(OperatorMixin):
     lowcut: Optional[float] = None
     highcut: Optional[float] = None
     order: int = 5
-    tag: str = ""
+    tag: str = "bandpass filter"
     btype: str = "bandpass"
 
     @wrap_generator_to_generator

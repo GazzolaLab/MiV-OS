@@ -16,7 +16,6 @@ class Pipeline:
         dry_run: bool = False,
         verbose: bool = False,
     ):
-        # TODO: implement save_path
         for node in self.execution_order:
             if verbose:
                 print("Running: ", node)

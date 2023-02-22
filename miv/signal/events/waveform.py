@@ -35,11 +35,11 @@ class ExtractWaveforms(OperatorMixin):
     channels : Optional[List[int]]
         Interested channels. If None, extract from all channels. (default: None)
     pre : pq.Quantity | float
-        The duration of the cutout before the spike in seconds. (default=0.001 s)
+        The duration of the cutout before the spike in seconds. (default: 0.001 s)
     post : pq.Quantity | float
-        The duration of the cutout after the spike in seconds. (default=0.002 s)
+        The duration of the cutout after the spike in seconds. (default: 0.002 s)
     plot_n_spikes : Optional[int]
-        The number of cutouts to plot. None to plot all. (Default: 100)
+        The number of cutouts to plot. None to plot all. (default: 100)
     """
 
     channels: Optional[List[int]] = None

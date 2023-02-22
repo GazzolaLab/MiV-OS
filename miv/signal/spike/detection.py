@@ -67,7 +67,7 @@ class ThresholdCutoff(OperatorMixin):
     search_range: float = 0.002
     cutoff: float = 5.0
     use_mad: bool = True
-    tag: str = "Threshold Cutoff Spike Detection"
+    tag: str = "spike detection"
     progress_bar: bool = False
     units: Union[str, pq.UnitTime] = "sec"
     return_neotype: bool = False  # TODO: Remove, shift to spikestamps datatype

@@ -39,7 +39,7 @@ class MedianFilter(OperatorMixin):
 
     threshold: float
     k: Union[int, Tuple[int, int]] = 20
-    tag: str = ""
+    tag: str = "median filter"
 
     @wrap_generator_to_generator
     def __call__(
