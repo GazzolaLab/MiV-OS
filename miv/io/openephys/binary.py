@@ -290,7 +290,7 @@ def load_recording(
     # TODO: maybe need to support multiple continuous.dat files in the future
     signal, timestamps = load_continuous_data(file_path[0], num_channels, sampling_rate)
     if num_fragments is None:
-        num_fragments = max(timestamps.shape[0] // sampling_rate // (60 + 1), 1)
+        num_fragments = int(max(timestamps.shape[0] // sampling_rate // (60 + 1), 1))
     fragmented_signal = np.array_split(signal, num_fragments, axis=0)[
         start_index:end_index
     ]
