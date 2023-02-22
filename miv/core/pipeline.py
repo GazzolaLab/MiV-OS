@@ -19,7 +19,7 @@ class Pipeline:
         for node in self.execution_order:
             if verbose:
                 print("Running: ", node)
-            node.run(dry_run=dry_run)
+            node.run(dry_run=dry_run, save_path=save_path)
 
     def summarize(self):
         strs = []

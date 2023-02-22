@@ -97,7 +97,7 @@ class DataLoaderMixin(BaseChainingMixin, BaseCallbackMixin):
         self._output = self.load()
         return self._output
 
-    def run(self, dry_run: bool = False) -> None:
+    def run(self, dry_run: bool = False, **kwargs) -> None:
         if dry_run:
             print("Dry run: ", self.__class__.__name__)
             return

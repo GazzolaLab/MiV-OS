@@ -29,6 +29,7 @@ class BaseCallbackMixin:
         super().__init__()
         self._callback_before_run = []
         self._callback_after_run = []
+        self._callback_plot = []
 
     def __lshift__(self, right: Callable) -> SelfCallback:
         if right.__name__.startswith(
@@ -39,7 +40,7 @@ class BaseCallbackMixin:
         if right.__name__.startswith(
             "plot_"
         ):  # TODO: need better way to prepend callbacks
-            self._callback_before_run.append(right)
+            self._callback_plot.append(right)
             return self
         self._callback_after_run.append(right)
         return self
@@ -51,3 +52,7 @@ class BaseCallbackMixin:
     def callback_after_run(self):
         for callback in self._callback_after_run:
             callback(self, self.output)
+
+    def plot_from_callbacks(self, *args, **kwargs):
+        for callback in self._callback_plot:
+            callback(self, *args, **kwargs)

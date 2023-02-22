@@ -88,18 +88,25 @@ def miv_function(name, **params):
     """
 
     def decorator(func):
-        LambdaClass = make_dataclass(
+        _LambdaClass = make_dataclass(
             name,
             [k for k in params.keys()],
-            namespace={
-                "__call__": func,
-                "__post_init__": lambda self: super(OperatorMixin, self).__init__(),
-            },
-            bases=(OperatorMixin,),
         )
+
+        @dataclass
+        class LambdaClass(_LambdaClass, OperatorMixin):
+            tag: str = name
+
+            def __call__(self, *args, **kwargs):
+                print(type(args[0]))
+                return func(self, *args)
+
+            def __post_init__(self):
+                _LambdaClass.__init__(self, **params)
+                OperatorMixin.__init__(self)
+
         LambdaClass.__name__ = name
         obj = LambdaClass(**params)
-        obj.tag = name
         return obj
 
     return decorator
