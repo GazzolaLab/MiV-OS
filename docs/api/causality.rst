@@ -1,6 +1,19 @@
-******************************
-Causality/Connectivity Modules
-******************************
+***********************************************************
+Causality/Connectivity (:mod:`miv.statistics.connectivity`)
+***********************************************************
+
+Connectivity Operators
+======================
+
+.. currentmodule:: miv.statistics.connectivity
+
+.. autosummary::
+   :nosignatures:
+   :toctree: _toctree/ConnectivityAPI
+
+   DirectedConnectivity
+   plot_eigenvector_centrality
+
 
 Useful External Packages
 ========================

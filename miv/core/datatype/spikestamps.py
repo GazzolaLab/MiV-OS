@@ -32,6 +32,10 @@ class Spikestamps(UserList, CollapseExtendableMixin):
             iterable = []
         self.data = iterable
 
+    @property
+    def number_of_channels(self) -> int:
+        return len(self.data)
+
     def __setitem__(self, index, item):
         self.data[index] = item
 
@@ -131,19 +135,31 @@ class Spikestamps(UserList, CollapseExtendableMixin):
 
         """
         spiketrain = self.data
-        t_start = self.get_first_spikestamp()
-        t_end = self.get_last_spikestamp()
 
         if isinstance(bin_size, pq.Quantity):
             bin_size = bin_size.rescale(pq.s).magnitude
-
         assert bin_size > 0, "bin size should be greater than 0"
+
+        t_start = self.get_first_spikestamp()
+        t_end = self.get_last_spikestamp()
         n_bins = int(np.ceil((t_end - t_start) / bin_size))
         time = t_start + (np.arange(n_bins + 1) * bin_size)
-        bins = np.digitize(spiketrain, time)
-        bincount = np.bincount(bins, minlength=n_bins + 2)[1:-1]
-        if return_count:
-            bin_spike = bincount
-        else:
-            bin_spike = (bincount != 0).astype(np.bool_)
-        return Signal(data=bin_spike, timestamps=time[1:-1], rate=1 / bin_size)
+
+        num_channels = self.number_of_channels
+        signal = Signal(
+            data=np.zeros(
+                [time.shape[0] - 1, num_channels],
+                dtype=np.int_ if return_count else np.bool_,
+            ),
+            timestamps=time[:-1],
+            rate=1.0 / bin_size,
+        )
+        for idx, spiketrain in enumerate(self.data):
+            bins = np.digitize(spiketrain, time)
+            bincount = np.bincount(bins, minlength=n_bins + 2)[1:-1]
+            if return_count:
+                bin_spike = bincount
+            else:
+                bin_spike = (bincount != 0).astype(np.bool_)
+            signal.data[:, idx] = bin_spike
+        return signal

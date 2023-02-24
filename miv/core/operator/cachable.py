@@ -143,7 +143,7 @@ class DataclassCacher:
             with open(path, "rb") as f:
                 yield pkl.load(f)
 
-    def save_cache(self, values, idx) -> bool:
+    def save_cache(self, values, idx=0) -> bool:
         os.makedirs(self.cache_dir, exist_ok=True)
         with open(self.cache_filename(idx), "wb") as f:
             pkl.dump(values, f)
