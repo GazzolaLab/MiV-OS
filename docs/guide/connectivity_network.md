@@ -95,13 +95,12 @@ connectivity_analysis << plot_eigenvector_centrality
 Finally, we can use the "plot" method to visualize the results of our connectivity analysis. This method will generate a plot of the connectivity measures for each pair of electrodes in the network.
 
 ```{code-cell} ipython3
-connectivity_analysis.plot()
+connectivity_analysis.plot(show=True)
 ```
 
 The result would include four different plot
     1. connectivity through p-test in surrogate analysis (if skip_surrogate is true, this plot will show all nodes are connected to eachother) named `p_graph`.
     2. connectivity with connection metrics value, named `te_graph`.
     3. centrality graph of the network using eigenvector centrality, named 'eigenvector_centrality.' (This plot is added by `plot_eigenvector_centrality`)
-    4. connection matrix image, named `connection_matrix`.
 
 For more information on the `DirectedConnectivity` module and other connectivity analysis tools in the `miv` package, check out the API documentation.

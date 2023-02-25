@@ -239,42 +239,6 @@ class DirectedConnectivity(OperatorMixin):
                 boolean_connectivity=False,
             )
 
-    def plot_connectivity_graph(self, result, save_path=None, show=False):
-        """
-        Plot connectivity graph
-        """
-        adj_matrix = result["adjacency_matrix"]
-        n_nodes = adj_matrix.shape[0]
-        channels = self.channels if self.channels is not None else list(range(n_nodes))
-
-        G_1 = nx.DiGraph()
-
-        # position
-        for i in range(self.mea_map.shape[0]):
-            for j in range(self.mea_map.shape[1]):
-                center = self.mea_map[i, j]
-                if center < 0:
-                    continue
-                if center not in channels:
-                    continue
-                G_1.add_node(center)
-
-        for sidx, source in enumerate(channels):
-            if source not in self.mea_map:
-                continue
-            for tidx, target in enumerate(channels):
-                if target not in self.mea_map:
-                    continue
-                if source == target:
-                    conn = 0
-                else:
-                    conn = adj_matrix[sidx, tidx]
-                if np.isnan(conn):
-                    conn = 0.0
-                G_1.add_edge(source, target, weight=conn)
-
-        return G_1
-
     def _plot_directionality(
         self,
         connectivity,
