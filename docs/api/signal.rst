@@ -1,6 +1,6 @@
-***********************************************
+*****************************************
 Signal Pre-Processing (:mod:`miv.signal`)
-***********************************************
+*****************************************
 
 Signal Filter
 #############
@@ -14,6 +14,7 @@ Signal Filter
    FilterProtocol
    ButterBandpass
    MedianFilter
+   Notch
 
 .. automodule:: miv.signal.spike.detection
 
