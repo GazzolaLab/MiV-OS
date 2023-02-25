@@ -21,19 +21,19 @@ def plot_eigenvector_centrality(self, result, show=False, save_path=None):
 
     # position
     pos = {}
-    for i in range(self.mea.shape[0]):
-        for j in range(self.mea.shape[1]):
-            center = self.mea[i, j]
+    for i in range(self.mea_map.shape[0]):
+        for j in range(self.mea_map.shape[1]):
+            center = self.mea_map[i, j]
             if center < 0:
                 continue
             G.add_node(center)
             pos[center] = (j, i)
 
     for source in range(n_nodes):
-        if source not in self.mea:
+        if source not in self.mea_map:
             continue
         for target in range(n_nodes):
-            if target not in self.mea:
+            if target not in self.mea_map:
                 continue
             if source == target:
                 conn = 0

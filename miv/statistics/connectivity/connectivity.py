@@ -3,7 +3,7 @@ Connectivity module
 """
 __all__ = ["DirectedConnectivity"]  # , 'UndirectedConnectivity']
 
-from typing import Any, Optional, Union
+from typing import Any, List, Optional, Union
 
 import functools
 import gc
@@ -40,8 +40,8 @@ class DirectedConnectivity(OperatorMixin):
     ----------
     bin_size : pq.Quantity
         Bin size for spike train
-    mea_map_key : str
-        MEA map key
+    mea: Optional[Union[str, np.ndarray]]
+        2D array map of MEA channel layout.
     tag : str, optional
         Tag for this operator, by default "directional connectivity analysis"
     progress_bar : bool, optional
@@ -56,8 +56,9 @@ class DirectedConnectivity(OperatorMixin):
         Random seed. If None, use random seed, by default None
     """
 
-    mea_map_key: str
-    bin_size: float = 1.0
+    mea: Union[str, np.ndarray]
+    channels: Optional[List[int]] = None
+    bin_size: float = 0.001
     tag: str = "directional connectivity analysis"
     progress_bar: bool = True
 
@@ -70,7 +71,8 @@ class DirectedConnectivity(OperatorMixin):
 
     def __post_init__(self):
         super().__init__()
-        self.mea = mea_map[self.mea_map_key]
+        if isinstance(self.mea, str):
+            self.mea_map = mea_map[self.mea]
 
     @wrap_generator_to_generator
     def __call__(self, spikestamps: Spikestamps) -> np.ndarray:
@@ -82,7 +84,12 @@ class DirectedConnectivity(OperatorMixin):
         """
 
         binned_spiketrain: Signal = spikestamps.binning(bin_size=self.bin_size)
-        n_nodes = binned_spiketrain.number_of_channels
+        n_nodes = (
+            binned_spiketrain.number_of_channels
+            if self.channels is None
+            else len(self.channels)
+        )
+        channels = self.channels if self.channels is not None else list(range(n_nodes))
 
         # Get adjacency matrix based on transfer entropy
         adj_matrix = np.zeros([n_nodes, n_nodes], dtype=np.bool_)  # source -> target
@@ -90,17 +97,17 @@ class DirectedConnectivity(OperatorMixin):
             [n_nodes, n_nodes], dtype=np.float_
         )  # source -> target
         # TODO: Use mp.Pool
-        for source in tqdm(range(n_nodes), disable=not self.progress_bar):
-            if source not in self.mea:
+        for sidx, source in tqdm(enumerate(channels), disable=not self.progress_bar):
+            if source not in self.mea_map:
                 continue
             p_values = []
             metric_values = []
-            for target in tqdm(
-                range(n_nodes), disable=not self.progress_bar, leave=False
+            for tidx, target in tqdm(
+                enumerate(channels), disable=not self.progress_bar, leave=False
             ):
-                if source != target and target in self.mea:
-                    source_binned_spiketrain = binned_spiketrain[source]
-                    target_binned_spiketrain = binned_spiketrain[target]
+                if source != target and target in self.mea_map:
+                    source_binned_spiketrain = binned_spiketrain[sidx]
+                    target_binned_spiketrain = binned_spiketrain[tidx]
                     p, metrics = self._get_connection_info(
                         source_binned_spiketrain, target_binned_spiketrain
                     )
@@ -108,8 +115,8 @@ class DirectedConnectivity(OperatorMixin):
                     p, metrics = 1, 0
                 p_values.append(p)
                 metric_values.append(metrics)
-            adj_matrix[source] = np.array(p_values) < self.p_threshold
-            connectivity_metric_matrix[source] = np.array(metric_values)
+            adj_matrix[sidx] = np.array(p_values) < self.p_threshold
+            connectivity_metric_matrix[sidx] = np.array(metric_values)
         connection_ratio = adj_matrix.sum() / adj_matrix.ravel().shape[0]
 
         info = dict(
@@ -120,12 +127,16 @@ class DirectedConnectivity(OperatorMixin):
 
         return info
 
-    def _surrogate_t_test(self, source, target, te_history=16, sublength=64, stride=8):
+    def _surrogate_t_test(self, source, target, te_history=4, sublength=64, stride=8):
         """
         Surrogate t-test
         """
-        assert source.shape[0] == target.shape[0]
-        assert source.shape[0] - sublength > 0
+        assert (
+            source.shape[0] == target.shape[0]
+        ), f"source.shape={source.shape}, target.shape={target.shape}"
+        assert (
+            source.shape[0] - sublength > 0
+        ), f"source.shape[0]={source.shape[0]}, sublength={sublength}"
 
         rng = np.random.default_rng(self.seed)  # TODO take rng instead
 
@@ -183,44 +194,46 @@ class DirectedConnectivity(OperatorMixin):
 
         """
         if show:
-            logging.warning("show is not supported for this plot.")
+            logging.warning(
+                "show is not supported for node-wise connectivity plot. Plots will be saved only, if save_path is specified."
+            )
+            show = False
+        if save_path is None:
+            return
         adj_matrix = result["adjacency_matrix"]
         connectivity_metric_matrix = result["connectivity_matrix"]
 
         n_nodes = adj_matrix.shape[0]
+        channels = self.channels if self.channels is not None else list(range(n_nodes))
 
         # Save connectivity plot
-        for source in range(n_nodes):
-            if source not in self.mea:
+        for idx, source in enumerate(channels):
+            if source not in self.mea_map:
                 continue
             self._plot_directionality(
-                adj_matrix[source],
+                adj_matrix[idx],
                 source,
-                n_nodes,
                 os.path.join(save_path, f"p_graph_source_{source}.png"),
             )
             self._plot_directionality(
-                connectivity_metric_matrix[source],
+                connectivity_metric_matrix[idx],
                 source,
-                n_nodes,
                 os.path.join(save_path, f"te_graph_source_{source}.png"),
                 boolean_connectivity=False,
             )
 
-        for target in range(n_nodes):
-            if target not in self.mea:
+        for idx, target in enumerate(channels):
+            if target not in self.mea_map:
                 continue
             self._plot_directionality(
-                adj_matrix[:, target],
+                adj_matrix[:, idx],
                 target,
-                n_nodes,
                 os.path.join(save_path, f"p_graph_target_{target}.png"),
                 reverse=True,
             )
             self._plot_directionality(
-                connectivity_metric_matrix[:, target],
+                connectivity_metric_matrix[:, idx],
                 target,
-                n_nodes,
                 os.path.join(save_path, f"te_graph_target_{target}.png"),
                 reverse=True,
                 boolean_connectivity=False,
@@ -232,27 +245,30 @@ class DirectedConnectivity(OperatorMixin):
         """
         adj_matrix = result["adjacency_matrix"]
         n_nodes = adj_matrix.shape[0]
+        channels = self.channels if self.channels is not None else list(range(n_nodes))
 
         G_1 = nx.DiGraph()
 
         # position
-        for i in range(self.mea.shape[0]):
-            for j in range(self.mea.shape[1]):
-                center = self.mea[i, j]
+        for i in range(self.mea_map.shape[0]):
+            for j in range(self.mea_map.shape[1]):
+                center = self.mea_map[i, j]
                 if center < 0:
+                    continue
+                if center not in channels:
                     continue
                 G_1.add_node(center)
 
-        for source in range(n_nodes):
-            if source not in self.mea:
+        for sidx, source in enumerate(channels):
+            if source not in self.mea_map:
                 continue
-            for target in range(n_nodes):
-                if target not in self.mea:
+            for tidx, target in enumerate(channels):
+                if target not in self.mea_map:
                     continue
                 if source == target:
                     conn = 0
                 else:
-                    conn = adj_matrix[source, target]
+                    conn = adj_matrix[sidx, tidx]
                 if np.isnan(conn):
                     conn = 0.0
                 G_1.add_edge(source, target, weight=conn)
@@ -263,7 +279,6 @@ class DirectedConnectivity(OperatorMixin):
         self,
         connectivity,
         self_index,
-        n_nodes,
         savename,
         reverse=False,
         boolean_connectivity=True,
@@ -275,9 +290,9 @@ class DirectedConnectivity(OperatorMixin):
 
         # position
         pos = {}
-        for i in range(self.mea.shape[0]):
-            for j in range(self.mea.shape[1]):
-                center = self.mea[i, j]
+        for i in range(self.mea_map.shape[0]):
+            for j in range(self.mea_map.shape[1]):
+                center = self.mea_map[i, j]
                 if center < 0:
                     continue
                 G_1.add_node(center)
@@ -287,7 +302,7 @@ class DirectedConnectivity(OperatorMixin):
             for idx, conn in enumerate(connectivity):
                 if idx == self_index:
                     continue  # No self-connection
-                if idx not in self.mea:
+                if idx not in self.mea_map:
                     continue  # No connection if node does not exist
                 if not conn:
                     continue  # No connection
@@ -300,7 +315,7 @@ class DirectedConnectivity(OperatorMixin):
             for idx, conn in enumerate(connectivity):
                 if idx == self_index:
                     continue  # No self-connection
-                if idx not in self.mea:
+                if idx not in self.mea_map:
                     continue  # No connection if node does not exist
 
                 if not reverse:

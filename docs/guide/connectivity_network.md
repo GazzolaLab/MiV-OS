@@ -11,99 +11,97 @@ kernelspec:
   name: python3
 file_format: mystnb
 mystnb:
-  execution_mode: 'off'
+  execution_mode: 'cache'
 ---
 
-# Connectivity Analysis
+# Connectivity using Causal Analysis
 
-Here is the example script of cross-correlation analysis using `Elephant` package.
+In this guide, we will explore how to use the "DirectedConnectivity" module to perform connectivity analysis and measure causal relationships among channels.
 
 ```{code-cell} ipython3
 :tags: [hide-cell]
 
-import os
-import sys
-
-import matplotlib.pyplot as plt
 import numpy as np
-import scipy.signal as ss
-
-import miv
-from miv.datasets import optogenetic
-from miv.io import DataManager
-from miv.signal.filter import ButterBandpass, FilterCollection, MedianFilter
-from miv.signal.spike import ThresholdCutoff
-from miv.visualization.connectivity import plot_connectivity
-
-```
-
-## Pre-processing
-
-```{code-cell} ipython3
-# Experiment name
-experiment_query = "experiment0"
-
-# Data call
-signal_filter = (
-    FilterCollection()
-        .append(ButterBandpass(600, 2400, order=4))
-        .append(MedianFilter(threshold=60, k=30))
-)
-spike_detection = ThresholdCutoff(cutoff=5)
-
-# Spike Detection
-data_collection = optogenetic.load_data()
-data = data_collection.query_path_name(experiment_query)[0]
-#false_channels = [12,15,36,41,42,43,45,47,53,57,55,58,61,62]
-#data.set_channel_mask(false_channels)
-with data.load() as (signal, timestamps, sampling_rate):
-    # Preprocess
-    signal = signal_filter(signal, sampling_rate)
-    spiketrains = spike_detection(signal, timestamps, sampling_rate)
-```
-
-## Provide MEA map
-
-```{code-cell} ipython3
-#Matrix containing electrode numbers according to their spatial location
-mea_map = np.array([[25  , 10 , 12 , 14 , 31 , 28 , 26 , 40],
-                         [18 , 17 , 11 , 13 , 32 , 27 , 38 , 37],
-                         [20 , 19 , 9  , 15 , 30 , 39 , 36 , 35],
-                         [23 , 22 , 21 , 16 , 29 , 34 , 33 , 56],
-                         [24 , 1  , 2  , 61 , 44 , 53 , 54 , 55],
-                         [3  , 4  , 7  , 62 , 43 , 48 , 51 , 52],
-                         [5  , 6  , 59 , 64 , 41 , 46 , 49 , 50],
-                         [57 , 58 , 60 , 63 , 42 , 45 , 47 , 8]])
-
-```
-
-## Forming Connectivity Matrix
-
-```{code-cell} ipython3
-#Correlation using Elephant
-import elephant.statistics
 import quantities as pq
-from elephant.spike_train_correlation import correlation_coefficient
+import matplotlib.pyplot as plt
 
-rates = elephant.statistics.BinnedSpikeTrain(spiketrains, bin_size=2*pq.ms)
-corrcoef_matrix = correlation_coefficient(rates)
+from miv.core.operator import Operator, DataLoader
+from miv.core.pipeline import Pipeline
+from miv.io.openephys import Data, DataManager
+from miv.signal.filter import ButterBandpass, MedianFilter
+from miv.signal.spike import ThresholdCutoff
 
+from miv.datasets.openephys_sample import load_data
+
+# Prepare data
+dataset: DataManager = load_data(progbar_disable=True)
+data: DataLoader = dataset[0]
 ```
 
-## Plot Connectivity
+## Pre-Processing Pipeline
 
-Plots connectivity using the provided MEA map and connectivity matrix. Documentation is available [here](miv.visualization.connectivity.plot_connectivity)
+Before we dive into connectivity analysis, it's important to ensure that the data is pre-processed properly. We will create a pre-processing pipeline to filter out unwanted frequencies and detect spikes in the signal.
 
 ```{code-cell} ipython3
-#Non-interactive connectivity plot using correlation
-G = plot_connectivity(mea_map, corrcoef_matrix, False)
-G.view()
+# Create operator modules:
+bandpass_filter: Operator = ButterBandpass(lowcut=300, highcut=3000, order=4, tag="bandpass")
+spike_detection: Operator = ThresholdCutoff(cutoff=4.0, use_mad=True, dead_time=0.002, tag="spikes")
 
+data >> bandpass_filter >> spike_detection
 ```
+
+## Connectivity Module
+
+Next, we will import the "DirectedConnectivity" module from the "miv.statistics.connectivity" package. This module allows us to construct connectivity graph measured by causal relationships among channels. We will create an instance of the `DirectedConnectivity` class, and attach next to `ThresholdCutoff` operation. Two operators are compatible because the output of `ThresholdCutoff` is a `SpikeTrain` object, which is the input of `DirectedConnectivity`.
 
 ```{code-cell} ipython3
-#Interactive connectivity plot using correlation
-N = plot_connectivity_interactive(mea_map, corrcoef_matrix, False)
-N.show("nodes.html")
+from miv.statistics.connectivity import DirectedConnectivity
+connectivity_analysis = DirectedConnectivity(mea="64_intanRHD", skip_surrogate=True, progress_bar=False, channels=[11, 26, 37, 50])
 
+spike_detection >> connectivity_analysis
+print(data.summarize())  # Print the summary of data flow
 ```
+
+```{note}
+The "skip_surrogate" parameter is set to True to skip the computation of surrogate data. This is done to speed up the tutorial, but can be set to `False` in practice. If you are interested in learning more about surrogate data, check out the documentation.
+```
+
+```{note}
+The channels parameter is set to [11, 26, 37, 50] to speed up the tutorial. In practice, you should set this parameter to `None` to analyze all channels in the network.
+```
+
+## Run Pipeline
+
+Now that we have set up our pre-processing and connectivity analysis pipeline, we can create a pipeline object using the `Pipeline` class and run.
+
+```{code-cell} ipython3
+pipeline = Pipeline(connectivity_analysis)  # Create a pipeline object to compute connectivity
+print(pipeline.summarize())
+pipeline.run(verbose=True, save_path="results")  # Save outcome into "results" directory
+```
+
+## Adding Centrality Plot
+
+By default, the `DirectedConnectivity` module includes plotting the connectivity between each nodes, and plot overall connectivity matrix.
+Additionally, we can visualize the centrality of the graph by adding built-in callback function, `plot_eigenvector_centrality`. Just like any other callbacks, the function can be connected to the `connectivity_analysis` operator using the `<<` operator. This will add a plot of the eigenvector centrality of the nodes in the network.
+
+```{code-cell} ipython3
+from miv.statistics.connectivity import plot_eigenvector_centrality
+connectivity_analysis << plot_eigenvector_centrality
+```
+
+## Plot
+
+Finally, we can use the "plot" method to visualize the results of our connectivity analysis. This method will generate a plot of the connectivity measures for each pair of electrodes in the network.
+
+```{code-cell} ipython3
+connectivity_analysis.plot()
+```
+
+The result would include four different plot
+    1. connectivity through p-test in surrogate analysis (if skip_surrogate is true, this plot will show all nodes are connected to eachother) named `p_graph`.
+    2. connectivity with connection metrics value, named `te_graph`.
+    3. centrality graph of the network using eigenvector centrality, named 'eigenvector_centrality.' (This plot is added by `plot_eigenvector_centrality`)
+    4. connection matrix image, named `connection_matrix`.
+
+For more information on the `DirectedConnectivity` module and other connectivity analysis tools in the `miv` package, check out the API documentation.
