@@ -2888,13 +2888,13 @@ tokenize-rt = ">=3.2.0"
 
 [[package]]
 name = "pyvis"
-version = "0.3.1"
+version = "0.3.2"
 description = "A Python network graph visualization library"
 category = "main"
 optional = false
 python-versions = ">3.6"
 files = [
-    {file = "pyvis-0.3.1.tar.gz", hash = "sha256:aa817caac54afc9a4df38ada6f46636b842a8bd57197bb6aca5084699da04307"},
+    {file = "pyvis-0.3.2-py3-none-any.whl", hash = "sha256:5720c4ca8161dc5d9ab352015723abb7a8bb8fb443edeb07f7a322db34a97555"},
 ]
 
 [package.dependencies]
