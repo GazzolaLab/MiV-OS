@@ -1549,14 +1549,14 @@ resolved_reference = "91dd700dc7bb45f98ac490a2adfcfe6bc35e6310"
 
 [[package]]
 name = "machinable"
-version = "4.0"
+version = "4.1.2"
 description = "A modular configuration system for research projects"
 category = "main"
 optional = false
 python-versions = ">=3.7,<4.0"
 files = [
-    {file = "machinable-4.0-py3-none-any.whl", hash = "sha256:50a140edce060f102d11e6d50b8b44abc3a5c387c0b7c9f7ff060bfda7c964e3"},
-    {file = "machinable-4.0.tar.gz", hash = "sha256:caf7e26f319787d1994a38d79fb5911ffdb860ed240e43e70f65c8304f675c2e"},
+    {file = "machinable-4.1.2-py3-none-any.whl", hash = "sha256:96a38626ae54f5b3861834ae45beb3686fadb420b3f2582f37de15120058a786"},
+    {file = "machinable-4.1.2.tar.gz", hash = "sha256:5b7a251108ed0eaa00a2e94c1e765c7946c98c36d2fd99fae81d3f26d0ed1ac5"},
 ]
 
 [package.dependencies]
