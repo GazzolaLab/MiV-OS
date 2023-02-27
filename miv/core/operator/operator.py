@@ -1,5 +1,12 @@
 __doc__ = """"""
-__all__ = ["Operator", "DataLoader", "DataLoaderMixin", "OperatorMixin"]
+__all__ = [
+    "Operator",
+    "DataLoader",
+    "DataLoaderMixin",
+    "OperatorMixin",
+    "DataNodeMixin",
+    "DataNode",
+]
 
 from typing import Callable, Generator, List, Optional, Protocol, Union
 
@@ -79,8 +86,22 @@ class DataLoader(
     def load(self) -> Generator[DataTypes, None, None]:
         ...
 
-    def run(self, dry_run: bool = False) -> None:
-        ...
+
+class DataNode(_Chainable, Protocol):
+    ...
+
+
+class DataNodeMixin(BaseChainingMixin):
+    """ """
+
+    def __init__(self):
+        super().__init__()
+        self._output = None
+
+    @property
+    def output(self) -> List[DataTypes]:
+        self._output = self
+        return self._output
 
 
 class DataLoaderMixin(BaseChainingMixin, BaseCallbackMixin):
@@ -96,11 +117,6 @@ class DataLoaderMixin(BaseChainingMixin, BaseCallbackMixin):
     def output(self) -> List[DataTypes]:
         self._output = self.load()
         return self._output
-
-    def run(self, dry_run: bool = False, **kwargs) -> None:
-        if dry_run:
-            print("Dry run: ", self.__class__.__name__)
-            return
 
 
 class OperatorMixin(BaseChainingMixin, BaseCallbackMixin):

@@ -15,12 +15,13 @@ from dataclasses import dataclass
 
 import numpy as np
 
+from miv.core.operator import DataNodeMixin
 from miv.core.policy import SupportMultiprocessing
 from miv.typing import SignalType, TimestampsType
 
 
 @dataclass
-class Signal(SupportMultiprocessing):
+class Signal(SupportMultiprocessing, DataNodeMixin):
     """
     Contiguous array of raw signal type.
 

@@ -22,6 +22,7 @@ import numpy as np
 from tqdm import tqdm
 
 import miv.io.intan.rhs as rhs
+from miv.core.datatype import Signal
 from miv.io.openephys.data import Data, DataManager
 from miv.typing import SignalType
 
@@ -112,7 +113,11 @@ class DataIntan(Data):
             assert not hasattr(result, name), f"No {name} in the file ({filename=})."
 
             # signal_group = result["amplifier_channels"]
-            yield np.asarray(result[name]).T, np.asarray(result["t"]), sampling_rate
+            yield Signal(
+                data=np.asarray(result[name]).T,
+                timestamps=np.asarray(result["t"]),
+                rate=sampling_rate,
+            )
 
     def check_path_validity(self):
         """

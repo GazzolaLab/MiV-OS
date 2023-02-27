@@ -18,9 +18,10 @@ import quantities as pq
 
 from miv.core.datatype.collapsable import CollapseExtendableMixin
 from miv.core.datatype.signal import Signal
+from miv.core.operator import DataNodeMixin
 
 
-class Spikestamps(UserList, CollapseExtendableMixin):
+class Spikestamps(UserList, CollapseExtendableMixin, DataNodeMixin):
     """List of array of spike times
 
     Represents spikes emitted by the same unit in a period of times.

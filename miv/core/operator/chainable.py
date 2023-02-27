@@ -26,6 +26,10 @@ class _Chainable(Protocol):
     def tag(self) -> str:
         ...
 
+    @property
+    def output(self) -> List[DataTypes]:
+        ...
+
     def __rshift__(self, right: SelfChain) -> SelfChain:
         ...
 
