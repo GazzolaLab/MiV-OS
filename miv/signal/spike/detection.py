@@ -23,6 +23,8 @@ __all__ = ["ThresholdCutoff"]
 
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
+import csv
+import os
 import pathlib
 from dataclasses import dataclass
 
@@ -35,6 +37,7 @@ from tqdm import tqdm
 from miv.core.datatype import Signal, Spikestamps
 from miv.core.operator import OperatorMixin
 from miv.core.wrapper import wrap_generator_to_generator, wrap_output_generator_collapse
+from miv.statistics import firing_rates
 from miv.typing import SignalType, SpikestampsType, TimestampsType
 
 
@@ -214,6 +217,9 @@ class ThresholdCutoff(OperatorMixin):
         save_path: Optional[pathlib.Path] = None,
         ax: Optional[plt.Axes] = None,
     ) -> plt.Axes:
+        """
+        Plot spike train
+        """
         if ax is None:
             fig, ax = plt.subplots(figsize=(16, 6))
         ax.eventplot(spikestamps, color="r")
@@ -223,4 +229,49 @@ class ThresholdCutoff(OperatorMixin):
             plt.savefig(save_path)
         if show:
             plt.show()
+        return ax
+
+    def plot_firing_rate_histogram(self, spikestamps, show=False, save_path=None):
+        """Plot firing rate histogram"""
+        threshold = 3
+
+        rates = firing_rates(spikestamps)["rates"]
+        hist, bins = np.histogram(rates, bins=20)
+        logbins = np.logspace(np.log10(bins[0]), np.log10(bins[-1]), len(bins))
+        fig = plt.figure()
+        ax = plt.gca()
+        ax.hist(rates, bins=logbins)
+        ax.axvline(
+            np.mean(rates),
+            color="r",
+            linestyle="dashed",
+            linewidth=1,
+            label=f"Mean {np.mean(rates):.2f} Hz",
+        )
+        ax.axvline(
+            threshold,
+            color="g",
+            linestyle="dashed",
+            linewidth=1,
+            label="Quality Threshold",
+        )
+        ax.set_xscale("log")
+        xlim = ax.get_xlim()
+        ax.set_xlabel("Firing rate (Hz) (log-scale)")
+        ax.set_ylabel("Count")
+        ax.set_xlim([min(xlim[0], 1e-1), max(1e2, xlim[1])])
+        ax.legend()
+        if save_path is not None:
+            fig.savefig(os.path.join(f"{save_path}", "firing_rate_histogram.png"))
+        if show:
+            plt.show()
+
+        with open(os.path.join(f"{save_path}", "firing_rate_histogram.csv"), "w") as f:
+            writer = csv.writer(f)
+            writer.writerow(["channel", "firing_rate_hz"])
+            data = list(enumerate(rates))
+            data.sort(reverse=True, key=lambda x: x[1])
+            for ch, rate in data:
+                writer.writerow([ch, rate])
+
         return ax

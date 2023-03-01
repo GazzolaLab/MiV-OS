@@ -91,7 +91,7 @@ class DataLoader(
         ...
 
 
-class DataNode(_Chainable, Protocol):
+class DataNode(_Chainable, _Runnable, Protocol):
     ...
 
 
@@ -107,6 +107,9 @@ class DataNodeMixin(BaseChainingMixin):
         self._output = self
         return self._output
 
+    def run(self, **kwargs):
+        pass
+
 
 class DataLoaderMixin(BaseChainingMixin, BaseCallbackMixin):
     """ """
@@ -121,6 +124,9 @@ class DataLoaderMixin(BaseChainingMixin, BaseCallbackMixin):
     def output(self) -> list[DataTypes]:
         self._output = self.load()
         return self._output
+
+    def run(self, **kwargs):
+        pass
 
 
 class OperatorMixin(BaseChainingMixin, BaseCallbackMixin):
