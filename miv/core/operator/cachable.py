@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 __doc__ = """
 """
 __all__ = ["_Cachable", "DataclassCacher"]
 
-from typing import Any, Generator, Literal, Protocol, Union
+from typing import TYPE_CHECKING, Any, Generator, Literal, Protocol, Union
 
 import collections
 import dataclasses
@@ -14,21 +16,22 @@ import os
 import pathlib
 import pickle as pkl
 
-from miv.core.datatype import DataTypes
+if TYPE_CHECKING:
+    from miv.core.datatype import DataTypes
 
 CACHE_POLICY = Literal["AUTO", "ON", "OFF"]
 
 
 class _CacherProtocol(Protocol):
     @property
-    def cache_dir(self) -> Union[str, pathlib.Path]:
+    def cache_dir(self) -> str | pathlib.Path:
         ...
 
     @property
-    def config_filename(self) -> Union[str, pathlib.Path]:
+    def config_filename(self) -> str | pathlib.Path:
         ...
 
-    def cache_filename(self) -> Union[str, pathlib.Path]:
+    def cache_filename(self) -> str | pathlib.Path:
         ...
 
     def load_cached(self) -> Generator[Any, None, None]:
@@ -48,7 +51,7 @@ class _CacherProtocol(Protocol):
 
 class _Cachable(Protocol):
     @property
-    def analysis_path(self) -> Union[str, pathlib.Path]:
+    def analysis_path(self) -> str | pathlib.Path:
         ...
 
     @property
@@ -58,7 +61,7 @@ class _Cachable(Protocol):
     def set_caching_policy(self, policy: CACHE_POLICY) -> None:
         ...
 
-    def run(self, cache_dir: Union[str, pathlib.Path]) -> None:
+    def run(self, cache_dir: str | pathlib.Path) -> None:
         ...
 
 
@@ -67,7 +70,7 @@ class SkipCache:
     Always run without saving.
     """
 
-    def __init__(self, parent, cache_dir: Union[str, pathlib.Path]):
+    def __init__(self, parent, cache_dir: str | pathlib.Path):
         super().__init__()
 
     @property

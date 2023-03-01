@@ -92,10 +92,10 @@ class DataIntan(Data):
             signals.append(signal)
             timestamps.append(timestamp)
 
-        return (
-            np.concatenate(signals, axis=0),
-            np.concatenate(timestamps),
-            sampling_rate,
+        return Signal(
+            data=np.concatenate(signals, axis=0),
+            timestamps=np.concatenate(timestamps),
+            rate=sampling_rate,
         )
 
     def _generator_by_channel_name(self, name: str, progress_bar: bool = False):

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 __doc__ = """"""
 __all__ = [
     "Operator",
@@ -8,7 +10,7 @@ __all__ = [
     "DataNode",
 ]
 
-from typing import Callable, Generator, List, Optional, Protocol, Union
+from typing import TYPE_CHECKING, Callable, Generator, List, Optional, Protocol, Union
 
 import functools
 import itertools
@@ -16,7 +18,9 @@ import os
 import pathlib
 from dataclasses import dataclass
 
-from miv.core.datatype import DataTypes
+if TYPE_CHECKING:
+    from miv.core.datatype import DataTypes
+
 from miv.core.operator.cachable import DataclassCacher, _Cachable, _CacherProtocol
 from miv.core.operator.callback import BaseCallbackMixin, _Callback
 from miv.core.operator.chainable import BaseChainingMixin, _Chainable
@@ -71,7 +75,7 @@ class Operator(
     def run(self, dry_run: bool = False) -> None:
         ...
 
-    def query(self) -> List[DataTypes]:
+    def query(self) -> list[DataTypes]:
         ...
 
 
@@ -99,7 +103,7 @@ class DataNodeMixin(BaseChainingMixin):
         self._output = None
 
     @property
-    def output(self) -> List[DataTypes]:
+    def output(self) -> list[DataTypes]:
         self._output = self
         return self._output
 
@@ -109,12 +113,12 @@ class DataLoaderMixin(BaseChainingMixin, BaseCallbackMixin):
 
     def __init__(self):
         super().__init__()
-        self._output: Optional[DataTypes] = None
+        self._output: DataTypes | None = None
 
         self.runner = VanillaRunner()
 
     @property
-    def output(self) -> List[DataTypes]:
+    def output(self) -> list[DataTypes]:
         self._output = self.load()
         return self._output
 
@@ -135,7 +139,7 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin):
 
     def __init__(self):
         super().__init__()
-        self._output: Optional[DataTypes] = None
+        self._output: DataTypes | None = None
         assert self.tag != ""
         self.analysis_path = os.path.join(
             "results", self.tag.replace(" ", "_")
@@ -147,11 +151,11 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin):
     def set_caching_policy(self, cacher: _CacherProtocol):
         self.cacher = cacher(self)
 
-    def receive(self) -> List[DataTypes]:
+    def receive(self) -> list[DataTypes]:
         return [node.output for node in self.iterate_upstream()]
 
     @property
-    def output(self) -> List[DataTypes]:
+    def output(self) -> list[DataTypes]:
         # FIXME: Run graph upstream? what about the order??
         if self._output is None:
             raise RuntimeError(f"{self} is not yet executed.")
@@ -159,7 +163,7 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin):
         return self._output  # TODO: Just use upstream caller instead of .output
 
     def _execute(self):
-        args: List[DataTypes] = self.receive()  # Receive data from upstream
+        args: list[DataTypes] = self.receive()  # Receive data from upstream
         if len(args) == 0:
             self._output = self.runner(self.__call__)
         else:
@@ -167,9 +171,9 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin):
 
     def run(
         self,
-        save_path: Union[str, pathlib.Path],
+        save_path: str | pathlib.Path,
         dry_run: bool = False,
-        cache_dir: Union[str, pathlib.Path] = ".cache",
+        cache_dir: str | pathlib.Path = ".cache",
         enable_callback: bool = True,
     ) -> None:
         # Execute the module
@@ -191,7 +195,7 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin):
     def plot(
         self,
         show: bool = False,
-        save_path: Optional[Union[bool, str, pathlib.Path]] = None,
+        save_path: bool | str | pathlib.Path | None = None,
         dry_run: bool = False,
     ):
         if save_path is True:

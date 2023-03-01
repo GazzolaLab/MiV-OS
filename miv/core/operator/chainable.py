@@ -1,15 +1,27 @@
+from __future__ import annotations
+
 __doc__ = """"""
 __all__ = ["_Chainable", "BaseChainingMixin"]
 
 from typing import TypeVar  # TODO: For python 3.11, we can use typing.Self
-from typing import Callable, Iterator, List, Optional, Protocol, Set, Union
+from typing import (
+    TYPE_CHECKING,
+    Callable,
+    Iterator,
+    List,
+    Optional,
+    Protocol,
+    Set,
+    Union,
+)
 
 import functools
 import itertools
 
 import matplotlib.pyplot as plt
 
-from miv.core.datatype import DataTypes
+if TYPE_CHECKING:
+    from miv.core.datatype import DataTypes
 
 SelfChain = TypeVar("SelfChain", bound="_Chainable")
 
@@ -27,7 +39,7 @@ class _Chainable(Protocol):
         ...
 
     @property
-    def output(self) -> List[DataTypes]:
+    def output(self) -> list[DataTypes]:
         ...
 
     def __rshift__(self, right: SelfChain) -> SelfChain:
@@ -54,10 +66,10 @@ class BaseChainingMixin:
 
     def __init__(self):
         super().__init__()
-        self._downstream_list: List[_Chainable] = []
-        self._upstream_list: List[_Chainable] = []
+        self._downstream_list: list[_Chainable] = []
+        self._upstream_list: list[_Chainable] = []
 
-        self._output: Optional[DataTypes] = None
+        self._output: DataTypes | None = None
 
     def __rshift__(self, right: _Chainable) -> _Chainable:
         self._downstream_list.append(right)
@@ -65,6 +77,7 @@ class BaseChainingMixin:
         return right
 
     def clear_connections(self) -> None:
+        """Clear all the connections to other nodes, and remove dependencies."""
         for node in self.iterate_downstream():
             node._upstream_list.remove(self)
         for node in self.iterate_upstream():
@@ -132,7 +145,7 @@ class BaseChainingMixin:
                 output.append(str(label))
         return "\n".join(output)
 
-    def _get_full_topology(self) -> List[SelfChain]:
+    def _get_full_topology(self) -> list[SelfChain]:
         """Get all the operators and data loaders in the topology."""
         visited = []
         next_list = [self]

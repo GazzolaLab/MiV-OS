@@ -15,7 +15,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from miv.core.operator import DataNodeMixin
+from miv.core.operator.operator import DataNodeMixin
 from miv.core.policy import SupportMultiprocessing
 from miv.typing import SignalType, TimestampsType
 
@@ -57,10 +57,12 @@ class Signal(SupportMultiprocessing, DataNodeMixin):
         return self.data.shape
 
     def append(self, value) -> None:
+        """Append a channels to the end of the existing signal."""
         assert value.shape[self._SIGNALAXIS] == self.data.shape[self._SIGNALAXIS]
         self.data = np.append(self.data, value, axis=self._CHANNELAXIS)
 
     def extend_signal(self, value: SignalType, time: TimestampsType) -> None:
+        """Append a signal to the end of the existing signal."""
         assert (
             value.shape[self._SIGNALAXIS] == time.shape[0]
         ), "Time and signal must have same length"
@@ -71,6 +73,7 @@ class Signal(SupportMultiprocessing, DataNodeMixin):
         self.timestamps = np.append(self.timestamps, time)
 
     def prepend_signal(self, value: SignalType, time: TimestampsType) -> None:
+        """Prepend a signal to the end of the existing signal."""
         assert (
             value.shape[self._SIGNALAXIS] == time.shape[0]
         ), "Time and signal must have same length"

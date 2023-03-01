@@ -18,7 +18,7 @@ import quantities as pq
 
 from miv.core.datatype.collapsable import CollapseExtendableMixin
 from miv.core.datatype.signal import Signal
-from miv.core.operator import DataNodeMixin
+from miv.core.operator.operator import DataNodeMixin
 
 
 class Spikestamps(UserList, CollapseExtendableMixin, DataNodeMixin):
