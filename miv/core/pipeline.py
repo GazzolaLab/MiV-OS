@@ -13,12 +13,15 @@ class Pipeline:
     def run(
         self,
         save_path: Optional[Union[str, pathlib.Path]] = "./results",
+        no_cache: bool = False,
         dry_run: bool = False,
         verbose: bool = False,
     ):
         for node in self.execution_order:
             if verbose:
                 print("Running: ", node)
+            if hasattr(node, "cacher"):
+                node.cacher.cache_policy = "OFF" if no_cache else "AUTO"
             node.run(dry_run=dry_run, save_path=save_path)
 
     def summarize(self):

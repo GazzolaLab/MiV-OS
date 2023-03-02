@@ -12,24 +12,10 @@ import numpy as np
 import scipy as sp
 from tqdm import tqdm
 
-from miv.core.operator import Operator
 from miv.core.datatype import Spikestamps
+from miv.core.pipeline import Pipeline
 from miv.signal.filter import ButterBandpass
 from miv.signal.spike import ThresholdCutoff
-
-
-def preprocessing(data):
-    signal, timestamps, sampling_rate = data
-
-    filtered_signal = signal_filter(signal, sampling_rate)
-    spikestamp = spike_detection(
-        filtered_signal,
-        timestamps,
-        sampling_rate,
-        return_neotype=False,
-        progress_bar=False,
-    )
-    return spikestamp
 
 
 @click.command()
@@ -61,23 +47,33 @@ def preprocessing(data):
 )
 @click.option("--chunksize", default=1, help="Number of chunks for multiprocessing")
 def main(path, tools, nproc, num_fragments, use_mpi, chunksize):
-    signal_filter:Operator = ButterBandpass(400, 1500, order=4)
-    spike_detection:Operator = ThresholdCutoff(cutoff=5)
-    preprocessing:Operator = signal_filter >> spike_detection
+    signal_filter = ButterBandpass(400, 1500, order=4)
+    spike_detection = ThresholdCutoff(cutoff=5.0, progress_bar=True)
+    signal_filter >> spike_detection
+
     # Select tools
     if tools == "OpenEphys":
         # If OpenEphys is selected, process all recordings in the set.
         from miv.io.openephys import DataManager
 
-        raise NotImplementedError
+        for p in path:
+            for data in DataManager(p):
+                data >> signal_filter
+                pipeline = Pipeline(spike_detection)
+                pipeline.run(save_path=data.analysis_path, no_cache=True)
+                spike_detection.plot()
+                logging.info(f"Pre-processing {p}-{data.data_path} done.")
+                data.clear_connections()
     elif tools == "Intan":
         from miv.io.intan import DataIntan
 
         for p in path:
-            data:Operator = DataIntan(p)
-            pipeline = data >> preprocessing
-            pipeline.run(num_processors=nproc)
-            logging.info(f"Pre-processing {p} done.")
+            data = DataIntan(p)
+            pipeline = Pipeline(spike_detection)
+            pipeline.run(save_path=data.analysis_path, no_cache=True)
+            spike_detection.plot()
+            logging.info(f"Pre-processing {p}-{data.data_path} done.")
+            data.clear_connections()
 
 
 if __name__ == "__main__":

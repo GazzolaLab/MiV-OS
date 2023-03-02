@@ -103,12 +103,30 @@ class SkipCache:
         )
 
 
+def when_policy_is(self, *policy):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(self, *args, **kwargs):
+            if self.policy in policy:
+                return func(*args, **kwargs)
+            else:
+                return False
+
+        return wrapper
+
+    return decorator
+
+
 class DataclassCacher:
     def __init__(self, parent):
         super().__init__()
         self.cache_policy: CACHE_POLICY = "AUTO"  # TODO: make this a property
         self.parent = parent
         self.cache_dir = None  # TODO: Public. Make proper setter
+
+    @property
+    def policy(self) -> CACHE_POLICY:
+        return self.cache_policy
 
     @property
     def config_filename(self) -> str:
@@ -118,6 +136,7 @@ class DataclassCacher:
         index = idx if isinstance(idx, str) else f"{idx:04}"
         return os.path.join(self.cache_dir, f"cache_{index}.pkl")
 
+    @when_policy_is("ON", "AUTO")
     def check_cached(self) -> bool:
         current_config = self._compile_configuration_as_dict()
         cached_config = self._load_configuration_from_cache()
@@ -134,11 +153,13 @@ class DataclassCacher:
     def _compile_configuration_as_dict(self) -> dict:
         return dataclasses.asdict(self.parent, dict_factory=collections.OrderedDict)
 
+    @when_policy_is("ON", "AUTO")
     def save_config(self):
         config = self._compile_configuration_as_dict()
         os.makedirs(self.cache_dir, exist_ok=True)
         with open(self.config_filename, "w") as f:
             json.dump(config, f, indent=4)
+        return True
 
     def load_cached(self) -> Generator[DataTypes, None, None]:
         paths = glob.glob(self.cache_filename("*"))
@@ -146,6 +167,7 @@ class DataclassCacher:
             with open(path, "rb") as f:
                 yield pkl.load(f)
 
+    @when_policy_is("ON", "AUTO")
     def save_cache(self, values, idx=0) -> bool:
         os.makedirs(self.cache_dir, exist_ok=True)
         with open(self.cache_filename(idx), "wb") as f:
