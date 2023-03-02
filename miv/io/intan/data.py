@@ -102,7 +102,6 @@ class DataIntan(Data):
         if not self.check_path_validity():
             raise FileNotFoundError("Data directory does not have all necessary files.")
         files = self.get_recording_files()
-        files.sort()
         # Get sampling rate from setting file
         setting_path = os.path.join(self.data_path, "settings.xml")
         sampling_rate = int(ET.parse(setting_path).getroot().attrib["SampleRateHertz"])
@@ -142,7 +141,9 @@ class DataIntan(Data):
         return True
 
     def get_recording_files(self):
-        return glob(os.path.join(self.data_path, "*.rhs"), recursive=True)
+        paths = glob(os.path.join(self.data_path, "*.rhs"), recursive=True)
+        paths.sort()
+        return paths
 
     # Disable
     def load_ttl_event(self):
