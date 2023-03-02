@@ -61,7 +61,7 @@ def main(path, tools, nproc, num_fragments, use_mpi, chunksize):
                 data >> signal_filter
                 pipeline = Pipeline(spike_detection)
                 pipeline.run(save_path=data.analysis_path, no_cache=True)
-                spike_detection.plot()
+                spike_detection.plot(save_path=data.analysis_path)
                 logging.info(f"Pre-processing {p}-{data.data_path} done.")
                 data.clear_connections()
     elif tools == "Intan":
@@ -71,7 +71,7 @@ def main(path, tools, nproc, num_fragments, use_mpi, chunksize):
             data = DataIntan(p)
             pipeline = Pipeline(spike_detection)
             pipeline.run(save_path=data.analysis_path, no_cache=True)
-            spike_detection.plot()
+            spike_detection.plot(save_path=data.analysis_path)
             logging.info(f"Pre-processing {p}-{data.data_path} done.")
             data.clear_connections()
 
