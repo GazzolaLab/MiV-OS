@@ -180,6 +180,7 @@ def fano_factor(
         fanofactor for the specified channel and conditions
 
     """
+    raise NotImplementedError("This function is not implemented yet.")
     assert (
         t_start < t_end
     ), f"End time {t_end} cannot be smaller or equal to start time {t_start}."

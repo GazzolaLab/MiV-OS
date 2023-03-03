@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pytest
 
-from miv.core.datatype import Signal
+from miv.core.datatype import Signal, Spikestamps
 from miv.signal.events import ExtractWaveforms
 
 
@@ -14,21 +14,23 @@ def fixture_mock_signal_for_waveform_extraction():
     signal = Signal(
         data=np.arange(n_length).reshape([n_length, 1]),
         timestamps=np.arange(n_length),
-        sampling_rate=1,
+        rate=1,
     )
     return signal
 
 
 def test_waveform_extraction(mock_signal_for_waveform):
     extract_waveform = ExtractWaveforms(channels=[0], pre=1, post=3)
-    extracted_waveform = extract_waveform(mock_signal_for_waveform, [[50]])
-    np.testing.assert_allclose(extracted_waveform[0], np.array([49, 50, 51, 52]))
+    extracted_waveform = extract_waveform(mock_signal_for_waveform, Spikestamps([[50]]))
+    np.testing.assert_allclose(
+        extracted_waveform[0].data, np.array([49, 50, 51, 52])[:, None]
+    )
 
 
 def test_plot_waveform_filecheck(mock_signal_for_waveform, tmp_path):
-    filename = os.path.join(tmp_path, "savefig.png")
-
     extract_waveforms = ExtractWaveforms(channels=[0], pre=1, post=3)
-    extracted_waveform = extract_waveforms(mock_signal_for_waveform, [[50]])
-    extract_waveforms.plot_waveforms(extracted_waveform, save_path=filename)
-    assert os.path.exists(filename)
+    extracted_waveform = extract_waveforms(
+        mock_signal_for_waveform, Spikestamps([[50]])
+    )
+    extract_waveforms.plot_waveforms(extracted_waveform, save_path=tmp_path)
+    assert os.path.exists(os.path.join(tmp_path, "spike_cutouts_ch000.png"))

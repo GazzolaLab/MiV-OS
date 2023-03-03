@@ -190,5 +190,5 @@ if __name__ == "__main__":
     # targets = [0,11,22,33,44,55,66,77,88,99,101,111]
     # mea_128.plot_network(targets)
 
-    targets = ["C-13", "D-12", "A-23", "B-6"]
+    targets = ["C-13", "D-12", "B-6"]
     mea_128.plot_network(targets, reverse=True)

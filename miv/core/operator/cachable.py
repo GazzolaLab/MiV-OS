@@ -108,7 +108,7 @@ def when_policy_is(self, *policy):
         @functools.wraps(func)
         def wrapper(self, *args, **kwargs):
             if self.policy in policy:
-                return func(*args, **kwargs)
+                return func(self, *args, **kwargs)
             else:
                 return False
 
@@ -127,6 +127,10 @@ class DataclassCacher:
     @property
     def policy(self) -> CACHE_POLICY:
         return self.cache_policy
+
+    @policy.setter
+    def policy(self, v) -> CACHE_POLICY:
+        self.cache_policy = v
 
     @property
     def config_filename(self) -> str:

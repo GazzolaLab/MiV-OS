@@ -21,7 +21,9 @@ def wrap_generator_to_generator(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         self: Operator = args[0]
-        is_all_generator = all(inspect.isgenerator(arg) for arg in args[1:])
+        is_all_generator = all(inspect.isgenerator(v) for v in args[1:]) and all(
+            inspect.isgenerator(v) for v in kwargs.values()
+        )
         if is_all_generator:
 
             def generator_func(*args, **kwargs):

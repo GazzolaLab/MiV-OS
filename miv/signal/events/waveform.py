@@ -5,6 +5,7 @@ __all__ = ["ExtractWaveforms"]
 
 from typing import Any, Dict, Generator, List, Optional, Tuple, Union
 
+import inspect
 import os
 import pathlib
 from dataclasses import dataclass
@@ -78,6 +79,8 @@ class ExtractWaveforms(OperatorMixin):
             post = self.post.rescale(pq.s).magnitude
         else:
             post = self.post
+        if not inspect.isgenerator(signal):
+            signal = [signal]
 
         cutouts = {}
         sampling_rate = None

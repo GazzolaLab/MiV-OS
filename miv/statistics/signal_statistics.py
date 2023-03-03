@@ -24,7 +24,7 @@ def signal_to_noise(signal: SignalType, axis: int = 0, ddof: int = 0):
 
 
 def spike_amplitude_to_background_noise(
-    signal: SignalType, spikestamps: SpikestampsType, sampling_rate: float
+    signal: SignalType, spikestamps: SpikestampsType
 ):
     """
     Calculate the signal-to-noise ratio (SNR) for a given signal and spikestamps.
@@ -39,8 +39,6 @@ def spike_amplitude_to_background_noise(
         The signal as a 2-dimensional numpy array (length, num_channel)
     spikestamps: SpikestampsType,
         The sample index of all spikes as a 1-dim numpy array
-    sampling_rate : float
-        The sampling frequency in Hz
 
     Returns
     -------
@@ -53,7 +51,7 @@ def spike_amplitude_to_background_noise(
     extract_waveforms = ExtractWaveforms(plot_n_spikes=None)
     cutouts = extract_waveforms(signal, spikestamps)
 
-    num_channels = signal.shape[1]
+    num_channels = signal.number_of_channels
     snr = np.empty(num_channels)
     for channel in range(num_channels):
         # Compute mean spike amplitude
@@ -63,7 +61,7 @@ def spike_amplitude_to_background_noise(
         mean_spike_amplitude = np.mean([np.max(np.abs(cutout)) for cutout in cutouts])
 
         # Compute background noise
-        background_noise_amplitude = signal[:, channel].std()
+        background_noise_amplitude = signal.data[:, channel].std()
 
         snr[channel] = (mean_spike_amplitude / background_noise_amplitude) ** 2
     return snr
