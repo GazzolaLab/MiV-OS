@@ -282,7 +282,7 @@ class Data(DataLoaderMixin):
         states, full_words, timestamps, sampling_rate, initial_state = load_ttl_event(
             self.data_path
         )
-        return Signal(data=states, timestamps=timestamps, rate=sampling_rate)
+        return Signal(data=states[:, None], timestamps=timestamps, rate=sampling_rate)
 
     def set_channel_mask(self, channel_id: Iterable[int]):
         """

@@ -17,13 +17,13 @@ file_format: mystnb
 This guide includes steps of how to load TTL events from OpenEphys binary data.
 
 > Use the following tutorial-data to run the code. If you have your own recorded data, you can directly load it using `DataManager`.
- 
+
 ```{code-cell} ipython3
 :tags: [hide-cell]
 
 from miv.datasets.ttl_events import load_data
 datasets = load_data()  # sample DataManager with TTL recording
-data = datasets[0] 
+data = datasets[0]
 ```
 
 ## Load example dataset
@@ -37,7 +37,11 @@ TTL event are compose of five data types: states, full_words, timestamps, sampli
 
 ```{code-cell} ipython3
 data = datasets[0]
-states, full_words, timestamps, sampling_rate, initial_state = data.load_ttl_event()
+signal = data.load_ttl_event()
+
+states = signal.data[:,0]
+timestamps = signal.timestamps
+sampling_rate = signal.rate
 ```
 
 ## Visualize TTL Events

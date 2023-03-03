@@ -237,7 +237,9 @@ class ThresholdCutoff(OperatorMixin):
 
         rates = firing_rates(spikestamps)["rates"]
         hist, bins = np.histogram(rates, bins=20)
-        logbins = np.logspace(np.log10(bins[0]), np.log10(bins[-1]), len(bins))
+        logbins = np.logspace(
+            np.log10(max(bins[0], 1e-3)), np.log10(bins[-1]), len(bins)
+        )
         fig = plt.figure()
         ax = plt.gca()
         ax.hist(rates, bins=logbins)
@@ -263,15 +265,16 @@ class ThresholdCutoff(OperatorMixin):
         ax.legend()
         if save_path is not None:
             fig.savefig(os.path.join(f"{save_path}", "firing_rate_histogram.png"))
+            with open(
+                os.path.join(f"{save_path}", "firing_rate_histogram.csv"), "w"
+            ) as f:
+                writer = csv.writer(f)
+                writer.writerow(["channel", "firing_rate_hz"])
+                data = list(enumerate(rates))
+                data.sort(reverse=True, key=lambda x: x[1])
+                for ch, rate in data:
+                    writer.writerow([ch, rate])
         if show:
             plt.show()
-
-        with open(os.path.join(f"{save_path}", "firing_rate_histogram.csv"), "w") as f:
-            writer = csv.writer(f)
-            writer.writerow(["channel", "firing_rate_hz"])
-            data = list(enumerate(rates))
-            data.sort(reverse=True, key=lambda x: x[1])
-            for ch, rate in data:
-                writer.writerow([ch, rate])
 
         return ax
