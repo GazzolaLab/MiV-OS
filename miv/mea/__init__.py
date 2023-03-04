@@ -1,5 +1,6 @@
 import numpy as np
 
+from miv.mea.channel_mapping import MEA_128
 from miv.mea.grid import *
 
 mea_map = {
@@ -45,7 +46,7 @@ mea_map = {
         dtype=np.int_,
     )
     - 1,
-    "128_dual_connector_two_64_rhd": np.array(  # Left and right headstages are flipped
+    "128_dual_connector_two_64_rhd": np.array(
         [
             (np.array([25, 24, 19, 18]) + 64).tolist()
             + (np.array([112, 109, 106, 103]) - 64).tolist(),

@@ -1,3 +1,5 @@
+__all__ = ["MEA_128"]
+
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
@@ -21,13 +23,13 @@ class MEA_128:
         self.oe_map = np.concatenate([rhd_64_1, rhd_64_2], axis=0)
 
         rhs_32_1 = rhs_32[::-1, ::-1].copy()
-        rhs_32_1[rhs_32_1 != -1] += 400
+        rhs_32_1[rhs_32_1 != -1] += 32 * 3
         rhs_32_2 = rhs_32[::-1, ::-1].copy()
-        rhs_32_2[rhs_32_2 != -1] += 300
+        rhs_32_2[rhs_32_2 != -1] += 32 * 2
         rhs_32_3 = rhs_32.copy()
-        rhs_32_3[rhs_32_3 != -1] += 200
+        rhs_32_3[rhs_32_3 != -1] += 32 * 1
         rhs_32_4 = rhs_32.copy()
-        rhs_32_4[rhs_32_4 != -1] += 100
+        rhs_32_4[rhs_32_4 != -1] += 32 * 0
         self.intan_map = np.concatenate(
             [rhs_32_1, rhs_32_2, rhs_32_3, rhs_32_4], axis=0
         )
@@ -54,13 +56,11 @@ class MEA_128:
             return intan
 
     def intan_channel_int_to_str(self, intan_channel):
-        return (
-            chr((intan_channel // 100) - 1 + ord("A")) + "-" + str(intan_channel % 100)
-        )
+        return chr((intan_channel // 32) + ord("A")) + "-" + str(intan_channel % 32)
 
     def intan_channel_str_to_int(self, intan_channel):
         group, channel = intan_channel.split("-")
-        return (ord(group) - ord("A") + 1) * 100 + int(channel)
+        return (ord(group) - ord("A")) * 32 + int(channel)
 
     def plot_network(self, channels, reverse=False):
         """

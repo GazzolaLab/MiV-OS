@@ -56,7 +56,7 @@ class DirectedConnectivity(OperatorMixin):
         Random seed. If None, use random seed, by default None
     """
 
-    mea: Union[str, np.ndarray]
+    mea: str = None
     channels: Optional[List[int]] = None
     bin_size: float = 0.001
     tag: str = "directional connectivity analysis"
@@ -73,6 +73,8 @@ class DirectedConnectivity(OperatorMixin):
         super().__init__()
         if isinstance(self.mea, str):
             self.mea_map = mea_map[self.mea]
+        else:
+            self.mea_map = mea_map["64_intanRHD"]
 
     @wrap_generator_to_generator
     def __call__(self, spikestamps: Spikestamps) -> np.ndarray:
