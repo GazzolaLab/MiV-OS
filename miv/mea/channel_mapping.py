@@ -47,8 +47,6 @@ class MEA128:
             If true, mapping is from "given Intan channel, output OE channel"
         """
         if reverse:
-            print(self.intan_map)
-            print(channel)
             oe = self.oe_map[self.intan_map == channel][0]
             return oe
         else:

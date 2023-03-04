@@ -12,6 +12,8 @@ __all__ = [
 from typing import Any, Dict, Iterable, List, Optional, Union
 
 import datetime
+import os
+from dataclasses import dataclass
 
 import elephant.statistics
 import matplotlib.pyplot as plt
@@ -22,6 +24,7 @@ import scipy
 import scipy.signal
 
 from miv.core.datatype import Spikestamps
+from miv.core.operator import OperatorMixin
 from miv.core.wrapper import miv_function
 from miv.typing import SpikestampsType
 
@@ -56,6 +59,59 @@ def firing_rates(spiketrains: Spikestamps) -> Dict[str, Any]:
         "mean": rates_mean_over_channel,
         "variance": rates_variance_over_channel,
     }
+
+
+@dataclass
+class MFRComparison(OperatorMixin):
+    recording_duration: float = None
+    tag: str = "Mean Firing Rate Comparison"
+
+    def __call__(self, pre_spiketrains: Spikestamps, post_spiketrains: Spikestamps):
+        pre_rates = firing_rates(pre_spiketrains)["rates"]
+        post_rates = firing_rates(post_spiketrains)["rates"]
+        if self.recording_duration is None:
+            self.recording_duration = max(
+                pre_spiketrains.get_last_spikestamp(),
+                post_spiketrains.get_last_spikestamp(),
+            ) - min(
+                pre_spiketrains.get_first_spikestamp(),
+                post_spiketrains.get_first_spikestamp(),
+            )
+        return pre_rates, post_rates
+
+    def __post_init__(self):
+        super().__init__()
+
+    def plot_mfr_comparison(self, output, show=False, save_path=None):
+        MFR_pre, MFR_post, duration = output
+
+        MFR = np.geomspace(1e-1, 1e2)
+        kl = 7
+        ku = 7
+        sigma = (
+            np.sqrt(np.mean([MFR_pre, MFR_post]) * self.recording_duration)
+            / self.recording_duration
+        )
+
+        fig = plt.figure()
+        plt.plot(MFR, MFR, "b--")
+        plt.plot(MFR, MFR - kl * sigma, "b")
+        plt.plot(MFR, MFR + ku * sigma, "b")
+        plt.scatter(MFR_pre, MFR_post)
+        ax = plt.gca()
+        ax.set_yscale("log")
+        ax.set_xscale("log")
+        ax.set_xlim([1e-1, 1e2])
+        ax.set_ylim([1e-1, 1e2])
+        ax.set_xlabel("MFR pre")
+        ax.set_ylabel("MFR post")
+
+        if show:
+            plt.show()
+        if save_path is not None:
+            fig.savefig(os.path.join(f"{save_path}", "mfr.png"))
+
+        return ax
 
 
 def interspike_intervals(spikes: SpikestampsType):
