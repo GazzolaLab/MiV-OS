@@ -43,14 +43,24 @@ class VanillaRunner:
 
 
 class MultiprocessingRunner:
+    def __init__(self, np: Optional[int] = None):
+        if np is None:
+            self._np = multiprocessing.cpu_count()
+        else:
+            self._np = np
+
+    @property
+    def num_proc(self):
+        return self._np
+
     def __call__(self, func, inputs=None, **kwargs):
         if inputs is None:
             raise NotImplementedError(
                 "Multiprocessing for operator with no generator input is not supported yet. Please use VanillaRunner for this operator."
             )
         else:
-            output = func(*inputs)
-        return output
+            with multiprocessing.Pool(self.num_proc) as p:
+                yield from p.imap(func, inputs)
 
 
 class StrictMPI:

@@ -54,43 +54,6 @@ def wrap_generator_to_generator(func):
     return wrapper
 
 
-# TODO: remove this
-'''
-def wrap_output_generator_collapse(*datatype_args: Union[DataTypes, Extendable]):
-    """
-    If all input arguments are generator, then the Generator output will be collapsed
-    into designated datatypes.
-
-    TODO: Fix to accomodate free functions
-    TODO: Allow for mixture of Generators and non-Generators returns
-    """
-
-    def wrapper_gen(func):
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            results = func(*args, **kwargs)
-            is_output_generator = inspect.isgenerator(results)
-            if is_output_generator:  # Collapse
-                stacks = [T() for T in datatype_args]
-                for result in results:
-                    if not isinstance(result, tuple):
-                        result = (result,)
-                    assert len(result) == len(datatype_args)
-                    for idx, item in enumerate(result):
-                        stacks[idx].extend(item)
-                if len(stacks) == 1:
-                    return stacks[0]
-                else:
-                    return tuple(stacks)
-            else:
-                return results
-
-        return wrapper
-
-    return wrapper_gen
-'''
-
-
 def miv_function(name, **params):
     """
     Decorator to convert a function into a MIV operator.
@@ -119,37 +82,6 @@ def miv_function(name, **params):
         return obj
 
     return decorator
-
-
-# TODO: remove this if wrap_output_generator_collapse is removed
-"""
-def test_output_generator_collapse():
-    def bar():
-        yield 1
-        yield 2
-        yield 3
-
-    class ExtendableList(UserList):
-        def extend(self, other):
-            self.data.append(other)
-
-    class foo_class:
-        @wrap_output_generator_collapse(ExtendableList, ExtendableList)
-        @wrap_generator_to_generator
-        def __call__(self, x, y):
-            return x + 1, y
-
-        @wrap_output_generator_collapse(ExtendableList)
-        @wrap_generator_to_generator
-        def other(self, x, y):
-            return x + 1
-
-    a = foo_class()
-    assert a.other(1, 2) == 2
-    assert a(1, 2) == (2, 2)
-    assert a.other(bar(), bar()) == ([2, 3, 4])
-    assert a(bar(), bar()) == ([2, 3, 4], [1, 2, 3])
-"""
 
 
 def test_wrap_generator():
