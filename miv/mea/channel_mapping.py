@@ -1,4 +1,4 @@
-__all__ = ["MEA_128"]
+__all__ = ["MEA128"]
 
 import matplotlib.pyplot as plt
 import networkx as nx
@@ -7,7 +7,7 @@ import numpy as np
 from miv.mea import mea_map, rhd_64, rhs_32
 
 
-class MEA_128:
+class MEA128:
     def __init__(self, map_key="128_dual_connector_two_64_rhd"):
         """
         OE Arangement:
@@ -36,7 +36,7 @@ class MEA_128:
 
         self.mea = mea_map[map_key]
 
-    def channel_mapping_128(self, channel, reverse=False):
+    def channel_mapping(self, channel, reverse=False):
         """
 
         Parameters
@@ -97,7 +97,7 @@ class MEA_128:
         for idl_channel in range(128):
             # if idl_channel in channels:
             #    continue
-            idl_intan_channel = self.channel_mapping_128(idl_channel)
+            idl_intan_channel = self.channel_mapping(idl_channel)
 
             oe_x, oe_y = np.where(oe_arrangement == idl_channel)
             oe_x, oe_y = oe_x[0], oe_y[0]
@@ -134,9 +134,9 @@ class MEA_128:
         for channel in channels:
             if reverse:
                 intan_channel = channel
-                channel = self.channel_mapping_128(intan_channel, reverse=True)
+                channel = self.channel_mapping(intan_channel, reverse=True)
             else:
-                intan_channel = self.channel_mapping_128(channel)
+                intan_channel = self.channel_mapping(channel)
 
             oe_x, oe_y = np.where(oe_arrangement == channel)
             oe_x, oe_y = oe_x[0], oe_y[0]
@@ -185,7 +185,7 @@ class MEA_128:
 
 
 if __name__ == "__main__":
-    mea_128 = MEA_128()
+    mea_128 = MEA128()
 
     # targets = [0,11,22,33,44,55,66,77,88,99,101,111]
     # mea_128.plot_network(targets)
