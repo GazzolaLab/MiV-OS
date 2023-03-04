@@ -27,36 +27,6 @@ from miv.core.operator.chainable import BaseChainingMixin, _Chainable
 from miv.core.policy import VanillaRunner, _Runnable, _RunnerProtocol
 
 
-def MixinOperators(func):
-    return func
-
-
-@MixinOperators
-def get_methods_from_feature_classes_by_startswith_str(self, method_name: str):
-    methods = [
-        [
-            v
-            for (k, v) in cls.__dict__.items()
-            if k.startswith(method_name) and method_name != k and callable(v)
-        ]
-        for cls in self.__class__.__mro__
-    ]
-    return list(itertools.chain.from_iterable(methods))
-
-
-@MixinOperators
-def get_methods_from_feature_classes_by_endswith_str(self, method_name: str):
-    methods = [
-        [
-            v
-            for (k, v) in cls.__dict__.items()
-            if k.endswith(method_name) and method_name != k and callable(v)
-        ]
-        for cls in self.__class__.__mro__
-    ]
-    return list(itertools.chain.from_iterable(methods))
-
-
 class Operator(
     _Callback,
     _Chainable,
@@ -170,47 +140,28 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin):
 
     def _execute(self):
         args: list[DataTypes] = self.receive()  # Receive data from upstream
+        # TODO : implement pre-run callback
+        # args = self.callback_before_run(args)
         if len(args) == 0:
-            self._output = self.runner(self.__call__)
+            output = self.runner(self.__call__)
         else:
-            self._output = self.runner(self.__call__, args)
+            output = self.runner(self.__call__, args)
+        # Post Processing
+        self._output = self.callback_after_run(output)
 
     def run(
         self,
         save_path: str | pathlib.Path,
         dry_run: bool = False,
         cache_dir: str | pathlib.Path = ".cache",
-        enable_callback: bool = True,
+        enable_save_plot: bool = True,
     ) -> None:
         # Execute the module
         self.analysis_path = os.path.join(save_path, self.tag.replace(" ", "_"))
         self.cacher.cache_dir = os.path.join(self.analysis_path, cache_dir)
 
-        if enable_callback:
-            self.callback_before_run()
-
         if dry_run:
             print("Dry run: ", self.__class__.__name__)
             return
         self._execute()
-
-        # Post Processing
-        if enable_callback:
-            self.callback_after_run()
-
-    def plot(
-        self,
-        show: bool = False,
-        save_path: bool | str | pathlib.Path | None = None,
-        dry_run: bool = False,
-    ):
-        if save_path is True:
-            os.makedirs(self.analysis_path, exist_ok=True)
-            save_path = self.analysis_path
-        plotters = get_methods_from_feature_classes_by_startswith_str(self, "plot")
-        if dry_run:
-            for plotter in plotters:
-                print(f"dry run: {plotter}")
-            return
-        for plotter in plotters:
-            plotter(self, self._output, show=show, save_path=save_path)
+        self.plot(save_path=save_path, dry_run=dry_run)

@@ -15,7 +15,7 @@ Tutorial
    signal_processing
    custom_callbacks
    spike_cutout
-   spike_sorting
+..spike_sorting
 
 
 Indices and tables

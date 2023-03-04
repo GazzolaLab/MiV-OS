@@ -21,9 +21,10 @@ Code Example::
 """
 __all__ = ["ThresholdCutoff"]
 
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
+from typing import Any, Dict, Generator, Iterable, List, Optional, Tuple, Union
 
 import csv
+import inspect
 import os
 import pathlib
 from dataclasses import dataclass
@@ -36,13 +37,18 @@ from tqdm import tqdm
 
 from miv.core.datatype import Signal, Spikestamps
 from miv.core.operator import OperatorMixin
-from miv.core.wrapper import wrap_generator_to_generator, wrap_output_generator_collapse
+from miv.core.policy import InternallyMultiprocessing
+from miv.core.wrapper import wrap_generator_to_generator
 from miv.statistics import firing_rates
 from miv.typing import SignalType, SpikestampsType, TimestampsType
 
 
+def lambdax(x):
+    return x
+
+
 @dataclass
-class ThresholdCutoff(OperatorMixin):
+class ThresholdCutoff(OperatorMixin, InternallyMultiprocessing):
     """ThresholdCutoff
     Spike sorting step by step guide is well documented `here <http://www.scholarpedia.org/article/Spike_sorting>`_.
 
@@ -72,10 +78,10 @@ class ThresholdCutoff(OperatorMixin):
     use_mad: bool = True
     tag: str = "spike detection"
     progress_bar: bool = False
-    units: Union[str, pq.UnitTime] = "sec"
+    units: str = "sec"
     return_neotype: bool = False  # TODO: Remove, shift to spikestamps datatype
 
-    @wrap_output_generator_collapse(Spikestamps)
+    # @wrap_output_generator_collapse(Spikestamps)
     @wrap_generator_to_generator
     def __call__(self, signal: SignalType) -> SpikestampsType:
         """Execute threshold-cutoff method and return spike stamps
@@ -98,13 +104,13 @@ class ThresholdCutoff(OperatorMixin):
             array = signal[channel]  # type: ignore
 
             # Spike Detection: get spikestamp
-            spike_threshold = self.compute_spike_threshold(
+            spike_threshold = self._compute_spike_threshold(
                 array, cutoff=self.cutoff, use_mad=self.use_mad
             )
-            crossings = self.detect_threshold_crossings(
+            crossings = self._detect_threshold_crossings(
                 array, rate, spike_threshold, self.dead_time
             )
-            spikes = self.align_to_minimum(array, rate, crossings, self.search_range)
+            spikes = self._align_to_minimum(array, rate, crossings, self.search_range)
             spikestamp = spikes / rate + timestamps.min()
             # Convert spikestamp to neo.SpikeTrain (for plotting)
             if self.return_neotype:
@@ -122,7 +128,17 @@ class ThresholdCutoff(OperatorMixin):
     def __post_init__(self):
         super().__init__()
 
-    def compute_spike_threshold(
+    def after_run_collapse_spiketrain(
+        self, spiketrains: Union[Generator[Spikestamps, None, None], Spikestamps]
+    ):
+        if not inspect.isgenerator(spiketrains):
+            return spiketrains
+        collapsed_result = Spikestamps()
+        for spiketrain in spiketrains:
+            collapsed_result.extend(spiketrain)
+        return collapsed_result
+
+    def _compute_spike_threshold(
         self, signal: SignalType, cutoff: float = 5.0, use_mad: bool = True
     ) -> (
         float
@@ -148,7 +164,7 @@ class ThresholdCutoff(OperatorMixin):
         spike_threshold = -cutoff * noise_mid
         return spike_threshold
 
-    def detect_threshold_crossings(
+    def _detect_threshold_crossings(
         self, signal: SignalType, fs: float, threshold: float, dead_time: float
     ):
         """
@@ -183,7 +199,7 @@ class ThresholdCutoff(OperatorMixin):
             )
         return threshold_crossings
 
-    def get_next_minimum(self, signal, index, max_samples_to_search):
+    def _get_next_minimum(self, signal, index, max_samples_to_search):
         """
         Returns the index of the next minimum in the signal after an index
 
@@ -195,7 +211,7 @@ class ThresholdCutoff(OperatorMixin):
         min_idx = np.argmin(signal[index:search_end_idx])
         return index + min_idx
 
-    def align_to_minimum(self, signal, fs, threshold_crossings, search_range):
+    def _align_to_minimum(self, signal, fs, threshold_crossings, search_range):
         """
         Returns the index of the next negative spike peak for all threshold crossings
 
@@ -206,7 +222,7 @@ class ThresholdCutoff(OperatorMixin):
         """
         search_end = int(search_range * fs)
         aligned_spikes = [
-            self.get_next_minimum(signal, t, search_end) for t in threshold_crossings
+            self._get_next_minimum(signal, t, search_end) for t in threshold_crossings
         ]
         return np.array(aligned_spikes)
 

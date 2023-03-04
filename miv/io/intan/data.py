@@ -14,7 +14,6 @@ from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, Un
 import logging
 import os
 import pickle
-import xml.etree.ElementTree as ET
 from glob import glob
 
 import matplotlib.pyplot as plt
@@ -99,6 +98,8 @@ class DataIntan(Data):
         )
 
     def _generator_by_channel_name(self, name: str, progress_bar: bool = False):
+        import xml.etree.ElementTree as ET
+
         if not self.check_path_validity():
             raise FileNotFoundError("Data directory does not have all necessary files.")
         files = self.get_recording_files()

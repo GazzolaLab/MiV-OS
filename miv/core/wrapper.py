@@ -1,3 +1,7 @@
+__all__ = [
+    "wrap_generator_to_generator",
+]
+
 import types
 from typing import Protocol, Union
 
@@ -50,6 +54,8 @@ def wrap_generator_to_generator(func):
     return wrapper
 
 
+# TODO: remove this
+'''
 def wrap_output_generator_collapse(*datatype_args: Union[DataTypes, Extendable]):
     """
     If all input arguments are generator, then the Generator output will be collapsed
@@ -82,6 +88,7 @@ def wrap_output_generator_collapse(*datatype_args: Union[DataTypes, Extendable])
         return wrapper
 
     return wrapper_gen
+'''
 
 
 def miv_function(name, **params):
@@ -114,6 +121,8 @@ def miv_function(name, **params):
     return decorator
 
 
+# TODO: remove this if wrap_output_generator_collapse is removed
+"""
 def test_output_generator_collapse():
     def bar():
         yield 1
@@ -140,6 +149,7 @@ def test_output_generator_collapse():
     assert a(1, 2) == (2, 2)
     assert a.other(bar(), bar()) == ([2, 3, 4])
     assert a(bar(), bar()) == ([2, 3, 4], [1, 2, 3])
+"""
 
 
 def test_wrap_generator():

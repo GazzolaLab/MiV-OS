@@ -68,10 +68,10 @@ def callback_statistics(self, signal:Signal):
     signal = next(signal)  # Get the first signal fragment
     for channel in range(5):
         print(f"{channel=} | mean={signal.data[channel].mean():.2f} | std={signal.data[channel].std():.2f} | median={np.median(signal.data[channel]):.2f}")
+    return signal
 
 def callback_median_histogram(self, signal:Signal):
     """Plot the histogram of the median of each channel"""
-    signal = next(signal)  # Get the first signal fragment
     medians = []
     for channel in range(signal.number_of_channels):
         medians.append(np.median(signal.data[channel]))
@@ -79,12 +79,17 @@ def callback_median_histogram(self, signal:Signal):
     plt.title("Histogram of the median of each channel")
     plt.xlabel("Median (mV)")
     plt.ylabel("Count")
+    return signal
 ```
 
 We can then pass the callback function to the operator using `<<` operator.
 
 ```{code-cell} ipython3
 bandpass_filter << callback_statistics << callback_median_histogram
+```
+
+```{note}
+The callback function will be called __in the order__ of the `<<` operator. In the above example, the `callback_statistics` function will be called first, followed by `callback_median_histogram`, hence the input of the `callback_median_histogram` function is the output of the `callback_statistics` function.
 ```
 
 Lets run the pipeline and see the result.
