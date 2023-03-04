@@ -1,6 +1,5 @@
 import numpy as np
 
-from miv.mea.channel_mapping import MEA128
 from miv.mea.grid import *
 
 mea_map = {
