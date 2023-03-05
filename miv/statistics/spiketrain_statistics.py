@@ -83,7 +83,7 @@ class MFRComparison(OperatorMixin):
         super().__init__()
 
     def plot_mfr_comparison(self, output, show=False, save_path=None):
-        MFR_pre, MFR_post, duration = output
+        MFR_pre, MFR_post = output
 
         MFR = np.geomspace(1e-1, 1e2)
         kl = 7
