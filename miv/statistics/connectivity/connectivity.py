@@ -26,13 +26,14 @@ from tqdm import tqdm
 
 from miv.core.datatype import Signal, Spikestamps
 from miv.core.operator import OperatorMixin
+from miv.core.policy import InternallyMultiprocessing
 from miv.core.wrapper import wrap_generator_to_generator
 from miv.mea import mea_map
 
 
 # self MPI-able
 @dataclass
-class DirectedConnectivity(OperatorMixin):
+class DirectedConnectivity(OperatorMixin, InternallyMultiprocessing):
     """
     Directional connectivity analysis operator
 
@@ -86,44 +87,69 @@ class DirectedConnectivity(OperatorMixin):
         """
 
         binned_spiketrain: Signal = spikestamps.binning(bin_size=self.bin_size)
-        n_nodes = (
-            binned_spiketrain.number_of_channels
-            if self.channels is None
-            else len(self.channels)
-        )
-        channels = self.channels if self.channels is not None else list(range(n_nodes))
+
+        # Channel Selection
+        if self.channels is None:
+            n_nodes = binned_spiketrain.number_of_channels
+            channels = list(range(n_nodes))
+        else:
+            n_nodes = len(self.channels)
+            channels = self.channels
+            binned_spiketrain = binned_spiketrain.select(channels)
 
         # Get adjacency matrix based on transfer entropy
         adj_matrix = np.zeros([n_nodes, n_nodes], dtype=np.bool_)  # source -> target
         connectivity_metric_matrix = np.zeros(
             [n_nodes, n_nodes], dtype=np.float_
         )  # source -> target
-        # TODO: Use mp.Pool
-        for sidx, source in tqdm(
-            enumerate(channels), disable=not self.progress_bar, total=len(channels)
-        ):
-            if source not in self.mea_map:
-                continue
-            p_values = []
-            metric_values = []
-            for tidx, target in tqdm(
-                enumerate(channels),
-                disable=not self.progress_bar,
-                leave=False,
-                total=len(channels),
+
+        pairs = [(i, j) for i, j in itertools.product(range(n_nodes), range(n_nodes))]
+        func = functools.partial(
+            self._get_connection_info,
+            binned_spiketrain=binned_spiketrain,
+            channels=channels,
+            mea=self.mea_map,
+            skip_surrogate=self.skip_surrogate,
+            surrogate_N=self.surrogate_N,
+            seed=self.seed,
+        )
+        with mp.Pool(self.num_proc) as pool:
+            for idx, result in enumerate(
+                tqdm(
+                    pool.imap(func, pairs),
+                    total=len(pairs),
+                    disable=not self.progress_bar,
+                )
             ):
-                if source != target and target in self.mea_map:
-                    source_binned_spiketrain = binned_spiketrain[sidx]
-                    target_binned_spiketrain = binned_spiketrain[tidx]
-                    p, metrics = self._get_connection_info(
-                        source_binned_spiketrain, target_binned_spiketrain
-                    )
-                else:
-                    p, metrics = 1, 0
-                p_values.append(p)
-                metric_values.append(metrics)
-            adj_matrix[sidx] = np.array(p_values) < self.p_threshold
-            connectivity_metric_matrix[sidx] = np.array(metric_values)
+                i, j = pairs[idx]
+                adj_matrix[i, j] = result[0] < self.p_threshold
+                connectivity_metric_matrix[i, j] = result[1]
+
+        # for sidx, source in tqdm(
+        #     enumerate(channels), disable=not self.progress_bar, total=len(channels)
+        # ):
+        #     if source not in self.mea_map:
+        #         continue
+        #     p_values = []
+        #     metric_values = []
+        #     for tidx, target in tqdm(
+        #         enumerate(channels),
+        #         disable=not self.progress_bar,
+        #         leave=False,
+        #         total=len(channels),
+        #     ):
+        #         if source != target and target in self.mea_map:
+        #             source_binned_spiketrain = binned_spiketrain[sidx]
+        #             target_binned_spiketrain = binned_spiketrain[tidx]
+        #             p, metrics = self._get_connection_info(
+        #                 source_binned_spiketrain, target_binned_spiketrain
+        #             )
+        #         else:
+        #             p, metrics = 1, 0
+        #         p_values.append(p)
+        #         metric_values.append(metrics)
+        #     adj_matrix[sidx] = np.array(p_values) < self.p_threshold
+        #     connectivity_metric_matrix[sidx] = np.array(metric_values)
         connection_ratio = adj_matrix.sum() / adj_matrix.ravel().shape[0]
 
         info = dict(
@@ -134,10 +160,19 @@ class DirectedConnectivity(OperatorMixin):
 
         return info
 
-    def _surrogate_t_test(self, source, target, te_history=4, sublength=64, stride=8):
+    @staticmethod
+    def _surrogate_t_test(
+        source, target, skip_surrogate=False, surrogate_N=30, seed=None
+    ):
         """
         Surrogate t-test
         """
+        # Function configuration. TODO: Make this dependency injection
+        func = pyte.transfer_entropy
+        te_history = 4
+        sublength = 64
+        stride = 8
+
         assert (
             source.shape[0] == target.shape[0]
         ), f"source.shape={source.shape}, target.shape={target.shape}"
@@ -145,24 +180,24 @@ class DirectedConnectivity(OperatorMixin):
             source.shape[0] - sublength > 0
         ), f"source.shape[0]={source.shape[0]}, sublength={sublength}"
 
-        rng = np.random.default_rng(self.seed)  # TODO take rng instead
+        rng = np.random.default_rng(seed)  # TODO take rng instead
 
         tes = []
         for start_index in np.arange(0, source.shape[0] - sublength, stride):
             end_index = start_index + sublength
-            te = pyte.transfer_entropy(
+            te = func(
                 source[start_index:end_index], target[start_index:end_index], te_history
             )
             tes.append(te)
 
         surrogate_tes = []
-        if not self.skip_surrogate:
-            for _ in range(self.surrogate_N):
+        if not skip_surrogate:
+            for _ in range(surrogate_N):
                 surrogate_source = source.copy()
                 rng.shuffle(surrogate_source)
                 for start_index in np.arange(0, source.shape[0] - sublength, stride):
                     end_index = start_index + sublength
-                    surr_te = pyte.transfer_entropy(
+                    surr_te = func(
                         surrogate_source[start_index:end_index],
                         target[start_index:end_index],
                         te_history,
@@ -171,11 +206,27 @@ class DirectedConnectivity(OperatorMixin):
 
         return tes, surrogate_tes
 
-    def _get_connection_info(self, source, target):
+    @staticmethod
+    def _get_connection_info(
+        pair, binned_spiketrain, channels, mea, skip_surrogate, surrogate_N, seed
+    ):
         """
         Get connection information
         """
-        te_list, surrogate_te_list = self._surrogate_t_test(source, target)
+        sid, tid = pair
+        if sid == tid:
+            return 1, 0
+        if channels[sid] not in mea or channels[tid] not in mea:
+            return 1, 0
+        source = binned_spiketrain[sid]
+        target = binned_spiketrain[tid]
+        te_list, surrogate_te_list = DirectedConnectivity._surrogate_t_test(
+            source,
+            target,
+            skip_surrogate=skip_surrogate,
+            surrogate_N=surrogate_N,
+            seed=seed,
+        )
         t_value, p_value = spst.ttest_ind(
             te_list, surrogate_te_list, equal_var=False, nan_policy="omit"
         )

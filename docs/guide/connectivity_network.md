@@ -56,7 +56,7 @@ Next, we will import the "DirectedConnectivity" module from the "miv.statistics.
 
 ```{code-cell} ipython3
 from miv.statistics.connectivity import DirectedConnectivity
-connectivity_analysis = DirectedConnectivity(mea="64_intanRHD", skip_surrogate=True, progress_bar=False, channels=[11, 26, 37, 50])
+connectivity_analysis = DirectedConnectivity(mea="64_intanRHD", skip_surrogate=True, progress_bar=True, channels=[11, 26, 37, 50])
 
 spike_detection >> connectivity_analysis
 print(data.summarize())  # Print the summary of data flow
