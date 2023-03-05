@@ -242,7 +242,7 @@ class ThresholdCutoff(OperatorMixin, InternallyMultiprocessing):
         ax.set_xlabel("Time (s)")
         ax.set_ylabel("Channel")
         if save_path is not None:
-            plt.savefig(save_path)
+            plt.savefig(os.path.join(save_path, "spiketrain_raster.png"))
         if show:
             plt.show()
         return ax

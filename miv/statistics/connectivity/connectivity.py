@@ -99,13 +99,18 @@ class DirectedConnectivity(OperatorMixin):
             [n_nodes, n_nodes], dtype=np.float_
         )  # source -> target
         # TODO: Use mp.Pool
-        for sidx, source in tqdm(enumerate(channels), disable=not self.progress_bar):
+        for sidx, source in tqdm(
+            enumerate(channels), disable=not self.progress_bar, total=len(channels)
+        ):
             if source not in self.mea_map:
                 continue
             p_values = []
             metric_values = []
             for tidx, target in tqdm(
-                enumerate(channels), disable=not self.progress_bar, leave=False
+                enumerate(channels),
+                disable=not self.progress_bar,
+                leave=False,
+                total=len(channels),
             ):
                 if source != target and target in self.mea_map:
                     source_binned_spiketrain = binned_spiketrain[sidx]
