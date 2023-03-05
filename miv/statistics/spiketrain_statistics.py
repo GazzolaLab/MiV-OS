@@ -1,5 +1,6 @@
 __all__ = [
     "firing_rates",
+    "MFRComparison",
     "interspike_intervals",
     "coefficient_variation",
     "peri_stimulus_time",
