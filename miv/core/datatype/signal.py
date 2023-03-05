@@ -46,6 +46,12 @@ class Signal(SupportMultiprocessing, DataNodeMixin):
     def __getitem__(self, i: int) -> SignalType:
         return self.data[:, i]  # TODO: Fix to row-major
 
+    def select(self, indices: Tuple[int, ...]) -> "Signal":
+        """
+        Select channels by indices.
+        """
+        return Signal(self.data[:, indices], self.timestamps, self.rate)
+
     def get_start_time(self):
         return self.timestamps.min()
 

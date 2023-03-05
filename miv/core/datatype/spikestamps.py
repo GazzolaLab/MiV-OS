@@ -25,11 +25,13 @@ class Spikestamps(UserList, CollapseExtendableMixin, DataNodeMixin):
     """List of array of spike times
 
     Represents spikes emitted by the same unit in a period of times.
+
+    Comply with `ChannelWise` and `Extendable` protocols.
     """
 
     def __init__(self, iterable: Optional[List] = None):
         super().__init__()
-        if iterable is None:
+        if iterable is None:  # Default
             iterable = []
         self.data = iterable
 
@@ -102,6 +104,10 @@ class Spikestamps(UserList, CollapseExtendableMixin, DataNodeMixin):
                 for arr in self.data
             ]
         )
+
+    def select(self, indices):
+        """Select channels by indices."""
+        return Spikestamps([self.data[idx] for idx in indices])
 
     def neo(self):
         """Cast to neo.SpikeTrain"""
