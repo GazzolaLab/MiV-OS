@@ -15,23 +15,27 @@ from miv.core.datatype import DataTypes, Extendable
 from miv.core.operator.operator import Operator, OperatorMixin
 
 
-def wrap_cacher(func):
+def wrap_cacher(cache_tag):
     """
     Decorator to wrap the function to use cacher.
     """
 
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        self: Operator = args[0]
-        if self.cacher.check_cached():
-            return next(self.cacher.load_cached())
-        else:
-            result = func(*args, **kwargs)
-            self.cacher.save_cache(result)
-            self.cacher.save_config()
-            return result
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            self: Operator = args[0]
+            self.cacher.cache_tag = cache_tag
+            if self.cacher.check_cached(cache_tag=cache_tag):
+                return self.cacher.load_cached(cache_tag=cache_tag)
+            else:
+                result = func(*args, **kwargs)
+                self.cacher.save_cache(resultcache_tag=cache_tag)
+                self.cacher.save_config(cache_tag=cache_tag)
+                return result
 
-    return wrapper
+        return wrapper
+
+    return decorator
 
 
 def wrap_generator_to_generator(func):

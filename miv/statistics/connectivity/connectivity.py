@@ -77,7 +77,7 @@ class DirectedConnectivity(OperatorMixin, InternallyMultiprocessing):
         else:
             self.mea_map = mea_map["64_intanRHD"]
 
-    @wrap_cacher
+    @wrap_cacher(cache_tag="adjacency_matrix")
     def __call__(self, spikestamps: Spikestamps) -> np.ndarray:
         """__call__.
 

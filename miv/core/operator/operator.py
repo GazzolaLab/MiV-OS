@@ -21,7 +21,12 @@ from dataclasses import dataclass
 if TYPE_CHECKING:
     from miv.core.datatype import DataTypes
 
-from miv.core.operator.cachable import DataclassCacher, _Cachable, _CacherProtocol
+from miv.core.operator.cachable import (
+    DataclassCacher,
+    FunctionalCacher,
+    _Cachable,
+    _CacherProtocol,
+)
 from miv.core.operator.callback import BaseCallbackMixin, _Callback
 from miv.core.operator.chainable import BaseChainingMixin, _Chainable
 from miv.core.policy import VanillaRunner, _Runnable, _RunnerProtocol
@@ -43,6 +48,7 @@ class Operator(
 class DataLoader(
     _Callback,
     _Chainable,
+    _Cachable,
     _Runnable,
     Protocol,
 ):
@@ -80,6 +86,8 @@ class DataLoaderMixin(BaseChainingMixin, BaseCallbackMixin):
         self._output: DataTypes | None = None
 
         self.runner = VanillaRunner()
+        self.cacher = FunctionalCacher(self)
+        self.cacher.cache_dir = os.path.join(self.data_path, ".cache")
 
     @property
     def output(self) -> list[DataTypes]:

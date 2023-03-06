@@ -6,14 +6,18 @@ Module (Intan)
 .. autoclass:: DataIntan
    :members:
 
+.. autoclass:: DataIntanTriggered
+   :members:
+
 """
-__all__ = ["DataIntan"]
+__all__ = ["DataIntan", "DataIntanTriggered"]
 
 from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, Union
 
 import logging
 import os
 import pickle
+import xml.etree.ElementTree as ET
 from glob import glob
 
 import matplotlib.pyplot as plt
@@ -22,12 +26,9 @@ from tqdm import tqdm
 
 import miv.io.intan.rhs as rhs
 from miv.core.datatype import Signal
+from miv.core.wrapper import wrap_cacher
 from miv.io.openephys.data import Data, DataManager
 from miv.typing import SignalType
-
-
-class DataManagerIntan(DataManager):
-    pass
 
 
 class DataIntan(Data):
@@ -98,8 +99,6 @@ class DataIntan(Data):
         )
 
     def _generator_by_channel_name(self, name: str, progress_bar: bool = False):
-        import xml.etree.ElementTree as ET
-
         if not self.check_path_validity():
             raise FileNotFoundError("Data directory does not have all necessary files.")
         files = self.get_recording_files()
@@ -149,3 +148,114 @@ class DataIntan(Data):
     # Disable
     def load_ttl_event(self):
         raise AttributeError("DataIntan does not have laod_ttl_event method")
+
+
+class DataIntanTriggered(DataIntan):
+    """
+    DataIntanTriggered is a subclass of DataIntan, which is used to handle Intan
+    recording when the recording is triggered by TTL signals.
+    """
+
+    def __init__(
+        self,
+        index: int = 0,
+        trigger_key: str = "board_adc_data",
+        trigger_index: int = 0,
+        trigger_threshold_voltage=1.0,
+        *args,
+        **kwargs,
+    ):
+        super().__init__(*args, **kwargs)
+        self.index = index
+        self.trigger_key = trigger_key
+        self.trigger_index = trigger_index
+        self.trigger_threshold_voltage = trigger_threshold_voltage
+
+    def __getitem__(self, index):
+        self.index = index
+        return self
+
+    @wrap_cacher(cache_tag="trigger_grouping")
+    def _trigger_grouping(self, paths):
+        def _find_sequence(arr):
+            if arr.size == 0:
+                return arr
+            return arr[np.concatenate([np.array([True]), arr[1:] - 1 != arr[:-1]])]
+
+        group_files = []
+        group = {"paths": [], "start index": [], "end index": []}
+        status = 0
+        for file in paths:
+            result, _ = rhs.load_file(file)
+            time = result["t"]
+            adc_data = result[self.trigger_key][self.trigger_index]
+            diff_adc_data = adc_data[1:] - adc_data[:-1]
+            # TODO: Something can be done better
+            recording_on = _find_sequence(
+                np.where(diff_adc_data > self.trigger_threshold_voltage)[0]
+            ).tolist()
+            recording_off = _find_sequence(
+                np.where(diff_adc_data < -self.trigger_threshold_voltage)[0]
+            ).tolist()
+
+            sindex = 0
+            if status == 1 and len(recording_on) == 0 and len(recording_off) == 0:
+                group["paths"].append(file)
+                group["start index"].append(sindex)
+                group["end index"].append(time.shape[0])
+            while len(recording_on) > 0 or len(recording_off) > 0:
+                if status == 0 and len(recording_on) > 0:
+                    sindex = recording_on.pop(0)
+                    status = 1
+                    if len(recording_off) == 0:
+                        group["paths"].append(file)
+                        group["start index"].append(sindex)
+                        group["end index"].append(time.shape[0])
+                elif status == 1 and len(recording_off) > 0:
+                    eindex = recording_off.pop(0)
+                    status = 0
+                    if eindex < sindex:
+                        raise ValueError(
+                            f"Something went wrong with the trigger signal. Starting index {sindex} must be less than ending index {eindex}."
+                        )
+                    group["paths"].append(file)
+                    group["start index"].append(sindex)
+                    group["end index"].append(eindex)
+                    group_files.append(group)
+                    group = {"paths": [], "start index": [], "end index": []}
+                else:
+                    raise ValueError(
+                        f"Something went wrong with the trigger signal. {len(recording_on)=} {len(recording_off)=}"
+                    )
+
+        return group_files
+
+    def get_recording_files(self):
+        paths = DataIntan.get_recording_files(self)
+        groups = self._trigger_grouping(paths)
+        return groups[self.index]["paths"]
+
+    def _generator_by_channel_name(self, name: str, progress_bar: bool = False):
+        if not self.check_path_validity():
+            raise FileNotFoundError("Data directory does not have all necessary files.")
+        groups = self._trigger_grouping(None)  # Should be cached
+        files = groups[self.index]["paths"]
+        sindex = groups[self.index]["start index"]
+        eindex = groups[self.index]["end index"]
+        # Get sampling rate from setting file
+        setting_path = os.path.join(self.data_path, "settings.xml")
+        sampling_rate = int(ET.parse(setting_path).getroot().attrib["SampleRateHertz"])
+        # Read each files
+        for filename, sidx, eidx in tqdm(
+            zip(files, sindex, eindex), disable=not progress_bar
+        ):
+            result, data_present = rhs.load_file(filename)
+            assert data_present, f"Data does not present: {filename=}."
+            assert not hasattr(result, name), f"No {name} in the file ({filename=})."
+
+            # signal_group = result["amplifier_channels"]
+            yield Signal(
+                data=np.asarray(result[name]).T[sidx:eidx, :],
+                timestamps=np.asarray(result["t"])[sidx:eidx],
+                rate=sampling_rate,
+            )
