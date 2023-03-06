@@ -17,6 +17,7 @@ from tqdm import tqdm
 
 from miv.core.datatype import Signal, Spikestamps
 from miv.core.operator import OperatorMixin
+from miv.core.wrapper import wrap_cacher
 from miv.mea import mea_map
 
 
@@ -77,26 +78,23 @@ class PSTH(OperatorMixin):
         else:
             self.mea_map = mea_map["64_intanRHD"]
 
+    @wrap_cacher('psth')
     def __call__(self, events: Spikestamps, spikestamps: Spikestamps):
-        n_time = (
-            np.rint((self.interval - self.stimulus_length) / (self.binsize)).astype(
-                np.int_
-            )
-            - 1
-        )
-        time_axis = np.linspace(self.stimulus_length, self.interval, n_time)
+        n_time = int(np.ceil(self.interval / self.binsize))
+        time_axis = np.linspace(0, self.interval, n_time)
         psth = np.zeros((spikestamps.number_of_channels, n_time))
-        for channel, spikestamps in enumerate(spikestamps):
-            for t_start in events:
-                t_end = t_start + self.interval
-                bst = spikestamps.get_view(
-                    t_start + self.stimulus_length,
-                    t_end + self.stimulus_length,
-                ).binning(self.bin_size)
-                psth[channel] += bst
+        for t_start in events[0]:
+            t_end = t_start + n_time * self.binsize
+            bst = spikestamps.binning(
+                self.binsize, 
+                t_start=t_start + self.stimulus_length,
+                t_end=t_end + self.stimulus_length,
+            )
+            for channel in range(spikestamps.number_of_channels):
+                psth[channel] += bst[channel][:n_time]
         psth /= len(events)
         psth /= self.binsize
-        return Signal(data=psth, timestamps=time_axis, rate=1.0 / self.binsize)
+        return Signal(data=psth.T, timestamps=time_axis, rate=1.0 / self.binsize)
 
     def plot_psth_in_grid_map(
         self, psth, show=False, save_path=None, axes=None, label=""
@@ -107,7 +105,10 @@ class PSTH(OperatorMixin):
             fig, axes = plt.subplots(
                 nrow, ncol, figsize=(nrow * 4, ncol * 4), sharex=True, sharey=True
             )
-        for channel, p in range(psth.number_of_channels):
+        print(type(psth))
+        print(psth)
+        print(next(psth))
+        for channel in range(psth.number_of_channels):
             p = psth[channel]
             time = psth.timestamps
             if channel not in mea_map:

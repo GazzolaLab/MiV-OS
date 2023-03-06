@@ -90,11 +90,13 @@ class Spikestamps(CollapseExtendableMixin, DataNodeMixin, UserList):
 
     def get_last_spikestamp(self):
         """Return timestamps of the last spike in this spikestamps"""
-        return max([max(data) for data in self.data if len(data) > 0])
+        rowmax = [max(data) for data in self.data if len(data) > 0]
+        return 0 if len(rowmax) == 0 else max(rowmax)
 
     def get_first_spikestamp(self):
         """Return timestamps of the first spike in this spikestamps"""
-        return min([min(data) for data in self.data if len(data) > 0])
+        rowmin = [min(data) for data in self.data if len(data) > 0]
+        return 0 if len(rowmin) == 0 else min(rowmin)
 
     def get_view(self, t_start: float, t_end: float):
         """Truncate array and only includes spikestamps between t_start and t_end."""

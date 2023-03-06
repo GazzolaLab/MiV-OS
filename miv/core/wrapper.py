@@ -26,7 +26,7 @@ def wrap_cacher(cache_tag):
             self: Operator = args[0]
             self.cacher.cache_tag = cache_tag
             if self.cacher.check_cached():
-                return self.cacher.load_cached()
+                return next(self.cacher.load_cached())
             else:
                 result = func(*args, **kwargs)
                 self.cacher.save_cache(result)
