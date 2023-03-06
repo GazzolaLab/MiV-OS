@@ -67,7 +67,6 @@ class PSTH(OperatorMixin):
     interval: float = 0.4  # seconds
     tag: str = "peri-stimulus time histogram"
 
-    minimum_stimulus_gap = 0.010
     stimulus_length = 0.010
 
     def __post_init__(self):
