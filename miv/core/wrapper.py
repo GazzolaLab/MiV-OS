@@ -29,7 +29,7 @@ def wrap_cacher(cache_tag):
                 return self.cacher.load_cached()
             else:
                 result = func(*args, **kwargs)
-                self.cacher.save_cache()
+                self.cacher.save_cache(result)
                 self.cacher.save_config()
                 return result
 

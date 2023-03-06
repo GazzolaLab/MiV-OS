@@ -107,12 +107,13 @@ class SkipCache:  # TODO
         )
 
 
-def when_policy_is(self, *policy):
+def when_policy_is(*policy):
     def decorator(func):
         @functools.wraps(func)
-        def wrapper(self, *args, **kwargs):
+        def wrapper(*args, **kwargs):
+            self = args[0]
             if self.policy in policy:
-                return func(self, *args, **kwargs)
+                return func(*args, **kwargs)
             else:
                 return False
 
