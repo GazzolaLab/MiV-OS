@@ -2666,14 +2666,14 @@ numpy = "*"
 
 [[package]]
 name = "pylint"
-version = "2.16.2"
+version = "2.16.3"
 description = "python code static checker"
 category = "dev"
 optional = false
 python-versions = ">=3.7.2"
 files = [
-    {file = "pylint-2.16.2-py3-none-any.whl", hash = "sha256:ff22dde9c2128cd257c145cfd51adeff0be7df4d80d669055f24a962b351bbe4"},
-    {file = "pylint-2.16.2.tar.gz", hash = "sha256:13b2c805a404a9bf57d002cd5f054ca4d40b0b87542bdaba5e05321ae8262c84"},
+    {file = "pylint-2.16.3-py3-none-any.whl", hash = "sha256:3e803be66e3a34c76b0aa1a3cf4714b538335e79bd69718d34fcf36d8fff2a2b"},
+    {file = "pylint-2.16.3.tar.gz", hash = "sha256:0decdf8dfe30298cd9f8d82e9a1542da464db47da60e03641631086671a03621"},
 ]
 
 [package.dependencies]
@@ -3982,4 +3982,4 @@ experiment = ["lyon", "pyserial"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<3.11"
-content-hash = "c65c5a4a385ece2b8a65e738330c907af92918c2563e98adda6722c4516157b5"
+content-hash = "377265397be35ee1ab7cdb6519e8fa05ec7acab6ccfae644ffe97738884d4134"
