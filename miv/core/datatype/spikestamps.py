@@ -21,7 +21,7 @@ from miv.core.datatype.signal import Signal
 from miv.core.operator.operator import DataNodeMixin
 
 
-class Spikestamps(UserList, CollapseExtendableMixin, DataNodeMixin):
+class Spikestamps(CollapseExtendableMixin, DataNodeMixin, UserList):
     """List of array of spike times
 
     Represents spikes emitted by the same unit in a period of times.
