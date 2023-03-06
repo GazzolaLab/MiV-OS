@@ -123,6 +123,8 @@ class Spikestamps(UserList, CollapseExtendableMixin, DataNodeMixin):
     def binning(
         self,
         bin_size: float = 1 * pq.ms,
+        t_start: Optional[float] = None,
+        t_end: Optional[float] = None,
         return_count: bool = False,
     ) -> Signal:
         """
@@ -147,8 +149,8 @@ class Spikestamps(UserList, CollapseExtendableMixin, DataNodeMixin):
             bin_size = bin_size.rescale(pq.s).magnitude
         assert bin_size > 0, "bin size should be greater than 0"
 
-        t_start = self.get_first_spikestamp()
-        t_end = self.get_last_spikestamp()
+        t_start = self.get_first_spikestamp() if t_start is None else t_start
+        t_end = self.get_last_spikestamp() if t_end is None else t_end
         n_bins = int(np.ceil((t_end - t_start) / bin_size))
         time = t_start + (np.arange(n_bins + 1) * bin_size)
 

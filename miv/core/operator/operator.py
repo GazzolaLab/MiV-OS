@@ -34,17 +34,9 @@ class Operator(
     _Runnable,
     Protocol,
 ):
-    @dataclass
-    class Config:
-        pass
-
-    def get_config(self) -> Config:
-        ...
+    """ """
 
     def run(self, dry_run: bool = False) -> None:
-        ...
-
-    def query(self) -> list[DataTypes]:
         ...
 
 
