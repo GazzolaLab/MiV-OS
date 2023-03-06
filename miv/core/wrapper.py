@@ -1,4 +1,5 @@
 __all__ = [
+    "wrap_cacher",
     "wrap_generator_to_generator",
 ]
 
@@ -12,6 +13,25 @@ from dataclasses import dataclass, make_dataclass
 
 from miv.core.datatype import DataTypes, Extendable
 from miv.core.operator.operator import Operator, OperatorMixin
+
+
+def wrap_cacher(func):
+    """
+    Decorator to wrap the function to use cacher.
+    """
+
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        self: Operator = args[0]
+        if self.cacher.check_cached():
+            return next(self.cacher.load_cached())
+        else:
+            result = func(*args, **kwargs)
+            self.cacher.save_cache(result)
+            self.cacher.save_config()
+            return result
+
+    return wrapper
 
 
 def wrap_generator_to_generator(func):

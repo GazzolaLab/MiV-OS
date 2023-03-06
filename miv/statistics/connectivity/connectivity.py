@@ -27,7 +27,7 @@ from tqdm import tqdm
 from miv.core.datatype import Signal, Spikestamps
 from miv.core.operator import OperatorMixin
 from miv.core.policy import InternallyMultiprocessing
-from miv.core.wrapper import wrap_generator_to_generator
+from miv.core.wrapper import wrap_cacher
 from miv.mea import mea_map
 
 
@@ -77,7 +77,7 @@ class DirectedConnectivity(OperatorMixin, InternallyMultiprocessing):
         else:
             self.mea_map = mea_map["64_intanRHD"]
 
-    @wrap_generator_to_generator
+    @wrap_cacher
     def __call__(self, spikestamps: Spikestamps) -> np.ndarray:
         """__call__.
 

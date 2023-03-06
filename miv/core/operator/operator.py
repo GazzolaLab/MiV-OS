@@ -164,4 +164,4 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin):
             print("Dry run: ", self.__class__.__name__)
             return
         self._execute()
-        self.plot(save_path=save_path, dry_run=dry_run)
+        self.plot(save_path=True, dry_run=dry_run)
