@@ -8,11 +8,12 @@ The `MiV-OS` is a community-base project that aims to provide a set of tools for
 
 The amount of data that can be collected from electrophysiology experiments is increasing exponentially, while the amount of time that a researcher can spend on the analysis of the data is limited. Unfortunately, this limitation is often due to the lack of tools that can be adapted and automated for an individual experiments. We aims to bridge this gap by providing a set of pipelining tools and templates that can be customized and extended for any purposed experiments.
 
-Key features including the followings:
+Key features and developing philosophy evolves around followings concepts:
 
-1. Easy pipeline construction
+1. Easy pipeline construction and visualization
 2. Automatic caching the data processing to avoid re-computation of the expensive operations
-3. Parallelization using both multiprocessing and MPI.
+3. Lazy operation run to adapt different parallelization paradigms, for both multiprocessing and MPI.
+4. Modular and customizable design to adapt varying data format and experimental protocols.
 
 Key Modules
 -----------

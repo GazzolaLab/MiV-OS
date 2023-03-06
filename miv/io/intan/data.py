@@ -85,11 +85,11 @@ class DataIntan(Data):
         Load stimulation recorded data.
         """
         signals, timestamps = [], []
-        for signal, timestamp, sampling_rate in self._generator_by_channel_name(
-            "stim_data", progress_bar
-        ):
-            signals.append(signal)
-            timestamps.append(timestamp)
+        sampling_rate = None
+        for data in self._generator_by_channel_name("stim_data", progress_bar):
+            signals.append(data.data)
+            timestamps.append(data.timestamps)
+            sampling_rate = data.rate
 
         return Signal(
             data=np.concatenate(signals, axis=0),
