@@ -10,6 +10,9 @@ class _Collapsable(Protocol):
 
 
 class CollapseExtendableMixin:
+    def __init__(self):
+        super().__init__()
+
     @classmethod
     def from_collapse(cls, values: Generator[Extendable, None, None]):
         obj = cls()
