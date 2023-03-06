@@ -25,12 +25,12 @@ def wrap_cacher(cache_tag):
         def wrapper(*args, **kwargs):
             self: Operator = args[0]
             self.cacher.cache_tag = cache_tag
-            if self.cacher.check_cached(cache_tag=cache_tag):
-                return self.cacher.load_cached(cache_tag=cache_tag)
+            if self.cacher.check_cached():
+                return self.cacher.load_cached()
             else:
                 result = func(*args, **kwargs)
-                self.cacher.save_cache(resultcache_tag=cache_tag)
-                self.cacher.save_config(cache_tag=cache_tag)
+                self.cacher.save_cache()
+                self.cacher.save_config()
                 return result
 
         return wrapper

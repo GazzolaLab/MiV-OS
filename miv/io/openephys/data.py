@@ -110,8 +110,8 @@ class Data(DataLoaderMixin):
         data_path: str,
         tag: str = "data",
     ):
-        super().__init__()
         self.data_path: str = data_path
+        super().__init__()
         self._analysis_path: str = os.path.join(data_path, "analysis")
         self.masking_channel_set: set[int] = set()
 
