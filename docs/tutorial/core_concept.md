@@ -25,3 +25,13 @@ The `MiV-OS` is a collection of modules that can be used independently. The key 
     - core.operator: functional protocols that takes parameters and some `core.datatype` and yield another set of `core.datatype`.
     - core.pipeline: a pipeline that can be constructed from `core.operator` and `core.datatype`.
     - core.policy: a set of policies that can be used to control the behavior of the `core.pipeline`.
+- DataLoader
+    - Serves as a `source` or the `starting` node of the analysis pipeline.
+    - Designed to accomodate the difference in the data format.
+- Operator
+    - A set of operation that processes the data.
+    - Each `operator` can be treated as a functional node in the pipeline.
+    - Comply `Callback`: can be used to monitor the progress or insert custom codes. ex) plotting.
+    - Comply `Cachable`: automatically cache the results. Caching policy can be controlled.
+    - Comply `Chainable`: can be chained with other `operator` to form a new `operator`.
+    - Comply `Runnable`: can be called and run independently or within a given pipeline.

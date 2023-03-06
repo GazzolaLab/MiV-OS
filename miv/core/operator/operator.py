@@ -32,7 +32,6 @@ class Operator(
     _Chainable,
     _Cachable,
     _Runnable,
-    # Callable[[DataTypes],DataTypes],
     Protocol,
 ):
     @dataclass
