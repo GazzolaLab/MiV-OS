@@ -158,6 +158,7 @@ class DataIntanTriggered(DataIntan):
 
     def __init__(
         self,
+        data_path,  # FIXME: argument order with intan.DATA
         index: int = 0,
         trigger_key: str = "board_adc_data",
         trigger_index: int = 0,
@@ -165,7 +166,7 @@ class DataIntanTriggered(DataIntan):
         *args,
         **kwargs,
     ):
-        super().__init__(*args, **kwargs)
+        super().__init__(data_path=data_path, *args, **kwargs)
         self.index = index
         self.trigger_key = trigger_key
         self.trigger_index = trigger_index
@@ -259,3 +260,19 @@ class DataIntanTriggered(DataIntan):
                 timestamps=np.asarray(result["t"])[sidx:eidx],
                 rate=sampling_rate,
             )
+
+    def get_stimulation_events(self):  # TODO: refactor
+        minimum_stimulation_length = 0.010
+        data = self.get_stimulation()
+        stim = data.data
+        timestamps = data.timestamps
+        sampling_rate = data.rate
+        stimulated_channels = np.where(np.abs(stim).sum(axis=0))[0]
+        stimulated_channel = stimulated_channels[0]
+        stim = stim[:, stimulated_channel]
+
+        events = ~np.isclose(stim, 0)
+        eventstrain = timestamps[np.where(events)[0]]
+        ref = np.concatenate([[True], np.diff(eventstrain) > minimum_stimulation_length])
+        eventstrain = eventstrain[ref]
+        return Spikestamps([eventstrain])
