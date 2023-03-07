@@ -105,9 +105,6 @@ class PSTH(OperatorMixin):
             fig, axes = plt.subplots(
                 nrow, ncol, figsize=(nrow * 4, ncol * 4), sharex=True, sharey=True
             )
-        print(type(psth))
-        print(psth)
-        print(next(psth))
         for channel in range(psth.number_of_channels):
             p = psth[channel]
             time = psth.timestamps
