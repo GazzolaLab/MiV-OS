@@ -199,4 +199,4 @@ class FunctionalCacher(BaseCacher):
     def load_cached(self) -> Generator[DataTypes, None, None]:
         path = glob.glob(self.cache_filename("0"))
         with open(path, "rb") as f:
-            return pkl.load(f)
+            yield pkl.load(f)

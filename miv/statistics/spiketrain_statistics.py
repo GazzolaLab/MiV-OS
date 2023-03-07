@@ -42,6 +42,12 @@ def firing_rates(spiketrains: Spikestamps) -> Dict[str, Any]:
 
     """
     rates = []
+    if sum(spiketrains.get_count()) == 0:
+        return {
+            "rates": [0.0 for _ in range(spiketrains.number_of_channels)],
+            "mean": 0.0,
+            "variance": 0.0,
+        }
     for spikestamp in spiketrains.neo():
         if len(spikestamp) == 0:
             rates.append(0)
