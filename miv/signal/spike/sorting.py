@@ -89,7 +89,6 @@ class SpikeSorting:
     ...    feature_extractor=WaveletDecomposition(),
     ...    clustering_method=sklearn.cluster.MeanShift()
     ... )
-    >>> label, index = spike_sorting(cutouts, return_index=True)
 
 
     Parameters
