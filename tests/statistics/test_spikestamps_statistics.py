@@ -4,11 +4,8 @@ import quantities as pq
 from neo.core import Segment, SpikeTrain
 
 from miv.core.datatype import Spikestamps
-from miv.statistics.spiketrain_statistics import (
-    firing_rates,
-    interspike_intervals,
-    peri_stimulus_time,
-)
+from miv.statistics.peristimulus_analysis import peri_stimulus_time
+from miv.statistics.spiketrain_statistics import firing_rates, interspike_intervals
 
 SpikestampsTestSet = [
     Spikestamps([[1, 2, 3]]),
