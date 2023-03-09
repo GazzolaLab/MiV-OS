@@ -197,6 +197,31 @@ class BaseChainingMixin:
         stack.reverse()
         return stack
 
+    def dependency_sort(self):
+        """
+        Sort the topology in a way that the nodes are required for current node to be executed.
+        """
+        stack = [self]
+        needed = []
+        while stack:
+            node = stack.pop()
+            if node in needed:
+                raise RuntimeError("Loop detected")
+            needed.append(node)
+            if (
+                hasattr(node, "cacher")
+                and node.cacher is not None
+                and node.cacher.cache_dir is not None
+                and node.cacher.check_cached()
+            ):  # TODO: cache check should be done in the node itself
+                continue
+            for next_node in node.iterate_upstream():
+                if next_node in stack:
+                    continue
+                stack.append(next_node)
+        needed.reverse()
+        return needed
+
 
 def test_topological_sort():
     class V(BaseChainingMixin):

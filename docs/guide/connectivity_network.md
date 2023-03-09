@@ -77,7 +77,7 @@ Now that we have set up our pre-processing and connectivity analysis pipeline, w
 ```{code-cell} ipython3
 pipeline = Pipeline(connectivity_analysis)  # Create a pipeline object to compute connectivity
 print(pipeline.summarize())
-pipeline.run(verbose=True, save_path="results")  # Save outcome into "results" directory
+pipeline.run(working_directory="results")  # Save outcome into "results" directory
 ```
 
 ## Adding Centrality Plot

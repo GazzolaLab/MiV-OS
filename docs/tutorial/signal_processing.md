@@ -83,11 +83,11 @@ print(data.summarize())  # Print the summary of data flow
 
 To complete the analysis, we can create a `Pipeline` object and execute it by calling the `.run()` method.
 This will run the operations specified in the pipeline and generate the desired outcomes.
-The results can be saved to a specified directory by passing the path to the save_path argument.
+The results can be saved to a specified directory by passing the path to the `working_directory` argument.
 
 ```{code-cell} ipython3
 pipeline = Pipeline(spike_detection)  # Create a pipeline object to get `spike_detection` output
-pipeline.run(save_path="results/")  # Save outcome into "results" directory
+pipeline.run(working_directory="results/")  # Save outcome into "results" directory
 ```
 
 ```{note}
