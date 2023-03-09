@@ -294,3 +294,33 @@ class ThresholdCutoff(OperatorMixin, InternallyMultiprocessing):
             plt.show()
 
         return ax
+
+
+def query_firing_rate_between(
+    spikestamps: Spikestamps,
+    min_firing_rate: float,
+    max_firing_rate: float,
+) -> np.ndarray:
+    """
+    Mask channels with firing rates between min_firing_rate and max_firing_rate
+
+    Parameters
+    ----------
+    spikestamps : Spikestamps
+        Spikestamps
+    min_firing_rate : float
+        Minimum firing rate
+    max_firing_rate : float
+        Maximum firing rate
+
+    Returns
+    -------
+    Spikestamps
+        Mask of channels with firing rates between min_firing_rate and max_firing_rate
+    """
+    rates = firing_rates(spikestamps)["rates"]
+    masks = np.logical_and(rates >= min_firing_rate, rates <= max_firing_rate)
+    for idx, mask in enumerate(masks):
+        if mask:
+            spikestamps.data[idx] = []
+    return spikestamps
