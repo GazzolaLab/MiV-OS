@@ -15,7 +15,7 @@ class Pipeline:
         save_path: Optional[Union[str, pathlib.Path]] = "./results",
         no_cache: bool = False,
         dry_run: bool = False,
-        verbose: bool = False,
+        verbose: bool = False,  # Use logging
     ):
         for node in self.execution_order:
             if verbose:
@@ -23,6 +23,10 @@ class Pipeline:
             if hasattr(node, "cacher"):
                 node.cacher.cache_policy = "OFF" if no_cache else "AUTO"
             node.run(dry_run=dry_run, save_path=save_path)
+        if verbose:
+            print("Pipeline done:")
+            self.summarize()
+            print("-"*46)
 
     def summarize(self):
         strs = []
