@@ -23,8 +23,10 @@ def wrap_cacher(cache_tag):
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
+            if not hasattr(wrapper, "cache_tag"):
+                setattr(wrapper, "cache_tag", cache_tag)
             self: Operator = args[0]
-            self.cacher.cache_tag = cache_tag
+            self.cacher.cache_tag = wrapper.cache_tag
             if self.cacher.check_cached():
                 return next(self.cacher.load_cached())
             else:
