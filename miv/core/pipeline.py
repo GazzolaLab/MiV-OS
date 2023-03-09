@@ -33,11 +33,12 @@ class Pipeline:
     """
 
     def __init__(self, node: _Chainable):
-        self.execution_order: List[_Runnable] = node.topological_sort()
+        # self.execution_order: List[_Runnable] = node.topological_sort()
+        self.execution_order: List[_Runnable] = node.dependency_sort()
 
     def run(
         self,
-        save_path: Optional[Union[str, pathlib.Path]] = "./results",
+        working_directory: Optional[Union[str, pathlib.Path]] = "./results",
         no_cache: bool = False,
         dry_run: bool = False,
         verbose: bool = False,
@@ -47,8 +48,8 @@ class Pipeline:
 
         Parameters
         ----------
-        save_path : Optional[Union[str, pathlib.Path]], optional
-            The path to save the results, by default "./results"
+        working_directory : Optional[Union[str, pathlib.Path]], optional
+            The working directory where the pipeline will be executed. By default "./results"
         no_cache : bool, optional
             If True, the cache will be disabled. By default False
         dry_run : bool, optional
@@ -61,7 +62,7 @@ class Pipeline:
                 print("Running: ", node)
             if hasattr(node, "cacher"):
                 node.cacher.cache_policy = "OFF" if no_cache else "AUTO"
-            node.run(dry_run=dry_run, save_path=save_path)
+            node.run(dry_run=dry_run, save_path=working_directory)
 
     def summarize(self):
         strs = []
