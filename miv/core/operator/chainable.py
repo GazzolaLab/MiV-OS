@@ -102,7 +102,7 @@ class BaseChainingMixin:
             order.append((depth, current))
         return self._text_visualize_hierarchy(order)
 
-    def visualize(self, show: bool = False) -> None:
+    def visualize(self, show: bool = False, seed: int = 200) -> None:
         import networkx as nx
 
         G = nx.DiGraph()
@@ -123,7 +123,7 @@ class BaseChainingMixin:
         # Draw the graph
         # TODO: Balance layout
         # TODO: On edge, label the argument order
-        pos = nx.spring_layout(G, seed=200)
+        pos = nx.spring_layout(G, seed=seed)
         nx.draw_networkx_nodes(G, pos, node_size=500, alpha=0.8)
         nx.draw_networkx_edges(G, pos, width=2, arrows=True)
         nx.draw_networkx_labels(G, pos, font_size=12, font_family="sans-serif")

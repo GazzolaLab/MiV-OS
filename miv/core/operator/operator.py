@@ -153,7 +153,6 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin):
         save_path: str | pathlib.Path,
         dry_run: bool = False,
         cache_dir: str | pathlib.Path = ".cache",
-        enable_save_plot: bool = True,
     ) -> None:
         # Execute the module
         self.analysis_path = os.path.join(save_path, self.tag.replace(" ", "_"))
@@ -163,4 +162,4 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin):
             print("Dry run: ", self.__class__.__name__)
             return
         self._execute()
-        self.plot(save_path=True, dry_run=dry_run)
+        self.plot(show=False, save_path=True, dry_run=dry_run)

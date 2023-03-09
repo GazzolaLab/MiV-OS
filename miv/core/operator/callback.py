@@ -8,6 +8,8 @@ import itertools
 import os
 import pathlib
 
+import matplotlib.pyplot as plt
+
 SelfCallback = TypeVar("SelfCallback", bound="_Callback")
 
 
@@ -113,3 +115,5 @@ class BaseCallbackMixin:
             return
         for plotter in plotters:
             plotter(self, self._output, show=show, save_path=save_path)
+        if not show:
+            plt.close("all")
