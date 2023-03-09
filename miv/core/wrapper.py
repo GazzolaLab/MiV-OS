@@ -1,3 +1,13 @@
+__doc__ = """
+
+Useful wrapper functions for MIV operators.
+
+.. autofunction:: miv.core.wrapper.wrap_cacher
+
+.. autofunction:: miv.core.wrapper.wrap_generator_to_generator
+
+"""
+
 __all__ = [
     "wrap_cacher",
     "wrap_generator_to_generator",

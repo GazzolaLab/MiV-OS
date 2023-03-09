@@ -24,7 +24,7 @@ from miv import get_version
 # -- Project information -----------------------------------------------------
 
 project = "Mind-in-Vitro"
-copyright = "2022, GazzolaLab"
+copyright = "2023, GazzolaLab"
 author = "Gazzola Lab"
 
 # The full version, including alpha/beta/rc tags
