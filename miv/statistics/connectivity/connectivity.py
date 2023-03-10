@@ -33,7 +33,7 @@ from miv.mea import mea_map
 
 # self MPI-able
 @dataclass
-class DirectedConnectivity(OperatorMixin, InternallyMultiprocessing):
+class DirectedConnectivity(OperatorMixin):
     """
     Directional connectivity analysis operator
 
@@ -69,6 +69,7 @@ class DirectedConnectivity(OperatorMixin, InternallyMultiprocessing):
     surrogate_N: int = 30
     p_threshold: float = 0.05
     seed: int = None
+    num_proc: int = 1
 
     def __post_init__(self):
         super().__init__()

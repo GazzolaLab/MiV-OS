@@ -19,7 +19,7 @@ Code Example::
    ThresholdCutoff
 
 """
-__all__ = ["ThresholdCutoff"]
+__all__ = ["ThresholdCutoff", "query_firing_rate_between"]
 
 from typing import Any, Dict, Generator, Iterable, List, Optional, Tuple, Union
 
@@ -48,7 +48,7 @@ def lambdax(x):
 
 
 @dataclass
-class ThresholdCutoff(OperatorMixin, InternallyMultiprocessing):
+class ThresholdCutoff(OperatorMixin):
     """ThresholdCutoff
     Spike sorting step by step guide is well documented `here <http://www.scholarpedia.org/article/Spike_sorting>`_.
 
@@ -80,6 +80,8 @@ class ThresholdCutoff(OperatorMixin, InternallyMultiprocessing):
     progress_bar: bool = False
     units: str = "sec"
     return_neotype: bool = False  # TODO: Remove, shift to spikestamps datatype
+
+    num_proc: int = 1
 
     # @wrap_output_generator_collapse(Spikestamps)
     @wrap_generator_to_generator
@@ -318,9 +320,7 @@ def query_firing_rate_between(
     Spikestamps
         Mask of channels with firing rates between min_firing_rate and max_firing_rate
     """
-    rates = firing_rates(spikestamps)["rates"]
+    rates = np.array(firing_rates(spikestamps)["rates"])
     masks = np.logical_and(rates >= min_firing_rate, rates <= max_firing_rate)
-    for idx, mask in enumerate(masks):
-        if mask:
-            spikestamps.data[idx] = []
-    return spikestamps
+    print(f"masked: {len(masks)}: {masks}")
+    return np.where(masks)[0]

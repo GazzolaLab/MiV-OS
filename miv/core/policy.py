@@ -75,14 +75,7 @@ class SupportMultiprocessing:
     pass
 
 
-class InternallyMultiprocessing:
-    def __init__(self, np: Optional[int] = None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if np is None:
-            self._np = multiprocessing.cpu_count()
-        else:
-            self._np = np
-
+class InternallyMultiprocessing(Protocol):
     @property
-    def num_proc(self):
-        return self._np
+    def num_proc(self) -> int:
+        ...
