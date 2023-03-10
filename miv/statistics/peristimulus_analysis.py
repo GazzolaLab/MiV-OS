@@ -1,4 +1,4 @@
-__all__ = ["PSTH", "peri_stimulus_time"]
+__all__ = ["PSTH", "peri_stimulus_time", "PSTHOverlay"]
 
 from typing import List
 
@@ -114,6 +114,69 @@ class PSTH(OperatorMixin):
             c = w[1][0]
             axes[r][c].plot(time, p, label=label)
             axes[r][c].set_title(f"channel {channel+1}")
+        # Bottom row
+        for i in range(ncol):
+            axes[-1, i].set_xlabel("time (s)")
+
+        # Left row
+        for i in range(nrow):
+            axes[i, 0].set_ylabel("mean (channels) spike rate per bin")
+
+        # Legend
+        for i, j in itertools.product(range(nrow), range(ncol)):
+            axes[i, j].legend()
+
+        plt.suptitle("PSTH: stimulating electrode")
+
+        if show:
+            plt.show()
+        if save_path is not None:
+            plt.savefig(os.path.join(save_path, "psth.png"))
+
+        return axes
+
+
+@dataclass
+class PSTHOverlay(OperatorMixin):
+    # TODO: Experimental
+    # Histogram Configuration
+    # Default: 400ms domain, 4ms binsize
+    mea: str = None
+    tag: str = "peri-stimulus time histogram overlay"
+
+    stimulus_length = 0.010
+
+    def __post_init__(self):
+        super().__init__()
+        if isinstance(self.mea, str):
+            self.mea_map = mea_map[self.mea]
+        else:
+            self.mea_map = mea_map["64_intanRHD"]
+
+    def __call__(self, *psths):
+        return psths
+
+    def plot_psth_in_grid_map(
+        self, psths, show=False, save_path=None,
+    ):
+        mea_map = self.mea_map
+        nrow, ncol = mea_map.shape
+        fig, axes = plt.subplots(
+            nrow, ncol, figsize=(nrow * 4, ncol * 4), sharex=True, sharey=True
+        )
+        for idx, psth in enumerate(psths):
+            print(idx)
+            print(psth.shape)
+            for channel in range(psth.number_of_channels):
+                p = psth[channel]
+                time = psth.timestamps
+                if channel not in mea_map:
+                    continue
+                w = np.where(mea_map == channel)
+                r = w[0][0]
+                c = w[1][0]
+                axes[r][c].plot(time, p, label=f"PSTH {idx}")
+                axes[r][c].set_title(f"channel {channel+1}")
         # Bottom row
         for i in range(ncol):
             axes[-1, i].set_xlabel("time (s)")
