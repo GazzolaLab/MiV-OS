@@ -25,7 +25,7 @@ import numpy as np
 from tqdm import tqdm
 
 import miv.io.intan.rhs as rhs
-from miv.core.datatype import Signal
+from miv.core.datatype import Signal, Spikestamps
 from miv.core.wrapper import wrap_cacher
 from miv.io.openephys.data import Data, DataManager
 from miv.typing import SignalType
@@ -173,8 +173,7 @@ class DataIntanTriggered(DataIntan):
         self.trigger_threshold_voltage = trigger_threshold_voltage
 
     def __getitem__(self, index):
-        self.index = index
-        return self
+        return DataIntanTriggered(data_path=self.data_path, index=index, trigger_key=self.trigger_key, trigger_index=self.trigger_index, trigger_threshold_voltage=self.trigger_threshold_voltage)
 
     @wrap_cacher(cache_tag="trigger_grouping")
     def _trigger_grouping(self, paths):
@@ -268,6 +267,8 @@ class DataIntanTriggered(DataIntan):
         timestamps = data.timestamps
         sampling_rate = data.rate
         stimulated_channels = np.where(np.abs(stim).sum(axis=0))[0]
+        if len(stimulated_channels) == 0:
+            return None
         stimulated_channel = stimulated_channels[0]
         stim = stim[:, stimulated_channel]
 
@@ -275,4 +276,5 @@ class DataIntanTriggered(DataIntan):
         eventstrain = timestamps[np.where(events)[0]]
         ref = np.concatenate([[True], np.diff(eventstrain) > minimum_stimulation_length])
         eventstrain = eventstrain[ref]
-        return Spikestamps([eventstrain])
+        ret = Spikestamps([eventstrain])  # TODO: use datatype.Events
+        return ret
