@@ -160,8 +160,10 @@ class DataclassCacher(BaseCacher):
         current_config = self._compile_configuration_as_dict()
         cached_config = self._load_configuration_from_cache()
         if cached_config is None:
-            return False
-        return current_config == cached_config  # TODO: fix this
+            flag = False
+        else:
+            flag = current_config == cached_config  # TODO: fix this
+        return flag
 
     def _load_configuration_from_cache(self) -> dict:
         if os.path.exists(self.config_filename):
@@ -190,13 +192,14 @@ class DataclassCacher(BaseCacher):
 class FunctionalCacher(BaseCacher):
     @when_policy_is("ON", "AUTO")
     def check_cached(self) -> bool:
-        return os.path.exists(self.cache_filename(0))
+        flag = os.path.exists(self.cache_filename(0))
+        return flag
 
     @when_policy_is("ON", "AUTO")
     def save_config(self):
         pass
 
     def load_cached(self) -> Generator[DataTypes, None, None]:
-        path = glob.glob(self.cache_filename("0"))
+        path = glob.glob(self.cache_filename(0))[0]
         with open(path, "rb") as f:
             yield pkl.load(f)
