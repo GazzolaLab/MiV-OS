@@ -214,7 +214,7 @@ exclude_lines = [
     "if settings.DEBUG",
     "raise AssertionError",
     "raise NotImplementedError",
-    #"class .*\bProtocol):",
+    '''class '.*\bProtocol\)':''',
     #"@(abc\.)?abstractmethod",
 ]
 fail_under = 40
@@ -226,5 +226,7 @@ branch = true
 omit = [
     "*/.local/*",
 	"setup.py",
+#"*/__init__.py",
     "miv/io/intan/rhs.py",# not part of the dev target
+    "miv/io/asdf/asdf.py",# not part of the dev target
 ]
