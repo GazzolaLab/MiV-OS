@@ -11,7 +11,7 @@ __all__ = ["Spikestamps"]
 
 from typing import List, Optional
 
-from collections import UserList
+from collections.abc import Sequence
 
 import numpy as np
 import quantities as pq
@@ -21,7 +21,7 @@ from miv.core.datatype.signal import Signal
 from miv.core.operator.operator import DataNodeMixin
 
 
-class Spikestamps(CollapseExtendableMixin, DataNodeMixin, UserList):
+class Spikestamps(CollapseExtendableMixin, DataNodeMixin, Sequence):
     """List of array of spike times
 
     Represents spikes emitted by the same unit in a period of times.
@@ -41,6 +41,12 @@ class Spikestamps(CollapseExtendableMixin, DataNodeMixin, UserList):
 
     def __setitem__(self, index, item):
         self.data[index] = item
+
+    def __getitem__(self, index):
+        return self.data[index]
+
+    def __len__(self):
+        return len(self.data)
 
     def insert(self, index, item):
         if index > len(self.data) or index < 0:
