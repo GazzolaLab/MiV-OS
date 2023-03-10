@@ -158,44 +158,56 @@ class BaseChainingMixin:
                 next_list.append(node)
         return visited
 
+    def _get_upstream_topology(self, lst: list[SelfChain] = None) -> list[SelfChain]:
+        if lst is None:
+            lst = []
+        if (
+            hasattr(self, "cacher")
+            and self.cacher is not None
+            and self.cacher.cache_dir is not None
+            and self.cacher.check_cached()
+        ):
+            pass
+        else:
+            for node in self.iterate_upstream():
+                if node in lst:
+                    continue
+                node._get_upstream_topology(lst)
+        lst.append(self)
+        return lst
+
     def topological_sort(self):
-        """Topological sort of the topology."""
+        """
+        Topological sort of the graph.
+        Raise RuntimeError if there is a loop in the graph.
+        """
         # TODO: Make it free function
-        # TODO: Find loop detection
-        # Mark all the vertices as not visited
-        all_nodes = self._get_full_topology()
-        visited = []
+        upstream = self._get_upstream_topology()
 
-        stack = []
+        pos = dict()
+        ind = 0
+        tsort = []
 
-        # Call the helper function to store Topological
-        # Sort starting from all vertices one by one
-        for v, seed_node in enumerate(all_nodes):
-            if seed_node in visited:
-                continue
-            # working stack contains key and the corresponding current generator
-            working_stack = [seed_node]
-            while working_stack:
-                # get last element from stack
-                node = working_stack.pop()
-                visited.append(node)
+        while len(upstream) > 0:
+            pos[upstream[-1]] = ind
+            tsort.append(upstream[-1])
+            ind += 1
+            upstream.pop()
+        for source in tsort:
+            for up in source.iterate_upstream():
+                if up not in pos:
+                    continue
+                before = pos[source]
+                after = pos[up]
 
-                # run through neighbor generator until it's empty
-                for next_node in node.iterate_downstream():
-                    if next_node in visited:
-                        continue
-                    # remember current work
-                    working_stack.append(node)  # TODO: Somebody check this line
-                    # restart with new neighbor
-                    working_stack.append(next_node)
-                    break
-                else:
-                    # no already-visited neighbor (or no more of them)
-                    stack.append(node)
+                # If parent vertex does not appear first
+                if before > after:
+                    raise RuntimeError(
+                        f"Found loop in operation stream: node {source} is already in the upstream : {up}."
+                    )
 
-        # Print contents of the stack in reverse
-        stack.reverse()
-        return stack
+        tsort.reverse()
+        return tsort
 
     def dependency_sort(self):
         """
@@ -206,7 +218,9 @@ class BaseChainingMixin:
         while stack:
             node = stack.pop()
             if node in needed:
-                raise RuntimeError("Loop detected")
+                raise RuntimeError(
+                    f"Found loop in operation stream: node {node} is already in the upstream list: {needed}."
+                )
             needed.append(node)
             if (
                 hasattr(node, "cacher")
@@ -218,51 +232,7 @@ class BaseChainingMixin:
             for next_node in node.iterate_upstream():
                 if next_node in stack:
                     continue
+                print("pushed: ", next_node)
                 stack.append(next_node)
         needed.reverse()
         return needed
-
-
-def test_topological_sort():
-    class V(BaseChainingMixin):
-        def __init__(self, name):
-            super().__init__()
-            self.name = name
-
-        def __repr__(self):
-            return str(self.name)
-
-    a = V(1)
-    b = V(2)
-    c = V(3)
-    d = V(4)
-    e = V(5)
-
-    a >> b >> c >> d >> e
-    print(a.summarize())
-    print(b.summarize())
-    print(a.topological_sort())
-    print(b.topological_sort())
-
-    a.clear_connections()
-    print(a.summarize())
-    print(b.summarize())
-    print(a.topological_sort())
-    print(b.topological_sort())
-
-    a.clear_connections()
-    b.clear_connections()
-    c.clear_connections()
-    d.clear_connections()
-    e.clear_connections()
-
-    a >> e
-    b >> c >> d >> e
-    print(a.summarize())
-    print(b.summarize())
-    print(a.topological_sort())
-    print(b.topological_sort())
-
-
-if __name__ == "__main__":
-    test_topological_sort()

@@ -66,7 +66,7 @@ class Pipeline:
         if verbose:
             print("Pipeline done:")
             self.summarize()
-            print("-"*46)
+            print("-" * 46)
 
     def summarize(self):
         strs = []
