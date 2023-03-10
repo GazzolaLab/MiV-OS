@@ -157,7 +157,10 @@ class PSTHOverlay(OperatorMixin):
         return psths
 
     def plot_psth_in_grid_map(
-        self, psths, show=False, save_path=None,
+        self,
+        psths,
+        show=False,
+        save_path=None,
     ):
         mea_map = self.mea_map
         nrow, ncol = mea_map.shape
