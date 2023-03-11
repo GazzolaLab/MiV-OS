@@ -1,3 +1,5 @@
+from mock_runner import MockRunner
+
 from miv.core.operator.chainable import BaseChainingMixin
 
 
@@ -17,3 +19,12 @@ class MockChain(BaseChainingMixin):
 
     def __repr__(self):
         return str(self.name)
+
+
+class MockChainRunnable(MockChain):
+    def __init__(self, name):
+        super().__init__(name)
+        self.runner = MockRunner()
+
+    def run(self, save_path=None, dry_run=False, cache_dir=None):
+        print("run ", self.name)
