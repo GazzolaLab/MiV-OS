@@ -98,3 +98,19 @@ def test_topological_sort_loops():
     with pytest.raises(RuntimeError) as e_info:
         c.topological_sort()
         assert "loop" in str(e_info.value)
+
+
+def test_chain_debugging_tools():
+    a = MockChain(1)
+    b = MockChain(2)
+    c = MockChain(3)
+    d = MockChain(4)
+    e = MockChain(5)
+    f = MockChain(6)
+
+    a >> b >> c >> d >> e >> f
+    b >> d >> f
+    c >> f
+
+    a.visualize()
+    a.summarize()
