@@ -120,36 +120,6 @@ def miv_function(name, **params):
     return decorator
 
 
-def test_wrap_generator():
-    @wrap_generator_to_generator
-    def foo(x, y):
-        return x + y
-
-    def bar():
-        yield 1
-        yield 2
-        yield 3
-
-    # FIXME: See docstring for wrap_generator_to_generator
-    # assert foo(1, 2) == 3
-    # assert tuple(foo(bar(), bar())) == (2, 4, 6)
-
-    class foo_class:
-        @wrap_generator_to_generator
-        def __call__(self, x, y):
-            return x + y
-
-        @wrap_generator_to_generator
-        def other(self, x, y):
-            return x + y
-
-    a = foo_class()
-    assert a.other(1, 2) == 3
-    assert a(1, 2) == 3
-    assert tuple(a.other(bar(), bar())) == (2, 4, 6)
-    assert tuple(a(bar(), bar())) == (2, 4, 6)
-
-
 def test_wrap_miv_function():
     @miv_function("testTag", a=1, b=2)
     def func(self, c):
@@ -162,6 +132,4 @@ def test_wrap_miv_function():
 
 
 if __name__ == "__main__":
-    # test_wrap_generator()
-    # test_output_generator_collapse()
     test_wrap_miv_function()
