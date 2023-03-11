@@ -215,7 +215,7 @@ exclude_lines = [
     "raise AssertionError",
     "raise NotImplementedError",
     '''class '.*\bProtocol\)':''',
-    #"@(abc\.)?abstractmethod",
+    ''''@(abc\.)?'abstractmethod''',
 ]
 fail_under = 40
 show_missing = true
