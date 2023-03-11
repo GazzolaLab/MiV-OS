@@ -10,11 +10,11 @@ __all__ = [
     "conditional_entropy",
     "cross_entropy",
     "transfer_entropy",
-    "pid",
+    "partial_information_decomposition",
 ]
 
 
-from typing import Any, Dict, Iterable, List, Optional, Union
+from typing import Any, Callable, Dict, Iterable, List, Literal, Optional, Union
 
 import datetime
 
@@ -27,16 +27,33 @@ import quantities as pq
 import scipy
 import scipy.signal
 
+from miv.core.datatype import Spikestamps
 from miv.statistics.spiketrain_statistics import binned_spiketrain
-from miv.typing import SpikestampsType
+
+INFO_METRICS_TAG = Literal["self", "pair", "all"]  # Pragma: no cover
 
 
+def tag_info_metrics(tag: INFO_METRICS_TAG) -> Callable:  # Pragma: no cover
+    """
+    Decorator to tag the info metrics functions
+        - self: channel-wise metrics
+        - pair: channel pair-wise metrics
+        - all: combined across all channels
+    """
+
+    def decorator(func: Callable) -> Callable:
+        func.tag = tag
+        return func
+
+    return decorator
+
+
+@tag_info_metrics("self")
 def probability_distribution(
-    spiketrains: SpikestampsType,
-    channel: float,
-    t_start: float,
-    t_end: float,
+    spiketrains: Spikestamps,
     bin_size: float,
+    t_start: Optional[float] = None,
+    t_end: Optional[float] = None,
 ):
 
     """
@@ -44,16 +61,13 @@ def probability_distribution(
 
     Parameters
     ----------
-    spiketrains : SpikestampsType
-        Single spike-stamps
-    channel : float
-        electrode/channel
-    t_start : float
-        Binning start time
-    t_end : float
-        Binning end time
+    spiketrains : Spikestamps
     bin_size : float
         bin size in seconds
+    t_start : Optional[float]
+        Binning start time. If None, the start time is the first spike time.
+    t_end : Optional[float]
+        Binning end time. If None, the end time is the last spike time.
 
     Returns
     -------
@@ -61,36 +75,34 @@ def probability_distribution(
         probability distribution for the provided spiketrain
 
     """
-
-    assert t_start < t_end, "start time cannot be equal or greater than end time"
-    assert bin_size > 0, "bin_size should be a finite positive value"
-
-    bin_spike = binned_spiketrain(spiketrains, channel, t_start, t_end, bin_size)
-    prob_spike = np.sum(bin_spike) / np.size(bin_spike)
-    prob_no_spike = 1 - prob_spike
-    probability_distribution = bin_spike.copy()
-    probability_distribution[probability_distribution == 1] = prob_spike
-    probability_distribution[probability_distribution == 0] = prob_no_spike
-
+    bin_spike = spiketrains.binning(bin_size=bin_size, t_start=t_start, t_end=t_end)
+    prob_spike = (
+        bin_spike.data.sum(axis=bin_spike._SIGNALAXIS, keepdims=True)
+        / bin_spike.shape[bin_spike._SIGNALAXIS]
+    )
+    probability_distribution = np.empty_like(bin_spike.data, dtype=np.float_)
+    _prob_spike = np.repeat(
+        prob_spike, bin_spike.shape[bin_spike._SIGNALAXIS], axis=bin_spike._SIGNALAXIS
+    )
+    probability_distribution[bin_spike.data] = _prob_spike[bin_spike.data]
+    probability_distribution[~bin_spike.data] = (1 - _prob_spike)[~bin_spike.data]
     return probability_distribution
 
 
+@tag_info_metrics("self")
 def shannon_entropy(
-    spiketrains: SpikestampsType,
-    channel: float,
+    spiketrains: Spikestamps,
+    bin_size: float,
     t_start: float,
     t_end: float,
-    bin_size: float,
 ):
     """
     Estimates the shannon entropy for a single channel recording using the binned spiketrain.
 
     Parameters
     ----------
-    spiketrains : SpikestampsType
+    spiketrains : Spikestamps
         Single spike-stamps
-    channel : float
-        electrode/channel
     t_start : float
         Binning start time
     t_end : float
@@ -104,10 +116,11 @@ def shannon_entropy(
         Shannon entropy for the given channel
 
     """
-    assert t_start < t_end, "start time cannot be equal or greater than end time"
-    assert bin_size > 0, "bin_size should be a finite positive value"
-    bin_spike = binned_spiketrain(spiketrains, channel, t_start, t_end, bin_size)
-    prob_spike = np.sum(bin_spike) / np.size(bin_spike)
+    bin_spike = spiketrains.binning(bin_size=bin_size, t_start=t_start, t_end=t_end)
+    prob_spike = (
+        bin_spike.data.sum(axis=bin_spike._SIGNALAXIS, keepdims=True)
+        / bin_spike.shape[bin_spike._SIGNALAXIS]
+    )
     prob_no_spike = 1 - prob_spike
     shannon_entropy = -(
         prob_spike * np.log2(prob_spike) + prob_no_spike * np.log2(prob_no_spike)
@@ -115,10 +128,11 @@ def shannon_entropy(
     return shannon_entropy
 
 
+@tag_info_metrics("self")
 def block_entropy(
-    spiketrains: SpikestampsType,
+    spiketrains: Spikestamps,
     channel: float,
-    his: float,
+    history: float,
     t_start: float,
     t_end: float,
     bin_size: float,
@@ -128,11 +142,11 @@ def block_entropy(
 
     Parameters
     ----------
-    spiketrains : SpikestampsType
+    spiketrains : Spikestamps
         Single spike-stamps
     channel : float
         electrode/channel
-    his : float
+    history : float
         history length
     t_start : float
         Binning start time
@@ -149,16 +163,17 @@ def block_entropy(
     """
     assert t_start < t_end, "start time cannot be equal or greater than end time"
     assert bin_size > 0, "bin_size should be a finite positive value"
-    assert his > 0, "history length should be a finite positive value"
+    assert history > 0, "history length should be a finite positive value"
     bin_spike = binned_spiketrain(spiketrains, channel, t_start, t_end, bin_size)
-    block_entropy = pyinform.blockentropy.block_entropy(bin_spike, his)
+    block_entropy = pyinform.blockentropy.block_entropy(bin_spike, history)
     return block_entropy
 
 
+@tag_info_metrics("self")
 def entropy_rate(
-    spiketrains: SpikestampsType,
+    spiketrains: Spikestamps,
     channel: float,
-    his: float,
+    history: float,
     t_start: float,
     t_end: float,
     bin_size: float,
@@ -168,11 +183,11 @@ def entropy_rate(
 
     Parameters
     ----------
-    spiketrains : SpikestampsType
+    spiketrains : Spikestamps
         Single spike-stamps
     channel : float
         electrode/channel
-    his : float
+    history : float
         history length
     t_start : float
         Binning start time
@@ -189,16 +204,17 @@ def entropy_rate(
     """
     assert t_start < t_end, "start time cannot be equal or greater than end time"
     assert bin_size > 0, "bin_size should be a finite positive value"
-    assert his > 0, "history length should be a finite positive value"
+    assert history > 0, "history length should be a finite positive value"
     bin_spike = binned_spiketrain(spiketrains, channel, t_start, t_end, bin_size)
-    entropy_rate = pyinform.entropyrate.entropy_rate(bin_spike, k=his)
+    entropy_rate = pyinform.entropyrate.entropy_rate(bin_spike, k=history)
     return entropy_rate
 
 
+@tag_info_metrics("self")
 def active_information(
-    spiketrains: SpikestampsType,
+    spiketrains: Spikestamps,
     channel: float,
-    his: float,
+    history: float,
     t_start: float,
     t_end: float,
     bin_size: float,
@@ -208,11 +224,11 @@ def active_information(
 
     Parameters
     ----------
-    spiketrains : SpikestampsType
+    spiketrains : Spikestamps
         Single spike-stamps
     channel : float
         electrode/channel
-    his : float
+    history : float
         history length
     t_start : float
         Binning start time
@@ -229,14 +245,15 @@ def active_information(
     """
     assert t_start < t_end, "start time cannot be equal or greater than end time"
     assert bin_size > 0, "bin_size should be a finite positive value"
-    assert his > 0, "history length should be a finite positive value"
+    assert history > 0, "history length should be a finite positive value"
     bin_spike = binned_spiketrain(spiketrains, channel, t_start, t_end, bin_size)
-    active_information = pyinform.activeinfo.active_info(bin_spike, his)
+    active_information = pyinform.activeinfo.active_info(bin_spike, history)
     return active_information
 
 
+@tag_info_metrics("pair")
 def mutual_information(
-    spiketrains: SpikestampsType,
+    spiketrains: Spikestamps,
     channelx: float,
     channely: float,
     t_start: float,
@@ -248,7 +265,7 @@ def mutual_information(
 
     Parameters
     ----------
-    spiketrains : SpikestampsType
+    spiketrains : Spikestamps
         Single spike-stamps
     channelx : float
         electrode/channel X
@@ -275,8 +292,9 @@ def mutual_information(
     return mutual_information
 
 
+@tag_info_metrics("pair")
 def joint_entropy(
-    spiketrains: SpikestampsType,
+    spiketrains: Spikestamps,
     channelx: float,
     channely: float,
     t_start: float,
@@ -288,7 +306,7 @@ def joint_entropy(
 
     Parameters
     ----------
-    spiketrains : SpikestampsType
+    spiketrains : Spikestamps
         Single spike-stamps
     channelx : float
         electrode/channel X
@@ -321,8 +339,9 @@ def joint_entropy(
     return joint_entropy
 
 
+@tag_info_metrics("pair")
 def relative_entropy(
-    spiketrains: SpikestampsType,
+    spiketrains: Spikestamps,
     channelx: float,
     channely: float,
     t_start: float,
@@ -334,7 +353,7 @@ def relative_entropy(
 
     Parameters
     ----------
-    spiketrains : SpikestampsType
+    spiketrains : Spikestamps
         Single spike-stamps
     channelx : float
         electrode/channel X
@@ -364,8 +383,9 @@ def relative_entropy(
     return relative_entropy
 
 
+@tag_info_metrics("pair")
 def conditional_entropy(
-    spiketrains: SpikestampsType,
+    spiketrains: Spikestamps,
     channelx: float,
     channely: float,
     t_start: float,
@@ -377,7 +397,7 @@ def conditional_entropy(
 
     Parameters
     ----------
-    spiketrains : SpikestampsType
+    spiketrains : Spikestamps
         Single spike-stamps
     channelx : float
         electrode/channel X
@@ -407,8 +427,9 @@ def conditional_entropy(
     return conditional_entropy
 
 
+@tag_info_metrics("pair")
 def cross_entropy(
-    spiketrains: SpikestampsType,
+    spiketrains: Spikestamps,
     channelx: float,
     channely: float,
     t_start: float,
@@ -420,7 +441,7 @@ def cross_entropy(
 
     Parameters
     ----------
-    spiketrains : SpikestampsType
+    spiketrains : Spikestamps
         Single spike-stamps
     channelx : float
         electrode/channel X
@@ -452,11 +473,12 @@ def cross_entropy(
     return cross_entropy
 
 
+@tag_info_metrics("pair")
 def transfer_entropy(
-    spiketrains: SpikestampsType,
+    spiketrains: Spikestamps,
     channelx: float,
     channely: float,
-    his: float,
+    history: float,
     t_start: float,
     t_end: float,
     bin_size: float,
@@ -466,13 +488,13 @@ def transfer_entropy(
 
     Parameters
     ----------
-    spiketrains : SpikestampsType
+    spiketrains : Spikestamps
         Single spike-stamps
     channelx : float
         electrode/channel X
     channely : float
         electrode/channel Y
-    his : float
+    history : float
         history length
     t_start : float
         Binning start time
@@ -489,18 +511,19 @@ def transfer_entropy(
     """
     assert t_start < t_end, "start time cannot be equal or greater than end time"
     assert bin_size > 0, "bin_size should be a finite positive value"
-    assert his > 0, "history length should be a finite positive value"
+    assert history > 0, "history length should be a finite positive value"
 
     bin_spike_x = binned_spiketrain(spiketrains, channelx, t_start, t_end, bin_size)
     bin_spike_y = binned_spiketrain(spiketrains, channely, t_start, t_end, bin_size)
     transfer_entropy = pyinform.transferentropy.transfer_entropy(
-        bin_spike_x, bin_spike_y, k=his
+        bin_spike_x, bin_spike_y, k=history
     )
     return transfer_entropy
 
 
-def pid(
-    spiketrains: SpikestampsType,
+@tag_info_metrics("pair")
+def partial_information_decomposition(
+    spiketrains: Spikestamps,
     channelx: float,
     channely: float,
     channelz: float,
@@ -513,7 +536,7 @@ def pid(
 
     Parameters
     ----------
-    spiketrains : SpikestampsType
+    spiketrains : Spikestamps
         Single spike-stamps
     channelx : float
         electrode/channel X
