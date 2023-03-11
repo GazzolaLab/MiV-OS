@@ -14,11 +14,11 @@ class MockChain(BaseChainingMixin):
 
     def __init__(self, name):
         super().__init__()
-        self.name = name
         self.cacher = self.Flag()
+        self.tag = name
 
     def __repr__(self):
-        return str(self.name)
+        return str(self.tag)
 
 
 class MockChainRunnable(MockChain):
@@ -27,4 +27,4 @@ class MockChainRunnable(MockChain):
         self.runner = MockRunner()
 
     def run(self, save_path=None, dry_run=False, cache_dir=None):
-        print("run ", self.name)
+        print("run ", self.tag)
