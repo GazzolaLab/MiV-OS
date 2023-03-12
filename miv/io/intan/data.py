@@ -163,6 +163,7 @@ class DataIntanTriggered(DataIntan):
         trigger_key: str = "board_adc_data",
         trigger_index: int = 0,
         trigger_threshold_voltage=1.0,
+        progress_bar: bool=False,
         *args,
         **kwargs,
     ):
@@ -171,25 +172,27 @@ class DataIntanTriggered(DataIntan):
         self.trigger_key = trigger_key
         self.trigger_index = trigger_index
         self.trigger_threshold_voltage = trigger_threshold_voltage
+        self.progress_bar = progress_bar
 
     def __len__(self):
-        groups = self._trigger_grouping(None) # Should be cached
+        groups = self._trigger_grouping()
         return len(groups)
 
     def __getitem__(self, index):
-        groups = self._trigger_grouping(None) # Should be cached
-        if len(paths) <= index:
-            raise IndexError(f"Index exceeds the number of triggered recordings ({len(paths)}).")
+        groups = self._trigger_grouping()
+        if len(groups) <= index:
+            raise IndexError(f"Index exceeds the number of triggered recordings ({len(groups)}).")
         return DataIntanTriggered(
             data_path=self.data_path,
             index=index,
             trigger_key=self.trigger_key,
             trigger_index=self.trigger_index,
             trigger_threshold_voltage=self.trigger_threshold_voltage,
+            progress_bar=self.progress_bar
         )
 
     @wrap_cacher(cache_tag="trigger_grouping")
-    def _trigger_grouping(self, paths):
+    def _trigger_grouping(self):
         def _find_sequence(arr):
             if arr.size == 0:
                 return arr
@@ -201,7 +204,7 @@ class DataIntanTriggered(DataIntan):
         group_files = []
         group = {"paths": [], "start index": [], "end index": []}
         status = 0
-        for file in paths:
+        for file in tqdm(paths, disable=not self.progress_bar):
             result, _ = rhs.load_file(file)
             time = result["t"]
             adc_data = result[self.trigger_key][self.trigger_index]
@@ -247,14 +250,13 @@ class DataIntanTriggered(DataIntan):
         return group_files
 
     def get_recording_files(self):
-        paths = DataIntan.get_recording_files(self)
-        groups = self._trigger_grouping(paths)
+        groups = self._trigger_grouping()
         return groups[self.index]["paths"]
 
     def _generator_by_channel_name(self, name: str, progress_bar: bool = False):
         if not self.check_path_validity():
             raise FileNotFoundError("Data directory does not have all necessary files.")
-        groups = self._trigger_grouping(None)  # Should be cached
+        groups = self._trigger_grouping()
         files = groups[self.index]["paths"]
         sindex = groups[self.index]["start index"]
         eindex = groups[self.index]["end index"]
