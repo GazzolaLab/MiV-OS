@@ -1,6 +1,8 @@
+import neo
 import numpy as np
 import pytest
 
+from miv.core.datatype import Signal
 from miv.signal.spike import ThresholdCutoff
 
 
@@ -44,3 +46,22 @@ def test_align_to_minimum(threshold_cutoff):
         ),
         expected_output,
     )
+
+
+def test_spike_detector(threshold_cutoff):
+    # Set up test data
+    data = np.random.randn(10000, 2)
+    timestamps = np.arange(0, data.shape[0]) / 1000
+    fs = 1000
+    signal = Signal(data=data, timestamps=timestamps, rate=fs)
+
+    # Call the __call__ method of the SpikeDetector object
+    result = threshold_cutoff(signal)
+
+    # Check that the number of SpikeTrains in the Spikestamps object is equal to the number of channels in the input signal
+    assert len(result) == signal.shape[1]
+
+    # Check that each SpikeTrain in the Spikestamps object has the correct properties
+    for i, spiketrain in enumerate(result):
+        assert np.all(spiketrain.data >= timestamps[0])
+        assert np.all(spiketrain.data <= timestamps[-1])
