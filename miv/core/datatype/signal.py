@@ -69,9 +69,7 @@ class Signal(SupportMultiprocessing, DataNodeMixin):
 
     def extend_signal(self, value: SignalType, time: TimestampsType) -> None:
         """Append a signal to the end of the existing signal."""
-        assert (
-            value.shape[self._SIGNALAXIS] == time.shape[0]
-        ), "Time and signal must have same length"
+        assert value.shape[self._SIGNALAXIS] == time.shape[0]
         assert (
             value.shape[self._CHANNELAXIS] == self.data.shape[self._CHANNELAXIS]
         ), "Signal must have same number of channels"

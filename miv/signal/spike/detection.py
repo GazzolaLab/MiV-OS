@@ -43,10 +43,6 @@ from miv.statistics import firing_rates
 from miv.typing import SignalType, SpikestampsType, TimestampsType
 
 
-def lambdax(x):
-    return x
-
-
 @dataclass
 class ThresholdCutoff(OperatorMixin):
     """ThresholdCutoff

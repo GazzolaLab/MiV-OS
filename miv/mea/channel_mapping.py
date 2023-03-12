@@ -60,7 +60,7 @@ class MEA128:
         group, channel = intan_channel.split("-")
         return (ord(group) - ord("A")) * 32 + int(channel)
 
-    def plot_network(self, channels, reverse=False):
+    def plot_network(self, channels, show=False, save_path=None, reverse=False):
         """
         OE Arangement:
         (2)rhd_64 ->, (1)rhd_64 <-
@@ -178,7 +178,11 @@ class MEA128:
         nx.draw_networkx_labels(G, pos, labels, font_size=8, font_color="white")
         nx.draw_networkx_edges(G, pos, width=2, edge_color="black", alpha=0.8)
 
-        plt.show()
+        if save_path is not None:
+            plt.savefig(save_path)
+        if show:
+            plt.show()
+
         return
 
 
@@ -188,5 +192,25 @@ if __name__ == "__main__":
     # targets = [0,11,22,33,44,55,66,77,88,99,101,111]
     # mea_128.plot_network(targets)
 
-    targets = ["C-13", "D-12", "B-6"]
-    mea_128.plot_network(targets, reverse=True)
+    targets = [
+        "B-21",
+        "A-25",
+        "A-29",
+        "A-27",
+        "A-31",
+        "A-26",
+        "A-4",
+        "C-24",
+        "C-9",
+        "C-6",
+        "C-4",
+        "C-16",
+        "C-14",
+        "D-28",
+        "D-31",
+        "D-20",
+        "D-5",
+        "D-14",
+        "D-4",
+    ]
+    mea_128.plot_network(targets, reverse=True, show=True)

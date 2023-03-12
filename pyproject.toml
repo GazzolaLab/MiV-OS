@@ -212,10 +212,12 @@ exclude_lines = [
     "def __repr__",
     "if self.debug:",
     "if settings.DEBUG",
+    "if TYPE_CHECKING:",
     "raise AssertionError",
     "raise NotImplementedError",
-    #"class .*\bProtocol):",
-    #"@(abc\.)?abstractmethod",
+    '''class '.*\bProtocol\)':''',
+    ''''@(abc\.)?'abstractmethod''',
+    '\.\.\.'
 ]
 fail_under = 40
 show_missing = true
@@ -226,5 +228,7 @@ branch = true
 omit = [
     "*/.local/*",
 	"setup.py",
+#"*/__init__.py",
     "miv/io/intan/rhs.py",# not part of the dev target
+    "miv/io/asdf/asdf.py",# not part of the dev target
 ]

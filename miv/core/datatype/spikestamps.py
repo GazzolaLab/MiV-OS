@@ -159,6 +159,9 @@ class Spikestamps(CollapseExtendableMixin, DataNodeMixin, Sequence):
 
         t_start = self.get_first_spikestamp() if t_start is None else t_start
         t_end = self.get_last_spikestamp() if t_end is None else t_end
+        assert (
+            t_start < t_end
+        ), f"t_start ({t_start}) should be less than t_end ({t_end})"
         n_bins = int(np.ceil((t_end - t_start) / bin_size))
         time = t_start + (np.arange(n_bins + 1) * bin_size)
 

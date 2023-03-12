@@ -4,7 +4,6 @@ import quantities as pq
 from neo.core import Segment, SpikeTrain
 
 from miv.core.datatype import Spikestamps
-from miv.statistics.peristimulus_analysis import peri_stimulus_time
 from miv.statistics.spiketrain_statistics import firing_rates, interspike_intervals
 
 SpikestampsTestSet = [
@@ -26,22 +25,6 @@ def test_spikestamps_statistics_base_function(spikestamps, true_rate):
     np.testing.assert_allclose(result["rates"], true_rate)
     assert np.isclose(result["mean"], np.mean(true_rate))
     assert np.isclose(result["variance"], np.var(true_rate))
-
-
-SpikeTrainTestSet = [
-    [[1, 0, 1, 0], [0, 1, 1, 0]],
-    [
-        [1, 0, 1, 0],
-        [1, 1, 1, 0],
-    ],
-]
-TruePST = [[1, 1, 2, 0], [2, 1, 2, 0]]
-
-
-@pytest.mark.parametrize("spike_train_set, true_pst", zip(SpikeTrainTestSet, TruePST))
-def test_peri_stimulus_time_function(spike_train_set, true_pst):
-    PST = peri_stimulus_time(spike_train_set)
-    assert np.isclose(PST, true_pst).all()
 
 
 @pytest.mark.parametrize(

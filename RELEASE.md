@@ -1,3 +1,15 @@
+# Release Note (v0.3.0-beta.0)
+
+## What's Changed
+
+* Major rework in core operators and datatypes @skim0119 in https://github.com/GazzolaLab/MiV-OS/pull/204
+  - Includes pipeline, lazy generator runs, caching, and callback
+* Underlying structure implementation is done. The remaining work is left to test and try on various experimental procedures.
+* Reduced documentation to only includes the pages that support the current operator structure.
+
+**Full Changelog**: https://github.com/GazzolaLab/MiV-OS/commits/v0.3.0-beta.0
+
+
 # Release Note (version 0.2.4)
 
 ## What's Changed

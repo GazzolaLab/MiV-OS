@@ -33,8 +33,7 @@ class Pipeline:
     """
 
     def __init__(self, node: _Chainable):
-        # self.execution_order: List[_Runnable] = node.topological_sort()
-        self.execution_order: List[_Runnable] = node.dependency_sort()
+        self.execution_order: List[_Runnable] = node.topological_sort()
 
     def run(
         self,

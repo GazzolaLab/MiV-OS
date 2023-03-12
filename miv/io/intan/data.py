@@ -180,7 +180,13 @@ class DataIntanTriggered(DataIntan):
         groups = self._trigger_grouping(None) # Should be cached
         if len(paths) <= index:
             raise IndexError(f"Index exceeds the number of triggered recordings ({len(paths)}).")
-        return DataIntanTriggered(data_path=self.data_path, index=index, trigger_key=self.trigger_key, trigger_index=self.trigger_index, trigger_threshold_voltage=self.trigger_threshold_voltage)
+        return DataIntanTriggered(
+            data_path=self.data_path,
+            index=index,
+            trigger_key=self.trigger_key,
+            trigger_index=self.trigger_index,
+            trigger_threshold_voltage=self.trigger_threshold_voltage,
+        )
 
     @wrap_cacher(cache_tag="trigger_grouping")
     def _trigger_grouping(self, paths):
@@ -275,7 +281,7 @@ class DataIntanTriggered(DataIntan):
         data = self.get_stimulation()
         stim = data.data
         timestamps = data.timestamps
-        sampling_rate = data.rate
+        # sampling_rate = data.rate
         stimulated_channels = np.where(np.abs(stim).sum(axis=0))[0]
         if len(stimulated_channels) == 0:
             return None
@@ -284,7 +290,9 @@ class DataIntanTriggered(DataIntan):
 
         events = ~np.isclose(stim, 0)
         eventstrain = timestamps[np.where(events)[0]]
-        ref = np.concatenate([[True], np.diff(eventstrain) > minimum_stimulation_length])
+        ref = np.concatenate(
+            [[True], np.diff(eventstrain) > minimum_stimulation_length]
+        )
         eventstrain = eventstrain[ref]
         ret = Spikestamps([eventstrain])  # TODO: use datatype.Events
         return ret

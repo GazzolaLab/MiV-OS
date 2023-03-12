@@ -95,15 +95,12 @@ class PSTH(OperatorMixin):
         psth /= self.binsize
         return Signal(data=psth.T, timestamps=time_axis, rate=1.0 / self.binsize)
 
-    def plot_psth_in_grid_map(
-        self, psth, show=False, save_path=None, axes=None, label=""
-    ):
+    def plot_psth_in_grid_map(self, psth, show=False, save_path=None):
         mea_map = self.mea_map
         nrow, ncol = mea_map.shape
-        if axes is None:
-            fig, axes = plt.subplots(
-                nrow, ncol, figsize=(nrow * 4, ncol * 4), sharex=True, sharey=True
-            )
+        fig, axes = plt.subplots(
+            nrow, ncol, figsize=(nrow * 4, ncol * 4), sharex=True, sharey=True
+        )
         for channel in range(psth.number_of_channels):
             p = psth[channel]
             time = psth.timestamps
@@ -112,7 +109,7 @@ class PSTH(OperatorMixin):
             w = np.where(mea_map == channel)
             r = w[0][0]
             c = w[1][0]
-            axes[r][c].plot(time, p, label=label)
+            axes[r][c].plot(time, p)
             axes[r][c].set_title(f"channel {channel+1}")
         # Bottom row
         for i in range(ncol):
@@ -157,7 +154,10 @@ class PSTHOverlay(OperatorMixin):
         return psths
 
     def plot_psth_in_grid_map(
-        self, psths, show=False, save_path=None,
+        self,
+        psths,
+        show=False,
+        save_path=None,
     ):
         mea_map = self.mea_map
         nrow, ncol = mea_map.shape

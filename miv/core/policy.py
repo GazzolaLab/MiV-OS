@@ -7,9 +7,10 @@ __all__ = [
     "InternallyMultiprocessing",
 ]
 
-from typing import Callable, Optional, Protocol
+from typing import Any, Callable, Generator, Optional, Protocol, Union
 
 import multiprocessing
+import pathlib
 from dataclasses import dataclass
 
 
@@ -27,7 +28,12 @@ class _Runnable(Protocol):
     def runner(self) -> _RunnerProtocol:
         ...
 
-    def run(self):
+    def run(
+        self,
+        save_path: Union[str, pathlib.Path],
+        dry_run: bool,
+        cache_dir: Union[str, pathlib.Path],
+    ) -> None:
         ...
 
 
@@ -53,7 +59,7 @@ class MultiprocessingRunner:
     def num_proc(self):
         return self._np
 
-    def __call__(self, func, inputs=None, **kwargs):
+    def __call__(self, func, inputs: Generator[Any, None, None] = None, **kwargs):
         if inputs is None:
             raise NotImplementedError(
                 "Multiprocessing for operator with no generator input is not supported yet. Please use VanillaRunner for this operator."

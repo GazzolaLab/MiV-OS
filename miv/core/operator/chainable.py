@@ -145,19 +145,6 @@ class BaseChainingMixin:
                 output.append(str(label))
         return "\n".join(output)
 
-    def _get_full_topology(self) -> list[SelfChain]:
-        """Get all the operators and data loaders in the topology."""
-        visited = []
-        next_list = [self]
-        while next_list:
-            v = next_list.pop()
-            visited.append(v)
-            for node in itertools.chain(v.iterate_downstream(), v.iterate_upstream()):
-                if node in visited or node in next_list:
-                    continue
-                next_list.append(node)
-        return visited
-
     def _get_upstream_topology(self, lst: list[SelfChain] = None) -> list[SelfChain]:
         if lst is None:
             lst = []
@@ -208,31 +195,3 @@ class BaseChainingMixin:
 
         tsort.reverse()
         return tsort
-
-    def dependency_sort(self):
-        """
-        Sort the topology in a way that the nodes are required for current node to be executed.
-        """
-        stack = [self]
-        needed = []
-        while stack:
-            node = stack.pop()
-            if node in needed:
-                raise RuntimeError(
-                    f"Found loop in operation stream: node {node} is already in the upstream list: {needed}."
-                )
-            needed.append(node)
-            if (
-                hasattr(node, "cacher")
-                and node.cacher is not None
-                and node.cacher.cache_dir is not None
-                and node.cacher.check_cached()
-            ):  # TODO: cache check should be done in the node itself
-                continue
-            for next_node in node.iterate_upstream():
-                if next_node in stack:
-                    continue
-                print("pushed: ", next_node)
-                stack.append(next_node)
-        needed.reverse()
-        return needed

@@ -122,6 +122,18 @@ def when_policy_is(*policy):
     return decorator
 
 
+def when_initialized(func):  # TODO: refactor
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        self = args[0]
+        if self.cache_dir is None:
+            return False
+        else:
+            return func(*args, **kwargs)
+
+    return wrapper
+
+
 class BaseCacher:
     def __init__(self, parent):
         super().__init__()
@@ -147,6 +159,7 @@ class BaseCacher:
         return os.path.join(self.cache_dir, f"cache_{self.cache_tag}_{index}.pkl")
 
     @when_policy_is("ON", "AUTO")
+    @when_initialized
     def save_cache(self, values, idx=0) -> bool:
         os.makedirs(self.cache_dir, exist_ok=True)
         with open(self.cache_filename(idx), "wb") as f:
@@ -156,6 +169,7 @@ class BaseCacher:
 
 class DataclassCacher(BaseCacher):
     @when_policy_is("ON", "AUTO")
+    @when_initialized
     def check_cached(self) -> bool:
         current_config = self._compile_configuration_as_dict()
         cached_config = self._load_configuration_from_cache()
@@ -175,6 +189,7 @@ class DataclassCacher(BaseCacher):
         return dataclasses.asdict(self.parent, dict_factory=collections.OrderedDict)
 
     @when_policy_is("ON", "AUTO")
+    @when_initialized
     def save_config(self):
         config = self._compile_configuration_as_dict()
         os.makedirs(self.cache_dir, exist_ok=True)
@@ -182,6 +197,7 @@ class DataclassCacher(BaseCacher):
             json.dump(config, f, indent=4)
         return True
 
+    @when_initialized
     def load_cached(self) -> Generator[DataTypes, None, None]:
         paths = glob.glob(self.cache_filename("*"))
         for path in paths:
@@ -191,14 +207,17 @@ class DataclassCacher(BaseCacher):
 
 class FunctionalCacher(BaseCacher):
     @when_policy_is("ON", "AUTO")
+    @when_initialized
     def check_cached(self) -> bool:
         flag = os.path.exists(self.cache_filename(0))
         return flag
 
     @when_policy_is("ON", "AUTO")
+    @when_initialized
     def save_config(self):
         pass
 
+    @when_initialized
     def load_cached(self) -> Generator[DataTypes, None, None]:
         path = glob.glob(self.cache_filename(0))[0]
         with open(path, "rb") as f:
