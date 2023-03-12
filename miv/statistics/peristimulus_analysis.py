@@ -165,8 +165,6 @@ class PSTHOverlay(OperatorMixin):
             nrow, ncol, figsize=(nrow * 4, ncol * 4), sharex=True, sharey=True
         )
         for idx, psth in enumerate(psths):
-            print(idx)
-            print(psth.shape)
             for channel in range(psth.number_of_channels):
                 p = psth[channel]
                 time = psth.timestamps
