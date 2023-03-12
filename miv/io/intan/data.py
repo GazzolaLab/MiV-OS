@@ -172,7 +172,14 @@ class DataIntanTriggered(DataIntan):
         self.trigger_index = trigger_index
         self.trigger_threshold_voltage = trigger_threshold_voltage
 
+    def __len__(self):
+        groups = self._trigger_grouping(None) # Should be cached
+        return len(groups)
+
     def __getitem__(self, index):
+        groups = self._trigger_grouping(None) # Should be cached
+        if len(paths) <= index:
+            raise IndexError(f"Index exceeds the number of triggered recordings ({len(paths)}).")
         return DataIntanTriggered(data_path=self.data_path, index=index, trigger_key=self.trigger_key, trigger_index=self.trigger_index, trigger_threshold_voltage=self.trigger_threshold_voltage)
 
     @wrap_cacher(cache_tag="trigger_grouping")
@@ -181,6 +188,9 @@ class DataIntanTriggered(DataIntan):
             if arr.size == 0:
                 return arr
             return arr[np.concatenate([np.array([True]), arr[1:] - 1 != arr[:-1]])]
+
+        if paths is None:
+            paths = DataIntan.get_recording_files(self)
 
         group_files = []
         group = {"paths": [], "start index": [], "end index": []}
