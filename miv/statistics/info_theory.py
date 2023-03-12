@@ -93,8 +93,8 @@ def probability_distribution(
 def shannon_entropy(
     spiketrains: Spikestamps,
     bin_size: float,
-    t_start: float,
-    t_end: float,
+    t_start: Optional[float] = None,
+    t_end: Optional[float] = None,
 ):
     """
     Estimates the shannon entropy for a single channel recording using the binned spiketrain.
@@ -131,29 +131,26 @@ def shannon_entropy(
 @tag_info_metrics("self")
 def block_entropy(
     spiketrains: Spikestamps,
-    channel: float,
-    history: float,
-    t_start: float,
-    t_end: float,
+    history: int,
     bin_size: float,
+    t_start: Optional[float] = None,
+    t_end: Optional[float] = None,
 ):
     """
-    Estimates the block entropy for a single channel recording using the binned spiketrain
+    Estimates the block entropy for a recording using the binned spiketrain
 
     Parameters
     ----------
     spiketrains : Spikestamps
         Single spike-stamps
-    channel : float
-        electrode/channel
-    history : float
+    history : int
         history length
+    bin_size : float
+        bin size in seconds
     t_start : float
         Binning start time
     t_end : float
         Binning end time
-    bin_size : float
-        bin size in seconds
 
     Returns
     -------
@@ -161,22 +158,23 @@ def block_entropy(
         Block entropy for the given channel
 
     """
-    assert t_start < t_end, "start time cannot be equal or greater than end time"
-    assert bin_size > 0, "bin_size should be a finite positive value"
     assert history > 0, "history length should be a finite positive value"
-    bin_spike = binned_spiketrain(spiketrains, channel, t_start, t_end, bin_size)
-    block_entropy = pyinform.blockentropy.block_entropy(bin_spike, history)
+    bin_spike = spiketrains.binning(bin_size=bin_size, t_start=t_start, t_end=t_end)
+    block_entropy = np.zeros((bin_spike.shape[bin_spike._CHANNELAXIS],))
+    for idx, bin_spike_channel in enumerate(bin_spike):
+        block_entropy[idx] = pyinform.blockentropy.block_entropy(
+            bin_spike_channel, history
+        )
     return block_entropy
 
 
 @tag_info_metrics("self")
 def entropy_rate(
     spiketrains: Spikestamps,
-    channel: float,
     history: float,
-    t_start: float,
-    t_end: float,
     bin_size: float,
+    t_start: Optional[float] = None,
+    t_end: Optional[float] = None,
 ):
     """
     Estimates the entropy rate for a single channel recording using the binned spiketrain
@@ -185,9 +183,7 @@ def entropy_rate(
     ----------
     spiketrains : Spikestamps
         Single spike-stamps
-    channel : float
-        electrode/channel
-    history : float
+    history : int
         history length
     t_start : float
         Binning start time
@@ -202,22 +198,23 @@ def entropy_rate(
         entropy rate for the given channel
 
     """
-    assert t_start < t_end, "start time cannot be equal or greater than end time"
-    assert bin_size > 0, "bin_size should be a finite positive value"
     assert history > 0, "history length should be a finite positive value"
-    bin_spike = binned_spiketrain(spiketrains, channel, t_start, t_end, bin_size)
-    entropy_rate = pyinform.entropyrate.entropy_rate(bin_spike, k=history)
+    bin_spike = spiketrains.binning(bin_size=bin_size, t_start=t_start, t_end=t_end)
+    entropy_rate = np.zeros((bin_spike.shape[bin_spike._CHANNELAXIS],))
+    for idx, bin_spike_channel in enumerate(bin_spike):
+        entropy_rate[idx] = pyinform.entropyrate.entropy_rate(
+            bin_spike_channel, k=history
+        )
     return entropy_rate
 
 
 @tag_info_metrics("self")
 def active_information(
     spiketrains: Spikestamps,
-    channel: float,
     history: float,
-    t_start: float,
-    t_end: float,
     bin_size: float,
+    t_start: Optional[float] = None,
+    t_end: Optional[float] = None,
 ):
     """
     Estimates the active information for a single channel recording using the binned spiketrain
@@ -226,16 +223,14 @@ def active_information(
     ----------
     spiketrains : Spikestamps
         Single spike-stamps
-    channel : float
-        electrode/channel
+    bin_size : float
+        bin size in seconds
     history : float
         history length
     t_start : float
         Binning start time
     t_end : float
         Binning end time
-    bin_size : float
-        bin size in seconds
 
     Returns
     -------
@@ -243,11 +238,13 @@ def active_information(
         Active information for the given channel
 
     """
-    assert t_start < t_end, "start time cannot be equal or greater than end time"
-    assert bin_size > 0, "bin_size should be a finite positive value"
     assert history > 0, "history length should be a finite positive value"
-    bin_spike = binned_spiketrain(spiketrains, channel, t_start, t_end, bin_size)
-    active_information = pyinform.activeinfo.active_info(bin_spike, history)
+    bin_spike = spiketrains.binning(bin_size=bin_size, t_start=t_start, t_end=t_end)
+    active_information = np.zeros((bin_spike.shape[bin_spike._CHANNELAXIS],))
+    for idx, bin_spike_channel in enumerate(bin_spike):
+        active_information[idx] = pyinform.activeinfo.active_info(
+            bin_spike_channel, k=history
+        )
     return active_information
 
 
@@ -256,9 +253,9 @@ def mutual_information(
     spiketrains: Spikestamps,
     channelx: float,
     channely: float,
-    t_start: float,
-    t_end: float,
     bin_size: float,
+    t_start: Optional[float] = None,
+    t_end: Optional[float] = None,
 ):
     """
     Estimates the mutual information for the pair of electorde recordings (X & Y) using the binned spiketrains
@@ -297,9 +294,9 @@ def joint_entropy(
     spiketrains: Spikestamps,
     channelx: float,
     channely: float,
-    t_start: float,
-    t_end: float,
     bin_size: float,
+    t_start: Optional[float] = None,
+    t_end: Optional[float] = None,
 ):
     """
     Estimates the joint entropy for the pair of electorde recordings (X & Y) using the binned spiketrains
@@ -344,9 +341,9 @@ def relative_entropy(
     spiketrains: Spikestamps,
     channelx: float,
     channely: float,
-    t_start: float,
-    t_end: float,
     bin_size: float,
+    t_start: Optional[float] = None,
+    t_end: Optional[float] = None,
 ):
     """
     Estimates the relative entropy for the pair of electorde recordings (X & Y) using the binned spiketrains
@@ -388,9 +385,9 @@ def conditional_entropy(
     spiketrains: Spikestamps,
     channelx: float,
     channely: float,
-    t_start: float,
-    t_end: float,
     bin_size: float,
+    t_start: Optional[float] = None,
+    t_end: Optional[float] = None,
 ):
     """
     Estimates the conditional entropy for the pair of electorde recordings (X & Y) using the binned spiketrains
@@ -432,9 +429,9 @@ def cross_entropy(
     spiketrains: Spikestamps,
     channelx: float,
     channely: float,
-    t_start: float,
-    t_end: float,
     bin_size: float,
+    t_start: Optional[float] = None,
+    t_end: Optional[float] = None,
 ):
     """
     Estimates the cross entropy for the pair of electorde recordings (X & Y) using the binned spiketrains
@@ -479,9 +476,9 @@ def transfer_entropy(
     channelx: float,
     channely: float,
     history: float,
-    t_start: float,
-    t_end: float,
     bin_size: float,
+    t_start: Optional[float] = None,
+    t_end: Optional[float] = None,
 ):
     """
     Estimates the transfer entropy for the pair of electorde recordings (X & Y) using the binned spiketrains and history
@@ -527,9 +524,9 @@ def partial_information_decomposition(
     channelx: float,
     channely: float,
     channelz: float,
-    t_start: float,
-    t_end: float,
     bin_size: float,
+    t_start: Optional[float] = None,
+    t_end: Optional[float] = None,
 ):
     """
     Decomposes the information provided by channel x and y about channel z in redundancy, unique information, and synergy.

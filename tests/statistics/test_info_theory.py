@@ -48,6 +48,8 @@ def test_probability_distribution(spikestamps):
 
 
 def test_shannon_entropy_output(spikestamps):
+    with np.testing.assert_raises(AssertionError):
+        shannon_entropy(spikestamps, 1, 10, 0)
     output = shannon_entropy(spikestamps, 1, 0, 10)
     expected = np.array(
         [
@@ -63,34 +65,47 @@ def test_shannon_entropy_output(spikestamps):
     np.testing.assert_allclose(output, expected)
 
 
-# def test_block_entropy_output():
-#    with np.testing.assert_raises(AssertionError):
-#        output = block_entropy(spikestamps, 0, 1, 0, 0, 0.1)
-#    with np.testing.assert_raises(AssertionError):
-#        output = block_entropy(spikestamps, 0, 1, 0, 1, 0)
-#    output = block_entropy(spikestamps, 0, 4, 0, 1, 1)
-#    np.testing.assert_allclose(output, 0.0)
-#
-#
-# def test_entropy_rate_output():
-#    with np.testing.assert_raises(AssertionError):
-#        output = entropy_rate(spikestamps, 0, 1, 0, 0, 0.1)
-#    with np.testing.assert_raises(AssertionError):
-#        output = entropy_rate(spikestamps, 0, 1, 0, 1, 0)
-#    output = entropy_rate(spikestamps, 0, 1, 0, 1, 1)
-#    np.testing.assert_allclose(output, 0.0)
-#
-#
-# def test_active_information_output():
-#    with np.testing.assert_raises(AssertionError):
-#        output = active_information(spikestamps, 0, 1, 0, 0, 0.1)
-#    with np.testing.assert_raises(AssertionError):
-#        output = active_information(spikestamps, 0, 1, 0, 1, 0)
-#    output = active_information(spikestamps, 0, 1, 0, 1, 1)
-#    np.testing.assert_allclose(output, 0.0)
-#
-#
-# def test_mutual_information_output():
+def test_block_entropy_output(spikestamps):
+    with np.testing.assert_raises(AssertionError):  # history > 0
+        block_entropy(spikestamps, -1, 1)
+    with np.testing.assert_raises(AssertionError):  # t_start < t_end
+        block_entropy(spikestamps, -1, 1, 1, 0)
+    output = block_entropy(spikestamps, 4, 1)
+    expected = np.array(
+        [
+            1.356779649447039,
+            1.356779649447039,
+            1.356779649447039,
+            1.356779649447039,
+            1.770950594454669,
+        ]
+    )
+    np.testing.assert_allclose(output, expected)
+
+
+def test_entropy_rate_output(spikestamps):
+    with np.testing.assert_raises(AssertionError):  # history > 0
+        entropy_rate(spikestamps, -1, 1)
+    with np.testing.assert_raises(AssertionError):  # t_start < t_end
+        entropy_rate(spikestamps, -1, 1, 1, 0)
+    output = entropy_rate(spikestamps, 4, 1)
+    expected = np.array([0.460189937797365, 0.460189937797365, 0.460189937797365, 0, 0])
+    np.testing.assert_allclose(output, expected)
+
+
+def test_active_information_output(spikestamps):
+    with np.testing.assert_raises(AssertionError):  # history > 0
+        active_information(spikestamps, -1, 1)
+    with np.testing.assert_raises(AssertionError):  # t_start < t_end
+        active_information(spikestamps, -1, 1, 1, 0)
+    output = active_information(spikestamps, 4, 1)
+    expected = np.array(
+        [0.4581058951571238, 0.3040145676112544, 0.04306839587828, 0.0, 0.0]
+    )
+    np.testing.assert_allclose(output, expected)
+
+
+# def test_mutual_information_output(spikestamps):
 #    with np.testing.assert_raises(AssertionError):
 #        output = mutual_information(spikestamps, 0, 0, 0, 0, 0.1)
 #    with np.testing.assert_raises(AssertionError):
@@ -99,7 +114,7 @@ def test_shannon_entropy_output(spikestamps):
 #    np.testing.assert_allclose(output, 0.0)
 #
 #
-# def test_relative_entropy_output():
+# def test_relative_entropy_output(spikestamps):
 #    with np.testing.assert_raises(AssertionError):
 #        output = relative_entropy(spikestamps, 0, 0, 0, 0, 0.1)
 #    with np.testing.assert_raises(AssertionError):
@@ -108,7 +123,7 @@ def test_shannon_entropy_output(spikestamps):
 #    np.testing.assert_allclose(output, 0.0)
 #
 #
-# def test_conditional_entropy_output():
+# def test_conditional_entropy_output(spikestamps):
 #    with np.testing.assert_raises(AssertionError):
 #        output = conditional_entropy(spikestamps, 0, 0, 0, 0, 0.1)
 #    with np.testing.assert_raises(AssertionError):
@@ -117,7 +132,7 @@ def test_shannon_entropy_output(spikestamps):
 #    np.testing.assert_allclose(output, 0.0)
 #
 #
-# def test_transfer_entropy_output():
+# def test_transfer_entropy_output(spikestamps):
 #    with np.testing.assert_raises(AssertionError):
 #        output = transfer_entropy(spikestamps, 0, 0, 1, 0, 0, 0.1)
 #    with np.testing.assert_raises(AssertionError):
