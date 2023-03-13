@@ -171,21 +171,25 @@ class BaseChainingMixin:
         # TODO: Make it free function
         upstream = self._get_upstream_topology()
 
-        pos = dict()
+        # pos = dict()  # FIXME: Operators are not hashable
+        key = []
+        pos = []
         ind = 0
         tsort = []
 
         while len(upstream) > 0:
-            pos[upstream[-1]] = ind
+            key.append(upstream[-1])
+            pos.append(ind)
+            #pos[upstream[-1]] = ind
             tsort.append(upstream[-1])
             ind += 1
             upstream.pop()
         for source in tsort:
             for up in source.iterate_upstream():
-                if up not in pos:
+                if up not in key:
                     continue
-                before = pos[source]
-                after = pos[up]
+                before = pos[key.index(source)]
+                after = pos[key.index(up)]
 
                 # If parent vertex does not appear first
                 if before > after:
