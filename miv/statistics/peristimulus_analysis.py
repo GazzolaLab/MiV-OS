@@ -79,6 +79,7 @@ class PSTH(OperatorMixin):
 
     @wrap_cacher("psth")
     def __call__(self, events: Spikestamps, spikestamps: Spikestamps):
+        # TODO: Change events datatype to be Event, not Spikestamps
         n_time = int(np.ceil(self.interval / self.binsize))
         time_axis = np.linspace(0, self.interval, n_time)
         psth = np.zeros((spikestamps.number_of_channels, n_time))
@@ -91,7 +92,7 @@ class PSTH(OperatorMixin):
             )
             for channel in range(spikestamps.number_of_channels):
                 psth[channel] += bst[channel][:n_time]
-        psth /= len(events)
+        psth /= len(events[0])
         psth /= self.binsize
         return Signal(data=psth.T, timestamps=time_axis, rate=1.0 / self.binsize)
 
@@ -162,7 +163,7 @@ class PSTHOverlay(OperatorMixin):
         mea_map = self.mea_map
         nrow, ncol = mea_map.shape
         fig, axes = plt.subplots(
-            nrow, ncol, figsize=(nrow * 4, ncol * 4), sharex=True, sharey=True
+            nrow, ncol, figsize=(ncol * 4, nrow * 4), sharex=True, sharey=True
         )
         for idx, psth in enumerate(psths):
             for channel in range(psth.number_of_channels):
@@ -174,14 +175,19 @@ class PSTHOverlay(OperatorMixin):
                 r = w[0][0]
                 c = w[1][0]
                 axes[r][c].plot(time, p, label=f"PSTH {idx}")
-                axes[r][c].set_title(f"channel {channel+1}")
+                if channel in self._tetanus_channels:
+                    axes[r][c].set_title(f"channel {channel+1}", color='red')
+                elif channel in self._receive_channels:
+                    axes[r][c].set_title(f"channel {channel+1}", color='blue')
+                else:
+                    axes[r][c].set_title(f"channel {channel+1}")
         # Bottom row
         for i in range(ncol):
             axes[-1, i].set_xlabel("time (s)")
 
         # Left row
         for i in range(nrow):
-            axes[i, 0].set_ylabel("mean (channels) spike rate per bin")
+            axes[i, 0].set_ylabel("mean spike/bin")
 
         # Legend
         for i, j in itertools.product(range(nrow), range(ncol)):
