@@ -23,8 +23,10 @@ __all__ = ["ThresholdCutoff", "query_firing_rate_between"]
 
 from typing import Any, Dict, Generator, Iterable, List, Optional, Tuple, Union
 
+import multiprocessing
 import csv
 import inspect
+import functools
 import os
 import pathlib
 from dataclasses import dataclass
@@ -38,7 +40,7 @@ from tqdm import tqdm
 from miv.core.datatype import Signal, Spikestamps
 from miv.core.operator import OperatorMixin
 from miv.core.policy import InternallyMultiprocessing
-from miv.core.wrapper import wrap_generator_to_generator
+from miv.core.wrapper import wrap_cacher
 from miv.statistics import firing_rates
 from miv.typing import SignalType, SpikestampsType, TimestampsType
 
@@ -79,8 +81,8 @@ class ThresholdCutoff(OperatorMixin):
 
     num_proc: int = 1
 
-    # @wrap_output_generator_collapse(Spikestamps)
-    @wrap_generator_to_generator
+    # @wrap_generator_to_generator
+    @wrap_cacher(cache_tag="spikestamps")
     def __call__(self, signal: SignalType) -> SpikestampsType:
         """Execute threshold-cutoff method and return spike stamps
 
@@ -93,6 +95,22 @@ class ThresholdCutoff(OperatorMixin):
         spiketrain_list : List[SpikestampsType]
 
         """
+        if not inspect.isgenerator(signal): # TODO: Refactor in multiprocessing-enabling decorator
+            return self._detection(signal)
+        else:
+            collapsed_result = Spikestamps()
+            #with multiprocessing.Pool(self.num_proc) as pool:
+            #    #for result in pool.map(functools.partial(ThresholdCutoff._detection, self=self), signal):
+            #    inputs = list(signal)
+            #    print(inputs)
+            #    for result in pool.map(self._detection, inputs): # TODO: Something is not correct here. Check memory usage.
+            #        collapsed_result.extend(spiketrain)
+            for sig in signal: # TODO: mp
+                collapsed_result.extend(self._detection(sig))
+            return collapsed_result
+
+    #@staticmethod
+    def _detection(self, signal: SignalType):
         # Spike detection for each channel
         spiketrain_list = []
         num_channels = signal.number_of_channels  # type: ignore
@@ -121,20 +139,11 @@ class ThresholdCutoff(OperatorMixin):
                 spiketrain_list.append(spiketrain)
             else:
                 spiketrain_list.append(spikestamp.astype(np.float_))
-        return Spikestamps(spiketrain_list)
+        spikestamps = Spikestamps(spiketrain_list)
+        return spikestamps
 
     def __post_init__(self):
         super().__init__()
-
-    def after_run_collapse_spiketrain(
-        self, spiketrains: Union[Generator[Spikestamps, None, None], Spikestamps]
-    ):
-        if not inspect.isgenerator(spiketrains):
-            return spiketrains
-        collapsed_result = Spikestamps()
-        for spiketrain in spiketrains:
-            collapsed_result.extend(spiketrain)
-        return collapsed_result
 
     def _compute_spike_threshold(
         self, signal: SignalType, cutoff: float = 5.0, use_mad: bool = True

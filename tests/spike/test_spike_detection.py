@@ -56,7 +56,7 @@ def test_spike_detector(threshold_cutoff):
     signal = Signal(data=data, timestamps=timestamps, rate=fs)
 
     # Call the __call__ method of the SpikeDetector object
-    result = threshold_cutoff(signal)
+    result = threshold_cutoff._detection(signal)
 
     # Check that the number of SpikeTrains in the Spikestamps object is equal to the number of channels in the input signal
     assert len(result) == signal.shape[1]
