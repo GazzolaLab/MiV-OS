@@ -70,6 +70,7 @@ def firing_rates(spiketrains: Spikestamps) -> Dict[str, Any]:
 class MFRComparison(OperatorMixin):
     recording_duration: float = None
     tag: str = "Mean Firing Rate Comparison"
+    channels: List[int] = None
 
     def __call__(self, pre_spiketrains: Spikestamps, post_spiketrains: Spikestamps):
         pre_rates = firing_rates(pre_spiketrains)["rates"]
@@ -89,6 +90,10 @@ class MFRComparison(OperatorMixin):
 
     def plot_mfr_comparison(self, output, show=False, save_path=None):
         MFR_pre, MFR_post = output
+
+        if self.channels is not None:
+            MFR_pre = MFR_pre[self.channels]
+            MFR_post = MFR_post[self.channels]
 
         MFR = np.geomspace(1e-1, 1e2)
         kl = 7
