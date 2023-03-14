@@ -9,7 +9,7 @@ __all__ = [
     "spike_counts_with_kernel",
 ]
 
-from typing import Any, Dict, Iterable, List, Optional, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Union
 
 import datetime
 import os
@@ -176,10 +176,9 @@ def coefficient_variation(self, spikes: SpikestampsType):
 
 def fano_factor(
     spiketrains: SpikestampsType,
-    channel: float,  # TODO: the function should be independent of channel.
-    t_start: float,
-    t_end: float,
-    n_bins: float,
+    bin_size: float = 0.002,
+    t_start: Optional[float] = None,
+    t_end: Optional[float] = None,
 ):
     """
     Calculates the Fano factor for given signal by dividing it into the specified number of bins
@@ -188,14 +187,12 @@ def fano_factor(
     ----------
     spiketrains : SpikestampsType
         Single spike-stamps
-    channel : float
-        electrode/channel
+    bin_size : int
+        Size of the bin in second. Default is 2ms
     t_start : float
         Binning start time
     t_end : float
         Binning end time
-    n_bins : float
-        Number of bins
 
     Returns
     -------
@@ -203,23 +200,16 @@ def fano_factor(
         fanofactor for the specified channel and conditions
 
     """
-    raise NotImplementedError("This function is not implemented yet.")
-    assert (
-        t_start < t_end
-    ), f"End time {t_end} cannot be smaller or equal to start time {t_start}."
-    assert n_bins > 0, "Number of bins should be a positive integer"
-    bin_spike = spiketrains.get_view(t_start, t_end).binning(bin_size=0.002)
-    assert np.sum(bin_spike) != 0, "The channel has no spikes"
-    large_bin = []
-    bin_length = np.int32(np.size(bin_spike) / n_bins)
-    count = 0
-    for i in range(n_bins):
-        large_bin.append(np.sum(bin_spike[count : count + bin_length]))
-        count += bin_length
-    bin_array = np.array(large_bin)
-    fano_fac = np.var(bin_array) / np.mean(bin_array)
-
-    return fano_fac
+    bin_spike = spiketrains.binning(
+        bin_size=bin_size, t_start=t_start, t_end=t_end, return_count=True
+    )
+    fano_factor = np.zeros(bin_spike.number_of_channels, dtype=np.float_)
+    for channel in range(bin_spike.number_of_channels):
+        array = bin_spike[channel]
+        if np.sum(array) == 0:
+            fano_factor[channel] = np.nan
+        fano_factor[channel] = np.var(array) / np.mean(array)
+    return fano_factor
 
 
 def decay_spike_counts(
@@ -233,7 +223,7 @@ def decay_spike_counts(
     Parameters
     ----------
     spiketrain :
-        spiketrain
+        Single-channel spiketrain
     probe_times :
         probe_times
     amplitude :
@@ -263,7 +253,7 @@ def decay_spike_counts(
     return result
 
 
-def spike_counts_with_kernel(spiketrain, probe_times, kernel, batchsize=32):
+def spike_counts_with_kernel(spiketrain, probe_times, kernel: Callable, batchsize=32):
     if len(spiketrain) == 0:
         return np.zeros_like(probe_times)
 

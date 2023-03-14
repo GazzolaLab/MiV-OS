@@ -113,10 +113,13 @@ class Spikestamps(CollapseExtendableMixin, DataNodeMixin, Sequence):
             ]
         )
 
-    def select(self, indices, keepdims:bool=True):
+    def select(self, indices, keepdims: bool = True):
         """Select channels by indices."""
         if keepdims:
-            data = [self.data[idx] if idx in indices else [] for idx in range(self.number_of_channels)]
+            data = [
+                self.data[idx] if idx in indices else []
+                for idx in range(self.number_of_channels)
+            ]
             return Spikestamps(data)
         else:
             return Spikestamps([self.data[idx] for idx in indices])
