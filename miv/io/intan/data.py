@@ -163,7 +163,7 @@ class DataIntanTriggered(DataIntan):
         trigger_key: str = "board_adc_data",
         trigger_index: int = 0,
         trigger_threshold_voltage=1.0,
-        progress_bar: bool=False,
+        progress_bar: bool = False,
         *args,
         **kwargs,
     ):
@@ -181,14 +181,16 @@ class DataIntanTriggered(DataIntan):
     def __getitem__(self, index):
         groups = self._trigger_grouping()
         if len(groups) <= index:
-            raise IndexError(f"Index exceeds the number of triggered recordings ({len(groups)}).")
+            raise IndexError(
+                f"Index exceeds the number of triggered recordings ({len(groups)})."
+            )
         return DataIntanTriggered(
             data_path=self.data_path,
             index=index,
             trigger_key=self.trigger_key,
             trigger_index=self.trigger_index,
             trigger_threshold_voltage=self.trigger_threshold_voltage,
-            progress_bar=self.progress_bar
+            progress_bar=self.progress_bar,
         )
 
     @wrap_cacher(cache_tag="trigger_grouping")
@@ -198,8 +200,7 @@ class DataIntanTriggered(DataIntan):
                 return arr
             return arr[np.concatenate([np.array([True]), arr[1:] - 1 != arr[:-1]])]
 
-        if paths is None:
-            paths = DataIntan.get_recording_files(self)
+        paths = DataIntan.get_recording_files(self)
 
         group_files = []
         group = {"paths": [], "start index": [], "end index": []}

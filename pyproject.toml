@@ -228,7 +228,7 @@ branch = true
 omit = [
     "*/.local/*",
 	"setup.py",
-#"*/__init__.py",
+    "*/__init__.py",
     "miv/io/intan/rhs.py",# not part of the dev target
     "miv/io/asdf/asdf.py",# not part of the dev target
 ]

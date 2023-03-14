@@ -73,3 +73,7 @@ class Pipeline:
         for i, op in enumerate(self.execution_order):
             strs.append(f"{i}: {op}")
         return "\n".join(strs)
+
+    def export(self, working_directory: Optional[Union[str, pathlib.Path]]):
+        # TODO
+        pass
