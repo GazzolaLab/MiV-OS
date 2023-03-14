@@ -35,6 +35,10 @@ class MEA128:
         )
 
         self.mea = mea_map[map_key]
+        self.mea_intan = np.zeros_like(self.mea, dtype=np.int_) - 1
+        for channel in range(128):
+            oe_channel = self.channel_mapping(channel, reverse=True)
+            self.mea_intan[self.mea == oe_channel] = channel
 
     def channel_mapping(self, channel, reverse=False):
         """
