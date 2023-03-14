@@ -327,5 +327,4 @@ def query_firing_rate_between(
     """
     rates = np.array(firing_rates(spikestamps)["rates"])
     masks = np.logical_and(rates >= min_firing_rate, rates <= max_firing_rate)
-    print(f"masked: {len(masks)}: {masks}")
     return np.where(masks)[0]

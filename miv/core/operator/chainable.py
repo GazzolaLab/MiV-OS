@@ -180,7 +180,7 @@ class BaseChainingMixin:
         while len(upstream) > 0:
             key.append(upstream[-1])
             pos.append(ind)
-            #pos[upstream[-1]] = ind
+            # pos[upstream[-1]] = ind
             tsort.append(upstream[-1])
             ind += 1
             upstream.pop()
