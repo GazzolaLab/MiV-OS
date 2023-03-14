@@ -201,3 +201,49 @@ class PSTHOverlay(OperatorMixin):
             plt.savefig(os.path.join(save_path, "psth.png"))
 
         return axes
+
+    def plot_psth_area_trend(
+        self,
+        psths,
+        show=False,
+        save_path=None,
+    ):
+        mea_map = self.mea_map
+        nrow, ncol = mea_map.shape
+        fig, axes = plt.subplots(
+            nrow, ncol, figsize=(ncol * 4, nrow * 4), sharex=True, sharey=True
+        )
+        for channel in range(psths[0].number_of_channels):
+            if channel not in mea_map:
+                continue
+            w = np.where(mea_map == channel)
+            r = w[0][0]
+            c = w[1][0]
+
+            hist = []
+            for idx, psth in enumerate(psths):
+                p = psth[channel]
+                time = psth.timestamps
+                hist.append(np.trapz(p, time))
+            axes[r][c].plot(hist)
+            axes[r][c].set_title(f"channel {channel+1}")
+        # Bottom row
+        for i in range(ncol):
+            axes[-1, i].set_xlabel("data points")
+
+        # Left row
+        for i in range(nrow):
+            axes[i, 0].set_ylabel("Area under PSTH")
+
+        # Legend
+        for i, j in itertools.product(range(nrow), range(ncol)):
+            axes[i, j].legend()
+
+        plt.suptitle("PSTH Trend")
+
+        if show:
+            plt.show()
+        if save_path is not None:
+            plt.savefig(os.path.join(save_path, "psth_trend.png"))
+
+        return axes
