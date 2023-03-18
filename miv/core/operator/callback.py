@@ -66,6 +66,7 @@ class BaseCallbackMixin:
         self._callback_before_run = []
         self._callback_after_run = []
         self._callback_plot = []
+        self.skip_plotting: bool = False
 
     def __lshift__(self, right: Callable) -> SelfCallback:
         if right.__name__.startswith(
@@ -105,6 +106,8 @@ class BaseCallbackMixin:
         save_path: Optional[Union[bool, str, pathlib.Path]] = None,
         dry_run: bool = False,
     ):
+        if self.skip_plotting:
+            return
         if save_path is True:
             os.makedirs(self.analysis_path, exist_ok=True)
             save_path = self.analysis_path

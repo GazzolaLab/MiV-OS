@@ -77,18 +77,19 @@ class PSTH(OperatorMixin):
         else:
             self.mea_map = mea_map["64_intanRHD"]
 
-    @wrap_cacher("psth")
+    #@wrap_cacher("psth")
     def __call__(self, events: Spikestamps, spikestamps: Spikestamps):
         # TODO: Change events datatype to be Event, not Spikestamps
         n_time = int(np.ceil(self.interval / self.binsize))
         time_axis = np.linspace(0, self.interval, n_time)
-        psth = np.zeros((spikestamps.number_of_channels, n_time))
+        psth = np.zeros((spikestamps.number_of_channels, n_time), dtype=np.float_)
         for t_start in events[0]:
             t_end = t_start + n_time * self.binsize
             bst = spikestamps.binning(
                 self.binsize,
                 t_start=t_start + self.stimulus_length,
                 t_end=t_end + self.stimulus_length,
+                return_count=False
             )
             for channel in range(spikestamps.number_of_channels):
                 psth[channel] += bst[channel][:n_time]
@@ -100,7 +101,7 @@ class PSTH(OperatorMixin):
         mea_map = self.mea_map
         nrow, ncol = mea_map.shape
         fig, axes = plt.subplots(
-            nrow, ncol, figsize=(nrow * 4, ncol * 4), sharex=True, sharey=True
+            nrow, ncol, figsize=(ncol * 4, nrow * 4), sharex=True, sharey=True
         )
         for channel in range(psth.number_of_channels):
             p = psth[channel]
@@ -229,10 +230,6 @@ class PSTHOverlay(OperatorMixin):
         # Left row
         for i in range(nrow):
             axes[i, 0].set_ylabel("Area under PSTH")
-
-        # Legend
-        for i, j in itertools.product(range(nrow), range(ncol)):
-            axes[i, j].legend()
 
         plt.suptitle("PSTH Trend")
 
