@@ -175,12 +175,7 @@ class PSTHOverlay(OperatorMixin):
                 r = w[0][0]
                 c = w[1][0]
                 axes[r][c].plot(time, p, label=f"PSTH {idx}")
-                if channel in self._tetanus_channels:
-                    axes[r][c].set_title(f"channel {channel+1}", color='red')
-                elif channel in self._receive_channels:
-                    axes[r][c].set_title(f"channel {channel+1}", color='blue')
-                else:
-                    axes[r][c].set_title(f"channel {channel+1}")
+                axes[r][c].set_title(f"channel {channel+1}")
         # Bottom row
         for i in range(ncol):
             axes[-1, i].set_xlabel("time (s)")
