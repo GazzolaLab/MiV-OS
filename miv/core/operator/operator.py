@@ -115,25 +115,24 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin):
     def __init__(self):
         super().__init__()
         self._output: DataTypes | None = None
-        assert self.tag != ""
-        self.analysis_path = os.path.join(
-            "results", self.tag.replace(" ", "_")
-        )  # Default analysis path
-
         self.runner = VanillaRunner()
         self.cacher = DataclassCacher(self)
 
+        assert self.tag != ""
+        self.set_save_path("results")  # Default analysis path
+
     def set_caching_policy(self, cacher: _CacherProtocol):
         self.cacher = cacher(self)
+
+    def set_save_path(self, path: str | pathlib.Path):
+        self.analysis_path = os.path.join(path, self.tag.replace(" ", "_"))
+        self.cacher.cache_dir = os.path.join(self.analysis_path, ".cache")
 
     def receive(self) -> list[DataTypes]:
         return [node.output for node in self.iterate_upstream()]
 
     @property
     def output(self) -> list[DataTypes]:
-        # FIXME: Run graph upstream? what about the order??
-        if self._output is None:
-            raise RuntimeError(f"{self} is not yet executed.")
         self._execute()
         return self._output  # TODO: Just use upstream caller instead of .output
 
@@ -150,13 +149,12 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin):
 
     def run(
         self,
-        save_path: str | pathlib.Path,
+        save_path: str | pathlib.Path | None = None,
         dry_run: bool = False,
-        cache_dir: str | pathlib.Path = ".cache",
     ) -> None:
         # Execute the module
-        self.analysis_path = os.path.join(save_path, self.tag.replace(" ", "_"))
-        self.cacher.cache_dir = os.path.join(self.analysis_path, cache_dir)
+        if save_path is not None:
+            self.set_save_path(save_path)
 
         if dry_run:
             print("Dry run: ", self.__class__.__name__)
