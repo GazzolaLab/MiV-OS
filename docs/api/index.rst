@@ -6,6 +6,7 @@ API Documentation
    :caption: Functionalities
 
    signal
+   detection
    sorting
    statistics
    causality

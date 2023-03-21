@@ -13,6 +13,7 @@ from dataclasses import dataclass
 import matplotlib.pyplot as plt
 import numpy as np
 import quantities as pq
+from scipy.optimize import curve_fit
 
 from miv.core.datatype import Spikestamps
 from miv.core.operator import OperatorMixin
@@ -21,7 +22,7 @@ from miv.core.wrapper import wrap_cacher
 
 @dataclass
 class AvalancheAnalysis(OperatorMixin):
-    """
+    r"""
     An operator for finding avalanches in spike trains.
     It returns the size, duration, and avalanches themselves, defined as all the times each neuron spiked in a given avalanche.
 
@@ -36,16 +37,24 @@ class AvalancheAnalysis(OperatorMixin):
         Default is equal to the bin_size.
     allow_multiple_spike_per_bin : bool
         If True, allow multiple spikes per bin. Default is False.
+        This influence the threshold of the avalanche size.
 
     Returns
     -------
-    str_avas - a cell array containing all avalanches
-    szes - the size of each avalanche in number of spikes
-    lens - the duration of each avalanch
-    rast - a spike raster in row major ordering over the time range
-    specified, if that was specified
-    starts - times when avalanches begin
+    starts_time : np.ndarray
+        The start time of each avalanche.
+    ends_time : np.ndarray
+        The end time of each avalanche.
+    durations : np.ndarray
+        The duration of each avalanche. (ends_time - starts_time) * bin_size
+    size : np.ndarray
+        The number of active neurons/channels in each avalanche.
+    branching_ratio : np.ndarray
+        The branching ratio of each avalanche: the number of neurons active at time step t
+        divided by the number of neurons active at time step t-1.
 
+        .. math::
+            \sum(thisShape[1:] / thisShape[:-1]) / Avalanche.duration
     """
 
     bin_size: float = 0.004  # in seconds
@@ -93,9 +102,20 @@ class AvalancheAnalysis(OperatorMixin):
 
         starts_time = starts * self.bin_size + bincount.timestamps[0]
         ends_time = ends * self.bin_size + bincount.timestamps[0]
-        avalanche_lengths = ends_time - starts_time
+        durations = ends_time - starts_time
 
-        return starts_time, ends_time, avalanche_lengths
+        # Compute size and branching ratio
+        size = np.zeros(len(starts), dtype=np.int_)
+        branching_ratio = np.zeros(len(starts), dtype=np.float_)
+        for idx, (s, e) in enumerate(zip(starts, ends)):
+            if s == e:
+                raise ValueError("Avalanche size is 0")
+            avalanche = bincount.data[s:e, :]
+            size[idx] = np.count_nonzero(avalanche.sum(axis=0))
+            shape = avalanche.sum(axis=1)
+            branching_ratio[idx] = np.sum(shape[1:] / shape[:-1]) / durations[idx]
+
+        return starts_time, ends_time, durations, size, branching_ratio
 
     def __post_init__(self):
         super().__init__()
@@ -109,7 +129,7 @@ class AvalancheAnalysis(OperatorMixin):
     def plot_avalanche_on_raster(self, outputs, show=False, save_path=None):
         """Plot firing rate histogram"""
         spikestamps = self.receive()[0]
-        starts_time, ends_time, avalanche_lengths = outputs
+        starts_time, ends_time, _, _, _ = outputs
 
         fig, ax = plt.subplots(figsize=(16, 6))
         ax.eventplot(spikestamps)
@@ -124,3 +144,72 @@ class AvalancheAnalysis(OperatorMixin):
         if show:
             plt.show()
         return ax
+
+    def plot_power_law_fitting(self, outputs, show=False, save_path=None):
+        starts_time, ends_time, durations, size, branching_ratio = outputs
+
+        def power(x, a, c):
+            return c * (x**a)
+
+        def neg_power(x, a, c):
+            return c * (x ** (-a))
+
+        nbins = 100
+
+        fig, axes = plt.subplots(1, 3, figsize=(18, 6))
+        hist, bins = np.histogram(size, bins=nbins)
+        logbins = np.logspace(np.log10(bins[0]), np.log10(bins[-1]), len(bins))
+        axes[0].hist(size, bins=logbins, histtype="step", label="data")
+        axes[0].set_xscale("log")
+        axes[0].set_yscale("log")
+        axes[0].set_xlabel("size (# channels)")
+        axes[0].set_ylabel("Event Frequency")
+        hist, bins = np.histogram(size, bins=logbins)
+        popt, pcov = curve_fit(neg_power, bins[:-1][hist > 1], hist[hist > 1])
+        tau = popt[0]
+        axes[0].plot(logbins, neg_power(logbins, *popt), label=f"fit {tau=:.2f}")
+        axes[0].legend()
+        axes[0].set_ylim([5e-1, 1e3])
+
+        hist, bins = np.histogram(durations, bins=nbins)
+        logbins = np.logspace(np.log10(bins[0]), np.log10(bins[-1]), len(bins))
+        axes[1].hist(durations, bins=logbins, label="data")
+        axes[1].set_xscale("log")
+        axes[1].set_yscale("log")
+        axes[1].set_xlabel("duration (s)")
+        axes[1].set_ylabel("Event Frequency")
+        hist, bins = np.histogram(durations, bins=logbins)
+        popt, pcov = curve_fit(neg_power, bins[:-1][hist > 1], hist[hist > 1])
+        alpha = popt[0]
+        axes[1].plot(logbins, neg_power(logbins, *popt), label=f"fit {alpha=:.2f}")
+        axes[1].legend()
+        axes[1].set_ylim([5e-1, 1e3])
+
+        def width(p, w):
+            return 10 ** (np.log10(p) + w / 2.0) - 10 ** (np.log10(p) - w / 2.0)
+
+        values = []
+        avearges = []
+        for value in np.unique(durations):
+            positions = np.array([value])
+            axes[2].boxplot(
+                size[durations == value],
+                positions=positions,
+                widths=width(positions, 0.1),
+                showfliers=False,
+            )
+            values.append(value)
+            avearges.append(np.mean(size[durations == value]))
+        axes[2].set_xscale("log")
+        axes[2].set_yscale("log")
+        axes[2].set_xlabel("duration (s)")
+        axes[2].set_ylabel("Average size (# channels)")
+        popt, pcov = curve_fit(power, values, avearges)
+        axes[2].plot(logbins, power(logbins, *popt), label=f"fit 1/svz={popt[0]:.2f}")
+        axes[2].legend()
+        axes[2].set_title(f"({(alpha-1)/(tau-1)=})")
+
+        if save_path is not None:
+            plt.savefig(os.path.join(save_path, "avalanche_power_fitting.png"))
+        if show:
+            plt.show()

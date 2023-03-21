@@ -16,7 +16,6 @@ Signal Filter
    MedianFilter
    Notch
 
-.. automodule:: miv.signal.spike.detection
 
 Spike Waveform Extraction
 #########################

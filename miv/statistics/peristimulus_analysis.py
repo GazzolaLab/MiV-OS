@@ -77,7 +77,7 @@ class PSTH(OperatorMixin):
         else:
             self.mea_map = mea_map["64_intanRHD"]
 
-    #@wrap_cacher("psth")
+    @wrap_cacher("psth")
     def __call__(self, events: Spikestamps, spikestamps: Spikestamps):
         # TODO: Change events datatype to be Event, not Spikestamps
         n_time = int(np.ceil(self.interval / self.binsize))
@@ -89,7 +89,7 @@ class PSTH(OperatorMixin):
                 self.binsize,
                 t_start=t_start + self.stimulus_length,
                 t_end=t_end + self.stimulus_length,
-                return_count=False
+                return_count=False,
             )
             for channel in range(spikestamps.number_of_channels):
                 psth[channel] += bst[channel][:n_time]
