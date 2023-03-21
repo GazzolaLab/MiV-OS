@@ -17,7 +17,7 @@ keywords = ["neuroscience", "statistics", "data-analysis", "electrophysiology", 
 
 # Pypi classifiers: https://pypi.org/classifiers/
 classifiers = [
-  "Development Status :: 3 - Alpha",
+  "Development Status :: 3 - Beta",
   "Intended Audience :: Science/Research",
   "Intended Audience :: Education",
   "Operating System :: OS Independent",
@@ -210,7 +210,7 @@ exclude_lines = [
     "if 0:",
     "if __name__ == __main__:",
     "def __repr__",
-    '''def plot_'.*\)':''',
+    '''def plot_'.*':''',
     "if self.debug:",
     "if settings.DEBUG",
     "if TYPE_CHECKING:",

@@ -23,10 +23,10 @@ __all__ = ["ThresholdCutoff", "query_firing_rate_between"]
 
 from typing import Any, Dict, Generator, Iterable, List, Optional, Tuple, Union
 
-import multiprocessing
 import csv
-import inspect
 import functools
+import inspect
+import multiprocessing
 import os
 import pathlib
 from dataclasses import dataclass
@@ -95,21 +95,23 @@ class ThresholdCutoff(OperatorMixin):
         spiketrain_list : List[SpikestampsType]
 
         """
-        if not inspect.isgenerator(signal): # TODO: Refactor in multiprocessing-enabling decorator
+        if not inspect.isgenerator(
+            signal
+        ):  # TODO: Refactor in multiprocessing-enabling decorator
             return self._detection(signal)
         else:
             collapsed_result = Spikestamps()
-            #with multiprocessing.Pool(self.num_proc) as pool:
+            # with multiprocessing.Pool(self.num_proc) as pool:
             #    #for result in pool.map(functools.partial(ThresholdCutoff._detection, self=self), signal):
             #    inputs = list(signal)
             #    print(inputs)
             #    for result in pool.map(self._detection, inputs): # TODO: Something is not correct here. Check memory usage.
             #        collapsed_result.extend(spiketrain)
-            for sig in signal: # TODO: mp
+            for sig in signal:  # TODO: mp
                 collapsed_result.extend(self._detection(sig))
             return collapsed_result
 
-    #@staticmethod
+    # @staticmethod
     def _detection(self, signal: SignalType):
         # Spike detection for each channel
         spiketrain_list = []
@@ -238,20 +240,29 @@ class ThresholdCutoff(OperatorMixin):
         spikestamps,
         show: bool = False,
         save_path: Optional[pathlib.Path] = None,
-        ax: Optional[plt.Axes] = None,
     ) -> plt.Axes:
         """
-        Plot spike train
+        Plot spike train in raster
         """
-        if ax is None:
+        t0 = spikestamps.get_first_spikestamp()
+        tf = spikestamps.get_last_spikestamp()
+
+        term = 60
+        for idx in range(int(np.ceil((tf - t0) / term))):
+            spikes = spikestamps.get_view(
+                idx * term + t0, min((idx + 1) * term + t0, tf)
+            )
             fig, ax = plt.subplots(figsize=(16, 6))
-        ax.eventplot(spikestamps, color="r")
-        ax.set_xlabel("Time (s)")
-        ax.set_ylabel("Channel")
-        if save_path is not None:
-            plt.savefig(os.path.join(save_path, "spiketrain_raster.png"))
+            ax.eventplot(spikes)
+            ax.set_xlabel("Time (s)")
+            ax.set_ylabel("Channel")
+            if save_path is not None:
+                plt.savefig(os.path.join(save_path, f"spiketrain_raster_{idx:03d}.png"))
+            if not show:
+                plt.close("all")
         if show:
             plt.show()
+            plt.close("all")
         return ax
 
     def plot_firing_rate_histogram(self, spikestamps, show=False, save_path=None):
