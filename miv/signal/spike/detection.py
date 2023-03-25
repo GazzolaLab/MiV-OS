@@ -23,6 +23,7 @@ __all__ = ["ThresholdCutoff", "query_firing_rate_between"]
 
 from typing import Any, Dict, Generator, Iterable, List, Optional, Tuple, Union
 
+import logging
 import csv
 import functools
 import inspect
@@ -248,7 +249,11 @@ class ThresholdCutoff(OperatorMixin):
         tf = spikestamps.get_last_spikestamp()
 
         term = 60
-        for idx in range(int(np.ceil((tf - t0) / term))):
+        n_terms = int(np.ceil((tf - t0) / term))
+        if n_terms == 0:
+            # TODO: Warning message
+            return None
+        for idx in range(n_terms):
             spikes = spikestamps.get_view(
                 idx * term + t0, min((idx + 1) * term + t0, tf)
             )
