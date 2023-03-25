@@ -169,7 +169,7 @@ class AvalancheAnalysis(OperatorMixin):
         tau = popt[0]
         axes[0].plot(logbins, neg_power(logbins, *popt), label=f"fit {tau=:.2f}")
         axes[0].legend()
-        axes[0].set_ylim([5e-1, 1e3])
+        axes[1].set_ylim(left=5e-1)
 
         hist, bins = np.histogram(durations, bins=nbins)
         logbins = np.logspace(np.log10(bins[0]), np.log10(bins[-1]), len(bins))
@@ -183,7 +183,7 @@ class AvalancheAnalysis(OperatorMixin):
         alpha = popt[0]
         axes[1].plot(logbins, neg_power(logbins, *popt), label=f"fit {alpha=:.2f}")
         axes[1].legend()
-        axes[1].set_ylim([5e-1, 1e3])
+        axes[1].set_ylim(left=5e-1)
 
         def width(p, w):
             return 10 ** (np.log10(p) + w / 2.0) - 10 ** (np.log10(p) - w / 2.0)
