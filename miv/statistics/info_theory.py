@@ -120,7 +120,7 @@ def shannon_entropy(
     prob_spike = (
         bin_spike.data.sum(axis=bin_spike._SIGNALAXIS, keepdims=True)
         / bin_spike.shape[bin_spike._SIGNALAXIS]
-    )
+    ).astype(np.float_)
     prob_no_spike = 1 - prob_spike
     shannon_entropy = -(
         prob_spike * np.log2(prob_spike) + prob_no_spike * np.log2(prob_no_spike)

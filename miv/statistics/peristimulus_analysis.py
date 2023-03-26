@@ -112,7 +112,7 @@ class PSTH(OperatorMixin):
             r = w[0][0]
             c = w[1][0]
             axes[r][c].plot(time, p)
-            axes[r][c].set_title(f"channel {channel+1}")
+            axes[r][c].set_title(f"channel {channel}")
         # Bottom row
         for i in range(ncol):
             axes[-1, i].set_xlabel("time (s)")
@@ -176,7 +176,7 @@ class PSTHOverlay(OperatorMixin):
                 r = w[0][0]
                 c = w[1][0]
                 axes[r][c].plot(time, p, label=f"PSTH {idx}")
-                axes[r][c].set_title(f"channel {channel+1}")
+                axes[r][c].set_title(f"channel {channel}")
         # Bottom row
         for i in range(ncol):
             axes[-1, i].set_xlabel("time (s)")
@@ -222,7 +222,7 @@ class PSTHOverlay(OperatorMixin):
                 time = psth.timestamps
                 hist.append(np.trapz(p, time))
             axes[r][c].plot(hist)
-            axes[r][c].set_title(f"channel {channel+1}")
+            axes[r][c].set_title(f"channel {channel}")
         # Bottom row
         for i in range(ncol):
             axes[-1, i].set_xlabel("data points")
