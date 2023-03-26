@@ -68,6 +68,7 @@ class DirectedConnectivity(OperatorMixin):
     # Surrogate parameters
     surrogate_N: int = 30
     p_threshold: float = 0.05
+    H_threshold: float = 0.01
     seed: int = None
     num_proc: int = 1
 
@@ -113,6 +114,7 @@ class DirectedConnectivity(OperatorMixin):
             skip_surrogate=self.skip_surrogate,
             surrogate_N=self.surrogate_N,
             seed=self.seed,
+            H_threshold=self.H_threshold,
         )
         with mp.Pool(self.num_proc) as pool:
             for idx, result in enumerate(
@@ -209,7 +211,14 @@ class DirectedConnectivity(OperatorMixin):
 
     @staticmethod
     def _get_connection_info(
-        pair, binned_spiketrain, channels, mea, skip_surrogate, surrogate_N, seed
+        pair,
+        binned_spiketrain,
+        channels,
+        mea,
+        skip_surrogate,
+        surrogate_N,
+        seed,
+        H_threshold,
     ):
         """
         Get connection information
@@ -228,6 +237,8 @@ class DirectedConnectivity(OperatorMixin):
             surrogate_N=surrogate_N,
             seed=seed,
         )
+        if np.mean(te_list) < H_threshold:
+            return 1, 0
         t_value, p_value = spst.ttest_ind(
             te_list, surrogate_te_list, equal_var=False, nan_policy="omit"
         )

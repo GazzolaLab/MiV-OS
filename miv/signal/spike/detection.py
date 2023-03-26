@@ -23,10 +23,10 @@ __all__ = ["ThresholdCutoff", "query_firing_rate_between"]
 
 from typing import Any, Dict, Generator, Iterable, List, Optional, Tuple, Union
 
-import logging
 import csv
 import functools
 import inspect
+import logging
 import multiprocessing
 import os
 import pathlib

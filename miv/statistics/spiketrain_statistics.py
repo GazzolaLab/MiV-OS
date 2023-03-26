@@ -73,7 +73,9 @@ class MFRComparison(OperatorMixin):
     channels: List[int] = None
 
     def __call__(self, pre_spiketrains: Spikestamps, post_spiketrains: Spikestamps):
-        assert pre_spiketrains.number_of_channels == post_spiketrains.number_of_channels, f"Number of channels does not match."
+        assert (
+            pre_spiketrains.number_of_channels == post_spiketrains.number_of_channels
+        ), f"Number of channels does not match: {pre_spiketrains.number_of_channels} vs {post_spiketrains.number_of_channels}"
         pre_rates = firing_rates(pre_spiketrains)["rates"]
         post_rates = firing_rates(post_spiketrains)["rates"]
         if self.recording_duration is None:

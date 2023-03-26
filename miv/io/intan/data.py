@@ -124,7 +124,7 @@ class DataIntan(Data):
                 rate=sampling_rate,
             )
 
-    def _get_active_channels(self, group_prefix=("A","B","C","D")):
+    def _get_active_channels(self, group_prefix=("A", "B", "C", "D")):
         setting_path = os.path.join(self.data_path, "settings.xml")
         root = ET.parse(setting_path).getroot()
         total = 0

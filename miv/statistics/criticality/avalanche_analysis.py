@@ -6,8 +6,8 @@ __all__ = ["AvalancheAnalysis"]
 
 from typing import List, Optional, Tuple, Union
 
-import os
 import logging
+import os
 import sys
 from dataclasses import dataclass
 
@@ -215,7 +215,9 @@ class AvalancheAnalysis(OperatorMixin):
         axes[2].set_ylabel("Average size (# channels)")
         try:
             popt, pcov = curve_fit(power, values, avearges)
-            axes[2].plot(logbins, power(logbins, *popt), label=f"fit 1/svz={popt[0]:.2f}")
+            axes[2].plot(
+                logbins, power(logbins, *popt), label=f"fit 1/svz={popt[0]:.2f}"
+            )
         except RuntimeError:
             logging.warning("Power-fit failed. No fitted line will be plotted.")
         axes[2].legend()
