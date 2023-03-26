@@ -66,7 +66,7 @@ def plot_eigenvector_centrality(self, result, show=False, save_path=None):
 
     # nx.draw_networkx_edges(G, pos, alpha=0.2, ax=ax)
     nc = nx.draw_networkx_nodes(
-        G, pos, nodelist=nodes, node_color=colors, node_size=100, cmap=plt.cm.jet, ax=ax
+        G, pos, nodelist=nodes, node_color=colors, node_size=100, cmap=plt.cm.RdBu, ax=ax
     )  # , vmin=0, vmax=0.5)
     for node, (x_coord, y_coord) in pos.items():
         ax.text(x_coord - 0.1, y_coord - 0.1, str(node))
