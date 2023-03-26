@@ -173,7 +173,7 @@ class AvalancheAnalysis(OperatorMixin):
 
         hist, bins = np.histogram(durations, bins=nbins)
         logbins = np.logspace(np.log10(bins[0]), np.log10(bins[-1]), len(bins))
-        axes[1].hist(durations, bins=logbins, label="data")
+        axes[1].hist(durations, bins=logbins, histtype="step", label="data")
         axes[1].set_xscale("log")
         axes[1].set_yscale("log")
         axes[1].set_xlabel("duration (s)")
@@ -207,9 +207,40 @@ class AvalancheAnalysis(OperatorMixin):
         popt, pcov = curve_fit(power, values, avearges)
         axes[2].plot(logbins, power(logbins, *popt), label=f"fit 1/svz={popt[0]:.2f}")
         axes[2].legend()
-        axes[2].set_title(f"({(alpha-1)/(tau-1)=})")
+        axes[2].set_title(f"({(alpha-1)/(tau-1)=:.2f})")
 
         if save_path is not None:
             plt.savefig(os.path.join(save_path, "avalanche_power_fitting.png"))
+        if show:
+            plt.show()
+
+    def plot_branching_ratio_histogram(self, outputs, show=False, save_path=None):
+        return
+        starts_time, ends_time, durations, size, branching_ratio = outputs
+
+        nbins = 100
+
+        fig, ax = plt.subplots(1, 1)
+        # hist, bins = np.histogram(size, bins=nbins)
+        # logbins = np.logspace(np.log10(bins[0]), np.log10(bins[-1]), len(bins))
+        ax.hist(
+            branching_ratio[np.nonzero(branching_ratio)],
+            bins=nbins,
+            histtype="step",
+            label="data",
+        )
+        # axes[0].set_xscale("log")
+        # axes[0].set_yscale("log")
+        ax.set_xlabel("branching ratio")
+        ax.set_ylabel("Event Frequency")
+        # hist, bins = np.histogram(size, bins=logbins)
+        # popt, pcov = curve_fit(neg_power, bins[:-1][hist > 1], hist[hist > 1])
+        # tau = popt[0]
+        # axes[0].plot(logbins, neg_power(logbins, *popt), label=f"fit {tau=:.2f}")
+        # axes[0].legend()
+        # axes[0].set_ylim([5e-1, 1e3])
+        ax.set_title("branching ratio")
+        if save_path is not None:
+            plt.savefig(os.path.join(save_path, "branching_ratio.png"))
         if show:
             plt.show()
