@@ -30,7 +30,7 @@ def plot_eigenvector_centrality(self, result, show=False, save_path=None):
             if center not in channels:
                 continue
             G.add_node(center)
-            pos[center] = (j, i)
+            pos[center] = (j, -i)
 
     for source in range(n_nodes):
         if channels[source] not in self.mea_map:

@@ -319,7 +319,7 @@ class DirectedConnectivity(OperatorMixin):
                 if center < 0:
                     continue
                 G_1.add_node(center)
-                pos[center] = (j, i)
+                pos[center] = (j, -i)
 
         if boolean_connectivity:
             for idx, conn in enumerate(connectivity):
