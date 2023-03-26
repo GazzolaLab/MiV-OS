@@ -7,6 +7,7 @@ __all__ = ["AvalancheAnalysis"]
 from typing import List, Optional, Tuple, Union
 
 import os
+import logging
 import sys
 from dataclasses import dataclass
 
@@ -165,11 +166,15 @@ class AvalancheAnalysis(OperatorMixin):
         axes[0].set_xlabel("size (# channels)")
         axes[0].set_ylabel("Event Frequency")
         hist, bins = np.histogram(size, bins=logbins)
-        popt, pcov = curve_fit(neg_power, bins[:-1][hist > 1], hist[hist > 1])
-        tau = popt[0]
-        axes[0].plot(logbins, neg_power(logbins, *popt), label=f"fit {tau=:.2f}")
+        try:
+            popt, pcov = curve_fit(neg_power, bins[:-1][hist > 1], hist[hist > 1])
+            tau = popt[0]
+            axes[0].plot(logbins, neg_power(logbins, *popt), label=f"fit {tau=:.2f}")
+        except RuntimeError:
+            tau = 0
+            logging.warning("Power-fit failed. No fitted line will be plotted.")
         axes[0].legend()
-        axes[1].set_ylim(bottom=5e-1)
+        axes[0].set_ylim(bottom=5e-1)
 
         hist, bins = np.histogram(durations, bins=nbins)
         logbins = np.logspace(np.log10(bins[0]), np.log10(bins[-1]), len(bins))
@@ -179,9 +184,13 @@ class AvalancheAnalysis(OperatorMixin):
         axes[1].set_xlabel("duration (s)")
         axes[1].set_ylabel("Event Frequency")
         hist, bins = np.histogram(durations, bins=logbins)
-        popt, pcov = curve_fit(neg_power, bins[:-1][hist > 1], hist[hist > 1])
-        alpha = popt[0]
-        axes[1].plot(logbins, neg_power(logbins, *popt), label=f"fit {alpha=:.2f}")
+        try:
+            popt, pcov = curve_fit(neg_power, bins[:-1][hist > 1], hist[hist > 1])
+            alpha = popt[0]
+            axes[1].plot(logbins, neg_power(logbins, *popt), label=f"fit {alpha=:.2f}")
+        except RuntimeError:
+            alpha = 0
+            logging.warning("Power-fit failed. No fitted line will be plotted.")
         axes[1].legend()
         axes[1].set_ylim(bottom=5e-1)
 
@@ -204,8 +213,11 @@ class AvalancheAnalysis(OperatorMixin):
         axes[2].set_yscale("log")
         axes[2].set_xlabel("duration (s)")
         axes[2].set_ylabel("Average size (# channels)")
-        popt, pcov = curve_fit(power, values, avearges)
-        axes[2].plot(logbins, power(logbins, *popt), label=f"fit 1/svz={popt[0]:.2f}")
+        try:
+            popt, pcov = curve_fit(power, values, avearges)
+            axes[2].plot(logbins, power(logbins, *popt), label=f"fit 1/svz={popt[0]:.2f}")
+        except RuntimeError:
+            logging.warning("Power-fit failed. No fitted line will be plotted.")
         axes[2].legend()
         axes[2].set_title(f"({(alpha-1)/(tau-1)=:.2f})")
 
