@@ -105,18 +105,40 @@ class DataIntan(Data):
         # Get sampling rate from setting file
         setting_path = os.path.join(self.data_path, "settings.xml")
         sampling_rate = int(ET.parse(setting_path).getroot().attrib["SampleRateHertz"])
+        active_channels, total = self._get_active_channels()
         # Read each files
         for filename in tqdm(files, disable=not progress_bar):
             result, data_present = rhs.load_file(filename)
             assert data_present, f"Data does not present: {filename=}."
             assert not hasattr(result, name), f"No {name} in the file ({filename=})."
 
-            # signal_group = result["amplifier_channels"]
+            signal = np.asarray(result[name])
+            if total != signal.shape[0]:
+                _signal = np.zeros([total, signal.shape[1]], dtype=signal.dtype)
+                _signal[active_channels, :] = signal
+                signal = _signal
+
             yield Signal(
-                data=np.asarray(result[name]).T,
+                data=signal.T,
                 timestamps=np.asarray(result["t"]),
                 rate=sampling_rate,
             )
+
+    def _get_active_channels(self, group_prefix=("A","B","C","D")):
+        setting_path = os.path.join(self.data_path, "settings.xml")
+        root = ET.parse(setting_path).getroot()
+        total = 0
+        active_channels = []
+        for child in root:
+            if child.tag != "SignalGroup":
+                continue
+            if child.attrib["Prefix"] not in group_prefix:
+                continue
+            for channel in child:
+                if channel.attrib["Enabled"] == "True":
+                    active_channels.append(total)
+                total += 1
+        return np.array(active_channels), total
 
     def check_path_validity(self):
         """
@@ -285,6 +307,7 @@ class DataIntanTriggered(DataIntan):
         # Get sampling rate from setting file
         setting_path = os.path.join(self.data_path, "settings.xml")
         sampling_rate = int(ET.parse(setting_path).getroot().attrib["SampleRateHertz"])
+        active_channels, total = self._get_active_channels()
         # Read each files
         for filename, sidx, eidx in tqdm(
             zip(files, sindex, eindex), disable=not progress_bar
@@ -293,9 +316,14 @@ class DataIntanTriggered(DataIntan):
             assert data_present, f"Data does not present: {filename=}."
             assert not hasattr(result, name), f"No {name} in the file ({filename=})."
 
-            # signal_group = result["amplifier_channels"]
+            signal = np.asarray(result[name])
+            if total != signal.shape[0]:
+                _signal = np.zeros([total, signal.shape[1]], dtype=signal.dtype)
+                _signal[active_channels, :] = signal
+                signal = _signal
+
             yield Signal(
-                data=np.asarray(result[name]).T[sidx:eidx, :],
+                data=signal.T[sidx:eidx, :],
                 timestamps=np.asarray(result["t"])[sidx:eidx],
                 rate=sampling_rate,
             )
