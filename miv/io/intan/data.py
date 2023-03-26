@@ -145,6 +145,27 @@ class DataIntan(Data):
         paths.sort()
         return paths
 
+    def get_stimulation_events(self):  # TODO: refactor
+        minimum_stimulation_length = 0.010
+        data = self.get_stimulation()
+        stim = data.data
+        timestamps = data.timestamps
+        # sampling_rate = data.rate
+        stimulated_channels = np.where(np.abs(stim).sum(axis=0))[0]
+        if len(stimulated_channels) == 0:
+            return None
+        stimulated_channel = stimulated_channels[0]
+        stim = stim[:, stimulated_channel]
+
+        events = ~np.isclose(stim, 0)
+        eventstrain = timestamps[np.where(events)[0]]
+        ref = np.concatenate(
+            [[True], np.diff(eventstrain) > minimum_stimulation_length]
+        )
+        eventstrain = eventstrain[ref]
+        ret = Spikestamps([eventstrain])  # TODO: use datatype.Events
+        return ret
+
     # Disable
     def load_ttl_event(self):
         raise AttributeError("DataIntan does not have laod_ttl_event method")
@@ -278,24 +299,3 @@ class DataIntanTriggered(DataIntan):
                 timestamps=np.asarray(result["t"])[sidx:eidx],
                 rate=sampling_rate,
             )
-
-    def get_stimulation_events(self):  # TODO: refactor
-        minimum_stimulation_length = 0.010
-        data = self.get_stimulation()
-        stim = data.data
-        timestamps = data.timestamps
-        # sampling_rate = data.rate
-        stimulated_channels = np.where(np.abs(stim).sum(axis=0))[0]
-        if len(stimulated_channels) == 0:
-            return None
-        stimulated_channel = stimulated_channels[0]
-        stim = stim[:, stimulated_channel]
-
-        events = ~np.isclose(stim, 0)
-        eventstrain = timestamps[np.where(events)[0]]
-        ref = np.concatenate(
-            [[True], np.diff(eventstrain) > minimum_stimulation_length]
-        )
-        eventstrain = eventstrain[ref]
-        ret = Spikestamps([eventstrain])  # TODO: use datatype.Events
-        return ret
