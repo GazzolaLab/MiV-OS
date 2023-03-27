@@ -248,6 +248,7 @@ class ThresholdCutoff(OperatorMixin):
         t0 = spikestamps.get_first_spikestamp()
         tf = spikestamps.get_last_spikestamp()
 
+        # TODO: REFACTOR. Make single plot, and change xlim
         term = 60
         n_terms = int(np.ceil((tf - t0) / term))
         if n_terms == 0:

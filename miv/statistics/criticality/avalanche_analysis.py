@@ -9,6 +9,7 @@ from typing import List, Optional, Tuple, Union
 import logging
 import os
 import sys
+from collections import defaultdict
 from dataclasses import dataclass
 
 import matplotlib.pyplot as plt
@@ -108,10 +109,12 @@ class AvalancheAnalysis(OperatorMixin):
         # Compute size and branching ratio
         size = np.zeros(len(starts), dtype=np.int_)
         branching_ratio = np.zeros(len(starts), dtype=np.float_)
+        avalanches = []
         for idx, (s, e) in enumerate(zip(starts, ends)):
             if s == e:
                 raise ValueError("Avalanche size is 0")
             avalanche = bincount.data[s:e, :]
+            avalanches.append(avalanche)
             size[idx] = np.count_nonzero(avalanche.sum(axis=0))
             shape = avalanche.sum(axis=1)
             if np.any(np.isclose(shape[:-1], 0)) or np.isclose(size[idx], 0):
@@ -119,7 +122,7 @@ class AvalancheAnalysis(OperatorMixin):
             else:
                 branching_ratio[idx] = np.sum(shape[1:] / shape[:-1]) / size[idx]
 
-        return starts_time, ends_time, durations, size, branching_ratio
+        return starts_time, ends_time, durations, size, branching_ratio, avalanches
 
     def __post_init__(self):
         super().__init__()
@@ -132,8 +135,12 @@ class AvalancheAnalysis(OperatorMixin):
 
     def plot_avalanche_on_raster(self, outputs, show=False, save_path=None):
         """Plot firing rate histogram"""
+        if show:
+            logging.warning(
+                "Plotting avalanche on raster is not supported to be shown interactively."
+            )
         spikestamps = self.receive()[0]
-        starts_time, ends_time, _, _, _ = outputs
+        starts_time, ends_time, _, _, _, _ = outputs
 
         fig, ax = plt.subplots(figsize=(16, 6))
         ax.eventplot(spikestamps)
@@ -143,14 +150,20 @@ class AvalancheAnalysis(OperatorMixin):
 
         ax.set_xlabel("Time (s)")
         ax.set_ylabel("Channel")
-        if save_path is not None:
-            plt.savefig(os.path.join(save_path, "raster_avalanche_overlay.png"))
-        if show:
-            plt.show()
-        return ax
+
+        # Save
+        left, right = ax.get_xlim()
+        interval = 30  # sec
+        for i in range(int(np.ceil((right - left) / interval))):
+            ax.set_xlim(left + i * interval, left + (i + 1) * interval)
+            if save_path is not None:
+                plt.savefig(
+                    os.path.join(save_path, f"raster_avalanche_overlay_{i}.png")
+                )
+        plt.close(fig)
 
     def plot_power_law_fitting(self, outputs, show=False, save_path=None):
-        starts_time, ends_time, durations, size, branching_ratio = outputs
+        starts_time, ends_time, durations, size, branching_ratio, _ = outputs
 
         def power(x, a, c):
             return c * (x**a)
@@ -218,6 +231,7 @@ class AvalancheAnalysis(OperatorMixin):
         axes[2].set_ylabel("Average size (# channels)")
         try:
             popt, pcov = curve_fit(power, values, avearges)
+            self.svz = popt[0]
             axes[2].plot(
                 logbins, power(logbins, *popt), label=f"fit 1/svz={popt[0]:.2f}"
             )
@@ -230,10 +244,10 @@ class AvalancheAnalysis(OperatorMixin):
             plt.savefig(os.path.join(save_path, "avalanche_power_fitting.png"))
         if show:
             plt.show()
+        plt.close(fig)
 
     def plot_branching_ratio_histogram(self, outputs, show=False, save_path=None):
-        # return
-        starts_time, ends_time, durations, size, branching_ratio = outputs
+        starts_time, ends_time, durations, size, branching_ratio, _ = outputs
 
         nbins = 100
 
@@ -261,3 +275,45 @@ class AvalancheAnalysis(OperatorMixin):
             plt.savefig(os.path.join(save_path, "branching_ratio.png"))
         if show:
             plt.show()
+        plt.close(fig)
+
+    def plot_avalanche_shape_collapse(self, outputs, show=False, save_path=None):
+        _, _, durations, _, _, avalanches = outputs
+
+        shapes = defaultdict(list)
+        for avalanche in avalanches:
+            count = avalanche.shape[0]
+            if count <= 1:
+                continue
+            shapes[count].append(avalanche.sum(axis=1))
+
+        fig, axes = plt.subplots(1, 2, figsize=(12, 6))
+        for idx, count in enumerate(shapes.keys()):
+            shapes[count] = np.array(shapes[count])
+            time = np.arange(count) * self.bin_size
+            T = count * self.bin_size
+            mean = np.array(shapes[count]).mean(axis=0)
+            err = np.array(shapes[count]).std(axis=0)
+            axes[0].errorbar(
+                time, mean, yerr=err, label=f"duration {self.bin_size*count*1000:.2f}ms"
+            )
+            axes[1].plot(
+                time / T,
+                mean / (T ** (self.svz - 1)),
+                label=f"duration {self.bin_size*count*1000:.2f}ms",
+            )
+
+        axes[0].set_xlabel("Time in Avalanche (s)")
+        axes[0].set_ylabel("Average Number of Firing s(t,T)")
+        axes[0].set_title("Raw Shapes")
+        # axes[0].legend()
+        axes[1].set_xlabel("Time in Avalanche Duration (s / T)")
+        axes[1].set_ylabel("Average Number of Firing s(t,T) / T^1/svz-1 ")
+        axes[1].set_title(f"Normalized/Collapsed Avalanche Shape {self.svz:.2f}")
+        # axes[1].legend()
+
+        if save_path is not None:
+            plt.savefig(os.path.join(save_path, "avalanche_shape_collapse.png"))
+        if show:
+            plt.show()
+        plt.close(fig)
