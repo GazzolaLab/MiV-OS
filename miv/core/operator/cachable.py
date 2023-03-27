@@ -109,7 +109,7 @@ class SkipCache:  # TODO
 
 def when_policy_is(*policy):
     def decorator(func):
-        @functools.wraps(func)
+        #@functools.wraps(func) # TODO: fix this
         def wrapper(*args, **kwargs):
             self = args[0]
             if self.policy in policy:
@@ -123,7 +123,7 @@ def when_policy_is(*policy):
 
 
 def when_initialized(func):  # TODO: refactor
-    @functools.wraps(func)
+    #@functools.wraps(func) # TODO: fix this
     def wrapper(*args, **kwargs):
         self = args[0]
         if self.cache_dir is None:
