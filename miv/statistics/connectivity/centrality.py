@@ -51,15 +51,9 @@ def plot_eigenvector_centrality(self, result, show=False, save_path=None):
     centrality = nx.eigenvector_centrality_numpy(G, weight="weight")
     colors = [centrality[n] for n in nodes]
 
-    # mean = np.nanmean(metric_matrix)
-    # std = np.nanstd(metric_matrix)
-    # vmin = max(0.0, mean - 2 * std)
-    # vmax = mean + 2 * std
-
-    # fig = plt.figure()
-    # plt.imshow(nx.adjacency_matrix(G, weight="weight").todense())
-    # if save_path is not None:
-    #    plt.savefig(os.path.join(save_path, "connection_matrix.png"))
+    vmin = np.min(centrality)
+    vmax = np.max(centrality)
+    v = np.max(np.abs([vmin, vmax]))
 
     fig = plt.figure()
     ax = plt.gca()
@@ -73,7 +67,9 @@ def plot_eigenvector_centrality(self, result, show=False, save_path=None):
         node_size=100,
         cmap=plt.cm.RdBu,
         ax=ax,
-    )  # , vmin=0, vmax=0.5)
+        vmin=-v,
+        vmax=v,
+    )
     for node, (x_coord, y_coord) in pos.items():
         ax.text(x_coord - 0.1, y_coord - 0.1, str(node))
     fig.colorbar(nc, ax=ax)
