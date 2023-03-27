@@ -31,7 +31,7 @@ def wrap_cacher(cache_tag):
     """
 
     def decorator(func):
-        @functools.wraps(func)
+        #@functools.wraps(func)
         def wrapper(*args, **kwargs):
             if not hasattr(wrapper, "cache_tag"):
                 setattr(wrapper, "cache_tag", cache_tag)
@@ -58,31 +58,29 @@ def wrap_generator_to_generator(func):
     Current implementation only works for class methods.
     """
 
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        self: Operator = args[0]
+    #@functools.wraps(func)
+    def wrapper(self, *args, **kwargs):
         is_all_generator = all(inspect.isgenerator(v) for v in args[1:]) and all(
             inspect.isgenerator(v) for v in kwargs.values()
         )
         if is_all_generator:
-
-            def generator_func(*args, **kwargs):
-                if self.cacher.check_cached():
+            if self.cacher.check_cached():
+                def generator_func(*args, **kwargs):
                     yield from self.cacher.load_cached()
-                else:
+            else:
+                def generator_func(*args, **kwargs):
                     for idx, zip_arg in enumerate(zip(*args)):
                         result = func(self, *zip_arg, **kwargs)
                         self.cacher.save_cache(result, idx)
                         yield result
                     else:
                         self.cacher.save_config()
-
-            return generator_func(*(args[1:]), **kwargs)
+            return generator_func(*args, **kwargs)
         else:
             if self.cacher.check_cached():
                 return next(self.cacher.load_cached())
             else:
-                result = func(*args, **kwargs)
+                result = func(self, *args, **kwargs)
                 self.cacher.save_cache(result)
                 self.cacher.save_config()
             return result
@@ -106,7 +104,6 @@ def miv_function(name, **params):
             tag: str = name
 
             def __call__(self, *args, **kwargs):
-                print(type(args[0]))
                 return func(self, *args)
 
             def __post_init__(self):

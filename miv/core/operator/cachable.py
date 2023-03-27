@@ -107,29 +107,25 @@ class SkipCache:  # TODO
         )
 
 
-def when_policy_is(*policy):
+def when_policy_is(*allowed_policy):
     def decorator(func):
         #@functools.wraps(func) # TODO: fix this
-        def wrapper(*args, **kwargs):
-            self = args[0]
-            if self.policy in policy:
-                return func(*args, **kwargs)
+        def wrapper(self, *args, **kwargs):
+            if self.policy in allowed_policy:
+                return func(self, *args, **kwargs)
             else:
                 return False
-
         return wrapper
-
     return decorator
 
 
 def when_initialized(func):  # TODO: refactor
     #@functools.wraps(func) # TODO: fix this
-    def wrapper(*args, **kwargs):
-        self = args[0]
+    def wrapper(self, *args, **kwargs):
         if self.cache_dir is None:
             return False
         else:
-            return func(*args, **kwargs)
+            return func(self, *args, **kwargs)
 
     return wrapper
 
@@ -137,18 +133,10 @@ def when_initialized(func):  # TODO: refactor
 class BaseCacher:
     def __init__(self, parent):
         super().__init__()
-        self.cache_policy: CACHE_POLICY = "AUTO"  # TODO: make this a property
+        self.policy: CACHE_POLICY = "AUTO"  # TODO: make this a property
         self.parent = parent
         self.cache_dir = None  # TODO: Public. Make proper setter
         self.cache_tag = "data"
-
-    @property
-    def policy(self) -> CACHE_POLICY:
-        return self.cache_policy
-
-    @policy.setter
-    def policy(self, v) -> CACHE_POLICY:
-        self.cache_policy = v
 
     @property
     def config_filename(self) -> str:
