@@ -114,7 +114,10 @@ class AvalancheAnalysis(OperatorMixin):
             avalanche = bincount.data[s:e, :]
             size[idx] = np.count_nonzero(avalanche.sum(axis=0))
             shape = avalanche.sum(axis=1)
-            branching_ratio[idx] = np.sum(shape[1:] / shape[:-1]) / durations[idx]
+            if np.any(np.isclose(shape[:-1], 0)) or np.isclose(size[idx], 0):
+                branching_ratio[idx] = 0.0
+            else:
+                branching_ratio[idx] = np.sum(shape[1:] / shape[:-1]) / size[idx]
 
         return starts_time, ends_time, durations, size, branching_ratio
 
@@ -229,7 +232,7 @@ class AvalancheAnalysis(OperatorMixin):
             plt.show()
 
     def plot_branching_ratio_histogram(self, outputs, show=False, save_path=None):
-        return
+        # return
         starts_time, ends_time, durations, size, branching_ratio = outputs
 
         nbins = 100
