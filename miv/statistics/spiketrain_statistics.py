@@ -264,6 +264,7 @@ def decay_spike_counts(
 def spike_counts_with_kernel(spiketrain, probe_times, kernel: Callable, batchsize=32):
     if len(spiketrain) == 0:
         return np.zeros_like(probe_times)
+    spiketrain = np.asarray(spiketrain)
 
     batchsize = min(spiketrain.shape[0], batchsize)
     num_sections = spiketrain.shape[0] // batchsize + (
