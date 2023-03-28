@@ -54,6 +54,7 @@ class UnstructuredMEA(MEAMixin):
         dely = ymax - ymin
         x = np.linspace(xmin - 0.1 * delx, xmax + 0.1 * delx, 100)
         y = np.linspace(ymin - 0.1 * dely, ymax + 0.1 * dely, 100)
-        z = griddata(self.coordinates, values, (x, y), method="cubic")
+        Xn, Yn = np.meshgrid(x, y)
+        Z = griddata(self.coordinates, values, (Xn, Yn), method="cubic")
 
-        return x, y, z
+        return Xn, Yn, Z

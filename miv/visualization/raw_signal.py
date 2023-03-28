@@ -41,8 +41,9 @@ class MultiChannelSignalVisualization(OperatorMixin):
 
         for vidx, signal in enumerate(signals):
             probe_times = signal.timestamps[:: self.average_interval]
+            n = (signal.data.shape[0] // self.average_interval) * self.average_interval
             xs = np.average(
-                signal.data.reshape(
+                signal.data[:n,:].reshape(
                     -1, self.average_interval, signal.number_of_channels
                 ),
                 axis=1,
@@ -73,6 +74,7 @@ class MultiChannelSignalVisualization(OperatorMixin):
                     fig.clf()
                     ax = fig.add_subplot(111)
                     # X, Y, Z = interp_2d(Z)
+                    ax.plot(mea.coordinates[:,0], mea.coordinates[:,1], 'k.', ms=1)
                     pcm = ax.pcolormesh(
                         X, Y, Z, cmap="PuBu", vmin=xmin, vmax=xmax, shading="gouraud"
                     )
