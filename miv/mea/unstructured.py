@@ -1,4 +1,4 @@
-__all__ = ["GridMEA"]
+__all__ = ["UnstructuredMEA"]
 
 from typing import Tuple
 
@@ -8,7 +8,7 @@ import numpy as np
 from miv.mea.base import MEAMixin
 
 
-class GridMEA(MEAMixin):
+class UnstructuredMEA(MEAMixin):
     """
     A class representing a grid-based multi-electrode array (MEA).
 
@@ -39,5 +39,6 @@ class GridMEA(MEAMixin):
         value_grid = np.empty_like(self.grid, dtype=vector.dtype)
         value_grid[:] = missing_value
         for idx, value in enumerate(vector):
-            value_grid[self.grid == idx] = value
+            r, c = np.where([self.grid == idx])[0]
+            value_grid[r, c] = value
         return value_grid

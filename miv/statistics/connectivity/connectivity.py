@@ -128,31 +128,6 @@ class DirectedConnectivity(OperatorMixin):
                 adj_matrix[i, j] = result[0] < self.p_threshold
                 connectivity_metric_matrix[i, j] = result[1]
 
-        # for sidx, source in tqdm(
-        #     enumerate(channels), disable=not self.progress_bar, total=len(channels)
-        # ):
-        #     if source not in self.mea_map:
-        #         continue
-        #     p_values = []
-        #     metric_values = []
-        #     for tidx, target in tqdm(
-        #         enumerate(channels),
-        #         disable=not self.progress_bar,
-        #         leave=False,
-        #         total=len(channels),
-        #     ):
-        #         if source != target and target in self.mea_map:
-        #             source_binned_spiketrain = binned_spiketrain[sidx]
-        #             target_binned_spiketrain = binned_spiketrain[tidx]
-        #             p, metrics = self._get_connection_info(
-        #                 source_binned_spiketrain, target_binned_spiketrain
-        #             )
-        #         else:
-        #             p, metrics = 1, 0
-        #         p_values.append(p)
-        #         metric_values.append(metrics)
-        #     adj_matrix[sidx] = np.array(p_values) < self.p_threshold
-        #     connectivity_metric_matrix[sidx] = np.array(metric_values)
         connection_ratio = adj_matrix.sum() / adj_matrix.ravel().shape[0]
 
         info = dict(

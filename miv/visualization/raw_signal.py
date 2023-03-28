@@ -13,6 +13,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 
+from miv.core.datatype import Spikestamps
 from miv.core.operator import OperatorMixin
 from miv.mea.protocol import MEAGeometryProtocol
 from miv.typing import SignalType
@@ -23,7 +24,6 @@ from miv.visualization.utils import interp_2d
 class MultiChannelSignalVisualization(OperatorMixin):
     average_interval: int = 50  # frames to skip. TODO: refactor
 
-    mea = None
     tag: str = "signal render"
 
     progress_bar: bool = False
@@ -34,8 +34,7 @@ class MultiChannelSignalVisualization(OperatorMixin):
     def __post_init__(self):
         super().__init__()
 
-    def __call__(self, signals):
-        assert self.mea is not None, "MEA is not set"
+    def __call__(self, signals: Spikestamps, mea: MEAGeometryProtocol):
 
         if not inspect.isgenerator(signals):
             signals = [signals]
@@ -50,8 +49,6 @@ class MultiChannelSignalVisualization(OperatorMixin):
             )
             xmax = np.max(xs)
             xmin = np.min(xs)
-
-            xs_grid = np.zeros_like(self.mea)
 
             # Output Images
             FFMpegWriter = manimation.writers["ffmpeg"]
@@ -71,8 +68,7 @@ class MultiChannelSignalVisualization(OperatorMixin):
                     total=probe_times.shape[0],
                     disable=not self.progress_bar,
                 ):
-                    for channel in range(signal.number_of_channels):
-                        xs_grid[self.mea == channel] = xs[channel, timestep]
+                    xs_grid = mea.map_data(xs[:, timestep])
 
                     fig.clf()
                     ax = fig.add_subplot(111)
