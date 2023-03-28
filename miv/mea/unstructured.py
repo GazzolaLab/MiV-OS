@@ -23,15 +23,26 @@ class UnstructuredMEA(MEAMixin):
 
     def __init__(
         self,
-        values: np.ndarray,
+        indices: np.ndarray,
         coordinates: np.ndarray,
         *args,
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
-        self.values = values
+        assert (
+            indices.shape[0] == coordinates.shape[0]
+        ), "The number of indices and coordinates must be the same."
+        self.indices = indices
         self.coordinates = coordinates
 
-    def map_data(self, vector: np.ndarray, missing_value: float = 0.0) -> np.ndarray:
+    def map_data(
+        self, vector: np.ndarray, missing_value: float = 0.0
+    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Map data (1-D array) to MEA (2-D array or N-D array)"""
-        return self.values, self.coordinates[:, 1], self.coordinates[:, 0]
+        values = np.full(self.indices.shape, missing_value)
+        for idx, value in enumerate(vector):
+            if idx not in self.indices:
+                continue
+            values[self.indices == idx] = value
+
+        return values, self.coordinates[:, 1], self.coordinates[:, 0]

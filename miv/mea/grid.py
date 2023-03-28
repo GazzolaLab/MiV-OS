@@ -29,6 +29,8 @@ class GridMEA(MEAMixin):
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
+        assert grid.ndim == 2, "The grid must be 2-D."
+        assert spacing[0] > 0 and spacing[1] > 0, "The spacing must be positive."
         self.grid = grid
         self.spacing = spacing
 
@@ -38,9 +40,10 @@ class GridMEA(MEAMixin):
         self, vector: np.ndarray, missing_value: float = 0.0
     ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Map data (1-D array) to MEA (2-D array or N-D array)"""
-        value_grid = np.empty_like(self.grid, dtype=vector.dtype)
-        value_grid[:] = missing_value
+        value_grid = np.full(self.indices.shape, missing_value)
         for idx, value in enumerate(vector):
+            if idx not in self.grid:
+                continue
             value_grid[self.grid == idx] = value
         X = np.arange(self.ncol) * self.spacing[0]
         Y = np.arange(self.nrow) * self.spacing[1]
