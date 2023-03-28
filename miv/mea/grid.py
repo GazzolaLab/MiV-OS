@@ -40,7 +40,7 @@ class GridMEA(MEAMixin):
         self, vector: np.ndarray, missing_value: float = 0.0
     ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Map data (1-D array) to MEA (2-D array or N-D array)"""
-        value_grid = np.full(self.indices.shape, missing_value)
+        value_grid = np.full_like(self.grid, missing_value)
         for idx, value in enumerate(vector):
             if idx not in self.grid:
                 continue
