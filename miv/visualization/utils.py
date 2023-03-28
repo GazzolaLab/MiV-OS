@@ -14,7 +14,7 @@ def interp_2d(data, ratio=10):
     xnew = np.arange(0, data.shape[1], 1.0 / ratio)
     ynew = np.arange(0, data.shape[0], 1.0 / ratio)
     data1 = f(xnew, ynew)
-    data1 = gaussian_filter(data1, sigma=3)
+    # data1 = gaussian_filter(data1, sigma=3)
     Xn, Yn = np.meshgrid(xnew, ynew)
 
     return Xn[:-ratio, :-ratio], Yn[:-ratio, :-ratio], data1[:-ratio, :-ratio]

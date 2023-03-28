@@ -34,10 +34,14 @@ class GridMEA(MEAMixin):
 
         self.nrow, self.ncol = grid.shape
 
-    def map_data(self, vector: np.ndarray, missing_value: float = 0.0) -> np.ndarray:
+    def map_data(
+        self, vector: np.ndarray, missing_value: float = 0.0
+    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Map data (1-D array) to MEA (2-D array or N-D array)"""
         value_grid = np.empty_like(self.grid, dtype=vector.dtype)
         value_grid[:] = missing_value
         for idx, value in enumerate(vector):
             value_grid[self.grid == idx] = value
-        return value_grid
+        X = np.arange(self.ncol) * self.spacing[0]
+        Y = np.arange(self.nrow) * self.spacing[1]
+        return X, Y, value_grid

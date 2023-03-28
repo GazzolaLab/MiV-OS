@@ -68,12 +68,14 @@ class MultiChannelSignalVisualization(OperatorMixin):
                     total=probe_times.shape[0],
                     disable=not self.progress_bar,
                 ):
-                    xs_grid = mea.map_data(xs[:, timestep])
+                    X, Y, Z = mea.map_data(xs[:, timestep])
 
                     fig.clf()
                     ax = fig.add_subplot(111)
-                    X, Y, Z = interp_2d(xs_grid)
-                    pcm = ax.pcolormesh(X, Y, Z, cmap="PuBu", vmin=xmin, vmax=xmax)
+                    # X, Y, Z = interp_2d(Z)
+                    pcm = ax.pcolormesh(
+                        X, Y, Z, cmap="PuBu", vmin=xmin, vmax=xmax, shading="gouraud"
+                    )
                     cbar = fig.colorbar(pcm, ax=ax)
                     cbar.ax.set_ylabel(
                         f"signal averaged over {self.average_interval/signal.rate:.02f} sec",
