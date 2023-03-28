@@ -1,6 +1,8 @@
 import numpy as np
 
 from miv.mea.grid import *
+from miv.mea.protocol import *
+from miv.mea.unstructured import *
 
 mea_map = {
     "64_upper_half_intanRHD_stim": np.array(

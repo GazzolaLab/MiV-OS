@@ -62,6 +62,8 @@ class _Chainable(Protocol):
 class BaseChainingMixin:
     """
     Base mixin to create chaining structure between objects.
+
+    Need further implementation of: output, tag
     """
 
     def __init__(self):

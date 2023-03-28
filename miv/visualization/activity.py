@@ -8,7 +8,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
 
+from miv.core.datatype import Spikestamps
 from miv.core.operator import OperatorMixin
+from miv.mea import MEAGeometryProtocol
 from miv.statistics import spike_counts_with_kernel
 from miv.visualization.utils import interp_2d
 
@@ -19,7 +21,6 @@ class NeuralActivity(OperatorMixin):
     firing_rate_interval: float = 1.0  # sec
     skip_interval: int = 50  # frames to skip. TODO: refactor
 
-    mea = None
     tag: str = "neural activity render"
 
     progress_bar: bool = False
@@ -29,9 +30,7 @@ class NeuralActivity(OperatorMixin):
     def __post_init__(self):
         super().__init__()
 
-    def __call__(self, spikestamps):
-        assert self.mea is not None, "MEA is not set"
-
+    def __call__(self, spikestamps: Spikestamps, mea: MEAGeometryProtocol):
         spiketrains_bins = spikestamps.binning(self.bin_size, return_count=True)
         probe_times = spiketrains_bins.timestamps[:: self.skip_interval]
         xs = []
@@ -45,7 +44,6 @@ class NeuralActivity(OperatorMixin):
             )
             xs.append(x)
         xs = np.asarray(xs)
-        xs_grid = np.zeros_like(self.mea)
 
         xmax = np.max(xs)
         xmin = np.min(xs)
@@ -68,13 +66,14 @@ class NeuralActivity(OperatorMixin):
                 total=probe_times.shape[0],
                 disable=not self.progress_bar,
             ):
-                for channel in range(spiketrains_bins.number_of_channels):
-                    xs_grid[self.mea == channel] = xs[channel, timestep]
+                X, Y, Z = mea.map_data(xs[:, timestep])
 
                 fig.clf()
                 ax = fig.add_subplot(111)
-                X, Y, Z = interp_2d(xs_grid)
-                pcm = ax.pcolormesh(X, Y, Z, cmap="Oranges", vmin=xmin, vmax=xmax)
+                # X, Y, Z = interp_2d(Z)
+                pcm = ax.pcolormesh(
+                    X, Y, Z, cmap="Oranges", vmin=xmin, vmax=xmax, shading="gouraud"
+                )
                 cbar = fig.colorbar(pcm, ax=ax)
                 cbar.ax.set_ylabel(
                     f"activity per {self.firing_rate_interval:.02f} sec", rotation=270

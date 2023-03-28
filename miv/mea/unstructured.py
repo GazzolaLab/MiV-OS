@@ -1,4 +1,4 @@
-__all__ = ["GridMEA"]
+__all__ = ["UnstructuredMEA"]
 
 from typing import Tuple
 
@@ -8,7 +8,7 @@ import numpy as np
 from miv.mea.base import MEAMixin
 
 
-class GridMEA(MEAMixin):
+class UnstructuredMEA(MEAMixin):
     """
     A class representing a grid-based multi-electrode array (MEA).
 
@@ -23,28 +23,26 @@ class GridMEA(MEAMixin):
 
     def __init__(
         self,
-        grid: np.ndarray,
-        spacing: Tuple[float, float] = (100, 100),
+        indices: np.ndarray,
+        coordinates: np.ndarray,
         *args,
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
-        assert grid.ndim == 2, "The grid must be 2-D."
-        assert spacing[0] > 0 and spacing[1] > 0, "The spacing must be positive."
-        self.grid = grid
-        self.spacing = spacing
-
-        self.nrow, self.ncol = grid.shape
+        assert (
+            indices.shape[0] == coordinates.shape[0]
+        ), "The number of indices and coordinates must be the same."
+        self.indices = indices
+        self.coordinates = coordinates
 
     def map_data(
         self, vector: np.ndarray, missing_value: float = 0.0
     ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Map data (1-D array) to MEA (2-D array or N-D array)"""
-        value_grid = np.full(self.indices.shape, missing_value)
+        values = np.full(self.indices.shape, missing_value)
         for idx, value in enumerate(vector):
-            if idx not in self.grid:
+            if idx not in self.indices:
                 continue
-            value_grid[self.grid == idx] = value
-        X = np.arange(self.ncol) * self.spacing[0]
-        Y = np.arange(self.nrow) * self.spacing[1]
-        return X, Y, value_grid
+            values[self.indices == idx] = value
+
+        return values, self.coordinates[:, 1], self.coordinates[:, 0]
