@@ -1,7 +1,11 @@
 __doc__ = """Multi-channel signal plotting for MEA channels"""
-__all__ = ["multi_channel_signal_plot"]
+__all__ = ["multi_channel_signal_plot", "MultiChannelSignalVisualization"]
 
 from typing import Any, List, Optional
+
+import inspect
+import os
+from dataclasses import dataclass
 
 import matplotlib
 import matplotlib.animation as manimation
@@ -9,10 +13,85 @@ import numpy as np
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 
+from miv.core.operator import OperatorMixin
 from miv.mea.protocol import MEAGeometryProtocol
 from miv.typing import SignalType
+from miv.visualization.utils import interp_2d
 
-# matplotlib.use("Agg")  # Must be before importing matplotlib.pyplot or pylab!
+
+@dataclass
+class MultiChannelSignalVisualization(OperatorMixin):
+    average_interval: int = 50  # frames to skip. TODO: refactor
+
+    mea = None
+    tag: str = "signal render"
+
+    progress_bar: bool = False
+
+    fps: int = 25
+    dpi: int = 200
+
+    def __post_init__(self):
+        super().__init__()
+
+    def __call__(self, signals):
+        assert self.mea is not None, "MEA is not set"
+
+        if not inspect.isgenerator(signals):
+            signals = [signals]
+
+        for vidx, signal in enumerate(signals):
+            probe_times = signal.timestamps[:: self.average_interval]
+            xs = np.average(
+                signal.data.reshape(
+                    -1, self.average_interval, signal.number_of_channels
+                ),
+                axis=1,
+            )
+            xmax = np.max(xs)
+            xmin = np.min(xs)
+
+            xs_grid = np.zeros_like(self.mea)
+
+            # Output Images
+            FFMpegWriter = manimation.writers["ffmpeg"]
+            metadata = dict(
+                title="Movie Test", artist="Matplotlib", comment="Movie support!"
+            )
+            writer = FFMpegWriter(fps=self.fps, metadata=metadata)
+
+            os.makedirs(self.analysis_path, exist_ok=True)
+            video_name = os.path.join(self.analysis_path, f"output_{vidx}.mp4")
+
+            fig = plt.figure(figsize=(8, 6))
+            with writer.saving(fig, video_name, dpi=self.dpi):
+                for timestep, time in tqdm(
+                    enumerate(probe_times),
+                    desc="Rendering",
+                    total=probe_times.shape[0],
+                    disable=not self.progress_bar,
+                ):
+                    for channel in range(signal.number_of_channels):
+                        xs_grid[self.mea == channel] = xs[channel, timestep]
+
+                    fig.clf()
+                    ax = fig.add_subplot(111)
+                    X, Y, Z = interp_2d(xs_grid)
+                    pcm = ax.pcolormesh(X, Y, Z, cmap="PuBu", vmin=xmin, vmax=xmax)
+                    cbar = fig.colorbar(pcm, ax=ax)
+                    cbar.ax.set_ylabel(
+                        f"signal averaged over {self.average_interval/signal.rate:.02f} sec",
+                        rotation=270,
+                    )
+
+                    ax.set_xlabel("channels x-axis")
+                    ax.set_ylabel("channels y-axis")
+                    ax.set_title(f"Signal ({time:.02f} sec)")
+
+                    writer.grab_frame()
+            plt.close(plt.gcf())
+
+        return
 
 
 def multi_channel_signal_plot(
@@ -25,7 +104,6 @@ def multi_channel_signal_plot(
     video_name: str,
     max_subplot_in_x: int = 8,
     max_subplot_in_y: int = 8,
-    dpi: int = 100,
 ):
     """
     Plotting recorded neuron signals from each channel of MEA. Subplots for each channel are aligned with position of
@@ -53,8 +131,6 @@ def multi_channel_signal_plot(
         (default=8)
     max_subplot_in_y : int
         (default=8)
-    dpi : int
-        (default=100)
 
     Returns
     -------
@@ -74,7 +150,7 @@ def multi_channel_signal_plot(
     FFMpegWriter = manimation.writers["ffmpeg"]
     metadata = dict(title="Movie Test", artist="Matplotlib", comment="Movie support!")
     writer = FFMpegWriter(fps=rendering_fps, metadata=metadata)
-    fig = plt.figure(2, figsize=(20, 12), frameon=True, dpi=dpi)
+    fig = plt.figure(2, figsize=(20, 12), frameon=True, dpi=200)
     plt.rcParams.update({"font.size": 10})
     axs = []
 
@@ -98,6 +174,7 @@ def multi_channel_signal_plot(
     plt.tight_layout()
     fig.align_ylabels()
 
+    dpi = 200
     with writer.saving(fig, video_name, dpi):
         for step in tqdm(range(total_steps)):
             current_step = start_step + step
@@ -113,9 +190,4 @@ def multi_channel_signal_plot(
                 # axs[signal_id].set_xlim(x_value[0], x_value[-1])
 
             writer.grab_frame()
-
-    # Be a good boy and close figures
-    # https://stackoverflow.com/a/37451036
-    # plt.close(fig) alone does not suffice
-    # See https://github.com/matplotlib/matplotlib/issues/8560/
     plt.close(plt.gcf())

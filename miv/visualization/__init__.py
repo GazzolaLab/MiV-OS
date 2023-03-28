@@ -1,3 +1,4 @@
+from miv.visualization.activity import *
 from miv.visualization.causality import *
 from miv.visualization.connectivity import *
 from miv.visualization.event import *

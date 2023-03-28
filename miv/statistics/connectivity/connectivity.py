@@ -61,7 +61,7 @@ class DirectedConnectivity(OperatorMixin):
     channels: Optional[List[int]] = None
     bin_size: float = 0.001
     tag: str = "directional connectivity analysis"
-    progress_bar: bool = True
+    progress_bar: bool = False
 
     skip_surrogate: bool = False
 
