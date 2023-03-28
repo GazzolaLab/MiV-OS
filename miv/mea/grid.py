@@ -47,4 +47,5 @@ class GridMEA(MEAMixin):
             value_grid[self.grid == idx] = value
         X = np.arange(self.ncol) * self.spacing[0]
         Y = np.arange(self.nrow) * self.spacing[1]
-        return X, Y, value_grid
+        Xn, Yn = np.meshgrid(X, Y)
+        return Xn, Yn, value_grid

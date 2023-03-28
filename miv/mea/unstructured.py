@@ -4,6 +4,7 @@ from typing import Tuple
 
 import matplotlib
 import numpy as np
+from scipy.interpolate import griddata
 
 from miv.mea.base import MEAMixin
 
@@ -45,4 +46,14 @@ class UnstructuredMEA(MEAMixin):
                 continue
             values[self.indices == idx] = value
 
-        return values, self.coordinates[:, 1], self.coordinates[:, 0]
+        xmin = np.min(self.coordinates[:, 0])
+        xmax = np.max(self.coordinates[:, 0])
+        ymin = np.min(self.coordinates[:, 1])
+        ymax = np.max(self.coordinates[:, 1])
+        delx = xmax - xmin
+        dely = ymax - ymin
+        x = np.linspace(xmin - 0.1 * delx, xmax + 0.1 * delx, 100)
+        y = np.linspace(ymin - 0.1 * dely, ymax + 0.1 * dely, 100)
+        z = griddata(self.coordinates, values, (x, y), method="cubic")
+
+        return x, y, z
