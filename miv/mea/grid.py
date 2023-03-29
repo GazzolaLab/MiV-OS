@@ -49,3 +49,11 @@ class GridMEA(MEAMixin):
         Y = np.arange(self.nrow) * self.spacing[1]
         Xn, Yn = np.meshgrid(X, Y)
         return Xn, Yn, value_grid
+
+    @property
+    def coordinates(self):
+        """Return the coordinates of the electrodes"""
+        X = np.arange(self.ncol) * self.spacing[0]
+        Y = np.arange(self.nrow) * self.spacing[1]
+        Xn, Yn = np.meshgrid(X, Y)
+        return np.vstack([Xn.ravel(), Yn.ravel()]).T

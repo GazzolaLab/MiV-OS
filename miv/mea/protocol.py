@@ -11,6 +11,11 @@ from miv.core.policy import _Runnable
 
 
 class MEAGeometryProtocol(_Chainable, _Runnable, Protocol):
+    @property
+    def coordinates(self) -> np.ndarray:
+        """Return coordinates of MEA electrodes location"""
+        ...
+
     def get_xy(self, idx: int) -> Tuple[float, float]:
         """Given node index, return xy coordinate"""
         ...

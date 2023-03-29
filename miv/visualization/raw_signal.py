@@ -43,13 +43,14 @@ class MultiChannelSignalVisualization(OperatorMixin):
             probe_times = signal.timestamps[:: self.average_interval]
             n = (signal.data.shape[0] // self.average_interval) * self.average_interval
             xs = np.average(
-                signal.data[:n,:].reshape(
+                signal.data[:n, :].reshape(
                     -1, self.average_interval, signal.number_of_channels
                 ),
                 axis=1,
             )
-            xmax = np.max(xs)
-            xmin = np.min(xs)
+            med = np.median(np.abs(xs))
+            xmax = 1.5 * med
+            xmin = -1.5 * med
 
             # Output Images
             FFMpegWriter = manimation.writers["ffmpeg"]
@@ -69,14 +70,14 @@ class MultiChannelSignalVisualization(OperatorMixin):
                     total=probe_times.shape[0],
                     disable=not self.progress_bar,
                 ):
-                    X, Y, Z = mea.map_data(xs[:, timestep])
+                    X, Y, Z = mea.map_data(xs[timestep, :])
 
                     fig.clf()
                     ax = fig.add_subplot(111)
                     # X, Y, Z = interp_2d(Z)
-                    ax.plot(mea.coordinates[:,0], mea.coordinates[:,1], 'k.', ms=1)
+                    ax.plot(mea.coordinates[:, 0], mea.coordinates[:, 1], "k.", ms=1)
                     pcm = ax.pcolormesh(
-                        X, Y, Z, cmap="PuBu", vmin=xmin, vmax=xmax, shading="gouraud"
+                        X, Y, Z, cmap="bwr", vmin=xmin, vmax=xmax, shading="gouraud"
                     )
                     cbar = fig.colorbar(pcm, ax=ax)
                     cbar.ax.set_ylabel(
@@ -84,6 +85,7 @@ class MultiChannelSignalVisualization(OperatorMixin):
                         rotation=270,
                     )
 
+                    ax.set_aspect("equal")
                     ax.set_xlabel("channels x-axis")
                     ax.set_ylabel("channels y-axis")
                     ax.set_title(f"Signal ({time:.02f} sec)")
