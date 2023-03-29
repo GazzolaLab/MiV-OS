@@ -219,6 +219,24 @@ class DirectedConnectivity(OperatorMixin):
         )
         return p_value, np.mean(te_list)
 
+    def plot_adjacency_matrix(self, result, save_path=None, show=False):
+        connectivity_metric_matrix = result["connectivity_matrix"]
+
+        fig, ax = plt.subplots(figsize=(12, 12))
+        im = ax.imshow(connectivity_metric_matrix, cmap="jet")
+        ax.set_xlabel("Source")
+        ax.set_ylabel("Target")
+        ax.set_title("Transfer Entropy")
+        plt.colorbar(im, ax=ax)
+
+        if save_path is not None:
+            plt.savefig(os.path.join(save_path, "te.png"))
+
+        if show:
+            plt.show()
+
+        plt.close(fig)
+
     def plot_nodewise_connectivity(
         self,
         result: Any,

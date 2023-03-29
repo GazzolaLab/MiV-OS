@@ -64,12 +64,13 @@ class MultiChannelSignalVisualization(OperatorMixin):
 
             fig = plt.figure(figsize=(8, 6))
             with writer.saving(fig, video_name, dpi=self.dpi):
-                for timestep, time in tqdm(
-                    enumerate(probe_times),
+                for timestep in tqdm(
+                    range(xs.shape[0]),
                     desc="Rendering",
-                    total=probe_times.shape[0],
+                    total=xs.shape[0],
                     disable=not self.progress_bar,
                 ):
+                    time = probe_times[timestep]
                     X, Y, Z = mea.map_data(xs[timestep, :])
 
                     fig.clf()
