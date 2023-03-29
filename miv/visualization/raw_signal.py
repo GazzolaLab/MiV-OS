@@ -49,8 +49,8 @@ class MultiChannelSignalVisualization(OperatorMixin):
                 axis=1,
             )
             med = np.median(np.abs(xs))
-            xmax = 1.5 * med
-            xmin = -1.5 * med
+            xmax = 15.0 * med
+            xmin = -15.0 * med
 
             # Output Images
             FFMpegWriter = manimation.writers["ffmpeg"]
