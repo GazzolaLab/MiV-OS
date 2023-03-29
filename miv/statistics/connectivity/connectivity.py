@@ -93,10 +93,10 @@ class DirectedConnectivity(OperatorMixin):
         # Channel Selection
         if self.channels is None:
             n_nodes = binned_spiketrain.number_of_channels
-            channels = list(range(n_nodes))
+            channels = tuple(range(n_nodes))
         else:
             n_nodes = len(self.channels)
-            channels = self.channels
+            channels = tuple(self.channels)
             binned_spiketrain = binned_spiketrain.select(channels)
 
         # Get adjacency matrix based on transfer entropy
