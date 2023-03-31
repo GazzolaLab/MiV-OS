@@ -51,8 +51,8 @@ def plot_eigenvector_centrality(self, result, show=False, save_path=None):
     centrality = nx.eigenvector_centrality_numpy(G, weight="weight")
     colors = [centrality[n] for n in nodes]
 
-    vmin = np.min(centrality.values())
-    vmax = np.max(centrality.values())
+    vmin = np.min(list(centrality.values()))
+    vmax = np.max(list(centrality.values()))
     v = np.max(np.abs([vmin, vmax]))
 
     fig = plt.figure()
