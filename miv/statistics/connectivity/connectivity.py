@@ -147,7 +147,7 @@ class DirectedConnectivity(OperatorMixin):
         """
         # Function configuration. TODO: Make this dependency injection
         func = pyte.transfer_entropy
-        te_history = 4
+        te_history = 21
         sublength = 64
         stride = 8
 
@@ -160,13 +160,7 @@ class DirectedConnectivity(OperatorMixin):
 
         rng = np.random.default_rng(seed)  # TODO take rng instead
 
-        tes = []
-        for start_index in np.arange(0, source.shape[0] - sublength, stride):
-            end_index = start_index + sublength
-            te = func(
-                source[start_index:end_index], target[start_index:end_index], te_history
-            )
-            tes.append(te)
+        te = func(source, target, te_history)
 
         surrogate_tes = []
         if not skip_surrogate:
@@ -182,7 +176,7 @@ class DirectedConnectivity(OperatorMixin):
                     )
                     surrogate_tes.append(surr_te)
 
-        return tes, surrogate_tes
+        return te, surrogate_tes
 
     @staticmethod
     def _get_connection_info(
@@ -205,19 +199,17 @@ class DirectedConnectivity(OperatorMixin):
             return 1, 0
         source = binned_spiketrain[sid]
         target = binned_spiketrain[tid]
-        te_list, surrogate_te_list = DirectedConnectivity._surrogate_t_test(
+        te, surrogate_te_list = DirectedConnectivity._surrogate_t_test(
             source,
             target,
             skip_surrogate=skip_surrogate,
             surrogate_N=surrogate_N,
             seed=seed,
         )
-        if np.mean(te_list) < H_threshold:
+        if te < H_threshold:
             return 1, 0
-        t_value, p_value = spst.ttest_ind(
-            te_list, surrogate_te_list, equal_var=False, nan_policy="omit"
-        )
-        return p_value, np.mean(te_list)
+        t_value, p_value = spst.ttest_ind(surrogate_te_list, te, nan_policy="omit")
+        return p_value, te
 
     def plot_adjacency_matrix(self, result, save_path=None, show=False):
         connectivity_metric_matrix = result["connectivity_matrix"]
@@ -379,6 +371,7 @@ class DirectedConnectivity(OperatorMixin):
         plt.close()
 
 
+# TODO
 # @dataclass
 # class UndirectedConnectivity(OperatorMixin):
 #    pass
