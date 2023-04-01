@@ -19,6 +19,7 @@ from dataclasses import dataclass
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
+import pyinform
 import pyinform.transferentropy as pyte
 import quantities as pq
 import scipy.stats as spst
@@ -68,7 +69,7 @@ class DirectedConnectivity(OperatorMixin):
     # Surrogate parameters
     surrogate_N: int = 30
     p_threshold: float = 0.05
-    H_threshold: float = 0.01
+    H_threshold: float = 1e-4
     seed: int = None
     num_proc: int = 1
 
@@ -146,7 +147,6 @@ class DirectedConnectivity(OperatorMixin):
         Surrogate t-test
         """
         # Function configuration. TODO: Make this dependency injection
-        func = pyte.transfer_entropy
         te_history = 21
         sublength = 64
         stride = 8
@@ -160,7 +160,12 @@ class DirectedConnectivity(OperatorMixin):
 
         rng = np.random.default_rng(seed)  # TODO take rng instead
 
+        func = pyte.transfer_entropy
         te = func(source, target, te_history)
+        normalizer = pyinform.entropyrate.entropy_rate(
+            target, k=te_history, local=False
+        )
+        te = te / normalizer
 
         surrogate_tes = []
         if not skip_surrogate:
@@ -174,7 +179,7 @@ class DirectedConnectivity(OperatorMixin):
                         target[start_index:end_index],
                         te_history,
                     )
-                    surrogate_tes.append(surr_te)
+                    surrogate_tes.append(surr_te / normalizer)
 
         return te, surrogate_tes
 
@@ -208,7 +213,7 @@ class DirectedConnectivity(OperatorMixin):
         )
         if te < H_threshold:
             return 1, 0
-        t_value, p_value = spst.ttest_ind(surrogate_te_list, te, nan_policy="omit")
+        t_value, p_value = spst.ttest_1samp(surrogate_te_list, te, nan_policy="omit")
         return p_value, te
 
     def plot_adjacency_matrix(self, result, save_path=None, show=False):
