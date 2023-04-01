@@ -1,8 +1,12 @@
 __doc__ = """
 ASDF file type loader
 
-@author: tvarley
-         djhavert
+author: tvarley
+        djhavert
+
+.. autoclass:: miv.io.asdf.asdf.DataASDF
+   :members:
+
 """
 __all__ = ["DataASDF"]
 
@@ -18,7 +22,15 @@ from miv.core.operator import DataLoaderMixin
 
 
 class DataASDF(DataLoaderMixin):
+    """ASDF file type loader"""
+
     def __init__(self, data_path, rate: float):  # pragma: no cover
+        """
+        Constructor
+
+        :param data_path: path to data file
+        :param rate: sampling rate
+        """
         self.data_path = data_path
         self.rate = rate
 

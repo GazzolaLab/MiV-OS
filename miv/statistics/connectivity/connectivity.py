@@ -19,6 +19,7 @@ from dataclasses import dataclass
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
+import pyinform
 import pyinform.transferentropy as pyte
 import quantities as pq
 import scipy.stats as spst
@@ -68,7 +69,7 @@ class DirectedConnectivity(OperatorMixin):
     # Surrogate parameters
     surrogate_N: int = 30
     p_threshold: float = 0.05
-    H_threshold: float = 0.01
+    H_threshold: float = 1e-2
     seed: int = None
     num_proc: int = 1
 
@@ -146,8 +147,7 @@ class DirectedConnectivity(OperatorMixin):
         Surrogate t-test
         """
         # Function configuration. TODO: Make this dependency injection
-        func = pyte.transfer_entropy
-        te_history = 4
+        te_history = 21
         sublength = 64
         stride = 8
 
@@ -160,29 +160,31 @@ class DirectedConnectivity(OperatorMixin):
 
         rng = np.random.default_rng(seed)  # TODO take rng instead
 
-        tes = []
-        for start_index in np.arange(0, source.shape[0] - sublength, stride):
-            end_index = start_index + sublength
-            te = func(
-                source[start_index:end_index], target[start_index:end_index], te_history
-            )
-            tes.append(te)
+        func = pyte.transfer_entropy
+        te = func(source, target, te_history)
+        normalizer = pyinform.entropyrate.entropy_rate(
+            target, k=te_history, local=False
+        )
+        if np.isclose(normalizer, 0.0):
+            return 0.0, [0.0]
+        te = te / normalizer
 
         surrogate_tes = []
-        if not skip_surrogate:
-            for _ in range(surrogate_N):
-                surrogate_source = source.copy()
-                rng.shuffle(surrogate_source)
-                for start_index in np.arange(0, source.shape[0] - sublength, stride):
-                    end_index = start_index + sublength
-                    surr_te = func(
-                        surrogate_source[start_index:end_index],
-                        target[start_index:end_index],
-                        te_history,
-                    )
-                    surrogate_tes.append(surr_te)
+        if skip_surrogate:
+            return te, surrogate_tes
+        for _ in range(surrogate_N):
+            surrogate_source = source.copy()
+            rng.shuffle(surrogate_source)
+            for start_index in np.arange(0, source.shape[0] - sublength, stride):
+                end_index = start_index + sublength
+                surr_te = func(
+                    surrogate_source[start_index:end_index],
+                    target[start_index:end_index],
+                    te_history,
+                )
+                surrogate_tes.append(surr_te / normalizer)
 
-        return tes, surrogate_tes
+        return te, surrogate_tes
 
     @staticmethod
     def _get_connection_info(
@@ -205,19 +207,19 @@ class DirectedConnectivity(OperatorMixin):
             return 1, 0
         source = binned_spiketrain[sid]
         target = binned_spiketrain[tid]
-        te_list, surrogate_te_list = DirectedConnectivity._surrogate_t_test(
+        te, surrogate_te_list = DirectedConnectivity._surrogate_t_test(
             source,
             target,
             skip_surrogate=skip_surrogate,
             surrogate_N=surrogate_N,
             seed=seed,
         )
-        if np.mean(te_list) < H_threshold:
+        if te < H_threshold:
             return 1, 0
-        t_value, p_value = spst.ttest_ind(
-            te_list, surrogate_te_list, equal_var=False, nan_policy="omit"
-        )
-        return p_value, np.mean(te_list)
+        if skip_surrogate:
+            return 1, te
+        t_value, p_value = spst.ttest_1samp(surrogate_te_list, te, nan_policy="omit")
+        return p_value, te
 
     def plot_adjacency_matrix(self, result, save_path=None, show=False):
         connectivity_metric_matrix = result["connectivity_matrix"]
@@ -379,6 +381,7 @@ class DirectedConnectivity(OperatorMixin):
         plt.close()
 
 
+# TODO
 # @dataclass
 # class UndirectedConnectivity(OperatorMixin):
 #    pass

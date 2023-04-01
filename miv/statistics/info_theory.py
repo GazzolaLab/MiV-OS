@@ -26,6 +26,7 @@ import pyinform
 import quantities as pq
 import scipy
 import scipy.signal
+from tqdm import tqdm
 
 from miv.core.datatype import Spikestamps
 from miv.statistics.spiketrain_statistics import binned_spiketrain
@@ -249,6 +250,66 @@ def active_information(
 
 
 @tag_info_metrics("pair")
+def transfer_entropy(
+    spiketrains: Spikestamps,
+    history: float,
+    bin_size: float,
+    t_start: Optional[float] = None,
+    t_end: Optional[float] = None,
+):
+    """
+    Estimates the transfer entropy for the pair of electorde recordings (X & Y) using the binned spiketrains and history
+
+    Parameters
+    ----------
+    spiketrains : Spikestamps
+        Single spike-stamps
+    history : float
+        history length
+    t_start : float
+        Binning start time
+    t_end : float
+        Binning end time
+    bin_size : float
+        bin size in seconds
+
+    Returns
+    -------
+    transfer_entropy: float
+        Transfer_entropy for the given pair of electrodes
+
+    """
+    assert history > 0, "history length should be a finite positive value"
+    bin_spike = spiketrains.binning(bin_size=bin_size, t_start=t_start, t_end=t_end)
+
+    transfer_entropy_matrix = np.zeros(
+        [bin_spike.number_of_channels, bin_spike.number_of_channels]
+    )
+    for channelx in tqdm(range(bin_spike.number_of_channels)):
+        for channely in tqdm(range(bin_spike.number_of_channels), leave=False):
+            bin_spike_x = bin_spike[channelx]
+            bin_spike_y = bin_spike[channely]
+
+            # np.random.shuffle(bin_spike_x)
+
+            normalizer = pyinform.entropyrate.entropy_rate(
+                bin_spike_y, k=history, local=False
+            )
+            # normalizer = pyinform.mutualinfo.mutual_info(bin_spike_x, bin_spike_y, local=False)
+
+            transfer_entropy = pyinform.transferentropy.transfer_entropy(
+                bin_spike_x, bin_spike_y, k=history, local=False
+            )
+            if np.isclose(normalizer, 0):
+                transfer_entropy_matrix[channelx, channely] = 0
+            else:
+                transfer_entropy_matrix[channelx, channely] = (
+                    transfer_entropy / normalizer
+                )
+    return transfer_entropy_matrix
+
+
+@tag_info_metrics("pair")
 def mutual_information(
     spiketrains: Spikestamps,
     channelx: float,
@@ -468,54 +529,6 @@ def cross_entropy(
     )
     cross_entropy = -np.sum(spike_dist_x * np.log2(spike_dist_y))
     return cross_entropy
-
-
-@tag_info_metrics("pair")
-def transfer_entropy(
-    spiketrains: Spikestamps,
-    channelx: float,
-    channely: float,
-    history: float,
-    bin_size: float,
-    t_start: Optional[float] = None,
-    t_end: Optional[float] = None,
-):
-    """
-    Estimates the transfer entropy for the pair of electorde recordings (X & Y) using the binned spiketrains and history
-
-    Parameters
-    ----------
-    spiketrains : Spikestamps
-        Single spike-stamps
-    channelx : float
-        electrode/channel X
-    channely : float
-        electrode/channel Y
-    history : float
-        history length
-    t_start : float
-        Binning start time
-    t_end : float
-        Binning end time
-    bin_size : float
-        bin size in seconds
-
-    Returns
-    -------
-    transfer_entropy: float
-        Transfer_entropy for the given pair of electrodes
-
-    """
-    assert t_start < t_end, "start time cannot be equal or greater than end time"
-    assert bin_size > 0, "bin_size should be a finite positive value"
-    assert history > 0, "history length should be a finite positive value"
-
-    bin_spike_x = binned_spiketrain(spiketrains, channelx, t_start, t_end, bin_size)
-    bin_spike_y = binned_spiketrain(spiketrains, channely, t_start, t_end, bin_size)
-    transfer_entropy = pyinform.transferentropy.transfer_entropy(
-        bin_spike_x, bin_spike_y, k=history
-    )
-    return transfer_entropy
 
 
 @tag_info_metrics("pair")

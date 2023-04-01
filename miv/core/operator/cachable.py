@@ -19,7 +19,7 @@ import pickle as pkl
 if TYPE_CHECKING:
     from miv.core.datatype import DataTypes
 
-CACHE_POLICY = Literal["AUTO", "ON", "OFF"]
+CACHE_POLICY = Literal["AUTO", "ON", "OFF", "MUST"]
 
 
 class _CacherProtocol(Protocol):
@@ -109,18 +109,20 @@ class SkipCache:  # TODO
 
 def when_policy_is(*allowed_policy):
     def decorator(func):
-        #@functools.wraps(func) # TODO: fix this
+        # @functools.wraps(func) # TODO: fix this
         def wrapper(self, *args, **kwargs):
             if self.policy in allowed_policy:
                 return func(self, *args, **kwargs)
             else:
                 return False
+
         return wrapper
+
     return decorator
 
 
 def when_initialized(func):  # TODO: refactor
-    #@functools.wraps(func) # TODO: fix this
+    # @functools.wraps(func) # TODO: fix this
     def wrapper(self, *args, **kwargs):
         if self.cache_dir is None:
             return False
@@ -146,7 +148,7 @@ class BaseCacher:
         index = idx if isinstance(idx, str) else f"{idx:04}"
         return os.path.join(self.cache_dir, f"cache_{self.cache_tag}_{index}.pkl")
 
-    @when_policy_is("ON", "AUTO")
+    @when_policy_is("ON", "AUTO", "MUST")
     @when_initialized
     def save_cache(self, values, idx=0) -> bool:
         os.makedirs(self.cache_dir, exist_ok=True)
@@ -156,9 +158,11 @@ class BaseCacher:
 
 
 class DataclassCacher(BaseCacher):
-    @when_policy_is("ON", "AUTO")
+    @when_policy_is("ON", "AUTO", "MUST")
     @when_initialized
     def check_cached(self) -> bool:
+        if self.policy == "MUST":
+            return True
         current_config = self._compile_configuration_as_dict()
         cached_config = self._load_configuration_from_cache()
         if cached_config is None:
@@ -176,7 +180,7 @@ class DataclassCacher(BaseCacher):
     def _compile_configuration_as_dict(self) -> dict:
         return dataclasses.asdict(self.parent, dict_factory=collections.OrderedDict)
 
-    @when_policy_is("ON", "AUTO")
+    @when_policy_is("ON", "AUTO", "MUST")
     @when_initialized
     def save_config(self):
         config = self._compile_configuration_as_dict()
@@ -194,13 +198,15 @@ class DataclassCacher(BaseCacher):
 
 
 class FunctionalCacher(BaseCacher):
-    @when_policy_is("ON", "AUTO")
+    @when_policy_is("ON", "AUTO", "MUST")
     @when_initialized
     def check_cached(self) -> bool:
+        if self.policy == "MUST":  # TODO: fix this, remove redundancy
+            return True
         flag = os.path.exists(self.cache_filename(0))
         return flag
 
-    @when_policy_is("ON", "AUTO")
+    @when_policy_is("ON", "AUTO", "MUST")
     @when_initialized
     def save_config(self):
         pass
