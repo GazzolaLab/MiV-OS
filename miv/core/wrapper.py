@@ -31,7 +31,7 @@ def wrap_cacher(cache_tag):
     """
 
     def decorator(func):
-        #@functools.wraps(func)
+        # @functools.wraps(func)
         def wrapper(*args, **kwargs):
             if not hasattr(wrapper, "cache_tag"):
                 setattr(wrapper, "cache_tag", cache_tag)
@@ -58,16 +58,19 @@ def wrap_generator_to_generator(func):
     Current implementation only works for class methods.
     """
 
-    #@functools.wraps(func)
+    # @functools.wraps(func)
     def wrapper(self, *args, **kwargs):
         is_all_generator = all(inspect.isgenerator(v) for v in args[1:]) and all(
             inspect.isgenerator(v) for v in kwargs.values()
         )
         if is_all_generator:
             if self.cacher.check_cached():
+
                 def generator_func(*args, **kwargs):
                     yield from self.cacher.load_cached()
+
             else:
+
                 def generator_func(*args, **kwargs):
                     for idx, zip_arg in enumerate(zip(*args)):
                         result = func(self, *zip_arg, **kwargs)
@@ -75,6 +78,7 @@ def wrap_generator_to_generator(func):
                         yield result
                     else:
                         self.cacher.save_config()
+
             return generator_func(*args, **kwargs)
         else:
             if self.cacher.check_cached():

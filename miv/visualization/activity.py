@@ -71,7 +71,7 @@ class NeuralActivity(OperatorMixin):
                 fig.clf()
                 ax = fig.add_subplot(111)
                 # X, Y, Z = interp_2d(Z)
-                ax.plot(mea.coordinates[:,0], mea.coordinates[:,1], 'k.', ms=1)
+                ax.plot(mea.coordinates[:, 0], mea.coordinates[:, 1], "k.", ms=1)
                 pcm = ax.pcolormesh(
                     X, Y, Z, cmap="Oranges", vmin=xmin, vmax=xmax, shading="gouraud"
                 )
