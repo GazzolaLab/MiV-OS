@@ -1,13 +1,9 @@
 __doc__ = """
 
-Spike Detection
-###############
-
 Code Example::
 
     detection = ThresholdCutoff(cutoff=3.5)
     spiketrains = detection(signal, timestamps, sampling_rate)
-
 
 .. currentmodule:: miv.signal.spike
 

@@ -24,7 +24,7 @@ External Datafile (H5)
 External Datafile (ASDF)
 ========================
 
-.. automodule:: miv.io.asdf.DataASDF
+.. automodule:: miv.io.asdf.asdf
 
 Serial Communication Helper
 ===========================

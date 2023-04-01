@@ -8,12 +8,17 @@ Here we provide number of example scripts using `MiV` tools. Some examples provi
    :caption: Analysis
 
    connectivity_network
-..change_detection
-..channel_correlation
-..granger_causality_psd_cpsd_coherence
-..burst_analysis
-..info_theory
-..lyon_ear_model
+   info_theory
+   lyon_ear_model
+
+.. toctree::
+   :hidden:
+   :caption: [Work in progress]
+
+   change_detection
+   channel_correlation
+   granger_causality_psd_cpsd_coherence
+   burst_analysis
 
 .. toctree::
    :maxdepth: 2
