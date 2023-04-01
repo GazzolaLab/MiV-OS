@@ -69,7 +69,7 @@ class DirectedConnectivity(OperatorMixin):
     # Surrogate parameters
     surrogate_N: int = 30
     p_threshold: float = 0.05
-    H_threshold: float = 1e-4
+    H_threshold: float = 1e-2
     seed: int = None
     num_proc: int = 1
 
@@ -165,21 +165,24 @@ class DirectedConnectivity(OperatorMixin):
         normalizer = pyinform.entropyrate.entropy_rate(
             target, k=te_history, local=False
         )
+        if np.isclose(normalizer, 0.0):
+            return 0.0, [0.0]
         te = te / normalizer
 
         surrogate_tes = []
-        if not skip_surrogate:
-            for _ in range(surrogate_N):
-                surrogate_source = source.copy()
-                rng.shuffle(surrogate_source)
-                for start_index in np.arange(0, source.shape[0] - sublength, stride):
-                    end_index = start_index + sublength
-                    surr_te = func(
-                        surrogate_source[start_index:end_index],
-                        target[start_index:end_index],
-                        te_history,
-                    )
-                    surrogate_tes.append(surr_te / normalizer)
+        if skip_surrogate:
+            return te, surrogate_tes
+        for _ in range(surrogate_N):
+            surrogate_source = source.copy()
+            rng.shuffle(surrogate_source)
+            for start_index in np.arange(0, source.shape[0] - sublength, stride):
+                end_index = start_index + sublength
+                surr_te = func(
+                    surrogate_source[start_index:end_index],
+                    target[start_index:end_index],
+                    te_history,
+                )
+                surrogate_tes.append(surr_te / normalizer)
 
         return te, surrogate_tes
 
@@ -213,6 +216,8 @@ class DirectedConnectivity(OperatorMixin):
         )
         if te < H_threshold:
             return 1, 0
+        if skip_surrogate:
+            return 1, te
         t_value, p_value = spst.ttest_1samp(surrogate_te_list, te, nan_policy="omit")
         return p_value, te
 
