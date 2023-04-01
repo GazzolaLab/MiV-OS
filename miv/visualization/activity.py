@@ -80,6 +80,7 @@ class NeuralActivity(OperatorMixin):
                     f"activity per {self.firing_rate_interval:.02f} sec", rotation=270
                 )
 
+                ax.set_aspect("equal")
                 ax.set_xlabel("channels x-axis")
                 ax.set_ylabel("channels y-axis")
                 ax.set_title(f"Spatial Neural Activity ({time:.02f} sec)")
