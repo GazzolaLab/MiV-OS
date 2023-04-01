@@ -287,9 +287,11 @@ def load_recording(
     sampling_rate: float = float(info["continuous"][0]["sample_rate"])
     # channel_info: Dict[str, Any] = info["continuous"][0]["channels"]
 
-    version = info["GUI version"]
-    v_major, v_minor, v_sub = map(int, version.split("."))
-    _old_oe_version = v_major == 0 and v_minor <= 5  # Legacy
+    _old_oe_version = False
+    if "GUI version" in info:
+        version = info["GUI version"]
+        v_major, v_minor, v_sub = list(map(int, version.split(".")))[:3]
+        _old_oe_version = v_major == 0 and v_minor <= 5  # Legacy
     signal, timestamps = load_continuous_data(
         file_path[0], num_channels, sampling_rate, _old_oe_version=_old_oe_version
     )

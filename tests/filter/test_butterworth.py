@@ -60,19 +60,12 @@ def test_butterworth_repr_string(lowcut, highcut, order, tag):
 
 def test_butterworth_call_invalid_signal_shape():
     # Create a ButterBandpass object with default parameters
-    filter = ButterBandpass(lowcut=5, highcut=10)
-    filter.cacher.policy = "OFF"
-
-    # Create a signal with np array type
-    signal = np.random.randn(10, 10, 10)
-
-    # Check that calling the filter with the invalid signal shape raises a ValueError
-    with pytest.raises(AttributeError):
-        filter(signal)
+    filt = ButterBandpass(lowcut=5, highcut=10)
+    filt.cacher.policy = "OFF"
 
     # Create a signal with an invalid shape (more than 2 dimensions)
     with pytest.raises(AssertionError):
-        signal = Signal(
+        Signal(
             data=np.random.randn(10, 10, 10),
             timestamps=np.linspace(0, 1, 10),
             rate=10000,

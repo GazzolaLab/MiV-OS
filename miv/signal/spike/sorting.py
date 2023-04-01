@@ -1,7 +1,7 @@
 __doc__ = """
 
 Typical spike-sorting procedure can be described in three steps: (1) spike detection, (2) feature decomposition, and (3) clustering.
-We provide separate module to perform spike-detection; see :ref:`here <api/signal:Spike Detection>`.
+We provide separate module to perform spike-detection; see :ref:`here <api/detection:Spike Detection>`.
 
 We provide `SpikeSorting` module that composes *feature-decomposition* method and *unsupervised-clustering* method.
 A commonly used feature-decomposition method includes PCA or wavelet decomposition.
@@ -12,7 +12,7 @@ Additionally, one can use out-of-the-box clustering modules from `sklearn`.
 
 .. currentmodule:: miv.signal.spike
 
-.. autoclass:: SpikeSorting
+.. autoclass:: miv.signal.spike.SpikeSorting
    :members:
 
 Available Feature Extractor

@@ -11,49 +11,49 @@ Signals
 -------
 
 .. autosummary::
-  :nosignatures:
-  :toctree: _toctree/StatisticsAPI
+   :nosignatures:
+   :toctree: _toctree/StatisticsAPI
 
-  signal_to_noise
-  spike_amplitude_to_background_noise
+   signal_to_noise
+   spike_amplitude_to_background_noise
 
 Spikestamps Statistics
 ----------------------
 
 .. autosummary::
-  :nosignatures:
-  :toctree: _toctree/StatisticsAPI
+   :nosignatures:
+   :toctree: _toctree/StatisticsAPI
 
-  firing_rates
-  interspike_intervals
-  coefficient_variation
-  binned_spiketrain
-  fano_factor
+   firing_rates
+   interspike_intervals
+   coefficient_variation
+   binned_spiketrain
+   fano_factor
 
 Burst Analysis
-------------------
+--------------
 
 .. autosummary::
-  :nosignatures:
-  :toctree: _toctree/StatisticsAPI
+   :nosignatures:
+   :toctree: _toctree/StatisticsAPI
 
-  burst
+   burst
 
 Information Theory
 ------------------
 
 .. autosummary::
-  :nosignatures:
-  :toctree: _toctree/StatisticsAPI
+   :nosignatures:
+   :toctree: _toctree/StatisticsAPI
 
-  shannon_entropy
-  block_entropy
-  entropy_rate
-  active_information
-  mutual_information
-  relative_entropy
-  conditional_entropy
-  transfer_entropy
+   shannon_entropy
+   block_entropy
+   entropy_rate
+   active_information
+   mutual_information
+   relative_entropy
+   conditional_entropy
+   transfer_entropy
 
 
 Useful External Packages
