@@ -6,11 +6,11 @@ from typing import Any, Iterable, Protocol, Tuple
 import matplotlib
 import numpy as np
 
-from miv.core.operator import _Chainable
+from miv.core.operator import _Chainable, _Jsonable
 from miv.core.policy import _Runnable
 
 
-class MEAGeometryProtocol(_Chainable, _Runnable, Protocol):
+class MEAGeometryProtocol(_Jsonable, _Chainable, _Runnable, Protocol):
     @property
     def coordinates(self) -> np.ndarray:
         """Return coordinates of MEA electrodes location"""

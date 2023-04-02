@@ -36,6 +36,13 @@ class GridMEA(MEAMixin):
 
         self.nrow, self.ncol = grid.shape
 
+    def to_json(self) -> dict:
+        """Return a JSON-serializable dictionary"""
+        return {
+            "grid": self.grid.tolist(),
+            "spacing": self.spacing,
+        }
+
     def map_data(
         self, vector: np.ndarray, missing_value: float = 0.0
     ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
