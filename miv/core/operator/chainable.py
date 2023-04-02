@@ -20,6 +20,8 @@ import itertools
 
 import matplotlib.pyplot as plt
 
+from miv.core.datatype.literals import NumpyDType, PythonDataType
+
 if TYPE_CHECKING:
     from miv.core.datatype import DataTypes
 
@@ -66,14 +68,24 @@ class BaseChainingMixin:
     Need further implementation of: output, tag
     """
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self._downstream_list: list[_Chainable] = []
         self._upstream_list: list[_Chainable] = []
 
         self._output: DataTypes | None = None
 
     def __rshift__(self, right: _Chainable) -> _Chainable:
+        if isinstance(right, BaseChainingMixin):
+            pass
+        elif PythonDataType.is_valid(right):
+            right = PythonDataType(right)
+        elif NumpyDType.is_valid(right):
+            right = NumpyDType(right)
+        else:
+            raise TypeError(
+                f"Type {type(right)} is not supported: the type/class is not chainable."
+            )
         self._downstream_list.append(right)
         right._upstream_list.append(self)
         return right

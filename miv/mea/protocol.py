@@ -6,7 +6,8 @@ from typing import Any, Iterable, Protocol, Tuple
 import matplotlib
 import numpy as np
 
-from miv.core.operator import _Chainable, _Jsonable
+from miv.core.operator.cachable import _Jsonable
+from miv.core.operator.chainable import _Chainable
 from miv.core.policy import _Runnable
 
 
