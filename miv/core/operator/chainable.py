@@ -20,7 +20,7 @@ import itertools
 
 import matplotlib.pyplot as plt
 
-from miv.core.datatype.literals import NumpyDType, PythonDataType
+from miv.core.datatype.pure_python import NumpyDType, PythonDataType
 
 if TYPE_CHECKING:
     from miv.core.datatype import DataTypes
