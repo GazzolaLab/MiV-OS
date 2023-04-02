@@ -16,6 +16,8 @@ import os
 import pathlib
 import pickle as pkl
 
+import numpy as np
+
 if TYPE_CHECKING:
     from miv.core.datatype import DataTypes
 
@@ -178,15 +180,26 @@ class DataclassCacher(BaseCacher):
         return None
 
     def _compile_configuration_as_dict(self) -> dict:
-        return dataclasses.asdict(self.parent, dict_factory=collections.OrderedDict)
+        config = dataclasses.asdict(self.parent, dict_factory=collections.OrderedDict)
+        for key in config.keys():
+            if isinstance(config[key], np.ndarray):
+                config[key] = config[key].tostring()
+            elif hasattr(config[key], "to_json"):
+                config[key] = config[key].to_json()
+        return config
 
     @when_policy_is("ON", "AUTO", "MUST")
     @when_initialized
     def save_config(self):
         config = self._compile_configuration_as_dict()
         os.makedirs(self.cache_dir, exist_ok=True)
-        with open(self.config_filename, "w") as f:
-            json.dump(config, f, indent=4)
+        try:
+            with open(self.config_filename, "w") as f:
+                json.dump(config, f, indent=4)
+        except (TypeError, OverflowError):
+            raise TypeError(
+                "Some property of caching objects are not JSON serializable."
+            )
         return True
 
     @when_initialized
