@@ -36,6 +36,13 @@ class UnstructuredMEA(MEAMixin):
         self.indices = indices
         self.coordinates = coordinates
 
+    def to_json(self) -> dict:
+        """Return a JSON-serializable dictionary"""
+        return {
+            "indices": self.indices.tolist(),
+            "coordinates": self.coordinates.tolist(),
+        }
+
     def map_data(
         self, vector: np.ndarray, missing_value: float = 0.0
     ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:

@@ -225,7 +225,7 @@ class DirectedConnectivity(OperatorMixin):
         connectivity_metric_matrix = result["connectivity_matrix"]
 
         fig, ax = plt.subplots(figsize=(12, 12))
-        im = ax.imshow(connectivity_metric_matrix, cmap="jet")
+        im = ax.imshow(connectivity_metric_matrix, cmap="gray_r", vmin=0, vmax=1)
         ax.set_xlabel("Source")
         ax.set_ylabel("Target")
         ax.set_title("Transfer Entropy")
@@ -233,6 +233,24 @@ class DirectedConnectivity(OperatorMixin):
 
         if save_path is not None:
             plt.savefig(os.path.join(save_path, "te.png"))
+
+        if show:
+            plt.show()
+
+        plt.close(fig)
+
+    def plot_transfer_entropy_histogram(self, result, save_path=None, show=False):
+        connectivity_metric_matrix = result["connectivity_matrix"]
+
+        fig, ax = plt.subplots(figsize=(12, 12))
+        ax.hist(connectivity_metric_matrix, bins=100)
+        ax.set_xlabel("transfer entropy")
+        ax.set_ylabel("count")
+        ax.set_title("Transfer Entropy Histogram")
+        ax.set_xlim([-0.1, 1.1])
+
+        if save_path is not None:
+            plt.savefig(os.path.join(save_path, "te_histogram.png"))
 
         if show:
             plt.show()
@@ -356,17 +374,25 @@ class DirectedConnectivity(OperatorMixin):
         # edge_weights = [G_1[u][v]['weight'] if 'weight' in G_1[u][v] else 0.0 for u, v in G_1.edges()]
         plt.figure()
         widths = nx.get_edge_attributes(G_1, "weight")
-        # print(list(widths.items()))
         nx.draw(G_1, pos)
-        nx.draw_networkx_edges(
-            G_1,
-            pos,
-            edgelist=widths.keys(),
-            width=list(widths.values()),
-            alpha=0.5,
-            edge_color="lightblue",
-            ax=plt.gca(),
-        )
+        if boolean_connectivity:
+            nx.draw_networkx_edges(
+                G_1,
+                pos,
+                edgelist=widths.keys(),
+                ax=plt.gca(),
+            )
+        else:
+            nx.draw_networkx_edges(
+                G_1,
+                pos,
+                edgelist=widths.keys(),
+                edge_color=list(widths.values()),
+                edge_cmap=plt.cm.gray_r,
+                edge_vmin=0.0,
+                edge_vmax=1.0,
+                ax=plt.gca(),
+            )
         nx.draw_networkx_labels(
             G_1,
             pos,

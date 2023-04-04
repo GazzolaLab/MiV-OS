@@ -66,8 +66,8 @@ class BaseChainingMixin:
     Need further implementation of: output, tag
     """
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self._downstream_list: list[_Chainable] = []
         self._upstream_list: list[_Chainable] = []
 
