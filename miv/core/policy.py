@@ -5,6 +5,7 @@ __all__ = [
     "SupportMultiprocessing",
     "MultiprocessingRunner",
     "InternallyMultiprocessing",
+    "StrictMPIRunner",
 ]
 
 from typing import Any, Callable, Generator, Optional, Protocol, Union
@@ -69,11 +70,40 @@ class MultiprocessingRunner:
                 yield from p.imap(func, inputs)
 
 
-class StrictMPI:
-    pass
+class StrictMPIRunner:
+    def __init__(self):
+        from mpi4py import MPI
+
+        self.comm = MPI.COMM_WORLD
+        self.root = 0
+
+    def set_comm(self, comm):
+        self.comm = comm
+
+    def set_root(self, root: int):
+        self.root = root
+
+    def get_rank(self):
+        return self.comm.Get_rank()
+
+    def get_size(self):
+        return self.comm.Get_size()
+
+    def get_root(self):
+        return self.root
+
+    def is_root(self):
+        return self.get_rank() == self.root
+
+    def __call__(self, func, inputs=None, **kwargs):
+        if inputs is None:
+            output = func()
+        else:
+            output = func(*inputs)
+        return output
 
 
-class SupportMPI(StrictMPI):
+class SupportMPI(StrictMPIRunner):
     pass
 
 
