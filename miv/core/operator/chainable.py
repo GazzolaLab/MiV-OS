@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 __doc__ = """"""
-__all__ = ["_Chainable", "BaseChainingMixin", "SourceChainingMixin"]
+__all__ = ["_Chainable", "BaseChainingMixin"]
 
 from typing import TypeVar  # TODO: For python 3.11, we can use typing.Self
 from typing import (
@@ -74,18 +74,6 @@ class BaseChainingMixin:
         self._output: DataTypes | None = None
 
     def __rshift__(self, right: _Chainable) -> _Chainable:
-        from miv.core.datatype.pure_python import NumpyDType, PythonDataType
-
-        if isinstance(right, BaseChainingMixin):
-            pass
-        elif PythonDataType.is_valid(right):
-            right = PythonDataType(right)
-        elif NumpyDType.is_valid(right):
-            right = NumpyDType(right)
-        else:
-            raise TypeError(
-                f"Type {type(right)} is not supported: the type/class is not chainable."
-            )
         self._downstream_list.append(right)
         right._upstream_list.append(self)
         return right
@@ -213,32 +201,3 @@ class BaseChainingMixin:
 
         tsort.reverse()
         return tsort
-
-
-class SourceChainingMixin:
-    """
-    Mixin to create chaining structure for source nodes.
-    """
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._downstream_list: list[_Chainable] = []
-        self._output: DataTypes | None = None
-
-    def __rshift__(self, right: _Chainable) -> _Chainable:
-        raise ValueError("Source node must be the first node in the chain.")
-
-    def clear_connections(self) -> None:
-        """Clear all the connections to other nodes, and remove dependencies."""
-        for node in self.iterate_upstream():
-            node._downstream_list.remove(self)
-        self._downstream_list.clear()
-
-    def iterate_downstream(self) -> Iterator[_Chainable]:
-        return iter(self._downstream_list)
-
-    def iterate_upstream(self) -> Iterator[_Chainable]:
-        return []
-
-    def summarize(self) -> str:
-        raise NotImplementedError("SourceChainingMixin does not support summarize().")

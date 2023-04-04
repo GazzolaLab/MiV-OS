@@ -4,7 +4,7 @@ from typing import Protocol, Union
 
 import numpy as np
 
-from miv.core.operator.chainable import SourceChainingMixin
+from miv.core.operator.chainable import BaseChainingMixin
 
 
 class RawValuesProtocol(Protocol):
@@ -13,7 +13,7 @@ class RawValuesProtocol(Protocol):
         ...
 
 
-class ValuesMixin(SourceChainingMixin):
+class ValuesMixin(BaseChainingMixin):
     """
     This mixin is used to convert pure/numpy data type to be a valid input/output of a node.
     """
