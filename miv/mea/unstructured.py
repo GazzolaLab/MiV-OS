@@ -32,7 +32,7 @@ class UnstructuredMEA(MEAMixin):
         super().__init__(*args, **kwargs)
         assert (
             indices.shape[0] == coordinates.shape[0]
-        ), "The number of indices and coordinates must be the same."
+        ), f"The number of indices ({indices.shape[0]}) and coordinates ({coordinates.shape[0]}) must be the same."
         self.indices = indices
         self.coordinates = coordinates
 
