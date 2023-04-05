@@ -41,25 +41,27 @@ class Signal(SupportMultiprocessing, DataNodeMixin):
 
     @property
     def number_of_channels(self) -> int:
+        """Number of channels in the signal."""
         return self.data.shape[self._CHANNELAXIS]
 
     def __getitem__(self, i: int) -> SignalType:
         return self.data[:, i]  # TODO: Fix to row-major
 
     def select(self, indices: Tuple[int, ...]) -> "Signal":
-        """
-        Select channels by indices.
-        """
+        """Select channels by indices."""
         return Signal(self.data[:, indices], self.timestamps, self.rate)
 
     def get_start_time(self):
+        """Get the start time of the signal."""
         return self.timestamps.min()
 
     def get_end_time(self):
+        """Get the end time of the signal."""
         return self.timestamps.max()
 
     @property
     def shape(self) -> Tuple[int, int]:
+        """Shape of the signal."""
         return self.data.shape
 
     def append(self, value) -> None:
