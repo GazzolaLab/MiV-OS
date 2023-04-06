@@ -51,16 +51,19 @@ class NeuralActivity(OperatorMixin):
 
         # Split Tasks
         num_frames = probe_times.shape[0]
-        if size * self.fps * self.minimum_split_size < num_frames:
+        if size * self.fps * self.minimum_split_size > num_frames:
             size = np.ceil(num_frames / (self.fps * self.minimum_split_size)).astype(
                 np.int_
             )
-            logging.warning(f"Too many ranks. Splitting into {size} tasks.")
+            if rank == self.runner.get_root():
+                logging.warning(f"Too many ranks. Splitting into {size} tasks for total {num_frames} frames.")
             if rank >= size:
                 return
+
         probe_times = np.array_split(probe_times, size)[rank]
         start_time = probe_times[0]
         end_time = probe_times[-1]
+        logging.info(f"{rank=} | rendering from {start_time=:.03f} to {end_time=:.03f}: {probe_times.shape[0]} frames.")
 
         xs = []
         for i in range(spiketrains_bins.number_of_channels):
