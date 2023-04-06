@@ -93,7 +93,8 @@ class NeuralActivity(OperatorMixin):
         with writer.saving(fig, video_name, dpi=200):  # TODO: cut each video into 1min
             for timestep, time in tqdm(
                 enumerate(probe_times),
-                desc="Rendering",
+                desc=f"Rendering {rank}/{size}",
+                position=rank,
                 total=probe_times.shape[0],
                 disable=not self.progress_bar,
             ):
