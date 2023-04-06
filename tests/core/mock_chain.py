@@ -26,5 +26,5 @@ class MockChainRunnable(MockChain):
         super().__init__(name)
         self.runner = MockRunner()
 
-    def run(self, save_path=None, dry_run=False, cache_dir=None):
+    def run(self, save_path=None, dry_run=False, cache_dir=None, skip_plot=False):
         print("run ", self.tag)
