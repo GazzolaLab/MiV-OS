@@ -56,14 +56,18 @@ class NeuralActivity(OperatorMixin):
                 np.int_
             )
             if rank == self.runner.get_root():
-                logging.warning(f"Too many ranks. Splitting into {size} tasks for total {num_frames} frames.")
+                logging.warning(
+                    f"Too many ranks. Splitting into {size} tasks for total {num_frames} frames."
+                )
             if rank >= size:
                 return
 
         probe_times = np.array_split(probe_times, size)[rank]
         start_time = probe_times[0]
         end_time = probe_times[-1]
-        logging.info(f"{rank=} | rendering from {start_time=:.03f} to {end_time=:.03f}: {probe_times.shape[0]} frames.")
+        logging.info(
+            f"{rank=} | rendering from {start_time=:.03f} to {end_time=:.03f}: {probe_times.shape[0]} frames."
+        )
 
         xs = []
         for i in range(spiketrains_bins.number_of_channels):
