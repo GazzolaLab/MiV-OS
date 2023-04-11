@@ -8,6 +8,7 @@ __all__ = ["Pipeline"]
 
 from typing import List, Optional, Union
 
+import time
 import pathlib
 
 from miv.core.operator.chainable import _Chainable
@@ -33,7 +34,8 @@ class Pipeline:
     """
 
     def __init__(self, node: _Chainable):
-        self.execution_order: List[_Runnable] = node.topological_sort()
+        self._start_node = node
+        self.execution_order: List[_Runnable] = self._start_node.topological_sort()
 
     def run(
         self,
@@ -58,14 +60,16 @@ class Pipeline:
         """
         for node in self.execution_order:
             if verbose:
+                stime = time.time()
                 print("Running: ", node)
             if hasattr(node, "cacher"):
                 node.cacher.cache_policy = "OFF" if no_cache else "AUTO"
             node.run(dry_run=dry_run, save_path=working_directory)
+            if verbose:
+                print(f"Finished: {time.time() - stime} sec")
         if verbose:
-            print("Pipeline done:")
+            print(f"Pipeline done: computing {self._start_node}")
             self.summarize()
-            print("-" * 46)
 
     def summarize(self):
         strs = []
@@ -76,4 +80,4 @@ class Pipeline:
 
     def export(self, working_directory: Optional[Union[str, pathlib.Path]]):
         # TODO
-        pass
+        raise NotImplementedError
