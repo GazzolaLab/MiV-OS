@@ -2,7 +2,13 @@ from __future__ import annotations
 
 __doc__ = """
 """
-__all__ = ["_Cachable", "DataclassCacher", "FunctionalCacher"]
+__all__ = [
+    "_CacherProtocol",
+    "_Jsonable",
+    "_Cachable",
+    "DataclassCacher",
+    "FunctionalCacher",
+]
 
 from typing import TYPE_CHECKING, Any, Generator, Literal, Protocol, Union
 
@@ -52,6 +58,11 @@ class _CacherProtocol(Protocol):
 
     def check_cached(self) -> bool:
         """Check if the current configuration is the same as the cached one."""
+        ...
+
+
+class _Jsonable(Protocol):
+    def to_json(self) -> dict[str, Any]:
         ...
 
 

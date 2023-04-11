@@ -37,6 +37,7 @@ class Spikestamps(CollapseExtendableMixin, DataNodeMixin, Sequence):
 
     @property
     def number_of_channels(self) -> int:
+        """Number of channels"""
         return len(self.data)
 
     def __setitem__(self, index, item):

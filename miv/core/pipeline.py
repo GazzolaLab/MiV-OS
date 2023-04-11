@@ -41,6 +41,7 @@ class Pipeline:
         self,
         working_directory: Optional[Union[str, pathlib.Path]] = "./results",
         no_cache: bool = False,
+        skip_plot: bool = False,
         dry_run: bool = False,
         verbose: bool = False,  # Use logging
     ):
@@ -64,7 +65,7 @@ class Pipeline:
                 print("Running: ", node)
             if hasattr(node, "cacher"):
                 node.cacher.cache_policy = "OFF" if no_cache else "AUTO"
-            node.run(dry_run=dry_run, save_path=working_directory)
+            node.run(dry_run=dry_run, save_path=working_directory, skip_plot=skip_plot)
             if verbose:
                 print(f"Finished: {time.time() - stime} sec")
         if verbose:

@@ -151,6 +151,7 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin):
         self,
         save_path: str | pathlib.Path | None = None,
         dry_run: bool = False,
+        skip_plot: bool = False,
     ) -> None:
         # Execute the module
         if save_path is not None:
@@ -160,4 +161,5 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin):
             print("Dry run: ", self.__class__.__name__)
             return
         self._execute()
-        self.plot(show=False, save_path=True, dry_run=dry_run)
+        if not skip_plot:
+            self.plot(show=False, save_path=True, dry_run=dry_run)

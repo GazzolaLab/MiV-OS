@@ -50,7 +50,7 @@ class Notch(OperatorMixin):
 
         """
         rate = signal.rate
-        b, a = sps.iirnotch(f0=self.f0, Q=self.Q, fs=rate)
+        b, a = sps.iirnotch(w0=self.f0, Q=self.Q, fs=rate)
         y = signal.data.copy()
         num_channel = signal.number_of_channels
         for ch in range(num_channel):

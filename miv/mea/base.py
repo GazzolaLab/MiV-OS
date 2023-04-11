@@ -42,7 +42,7 @@ class MEAMixin(BaseChainingMixin):
     def output(self):
         return self
 
-    def run(self, save_path: str = None, dry_run: bool = False):
+    def run(self, **kwargs):
         pass
 
     def map_data(self, vector: np.ndarray) -> np.ndarray:

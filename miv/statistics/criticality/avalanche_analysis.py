@@ -2,7 +2,7 @@ __doc__ = """
 Avalanche Analysis
 """
 
-__all__ = ["AvalancheAnalysis"]
+__all__ = ["AvalancheDetection", "AvalancheAnalysis"]
 
 from typing import List, Optional, Tuple, Union
 
@@ -16,14 +16,15 @@ import matplotlib.pyplot as plt
 import numpy as np
 import quantities as pq
 from scipy.optimize import curve_fit
+from tqdm import tqdm
 
-from miv.core.datatype import Spikestamps
+from miv.core.datatype import Signal, Spikestamps
 from miv.core.operator import OperatorMixin
 from miv.core.wrapper import wrap_cacher
 
 
 @dataclass
-class AvalancheAnalysis(OperatorMixin):
+class AvalancheDetection(OperatorMixin):
     r"""
     An operator for finding avalanches in spike trains.
     It returns the size, duration, and avalanches themselves, defined as all the times each neuron spiked in a given avalanche.
@@ -40,31 +41,29 @@ class AvalancheAnalysis(OperatorMixin):
     allow_multiple_spike_per_bin : bool
         If True, allow multiple spikes per bin. Default is False.
         This influence the threshold of the avalanche size.
+    minimum_bins_in_avalanche : int
+        The minimum number of bins in an avalanche. Default is 10.
 
     Returns
     -------
-    starts_time : np.ndarray
-        The start time of each avalanche.
-    ends_time : np.ndarray
-        The end time of each avalanche.
-    durations : np.ndarray
-        The duration of each avalanche. (ends_time - starts_time) * bin_size
-    size : np.ndarray
-        The number of active neurons/channels in each avalanche.
-    branching_ratio : np.ndarray
-        The branching ratio of each avalanche: the number of neurons active at time step t
-        divided by the number of neurons active at time step t-1.
+    starts : np.ndarray
+        The start timestamp of each avalanche.
+    ends : np.ndarray
+        The end timestamp of each avalanche.
+    bincount: Signal
+        The binned spike count.
 
         .. math::
             \sum(thisShape[1:] / thisShape[:-1]) / Avalanche.duration
     """
 
-    bin_size: float = 0.004  # in seconds
+    bin_size: float = 0.002  # in seconds
 
     # Miscellaneous configurations
     threshold: Optional[float] = None
     time_difference: Optional[float] = None
     allow_multiple_spike_per_bin: bool = False
+    minimum_bins_in_avalanche: int = 10
 
     tag: str = "Avalanche and Criticality Analysis"
 
@@ -92,6 +91,12 @@ class AvalancheAnalysis(OperatorMixin):
         starts = np.where(diff_events == 1)[0]
         ends = np.where(diff_events == -1)[0]
 
+        # remove avalanches that are too short
+        if self.minimum_bins_in_avalanche > 1:
+            inds = np.where(ends - starts >= self.minimum_bins_in_avalanche)[0]
+            starts = starts[inds]
+            ends = ends[inds]
+
         if not np.isclose(self.bin_size, self.time_difference):
             starts2 = starts[1:]
             ends2 = ends[:-1]
@@ -102,27 +107,7 @@ class AvalancheAnalysis(OperatorMixin):
             starts = starts[np.concatenate([[0], inds + 1])]
             ends = ends[np.concatenate([inds, [len(ends) - 1]])]
 
-        starts_time = starts * self.bin_size + bincount.timestamps[0]
-        ends_time = ends * self.bin_size + bincount.timestamps[0]
-        durations = ends_time - starts_time
-
-        # Compute size and branching ratio
-        size = np.zeros(len(starts), dtype=np.int_)
-        branching_ratio = np.zeros(len(starts), dtype=np.float_)
-        avalanches = []
-        for idx, (s, e) in enumerate(zip(starts, ends)):
-            if s == e:
-                raise ValueError("Avalanche size is 0")
-            avalanche = bincount.data[s:e, :]
-            avalanches.append(avalanche)
-            size[idx] = np.count_nonzero(avalanche.sum(axis=0))
-            shape = avalanche.sum(axis=1)
-            if np.any(np.isclose(shape[:-1], 0)) or np.isclose(size[idx], 0):
-                branching_ratio[idx] = 0.0
-            else:
-                branching_ratio[idx] = np.sum(shape[1:] / shape[:-1]) / size[idx]
-
-        return starts_time, ends_time, durations, size, branching_ratio, avalanches
+        return starts, ends, bincount
 
     def __post_init__(self):
         super().__init__()
@@ -140,7 +125,9 @@ class AvalancheAnalysis(OperatorMixin):
                 "Plotting avalanche on raster is not supported to be shown interactively."
             )
         spikestamps = self.receive()[0]
-        starts_time, ends_time, _, _, _, _ = outputs
+        starts, ends, bincount = outputs
+        starts_time = starts * self.bin_size + bincount.timestamps[0]
+        ends_time = ends * self.bin_size + bincount.timestamps[0]
 
         fig, ax = plt.subplots(figsize=(16, 6))
         ax.eventplot(spikestamps)
@@ -162,8 +149,67 @@ class AvalancheAnalysis(OperatorMixin):
                 )
         plt.close(fig)
 
+
+@dataclass
+class AvalancheAnalysis(OperatorMixin):
+    """
+    Avalanche and Criticality Analysis
+
+    .. example::
+
+        >>> from miv.statistics.criticality import AvalancheDetection, AvalancheAnalysis
+
+        >>> # Avalanche detection
+        >>> avalanche_detection = AvalancheDetection()
+        >>> avalanche_analysis = AvalancheAnalysis()
+        >>> avalanche_detection >> avalanche_analysis
+
+    Parameters
+    ----------
+    tag: str
+        The tag for the operator. Default is "Avalanche and Criticality Analysis".
+    """
+
+    tag: str = (
+        "Avalanche and Criticality Analysis"  # keep this same as AvalancheDetection
+    )
+
+    progress_bar: bool = False
+
+    @wrap_cacher("shape_analysis")
+    def __call__(self, inputs):
+        starts, ends, bincount = inputs
+        bin_size = 1.0 / bincount.rate
+        durations = (ends - starts) * bin_size
+
+        # Compute size and branching ratio
+        size = np.zeros(starts.size, dtype=np.int_)
+        branching_ratio = np.zeros(starts.size, dtype=np.float_)
+        avalanches = []
+        for idx, (s, e) in tqdm(
+            enumerate(zip(starts, ends)),
+            total=len(starts),
+            desc="Avalanche analysis",
+            disable=not self.progress_bar,
+        ):
+            if s == e:
+                raise ValueError("Avalanche size is 0")
+            avalanche = bincount.data[s:e, :]
+            avalanches.append(avalanche)
+            size[idx] = np.count_nonzero(avalanche.sum(axis=0))
+            shape = avalanche.sum(axis=1)
+            if np.any(np.isclose(shape[:-1], 0)) or np.isclose(size[idx], 0):
+                branching_ratio[idx] = 0.0
+            else:
+                branching_ratio[idx] = np.sum(shape[1:] / shape[:-1]) / size[idx]
+
+        return durations, size, branching_ratio, avalanches, bin_size
+
+    def __post_init__(self):
+        super().__init__()
+
     def plot_power_law_fitting(self, outputs, show=False, save_path=None):
-        starts_time, ends_time, durations, size, branching_ratio, _ = outputs
+        durations, size, branching_ratio, _, _ = outputs
 
         def power(x, a, c):
             return c * (x**a)
@@ -247,7 +293,7 @@ class AvalancheAnalysis(OperatorMixin):
         plt.close(fig)
 
     def plot_branching_ratio_histogram(self, outputs, show=False, save_path=None):
-        starts_time, ends_time, durations, size, branching_ratio, _ = outputs
+        durations, size, branching_ratio, _, _ = outputs
 
         nbins = 100
 
@@ -260,16 +306,8 @@ class AvalancheAnalysis(OperatorMixin):
             histtype="step",
             label="data",
         )
-        # axes[0].set_xscale("log")
-        # axes[0].set_yscale("log")
         ax.set_xlabel("branching ratio")
         ax.set_ylabel("Event Frequency")
-        # hist, bins = np.histogram(size, bins=logbins)
-        # popt, pcov = curve_fit(neg_power, bins[:-1][hist > 1], hist[hist > 1])
-        # tau = popt[0]
-        # axes[0].plot(logbins, neg_power(logbins, *popt), label=f"fit {tau=:.2f}")
-        # axes[0].legend()
-        # axes[0].set_ylim([5e-1, 1e3])
         ax.set_title("branching ratio")
         if save_path is not None:
             plt.savefig(os.path.join(save_path, "branching_ratio.png"))
@@ -278,7 +316,7 @@ class AvalancheAnalysis(OperatorMixin):
         plt.close(fig)
 
     def plot_avalanche_shape_collapse(self, outputs, show=False, save_path=None):
-        _, _, durations, _, _, avalanches = outputs
+        durations, _, _, avalanches, bin_size = outputs
 
         shapes = defaultdict(list)
         for avalanche in avalanches:
@@ -290,17 +328,17 @@ class AvalancheAnalysis(OperatorMixin):
         fig, axes = plt.subplots(1, 2, figsize=(12, 6))
         for idx, count in enumerate(shapes.keys()):
             shapes[count] = np.array(shapes[count])
-            time = np.arange(count) * self.bin_size
-            T = count * self.bin_size
+            time = np.arange(count) * bin_size
+            T = count * bin_size
             mean = np.array(shapes[count]).mean(axis=0)
             err = np.array(shapes[count]).std(axis=0)
             axes[0].errorbar(
-                time, mean, yerr=err, label=f"duration {self.bin_size*count*1000:.2f}ms"
+                time, mean, yerr=err, label=f"duration {bin_size*count*1000:.2f}ms"
             )
             axes[1].plot(
                 time / T,
                 mean / (T ** (self.svz - 1)),
-                label=f"duration {self.bin_size*count*1000:.2f}ms",
+                label=f"duration {bin_size*count*1000:.2f}ms",
             )
 
         axes[0].set_xlabel("Time in Avalanche (s)")

@@ -88,9 +88,48 @@ def test_entropy_rate_output(spikestamps):
         entropy_rate(spikestamps, -1, 1)
     with np.testing.assert_raises(AssertionError):  # t_start < t_end
         entropy_rate(spikestamps, -1, 1, 1, 0)
-    output = entropy_rate(spikestamps, 4, 1)
-    expected = np.array([0.460189937797365, 0.460189937797365, 0.460189937797365, 0, 0])
-    np.testing.assert_allclose(output, expected)
+    output_rate, _ = entropy_rate(spikestamps, 4, 1)
+
+    expected = np.array(
+        [
+            [
+                0.22239242,
+                0.22239242,
+                0.22239242,
+                0.22239242,
+                0.22239242,
+                0.22239242,
+                2.80735492,
+                0.0,
+                0.0,
+            ],
+            [
+                0.0,
+                0.22239242,
+                0.22239242,
+                0.22239242,
+                0.22239242,
+                0.22239242,
+                0.22239242,
+                2.80735492,
+                0.0,
+            ],
+            [
+                0.0,
+                0.0,
+                0.22239242,
+                0.22239242,
+                0.22239242,
+                0.22239242,
+                0.22239242,
+                0.22239242,
+                2.80735492,
+            ],
+            [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+        ]
+    )
+    np.testing.assert_allclose(output_rate, expected)
 
 
 def test_active_information_output(spikestamps):

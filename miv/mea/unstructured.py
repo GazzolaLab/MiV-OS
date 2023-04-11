@@ -32,9 +32,16 @@ class UnstructuredMEA(MEAMixin):
         super().__init__(*args, **kwargs)
         assert (
             indices.shape[0] == coordinates.shape[0]
-        ), "The number of indices and coordinates must be the same."
+        ), f"The number of indices ({indices.shape[0]}) and coordinates ({coordinates.shape[0]}) must be the same."
         self.indices = indices
         self.coordinates = coordinates
+
+    def to_json(self) -> dict:
+        """Return a JSON-serializable dictionary"""
+        return {
+            "indices": self.indices.tolist(),
+            "coordinates": self.coordinates.tolist(),
+        }
 
     def map_data(
         self, vector: np.ndarray, missing_value: float = 0.0

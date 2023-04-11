@@ -178,7 +178,7 @@ def entropy_rate(
     t_end: Optional[float] = None,
 ):
     """
-    Estimates the entropy rate for a single channel recording using the binned spiketrain
+    Estimates the entropy rate for a each channel recording using the binned spiketrain
 
     Parameters
     ----------
@@ -201,12 +201,14 @@ def entropy_rate(
     """
     assert history > 0, "history length should be a finite positive value"
     bin_spike = spiketrains.binning(bin_size=bin_size, t_start=t_start, t_end=t_end)
-    entropy_rate = np.zeros((bin_spike.shape[bin_spike._CHANNELAXIS],))
+    entropy_rate = []
     for idx, bin_spike_channel in enumerate(bin_spike):
-        entropy_rate[idx] = pyinform.entropyrate.entropy_rate(
-            bin_spike_channel, k=history
+        entropy_rate.append(
+            pyinform.entropyrate.entropy_rate(bin_spike_channel, k=history, local=True)[
+                0
+            ]
         )
-    return entropy_rate
+    return np.asarray(entropy_rate), bin_spike  # TODO: return single type
 
 
 @tag_info_metrics("self")
