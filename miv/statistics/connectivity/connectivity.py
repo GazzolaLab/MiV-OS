@@ -16,6 +16,7 @@ import pathlib
 import pickle as pkl
 from dataclasses import dataclass
 
+import matplotlib
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
@@ -60,6 +61,7 @@ class DirectedConnectivity(OperatorMixin):
 
     mea: str = None
     channels: Optional[List[int]] = None
+    exclude_channels: Optional[List[int]] = None
     bin_size: float = 0.001
     tag: str = "directional connectivity analysis"
     progress_bar: bool = False
@@ -106,7 +108,7 @@ class DirectedConnectivity(OperatorMixin):
             [n_nodes, n_nodes], dtype=np.float_
         )  # source -> target
 
-        pairs = [(i, j) for i, j in itertools.product(range(n_nodes), range(n_nodes))]
+        pairs = [(i, j) for i, j in itertools.product(range(n_nodes), range(n_nodes)) if i not in self.exclude_channels and j not in self.exclude_channels]
         func = functools.partial(
             self._get_connection_info,
             binned_spiketrain=binned_spiketrain,
@@ -225,9 +227,9 @@ class DirectedConnectivity(OperatorMixin):
         connectivity_metric_matrix = result["connectivity_matrix"]
 
         fig, ax = plt.subplots(figsize=(12, 12))
-        im = ax.imshow(connectivity_metric_matrix, cmap="gray_r", vmin=0, vmax=1)
-        ax.set_xlabel("Source")
-        ax.set_ylabel("Target")
+        im = ax.imshow(connectivity_metric_matrix, cmap="gray_r", vmin=0)
+        ax.set_xlabel("Target")
+        ax.set_ylabel("Source")
         ax.set_title("Transfer Entropy")
         plt.colorbar(im, ax=ax)
 
@@ -243,7 +245,7 @@ class DirectedConnectivity(OperatorMixin):
         connectivity_metric_matrix = result["connectivity_matrix"]
 
         fig, ax = plt.subplots(figsize=(12, 12))
-        ax.hist(connectivity_metric_matrix, bins=100)
+        ax.hist(connectivity_metric_matrix, bins=30)
         ax.set_xlabel("transfer entropy")
         ax.set_ylabel("count")
         ax.set_title("Transfer Entropy Histogram")
