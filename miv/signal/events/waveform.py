@@ -178,7 +178,4 @@ class ExtractWaveforms(OperatorMixin):
             output_axes.append(ax)
             if save_path:
                 fig.savefig(os.path.join(save_path, f"spike_cutouts_ch{ch:03}.png"))
-        if show:
-            plt.show()
-
-        return output_axes
+            plt.close(fig)
