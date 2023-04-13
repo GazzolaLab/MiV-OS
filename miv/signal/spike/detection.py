@@ -115,7 +115,9 @@ class ThresholdCutoff(OperatorMixin):
         num_channels = signal.number_of_channels  # type: ignore
         timestamps = signal.timestamps
         rate = signal.rate
-        for channel in tqdm(range(num_channels), disable=not self.progress_bar, desc=self.tag):
+        for channel in tqdm(
+            range(num_channels), disable=not self.progress_bar, desc=self.tag
+        ):
             array = signal[channel]  # type: ignore
 
             # Spike Detection: get spikestamp

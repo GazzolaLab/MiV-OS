@@ -8,8 +8,8 @@ __all__ = ["Pipeline"]
 
 from typing import List, Optional, Union
 
-import time
 import pathlib
+import time
 
 from miv.core.operator.chainable import _Chainable
 from miv.core.policy import _Runnable

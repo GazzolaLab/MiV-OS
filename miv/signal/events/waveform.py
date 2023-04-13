@@ -173,7 +173,7 @@ class ExtractWaveforms(OperatorMixin):
                     **plot_kwargs,
                 )
             ax.set_xlabel("Time (ms)")
-            ax.set_ylabel("Voltage (mV)")
+            ax.set_ylabel("Voltage (microV)")
             ax.set_title(f"Spike Cutouts (channel {ch})")
             output_axes.append(ax)
             if save_path:
