@@ -27,7 +27,7 @@ class MEAGeometryProtocol(_Jsonable, _Chainable, _Runnable, Protocol):
     def load(self, path: str) -> None:
         ...
 
-    def view(self) -> matplotlib.pyplot.Figure:
+    def view(self):
         """Simplified view of MEA orientation"""
         ...
 
