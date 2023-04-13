@@ -82,6 +82,9 @@ class DirectedConnectivity(OperatorMixin):
         else:
             self.mea_map = mea_map["64_intanRHD"]
 
+        if self.exclude_channels is None:  # FIXME: Use dataclass default value
+            self.exclude_channels = []
+
     @wrap_cacher(cache_tag="adjacency_matrix")
     def __call__(self, spikestamps: Spikestamps) -> np.ndarray:
         """__call__.
@@ -108,7 +111,11 @@ class DirectedConnectivity(OperatorMixin):
             [n_nodes, n_nodes], dtype=np.float_
         )  # source -> target
 
-        pairs = [(i, j) for i, j in itertools.product(range(n_nodes), range(n_nodes)) if i not in self.exclude_channels and j not in self.exclude_channels]
+        pairs = [
+            (i, j)
+            for i, j in itertools.product(range(n_nodes), range(n_nodes))
+            if i not in self.exclude_channels and j not in self.exclude_channels
+        ]
         func = functools.partial(
             self._get_connection_info,
             binned_spiketrain=binned_spiketrain,
