@@ -35,8 +35,8 @@ class Data(DataLoaderMixin):
     """
 
     def __init__(self, data_path: str, *args, **kwargs):
-        super().__init__(*args, **kwargs)
         self.data_path = data_path
+        super().__init__(*args, **kwargs)
 
         self._lfp_key = "Local Field Potential"  # TODO: refactor
         self._load_every = 60  # sec. Parse every 60 sec.
