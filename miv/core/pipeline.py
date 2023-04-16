@@ -67,7 +67,7 @@ class Pipeline:
                 node.cacher.cache_policy = "OFF" if no_cache else "AUTO"
             node.run(dry_run=dry_run, save_path=working_directory, skip_plot=skip_plot)
             if verbose:
-                print(f"Finished: {time.time() - stime} sec")
+                print(f"Finished: {time.time() - stime:.03f} sec")
         if verbose:
             print(f"Pipeline done: computing {self._start_node}")
             self.summarize()
