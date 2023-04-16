@@ -64,7 +64,6 @@ class PeristimulusActivity(OperatorMixin):
     # Binning configuration
     # Default: 400ms domain, 4ms binsize
     mea: str = None
-    binsize: float = 0.004  # seconds
     interval: float = 0.4  # seconds
     tag: str = "peri-stimulus activity plot"
 
@@ -80,10 +79,9 @@ class PeristimulusActivity(OperatorMixin):
     # @wrap_cacher("psth")
     def __call__(self, events: Spikestamps, spikestamps: Spikestamps):
         # TODO: Change events datatype to be Event, not Spikestamps
-        n_time = int(np.ceil(self.interval / self.binsize))
         activity = [Spikestamps() for _ in range(spikestamps.number_of_channels)]
         for t_start in events[0]:
-            t_end = t_start + n_time * self.binsize
+            t_end = t_start + self.interval
             view = spikestamps.get_view(
                 t_start + self.stimulus_length, t_end + self.stimulus_length
             )
