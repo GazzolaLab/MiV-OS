@@ -86,7 +86,11 @@ class PeristimulusActivity(OperatorMixin):
                 t_start + self.stimulus_length, t_end + self.stimulus_length
             )
             for channel in range(view.number_of_channels):
-                activity[channel].append(view[channel])
+                shifted_array = np.asarray(view[channel])
+                if shifted_array.size > 0: # FIXME: Optimize this
+                    activity[channel].append(shifted_array - shifted_array[0])
+                else:
+                    activity[channel].append(shifted_array)
         return activity
 
     def plot_peristimulus_in_grid_map(self, activity, show=False, save_path=None):
