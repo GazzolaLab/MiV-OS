@@ -116,10 +116,6 @@ class PeristimulusActivity(OperatorMixin):
         for i in range(nrow):
             axes[i, 0].set_ylabel("Stimulus Index")
 
-        # Legend
-        for i, j in itertools.product(range(nrow), range(ncol)):
-            axes[i, j].legend()
-
         plt.suptitle("Peri-Stimulus spike activity for each channel")
 
         if show:
