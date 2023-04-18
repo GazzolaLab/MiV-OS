@@ -61,29 +61,32 @@ class Notch(OperatorMixin):
         super().__init__()
         self.cacher.policy = "OFF"
 
-    # def plot_frequency_response(self, signal:Signal, show=False, save_path=None):
-    #     """plot_frequency_response
+    def plot_frequency_response(self, signal, show=False, save_path=None):
+        """plot_frequency_response"""
+        rate = next(signal).rate
+        b, a = sps.iirnotch(w0=self.f0, Q=self.Q, fs=rate)
+        freq, h = sps.freqz(b, a, fs=rate)
 
-    #     Parameters
-    #     ----------
-    #     signal : Signal
+        fig, ax = plt.subplots(2, 1, figsize=(8, 6))
 
-    #     Returns
-    #     -------
-    #     plt.Figure
-    #     """
-    #     sampling_rate = next(signal).rate
-    #     b, a = self._butter_bandpass(sampling_rate)
-    #     w, h = sps.freqs(b, a)
-    #     fig = plt.figure()
-    #     plt.semilogx(w, 20 * np.log10(abs(h)))
-    #     plt.title(
-    #         f"Butterworth filter (order{self.order}) frequency response [{self.lowcut},{self.highcut}]"
-    #     )
-    #     plt.xlabel("Frequency")
-    #     plt.ylabel("Amplitude")
-    #     if show:
-    #         plt.show()
-    #     if save_path is not None:
-    #         fig.savefig(os.path.join(save_path, 'filter_frequency_response.png'))
-    #     return fig
+        ax[0].plot(freq, 20 * np.log10(abs(h)))
+        ax[0].set_title("Frequency Response")
+        ax[0].set_ylabel("Amplitude (dB)")
+        ax[0].set_xlim([0, 100])
+        ax[0].set_ylim([-25, 10])
+        ax[0].grid(True)
+
+        ax[1].plot(freq, np.unwrap(np.angle(h)) * 180 / np.pi)
+        ax[1].set_ylabel("Angle (degrees)")
+        ax[1].set_xlabel("Frequency (Hz)")
+        ax[1].set_xlim([0, 100])
+        ax[1].set_yticks([-90, -60, -30, 0, 30, 60, 90])
+        ax[1].set_ylim([-90, 90])
+        ax[1].grid(True)
+
+        if show:
+            plt.show()
+        if save_path is not None:
+            plt.savefig(os.path.join(save_path, "filter_frequency_response.png"))
+
+        plt.close(fig)

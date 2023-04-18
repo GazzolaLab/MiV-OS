@@ -87,7 +87,7 @@ class PeristimulusActivity(OperatorMixin):
             )
             for channel in range(view.number_of_channels):
                 shifted_array = np.asarray(view[channel])
-                if shifted_array.size > 0: # FIXME: Optimize this
+                if shifted_array.size > 0:  # FIXME: Optimize this
                     activity[channel].append(shifted_array - shifted_array[0])
                 else:
                     activity[channel].append(shifted_array)

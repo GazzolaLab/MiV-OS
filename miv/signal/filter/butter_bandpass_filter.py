@@ -59,11 +59,11 @@ class ButterBandpass(OperatorMixin):
 
         """
         rate = signal.rate
-        b, a = self._butter_bandpass(rate)
+        sos = self._butter_bandpass(rate)
         y = signal.data.copy()
         num_channel = signal.number_of_channels
         for ch in range(num_channel):
-            y[:, ch] = sps.lfilter(b, a, signal.data[:, ch])
+            y[:, ch] = sps.sosfiltfilt(sos, signal.data[:, ch])
         return Signal(data=y, timestamps=signal.timestamps, rate=rate)
 
     def __post_init__(self):
@@ -88,43 +88,46 @@ class ButterBandpass(OperatorMixin):
         self.cacher.policy = "OFF"
 
     def _butter_bandpass(self, sampling_rate: float):
-        nyq = 0.5 * sampling_rate
         if self.btype in ["bandpass", "bandstop"]:
-            low = self.lowcut / nyq
-            high = self.highcut / nyq
+            low = self.lowcut
+            high = self.highcut
             critical_frequency = [low, high]
         elif self.btype == "highpass":
-            critical_frequency = self.lowcut / nyq
+            critical_frequency = self.lowcut
         elif self.btype == "lowpass":
-            critical_frequency = self.highcut / nyq
+            critical_frequency = self.highcut
         else:
             raise ValueError("Unknown btype: %s" % self.btype)
-        b, a = sps.butter(self.order, critical_frequency, btype=self.btype)
-        return b, a
+        sos = sps.butter(
+            self.order,
+            critical_frequency,
+            fs=sampling_rate,
+            btype=self.btype,
+            output="sos",
+        )
+        return sos
 
-    # def plot_frequency_response(self, signal:Signal, show=False, save_path=None):
-    #     """plot_frequency_response
+    def plot_frequency_response(self, signal, show=False, save_path=None):
+        """plot_frequency_response"""
+        rate = next(signal).rate
+        sos = self._butter_bandpass(rate)
+        w, h = sps.sosfreqz(sos, worN=2000, fs=rate)
 
-    #     Parameters
-    #     ----------
-    #     signal : Signal
+        fig = plt.figure()
+        plt.semilogx(w, 20 * np.log10(abs(h)))
+        plt.title("Butterworth filter frequency response")
+        plt.xlabel("Frequency [Hz]")
+        plt.ylabel("Amplitude [dB]")
+        plt.margins(0, 0.1)
+        plt.grid(which="both", axis="both")
+        if self.lowcut is not None:
+            plt.axvline(self.lowcut, color="red")
+        if self.highcut is not None:
+            plt.axvline(self.highcut, color="red")
 
-    #     Returns
-    #     -------
-    #     plt.Figure
-    #     """
-    #     sampling_rate = next(signal).rate
-    #     b, a = self._butter_bandpass(sampling_rate)
-    #     w, h = sps.freqs(b, a)
-    #     fig = plt.figure()
-    #     plt.semilogx(w, 20 * np.log10(abs(h)))
-    #     plt.title(
-    #         f"Butterworth filter (order{self.order}) frequency response [{self.lowcut},{self.highcut}]"
-    #     )
-    #     plt.xlabel("Frequency")
-    #     plt.ylabel("Amplitude")
-    #     if show:
-    #         plt.show()
-    #     if save_path is not None:
-    #         fig.savefig(os.path.join(save_path, 'filter_frequency_response.png'))
-    #     return fig
+        if show:
+            plt.show()
+        if save_path is not None:
+            plt.savefig(os.path.join(save_path, "filter_frequency_response.png"))
+
+        plt.close(fig)
