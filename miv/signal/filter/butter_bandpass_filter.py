@@ -85,6 +85,7 @@ class ButterBandpass(OperatorMixin):
             self.lowcut is not None or self.highcut is not None
         ), "Filtering frequency cannot be both None"
         super().__init__()
+        self.cacher.policy = "OFF"
 
     def _butter_bandpass(self, sampling_rate: float):
         nyq = 0.5 * sampling_rate

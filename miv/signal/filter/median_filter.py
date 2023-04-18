@@ -80,3 +80,4 @@ class MedianFilter(OperatorMixin):
                 "Threshold is less than 50.0 uV, which could alter the spike signal"
             )
         super().__init__()
+        self.cacher.policy = "OFF"

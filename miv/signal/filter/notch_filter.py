@@ -59,6 +59,7 @@ class Notch(OperatorMixin):
 
     def __post_init__(self):
         super().__init__()
+        self.cacher.policy = "OFF"
 
     # def plot_frequency_response(self, signal:Signal, show=False, save_path=None):
     #     """plot_frequency_response
