@@ -135,7 +135,7 @@ class PSTH(OperatorMixin):
     interval: float = 0.4  # seconds
     tag: str = "peri-stimulus time histogram"
 
-    stimulus_length = 0.010  # seconds. Skips for removing stimulus artifact
+    stimulus_length:float = 0.010  # seconds. Skips for removing stimulus artifact
 
     def __post_init__(self):
         super().__init__()
@@ -148,7 +148,7 @@ class PSTH(OperatorMixin):
     def __call__(self, events: Spikestamps, spikestamps: Spikestamps):
         # TODO: Change events datatype to be Event, not Spikestamps
         n_time = int(np.ceil(self.interval / self.binsize))
-        time_axis = np.linspace(0, self.interval, n_time)
+        time_axis = np.linspace(0, self.interval, n_time) + self.stimulus_length
         psth = np.zeros((spikestamps.number_of_channels, n_time), dtype=np.float_)
         for t_start in events[0]:
             t_end = t_start + n_time * self.binsize
@@ -210,7 +210,7 @@ class PSTHOverlay(OperatorMixin):
     mea: str = None
     tag: str = "peri-stimulus time histogram overlay"
 
-    stimulus_length = 0.010
+    stimulus_length: float = 0.010
 
     def __post_init__(self):
         super().__init__()
