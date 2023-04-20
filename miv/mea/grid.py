@@ -24,7 +24,7 @@ class GridMEA(MEAMixin):
     def __init__(
         self,
         grid: np.ndarray,
-        spacing: Tuple[float, float] = (100, 100),
+        spacing: Tuple[float, float] = (200, 200),
         *args,
         **kwargs,
     ):
@@ -56,6 +56,14 @@ class GridMEA(MEAMixin):
         Y = np.arange(self.nrow) * self.spacing[1]
         Xn, Yn = np.meshgrid(X, Y)
         return Xn, Yn, value_grid
+
+    def get_ixiy(self, idx: int):
+        """Given node index, return x y coordinate index"""
+        if idx not in self.grid:
+            return None
+        ys, xs = np.where(self.grid == idx)
+        assert len(xs) == 1 and len(ys) == 1, "The index is not unique."
+        return ys[0], xs[0]
 
     @property
     def coordinates(self):

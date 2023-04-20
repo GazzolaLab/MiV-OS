@@ -3,6 +3,7 @@ __all__ = ["ButterBandpass"]
 
 from typing import Optional
 
+import inspect
 import os
 from dataclasses import dataclass
 
@@ -109,7 +110,13 @@ class ButterBandpass(OperatorMixin):
 
     def plot_frequency_response(self, signal, show=False, save_path=None):
         """plot_frequency_response"""
-        rate = next(signal).rate
+        if inspect.isgenerator(
+            signal
+        ):  # FIXME: this is a temporary solution for generator
+            signal = next(signal)
+            rate = signal.rate
+        else:
+            rate = signal.rate
         sos = self._butter_bandpass(rate)
         w, h = sps.sosfreqz(sos, worN=2000, fs=rate)
 

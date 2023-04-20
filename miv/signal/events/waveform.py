@@ -23,6 +23,7 @@ from sklearn.preprocessing import StandardScaler
 from miv.core.datatype import Signal, Spikestamps
 from miv.core.operator import OperatorMixin
 from miv.core.wrapper import wrap_generator_to_generator
+from miv.mea import MEAGeometryProtocol
 from miv.typing import SignalType, SpikestampsType
 
 
@@ -179,3 +180,39 @@ class ExtractWaveforms(OperatorMixin):
             if save_path:
                 fig.savefig(os.path.join(save_path, f"spike_cutouts_ch{ch:03}.png"))
             plt.close(fig)
+
+
+@dataclass
+class WaveformAverage(OperatorMixin):
+    """
+    Plot the average waveform of each channel
+    """
+
+    tag: str = "waveform average"
+
+    def __post_init__(self):
+        super().__init__()
+
+    def __call__(self, cutouts: Dict[int, Signal], mea: MEAGeometryProtocol):
+        nrow, ncol = mea.nrow, mea.ncol
+
+        fig, axes = plt.subplots(nrow, ncol, figsize=(ncol * 6, nrow * 4))
+        for key, cutout in cutouts.items():
+            idx = mea.get_ixiy(key)
+            if idx is None:
+                continue
+            axes[idx[0], idx[1]].plot(
+                cutout.timestamps, cutout.data.mean(axis=cutout._CHANNELAXIS)
+            )
+        # Bottom row
+        for i in range(ncol):
+            axes[-1, i].set_xlabel("time (s)")
+
+        # Left row
+        for i in range(nrow):
+            axes[i, 0].set_ylabel("Voltage (microV)")
+
+        plt.suptitle("Waveform Average Plot")
+
+        fig.savefig(os.path.join(self.analysis_path, "waveform_average.png"))
+        plt.close(fig)
