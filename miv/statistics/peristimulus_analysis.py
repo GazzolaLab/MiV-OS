@@ -135,7 +135,7 @@ class PSTH(OperatorMixin):
     interval: float = 0.4  # seconds
     tag: str = "peri-stimulus time histogram"
 
-    stimulus_length = 0.010  # seconds. Skips for removing stimulus artifact
+    stimulus_length:float = 0.010  # seconds. Skips for removing stimulus artifact
 
     def __post_init__(self):
         super().__init__()
@@ -210,7 +210,7 @@ class PSTHOverlay(OperatorMixin):
     mea: str = None
     tag: str = "peri-stimulus time histogram overlay"
 
-    stimulus_length = 0.010
+    stimulus_length: float = 0.010
 
     def __post_init__(self):
         super().__init__()
