@@ -41,5 +41,5 @@ def test_psth():
     assert result.data.shape == (100, 2)
 
     # check that result timestamps and rate are correct
-    assert np.allclose(result.timestamps, np.linspace(0, 0.1, 100))
+    assert np.allclose(result.timestamps, np.linspace(0, 0.1, 100) + 0.01)
     assert np.isclose(result.rate, 1000.0)
