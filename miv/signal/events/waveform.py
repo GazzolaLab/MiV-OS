@@ -1,7 +1,7 @@
 __doc__ = """
 Module for extracting each spike waveform and visualize.
 """
-__all__ = ["ExtractWaveforms"]
+__all__ = ["ExtractWaveforms", "WaveformAverage"]
 
 from typing import Any, Dict, Generator, List, Optional, Tuple, Union
 
@@ -26,6 +26,8 @@ from miv.core.wrapper import wrap_generator_to_generator
 from miv.mea import MEAGeometryProtocol
 from miv.typing import SignalType, SpikestampsType
 
+from tqdm import tqdm
+
 
 @dataclass
 class ExtractWaveforms(OperatorMixin):
@@ -49,6 +51,8 @@ class ExtractWaveforms(OperatorMixin):
     post: pq.Quantity = 0.002 * pq.s
     plot_n_spikes: int = 100
     tag: str = "extract waveform"
+
+    progress_bar: bool = False
 
     def __post_init__(self):
         super().__init__()
@@ -84,8 +88,8 @@ class ExtractWaveforms(OperatorMixin):
             signal = [signal]
 
         cutouts = {}
-        sampling_rate = None
-        for sig in signal:  # TODO: Use generator-accepted caller instead
+        previous_sig = None
+        for sig in tqdm(signal, desc="For each Signal segments"):
             sampling_rate = sig.rate
             num_channels = sig.number_of_channels
             channels = range(num_channels) if self.channels is None else self.channels
@@ -94,9 +98,7 @@ class ExtractWaveforms(OperatorMixin):
             assert (
                 pre_idx + post_idx > 0
             ), "Set larger pre/post duration. pre+post duration must be more than 1/sampling_rate."
-            spikestamps_view = spikestamps.get_view(
-                sig.get_start_time(), sig.get_end_time()
-            )
+            spikestamps_view = spikestamps.get_view(sig.get_start_time(), sig.get_end_time())
             for ch in channels:
                 # Padding signal
                 spikestamp = spikestamps_view[ch]
@@ -105,20 +107,16 @@ class ExtractWaveforms(OperatorMixin):
                 padded_signal = np.pad(
                     sig.data[:, ch], ((pre_idx, post_idx),), constant_values=0
                 )
+                if previous_sig is not None:
+                    padded_signal[:pre_idx] = previous_sig.data[-pre_idx:, ch]
                 cutout = np.empty(
                     [pre_idx + post_idx, len(spikestamp)], dtype=np.float_
                 )
                 for idx, time in enumerate(spikestamp):
                     index = int(round((time - sig.get_start_time()) * sampling_rate))
-                    if (
-                        index >= sig.data.shape[0]
-                        or index + post_idx + pre_idx >= sig.data.shape[0]
-                    ):
-                        raise IndexError(
-                            f"The width of the spike {post_idx+pre_idx} exceeded the signal {sig.data.shape[0]}. "
-                            "Either timestamp exceeded the maximum time recorded, or "
-                            "post duration is too large."
-                        )
+                    if index + post_idx + pre_idx >= sig.data.shape[0]:
+                        # FIXME: need better algorithm for handling segmented signal
+                        continue
                     cutout[:, idx] = padded_signal[index : (index + post_idx + pre_idx)]
                 if ch not in cutouts:
                     cutouts[ch] = Signal(
@@ -130,6 +128,7 @@ class ExtractWaveforms(OperatorMixin):
                     )
                 else:
                     cutouts[ch].append(cutout)
+            previous_sig = sig
 
         return cutouts
 
@@ -139,7 +138,7 @@ class ExtractWaveforms(OperatorMixin):
         show: bool = False,
         save_path: Optional[pathlib.Path] = None,
         plot_kwargs: Dict[Any, Any] = None,
-    ) -> plt.Figure:
+    ):
         """
         Plot an overlay of spike cutouts
 
@@ -150,7 +149,6 @@ class ExtractWaveforms(OperatorMixin):
         plot_kwargs : Dict[Any, Any]
             Addtional keyword-arguments for matplotlib.pyplot.plot.
         """
-        output_axes = []
         for ch, signal in cutouts.items():
             cutout = signal.data
             num_cutout = signal.number_of_channels
@@ -168,18 +166,20 @@ class ExtractWaveforms(OperatorMixin):
 
             fig, ax = plt.subplots(figsize=(8, 5))
             for i in range(plot_n_spikes):
+                arr = cutout[:,i]
+                arr[np.isnan(arr)] = 0
                 ax.plot(
                     time,
-                    cutout[:, i],
+                    arr,
                     **plot_kwargs,
                 )
             ax.set_xlabel("Time (ms)")
             ax.set_ylabel("Voltage (microV)")
             ax.set_title(f"Spike Cutouts (channel {ch})")
-            output_axes.append(ax)
             if save_path:
-                fig.savefig(os.path.join(save_path, f"spike_cutouts_ch{ch:03}.png"))
+                plt.savefig(os.path.join(save_path, f"spike_cutouts_ch{ch:03}.png"))
             plt.close(fig)
+        plt.close("all")
 
 
 @dataclass
@@ -214,5 +214,6 @@ class WaveformAverage(OperatorMixin):
 
         plt.suptitle("Waveform Average Plot")
 
-        fig.savefig(os.path.join(self.analysis_path, "waveform_average.png"))
+        os.makedirs(self.analysis_path, exist_ok=True)
+        plt.savefig(os.path.join(self.analysis_path, "waveform_average.png"))
         plt.close(fig)
