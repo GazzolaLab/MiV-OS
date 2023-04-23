@@ -47,7 +47,7 @@ We use `bandpass_filter` and the `spike_detection`, using the `ButterBandpass` a
 ```{code-cell} ipython3
 # Create operator modules:
 bandpass_filter: Operator = ButterBandpass(lowcut=300, highcut=3000, order=4, tag="bandpass")
-spike_detection: Operator = ThresholdCutoff(cutoff=4.0, use_mad=True, dead_time=0.002, tag="spikes")
+spike_detection: Operator = ThresholdCutoff(cutoff=4.0, dead_time=0.002, tag="spikes")
 ```
 
 We can assign a `tag` to each operator to label it and help visualize the processing steps later.
@@ -60,7 +60,7 @@ It requires a list of channels to extract the spikes from, which we can specify 
 We can also limit the number of spikes to plot using the `plot_n_spikes` parameter.
 
 ```{code-cell} ipython3
-from miv.signal.events import ExtractWaveforms
+from miv.signal.spike import ExtractWaveforms
 
 extract_waveforms: Operator = ExtractWaveforms(channels=[11, 26, 37, 50], plot_n_spikes=150)
 ```

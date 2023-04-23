@@ -19,14 +19,13 @@ from scipy.signal import lfilter, savgol_filter
 from sklearn.decomposition import PCA
 from sklearn.mixture import GaussianMixture
 from sklearn.preprocessing import StandardScaler
+from tqdm import tqdm
 
 from miv.core.datatype import Signal, Spikestamps
 from miv.core.operator import OperatorMixin
 from miv.core.wrapper import wrap_generator_to_generator
 from miv.mea import MEAGeometryProtocol
 from miv.typing import SignalType, SpikestampsType
-
-from tqdm import tqdm
 
 
 @dataclass
@@ -98,7 +97,9 @@ class ExtractWaveforms(OperatorMixin):
             assert (
                 pre_idx + post_idx > 0
             ), "Set larger pre/post duration. pre+post duration must be more than 1/sampling_rate."
-            spikestamps_view = spikestamps.get_view(sig.get_start_time(), sig.get_end_time())
+            spikestamps_view = spikestamps.get_view(
+                sig.get_start_time(), sig.get_end_time()
+            )
             for ch in channels:
                 # Padding signal
                 spikestamp = spikestamps_view[ch]
@@ -166,7 +167,7 @@ class ExtractWaveforms(OperatorMixin):
 
             fig, ax = plt.subplots(figsize=(8, 5))
             for i in range(plot_n_spikes):
-                arr = cutout[:,i]
+                arr = cutout[:, i]
                 arr[np.isnan(arr)] = 0
                 ax.plot(
                     time,

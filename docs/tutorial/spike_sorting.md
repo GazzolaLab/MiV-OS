@@ -36,8 +36,7 @@ import matplotlib.pyplot as plt
 from miv.core.pipeline import Pipeline
 from miv.io.openephys import Data, DataManager
 from miv.signal.filter import ButterBandpass
-from miv.signal.spike import ThresholdCutoff
-from miv.signal.events import ExtractWaveforms
+from miv.signal.spike import ThresholdCutoff, ExtractWaveforms
 
 from miv.datasets.openephys_sample import load_data
 

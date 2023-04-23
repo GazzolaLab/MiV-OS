@@ -13,6 +13,8 @@ Code Example::
 
    SpikeDetectionProtocol
    ThresholdCutoff
+   ExtractWaveforms
+   WaveformAverage
 
 """
 __all__ = ["ThresholdCutoff", "query_firing_rate_between"]
@@ -38,7 +40,7 @@ from miv.core.datatype import Signal, Spikestamps
 from miv.core.operator import OperatorMixin
 from miv.core.policy import InternallyMultiprocessing
 from miv.core.wrapper import wrap_cacher
-from miv.statistics import firing_rates
+from miv.statistics.spiketrain_statistics import firing_rates
 from miv.typing import SignalType, SpikestampsType, TimestampsType
 
 

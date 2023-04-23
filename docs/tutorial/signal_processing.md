@@ -58,7 +58,7 @@ data: DataLoader = dataset[0]
 # Create operator modules:
 bandpass_filter: Operator = ButterBandpass(lowcut=300, highcut=3000, order=4)
 lfp_filter: Operator = ButterBandpass(highcut=3000, order=2, btype='lowpass')
-spike_detection: Operator = ThresholdCutoff(cutoff=4.0, use_mad=True, dead_time=0.002)
+spike_detection: Operator = ThresholdCutoff(cutoff=4.0, dead_time=0.002)
 ```
 
 In this code block, we are creating three different operator modules, namely `bandpass_filter`, `lfp_filter`, and `spike_detection`.
