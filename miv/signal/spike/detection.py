@@ -55,8 +55,6 @@ class ThresholdCutoff(OperatorMixin):
             (default=0.002)
         cutoff : Union[float, np.ndarray]
             (default=5.0)
-        use_mad : bool
-            (default=False)
         tag : str
         units : Union[str, pq.UnitTime]
             (default='sec')
@@ -70,7 +68,6 @@ class ThresholdCutoff(OperatorMixin):
     dead_time: float = 0.003
     search_range: float = 0.002
     cutoff: float = 5.0
-    use_mad: bool = True
     tag: str = "spike detection"
     progress_bar: bool = False
     units: str = "sec"
@@ -86,6 +83,8 @@ class ThresholdCutoff(OperatorMixin):
         Parameters
         ----------
         signal : Signal
+        custom_spike_threshold : np.ndarray
+            If not None, use this value * cutoff as spike threshold.
 
         Returns
         -------
@@ -121,9 +120,7 @@ class ThresholdCutoff(OperatorMixin):
             array = signal[channel]  # type: ignore
 
             # Spike Detection: get spikestamp
-            spike_threshold = self._compute_spike_threshold(
-                array, cutoff=self.cutoff, use_mad=self.use_mad
-            )
+            spike_threshold = self._compute_spike_threshold(array, cutoff=self.cutoff)
             crossings = self._detect_threshold_crossings(
                 array, rate, spike_threshold, self.dead_time
             )
@@ -147,13 +144,14 @@ class ThresholdCutoff(OperatorMixin):
         super().__init__()
 
     def _compute_spike_threshold(
-        self, signal: SignalType, cutoff: float = 5.0, use_mad: bool = True
+        self, signal: SignalType, cutoff: float = 5.0
     ) -> (
         float
     ):  # TODO: make this function compatible to array of cutoffs (for each channel)
         """
         Returns the threshold for the spike detection given an array of signal.
 
+        Denoho D. et al., `link <https://web.stanford.edu/dept/statistics/cgi-bin/donoho/wp-content/uploads/2018/08/denoiserelease3.pdf>`_.
         Spike sorting step by step, `step 2 <http://www.scholarpedia.org/article/Spike_sorting>`_.
 
         Parameters
@@ -162,13 +160,8 @@ class ThresholdCutoff(OperatorMixin):
             The signal as a 1-dimensional numpy array
         cutoff : float
             The spike-cutoff multiplier. (default=5.0)
-        use_mad : bool
-            Noise estimation method. If set to false, use standard deviation for estimation. (default=True)
         """
-        if use_mad:
-            noise_mid = np.median(np.absolute(signal)) / 0.6745
-        else:
-            noise_mid = np.std(signal)
+        noise_mid = np.median(np.absolute(signal)) / 0.6745
         spike_threshold = -cutoff * noise_mid
         return spike_threshold
 

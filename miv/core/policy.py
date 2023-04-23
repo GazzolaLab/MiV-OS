@@ -45,6 +45,7 @@ class VanillaRunner:
         if inputs is None:
             output = func()
         else:
+            # TODO: support kwargs
             output = func(*inputs)
         return output
 
