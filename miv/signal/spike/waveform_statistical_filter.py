@@ -11,6 +11,7 @@ from typing import Dict, Optional
 
 import csv
 import os
+import pathlib
 from dataclasses import dataclass
 
 import matplotlib.pyplot as plt
@@ -18,6 +19,7 @@ import numpy as np
 
 from miv.core.datatype import Signal, Spikestamps
 from miv.core.operator import OperatorMixin
+from miv.visualization.event import plot_spiketrain_raster
 
 
 @dataclass
@@ -118,3 +120,34 @@ class WaveformStatisticalFilter(OperatorMixin):
             )
             for row in log:
                 writer.writerow(row)
+
+    def plot_spiketrain(
+        self,
+        spikestamps,
+        show: bool = False,
+        save_path: Optional[pathlib.Path] = None,
+    ) -> plt.Axes:
+        """
+        Plot spike train in raster
+        """
+        t0 = spikestamps.get_first_spikestamp()
+        tf = spikestamps.get_last_spikestamp()
+
+        # TODO: REFACTOR. Make single plot, and change xlim
+        term = 60
+        n_terms = int(np.ceil((tf - t0) / term))
+        if n_terms == 0:
+            # TODO: Warning message
+            return None
+        for idx in range(n_terms):
+            fig, ax = plot_spiketrain_raster(
+                spikestamps, idx * term + t0, min((idx + 1) * term + t0, tf)
+            )
+            if save_path is not None:
+                plt.savefig(os.path.join(save_path, f"spiketrain_raster_{idx:03d}.png"))
+            if not show:
+                plt.close("all")
+        if show:
+            plt.show()
+            plt.close("all")
+        return ax
