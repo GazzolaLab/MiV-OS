@@ -52,8 +52,8 @@ __all__ = [
     "SpikeSorting",
     "PCADecomposition",
     "PCAClustering",
-    # "WaveletDecomposition",
-    # "SuperParamagneticClustering",
+    "WaveletDecomposition",
+    "SuperParamagneticClustering",
 ]
 
 from typing import Any, Optional, Union
@@ -84,13 +84,13 @@ class SpikeSorting:
     """
     Spike sorting module.
     User can specify the method for feature extraction (e.g. WaveletDecomposition, PCADecomposition, etc)
-    and the method for clustering (e.g. MeanShift, KMeans, SuperParamagneticClustering, etc).
+    and the method for clustering (e.g. MeanShift, KMeans, etc).
 
 
     Examples
     --------
     >>> spike_sorting = SpikeSorting(
-    ...    feature_extractor=WaveletDecomposition(),
+    ...    feature_extractor=PCADecomposition(),
     ...    clustering_method=sklearn.cluster.MeanShift()
     ... )
 
@@ -126,7 +126,8 @@ class SuperParamagneticClustering:  # pragma : no cover
 
     """
 
-    pass
+    def __init__(self):
+        raise NotImplementedError
 
 
 class PCADecomposition:

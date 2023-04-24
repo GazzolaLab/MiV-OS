@@ -128,6 +128,9 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin):
         self.analysis_path = os.path.join(path, self.tag.replace(" ", "_"))
         self.cacher.cache_dir = os.path.join(self.analysis_path, ".cache")
 
+    def make_analysis_path(self):
+        os.makedirs(self.analysis_path, exist_ok=True)
+
     def receive(self) -> list[DataTypes]:
         return [node.output for node in self.iterate_upstream()]
 
@@ -160,6 +163,8 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin):
         if dry_run:
             print("Dry run: ", self.__class__.__name__)
             return
+        self.make_analysis_path()
         self._execute()
-        if not skip_plot:
+        cache_called = self.cacher.cache_called
+        if not skip_plot and not cache_called:
             self.plot(show=False, save_path=True, dry_run=dry_run)

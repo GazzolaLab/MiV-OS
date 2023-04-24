@@ -19,14 +19,13 @@ from scipy.signal import lfilter, savgol_filter
 from sklearn.decomposition import PCA
 from sklearn.mixture import GaussianMixture
 from sklearn.preprocessing import StandardScaler
+from tqdm import tqdm
 
 from miv.core.datatype import Signal, Spikestamps
 from miv.core.operator import OperatorMixin
 from miv.core.wrapper import wrap_generator_to_generator
 from miv.mea import MEAGeometryProtocol
 from miv.typing import SignalType, SpikestampsType
-
-from tqdm import tqdm
 
 
 @dataclass
@@ -87,7 +86,7 @@ class ExtractWaveforms(OperatorMixin):
         if not inspect.isgenerator(signal):
             signal = [signal]
 
-        cutouts = {}
+        waveforms = {}
         previous_sig = None
         for sig in tqdm(signal, desc="For each Signal segments"):
             sampling_rate = sig.rate
@@ -98,7 +97,9 @@ class ExtractWaveforms(OperatorMixin):
             assert (
                 pre_idx + post_idx > 0
             ), "Set larger pre/post duration. pre+post duration must be more than 1/sampling_rate."
-            spikestamps_view = spikestamps.get_view(sig.get_start_time(), sig.get_end_time())
+            spikestamps_view = spikestamps.get_view(
+                sig.get_start_time(), sig.get_end_time()
+            )
             for ch in channels:
                 # Padding signal
                 spikestamp = spikestamps_view[ch]
@@ -118,8 +119,8 @@ class ExtractWaveforms(OperatorMixin):
                         # FIXME: need better algorithm for handling segmented signal
                         continue
                     cutout[:, idx] = padded_signal[index : (index + post_idx + pre_idx)]
-                if ch not in cutouts:
-                    cutouts[ch] = Signal(
+                if ch not in waveforms:
+                    waveforms[ch] = Signal(
                         data=cutout,
                         timestamps=np.arange(pre_idx + post_idx).astype(np.float_)
                         / sampling_rate
@@ -127,29 +128,29 @@ class ExtractWaveforms(OperatorMixin):
                         rate=sampling_rate,
                     )
                 else:
-                    cutouts[ch].append(cutout)
+                    waveforms[ch].append(cutout)
             previous_sig = sig
 
-        return cutouts
+        return waveforms
 
     def plot_waveforms(
         self,
-        cutouts: Dict[int, Signal],
+        waveforms: Dict[int, Signal],
         show: bool = False,
         save_path: Optional[pathlib.Path] = None,
         plot_kwargs: Dict[Any, Any] = None,
     ):
         """
-        Plot an overlay of spike cutouts
+        Plot an overlay of spike waveforms
 
         Parameters
         ----------
-        cutouts : np.ndarray
-            A spikes x samples array of cutouts
+        waveforms : np.ndarray
+            A spikes x samples array of cutouts waveforms.
         plot_kwargs : Dict[Any, Any]
             Addtional keyword-arguments for matplotlib.pyplot.plot.
         """
-        for ch, signal in cutouts.items():
+        for ch, signal in waveforms.items():
             cutout = signal.data
             num_cutout = signal.number_of_channels
             if self.plot_n_spikes is None:
@@ -166,7 +167,7 @@ class ExtractWaveforms(OperatorMixin):
 
             fig, ax = plt.subplots(figsize=(8, 5))
             for i in range(plot_n_spikes):
-                arr = cutout[:,i]
+                arr = cutout[:, i]
                 arr[np.isnan(arr)] = 0
                 ax.plot(
                     time,
@@ -193,11 +194,11 @@ class WaveformAverage(OperatorMixin):
     def __post_init__(self):
         super().__init__()
 
-    def __call__(self, cutouts: Dict[int, Signal], mea: MEAGeometryProtocol):
+    def __call__(self, waveforms: Dict[int, Signal], mea: MEAGeometryProtocol):
         nrow, ncol = mea.nrow, mea.ncol
 
         fig, axes = plt.subplots(nrow, ncol, figsize=(ncol * 6, nrow * 4))
-        for key, cutout in cutouts.items():
+        for key, cutout in waveforms.items():
             idx = mea.get_ixiy(key)
             if idx is None:
                 continue

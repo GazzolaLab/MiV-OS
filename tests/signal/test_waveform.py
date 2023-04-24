@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 
 from miv.core.datatype import Signal, Spikestamps
-from miv.signal.events import ExtractWaveforms
+from miv.signal.spike import ExtractWaveforms
 
 
 @pytest.fixture(name="mock_signal_for_waveform")

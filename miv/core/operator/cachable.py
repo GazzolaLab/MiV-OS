@@ -40,6 +40,11 @@ class _CacherProtocol(Protocol):
         ...
 
     @property
+    def cache_called(self) -> bool:
+        """Return true if last call was cached."""
+        ...
+
+    @property
     def config_filename(self) -> str | pathlib.Path:
         ...
 
@@ -153,6 +158,8 @@ class BaseCacher:
         self.cache_dir = None  # TODO: Public. Make proper setter
         self.cache_tag = "data"
 
+        self.cache_called = False
+
     @property
     def config_filename(self) -> str:
         return os.path.join(self.cache_dir, "config.json")
@@ -174,6 +181,7 @@ class DataclassCacher(BaseCacher):
     @when_policy_is("ON", "AUTO", "MUST")
     @when_initialized
     def check_cached(self) -> bool:
+        self.cache_called = False  # FIXME: Maybe better place to switch then this
         if self.policy == "MUST":
             return True
         current_config = self._compile_configuration_as_dict()
@@ -215,6 +223,7 @@ class DataclassCacher(BaseCacher):
 
     @when_initialized
     def load_cached(self) -> Generator[DataTypes, None, None]:
+        self.cache_called = True
         paths = glob.glob(self.cache_filename("*"))
         for path in paths:
             with open(path, "rb") as f:
@@ -237,6 +246,7 @@ class FunctionalCacher(BaseCacher):
 
     @when_initialized
     def load_cached(self) -> Generator[DataTypes, None, None]:
+        self.cache_called = True
         path = glob.glob(self.cache_filename(0))[0]
         with open(path, "rb") as f:
             yield pkl.load(f)

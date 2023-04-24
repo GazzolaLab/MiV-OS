@@ -14,12 +14,8 @@ def threshold_cutoff():
 def test_compute_spike_threshold(threshold_cutoff):
     signal = np.array([1, 2, 3, 4, 5])
     cutoff = 3.0
-    use_mad = True
     expected_output = -np.median(np.absolute(signal)) / 0.6745 * cutoff
-    assert (
-        threshold_cutoff._compute_spike_threshold(signal, cutoff, use_mad)
-        == expected_output
-    )
+    assert threshold_cutoff._compute_spike_threshold(signal, cutoff) == expected_output
 
 
 def test_detect_threshold_crossings(threshold_cutoff):
