@@ -93,7 +93,7 @@ class WaveformStatisticalFilter(OperatorMixin):
             )
             number_of_outliers = indices.sum()
 
-            filtered_spiketrains.append(np.asarray(spiketrain)[indices])
+            filtered_spiketrains.append(np.asarray(spiketrain)[~indices])
             log.append(
                 (
                     channel,
@@ -103,6 +103,12 @@ class WaveformStatisticalFilter(OperatorMixin):
                 )
             )
 
+        self._log = log  # FIXME: Maybe better way to pass down the result
+
+        return filtered_spiketrains
+
+    def after_run_save_log(self, *args, **kwargs):
+        log = self._log
         # Save log in csv
         savepath = os.path.join(self.analysis_path, "filtered_statistics.csv")
         with open(savepath, "w", newline="") as csvfile:
@@ -112,5 +118,3 @@ class WaveformStatisticalFilter(OperatorMixin):
             )
             for row in log:
                 writer.writerow(row)
-
-        return filtered_spiketrains
