@@ -17,7 +17,7 @@ keywords = ["neuroscience", "statistics", "data-analysis", "electrophysiology", 
 
 # Pypi classifiers: https://pypi.org/classifiers/
 classifiers = [
-  "Development Status :: 3 - Alpha",
+  "Development Status :: 3 - Beta",
   "Intended Audience :: Science/Research",
   "Intended Audience :: Education",
   "Operating System :: OS Independent",
@@ -54,16 +54,16 @@ seaborn = ">=0.11.2,<0.13.0"
 tqdm = "^4.64.0"
 numpy = "^1.23.2"
 viziphant = "^0.2.0"
-Sphinx = {version = "^4.5.0", optional = true}
-pydata-sphinx-theme = {version = ">=0.9,<0.13", optional = true}
-readthedocs-sphinx-search = {version = "^0.2.0", optional = true}
+Sphinx = {version = "^5.3.0", optional = true}
+pydata-sphinx-theme = {version = "^0.13", optional = true}
+readthedocs-sphinx-search = {version = "^0.1.2", optional = true}
 sphinx-autodoc-typehints = {version = "^1.19.1", optional = true}
-myst-parser = {version = "^0.17.2", optional = true}
+myst-parser = {version = "^0.18.1", optional = true}
 numpydoc = {version = "^1.4.0", optional = true}
 sphinx-togglebutton = {version = "^0.3.2", optional = true}
 sphinx-copybutton = {version = "^0.5.0", optional = true}
-sphinxcontrib-mermaid = {version = "^0.7.1", optional = true}
-myst-nb = {version = "^0.15.0", optional = true}
+sphinxcontrib-mermaid = {version = "^0.8.1", optional = true}
+myst-nb = {version = "^0.17.1", optional = true}
 pyinform = "^0.2.0"
 graphviz = "^0.20.1"
 Pillow = "9.3.0"
@@ -75,13 +75,14 @@ pyserial = {version = "^3.5", optional = true}
 numba = "^0.56.4"
 machinable = "^4.0"
 coverage = "^7.1.0"
+opencv-python = "^4.7.0.72"
 
 [tool.poetry.dev-dependencies]
 black = "^22.8.0"
 isort = {extras = ["colors"], version = "^5.10.1"}
-mypy = "^0.982"
-mypy-extensions = "^0.4.3"
-pre-commit = "^2.21.0"
+mypy = "^1.0.1"
+mypy-extensions = "^1.0.0"
+pre-commit = "^3.0.4"
 pydocstyle = "^6.1.1"
 pylint = "^2.15.0"
 pytest = "^7.1.3"
@@ -210,12 +211,15 @@ exclude_lines = [
     "if 0:",
     "if __name__ == __main__:",
     "def __repr__",
+    '''def plot_'.*':''',
     "if self.debug:",
     "if settings.DEBUG",
+    "if TYPE_CHECKING:",
     "raise AssertionError",
     "raise NotImplementedError",
-    #"class .*\bProtocol):",
-    #"@(abc\.)?abstractmethod",
+    '''class '.*\bProtocol\)':''',
+    ''''@(abc\.)?'abstractmethod''',
+    '\.\.\.'
 ]
 fail_under = 40
 show_missing = true
@@ -226,5 +230,7 @@ branch = true
 omit = [
     "*/.local/*",
 	"setup.py",
+    "*/__init__.py",
     "miv/io/intan/rhs.py",# not part of the dev target
+    "miv/io/asdf/asdf.py",# not part of the dev target
 ]

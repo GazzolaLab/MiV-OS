@@ -3,6 +3,8 @@ __all__ = ["ButterBandpass"]
 
 from typing import Optional
 
+import inspect
+import os
 from dataclasses import dataclass
 
 import matplotlib.pyplot as plt
@@ -40,7 +42,7 @@ class ButterBandpass(OperatorMixin):
     lowcut: Optional[float] = None
     highcut: Optional[float] = None
     order: int = 5
-    tag: str = ""
+    tag: str = "bandpass filter"
     btype: str = "bandpass"
 
     @wrap_generator_to_generator
@@ -58,11 +60,11 @@ class ButterBandpass(OperatorMixin):
 
         """
         rate = signal.rate
-        b, a = self._butter_bandpass(rate)
+        sos = self._butter_bandpass(rate)
         y = signal.data.copy()
         num_channel = signal.number_of_channels
         for ch in range(num_channel):
-            y[:, ch] = sps.lfilter(b, a, signal.data[:, ch])
+            y[:, ch] = sps.sosfiltfilt(sos, signal.data[:, ch])
         return Signal(data=y, timestamps=signal.timestamps, rate=rate)
 
     def __post_init__(self):
@@ -84,40 +86,55 @@ class ButterBandpass(OperatorMixin):
             self.lowcut is not None or self.highcut is not None
         ), "Filtering frequency cannot be both None"
         super().__init__()
+        self.cacher.policy = "OFF"
 
     def _butter_bandpass(self, sampling_rate: float):
-        nyq = 0.5 * sampling_rate
-        low = self.lowcut / nyq
-        high = self.highcut / nyq
         if self.btype in ["bandpass", "bandstop"]:
+            low = self.lowcut
+            high = self.highcut
             critical_frequency = [low, high]
         elif self.btype == "highpass":
-            critical_frequency = low
+            critical_frequency = self.lowcut
         elif self.btype == "lowpass":
-            critical_frequency = high
+            critical_frequency = self.highcut
         else:
             raise ValueError("Unknown btype: %s" % self.btype)
-        b, a = sps.butter(self.order, critical_frequency, btype=self.btype)
-        return b, a
+        sos = sps.butter(
+            self.order,
+            critical_frequency,
+            fs=sampling_rate,
+            btype=self.btype,
+            output="sos",
+        )
+        return sos
 
-    def plot_frequency_response(self, sampling_rate: float):
-        """plot_frequency_response
+    def plot_frequency_response(self, signal, show=False, save_path=None):
+        """plot_frequency_response"""
+        if inspect.isgenerator(
+            signal
+        ):  # FIXME: this is a temporary solution for generator
+            signal = next(signal)
+            rate = signal.rate
+        else:
+            rate = signal.rate
+        sos = self._butter_bandpass(rate)
+        w, h = sps.sosfreqz(sos, worN=2000, fs=rate)
 
-        Parameters
-        ----------
-        sampling_rate : float
-
-        Returns
-        -------
-        plt.Figure
-        """
-        b, a = self._butter_bandpass(sampling_rate)
-        w, h = sps.freqs(b, a)
         fig = plt.figure()
         plt.semilogx(w, 20 * np.log10(abs(h)))
-        plt.title(
-            f"Butterworth filter (order{self.order}) frequency response [{self.lowcut},{self.highcut}]"
-        )
-        plt.xlabel("Frequency")
-        plt.ylabel("Amplitude")
-        return fig
+        plt.title("Butterworth filter frequency response")
+        plt.xlabel("Frequency [Hz]")
+        plt.ylabel("Amplitude [dB]")
+        plt.margins(0, 0.1)
+        plt.grid(which="both", axis="both")
+        if self.lowcut is not None:
+            plt.axvline(self.lowcut, color="red")
+        if self.highcut is not None:
+            plt.axvline(self.highcut, color="red")
+
+        if show:
+            plt.show()
+        if save_path is not None:
+            plt.savefig(os.path.join(save_path, "filter_frequency_response.png"))
+
+        plt.close(fig)

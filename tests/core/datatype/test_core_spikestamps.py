@@ -1,4 +1,4 @@
-from collections import UserList
+from collections.abc import Sequence
 
 import numpy as np
 import pytest
@@ -10,7 +10,7 @@ def test_spikestamps_init():
     # Test that the data attribute is set correctly
     s = Spikestamps([[1, 2, 3], [4, 5, 6]])
     assert s.data == [[1, 2, 3], [4, 5, 6]]
-    assert isinstance(s, UserList)
+    assert isinstance(s, Sequence)
 
     # Test that the data attribute is set to an empty list if no iterable is provided
     s = Spikestamps([])
@@ -34,11 +34,11 @@ def test_spikestamps_insert():
 
     # Test that we can insert an element at the beginning of the list
     s.insert(0, [7, 8, 9])
-    assert s == [[7, 8, 9], [1, 2, 3], [4, 5, 6]]
+    assert s.data == [[7, 8, 9], [1, 2, 3], [4, 5, 6]]
 
     # Test that we can insert an element at the end of the list
     s.insert(3, [10, 11, 12])
-    assert s == [[7, 8, 9], [1, 2, 3], [4, 5, 6], [10, 11, 12]]
+    assert s.data == [[7, 8, 9], [1, 2, 3], [4, 5, 6], [10, 11, 12]]
 
     # Test that an IndexError is raised if the index is out of range
     with pytest.raises(IndexError):
@@ -50,7 +50,7 @@ def test_spikestamps_append():
 
     # Test that we can append an element to the end of the list
     s.append([7, 8, 9])
-    assert s == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+    assert s.data == [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 
 
 def test_spikestamps_extend():
@@ -59,11 +59,11 @@ def test_spikestamps_extend():
 
     # Test that we can extend the current object with another Spikestamps object
     s1.extend(s2)
-    assert s1 == [[1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12]]
+    assert s1.data == [[1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12]]
 
     # Test that we can extend the current object with an iterable of arrays
     s1.extend([[13, 14, 15], [16, 17, 18]])
-    assert s1 == [
+    assert s1.data == [
         [1, 2, 3],
         [4, 5, 6],
         [7, 8, 9],
@@ -95,3 +95,23 @@ def test_spikestamps_window_truncation(array, tstart, tend, expected_truncated_a
     np.testing.assert_equal(
         np.sort(truncated_arr), truncated_arr
     )  # Check the result is sorted array
+
+
+"""
+def test_binned_spiketrain():
+    seg = Segment(index=1)
+    train0 = SpikeTrain(
+        times=[0.1, 1.2, 1.3, 1.4, 1.5, 1.6, 4, 5, 5.1, 5.2, 8, 9.5],
+        units="sec",
+        t_stop=10,
+    )
+    seg.spiketrains.append(train0)
+    with np.testing.assert_raises(AssertionError):
+        output = binned_spiketrain(seg.spiketrains[0], 0, 0, 0.1)
+    # start time must be less than end time
+    with np.testing.assert_raises(AssertionError):
+        output = binned_spiketrain(seg.spiketrains[0], 0, 5, 0)
+    # bin_size cannot be negative
+    output = binned_spiketrain(seg.spiketrains[0], 2, 5, 1)
+    np.testing.assert_allclose(output, [0, 0, 1])
+"""

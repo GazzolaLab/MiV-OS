@@ -287,10 +287,16 @@ def load_recording(
     sampling_rate: float = float(info["continuous"][0]["sample_rate"])
     # channel_info: Dict[str, Any] = info["continuous"][0]["channels"]
 
-    # TODO: maybe need to support multiple continuous.dat files in the future
-    signal, timestamps = load_continuous_data(file_path[0], num_channels, sampling_rate)
+    _old_oe_version = False
+    if "GUI version" in info:
+        version = info["GUI version"]
+        v_major, v_minor, v_sub = list(map(int, version.split(".")))[:3]
+        _old_oe_version = v_major == 0 and v_minor <= 5  # Legacy
+    signal, timestamps = load_continuous_data(
+        file_path[0], num_channels, sampling_rate, _old_oe_version=_old_oe_version
+    )
     if num_fragments is None:
-        num_fragments = max(timestamps.shape[0] // sampling_rate // (60 + 1), 1)
+        num_fragments = int(max(timestamps.shape[0] // sampling_rate // (60 + 1), 1))
     fragmented_signal = np.array_split(signal, num_fragments, axis=0)[
         start_index:end_index
     ]
@@ -327,6 +333,7 @@ def load_continuous_data(
     sampling_rate: float,
     timestamps_path: Optional[str] = None,
     _recorded_dtype: Union[np.dtype, str] = "int16",
+    _old_oe_version: bool = False,
 ):
     """
     Load single continous data file and return timestamps and raw data in numpy array.
@@ -385,7 +392,8 @@ def load_continuous_data(
         timestamps = np.asarray(
             np.load(timestamps_path)
         )  # TODO: check if npy file includes dtype. else, add "dtype=np.float32"
-        # timestamps /= float(sampling_rate)  # TODO(beyond 0.3.0) As of OpenEphys 0.6, this line is no-longer necessary.
+        if _old_oe_version:
+            timestamps = timestamps / float(sampling_rate)
     else:  # If timestamps_path doesn't exist, deduce the stamps
         timestamps = np.array(range(0, length)) / sampling_rate
 

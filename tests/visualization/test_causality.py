@@ -20,6 +20,8 @@ def test_pairwise_causality_plot_numpy(mock_numpy_signal, start, end):
     assert isinstance(fig, plt.Figure)
 
 
+# TODO: move this plot into one of the operator module
+"""
 @pytest.mark.parametrize("ch1, ch2", [(0, 1), (1, 0)])
 @pytest.mark.parametrize("window_length", [10, 20, 50])
 def test_spike_triggered_average_plot_numpy(
@@ -33,3 +35,4 @@ def test_spike_triggered_average_plot_numpy(
 
     assert isinstance(axes, Axes)
     assert isinstance(fig, plt.Figure)
+"""

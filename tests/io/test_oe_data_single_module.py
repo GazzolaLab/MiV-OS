@@ -30,7 +30,10 @@ def test_data_module_data_check(create_mock_data_file):
         expected_sampling_rate,
     ) = create_mock_data_file
     data = Data(dirname)
-    for (signal, timestamps, sampling_rate) in data.load(1):
+    for Signal in data.load(1):
+        signal = Signal.data
+        timestamps = Signal.timestamps
+        sampling_rate = Signal.rate
         np.testing.assert_allclose(signal, expected_signal)
         np.testing.assert_allclose(timestamps, expected_timestamps)
         np.testing.assert_allclose(sampling_rate, expected_sampling_rate)

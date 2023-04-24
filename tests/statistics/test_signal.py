@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 
+from miv.core.datatype import Signal, Spikestamps
 from miv.statistics.signal_statistics import (
     signal_to_noise,
     spike_amplitude_to_background_noise,
@@ -27,32 +28,38 @@ def test_spike_amplitude_to_background_noise_arbitrary_signal_and_timestamps():
     sampling_rate = 1000
 
     # Test a single channel with no spikes
-    signal = np.array([[1, 2, 3, 4, 5]]).T
-    spikestamps = np.array([[]])
+    signal = Signal(
+        data=np.array([[1, 2, 3, 4, 5, 6, 7, 8]]).T,
+        timestamps=np.arange(8) / sampling_rate,
+        rate=sampling_rate,
+    )
+    spikestamps = Spikestamps([[]])
     expected = np.array([np.nan])
-    actual = spike_amplitude_to_background_noise(signal, spikestamps, sampling_rate)
+    actual = spike_amplitude_to_background_noise(signal, spikestamps)
     assert np.allclose(expected, actual, equal_nan=True)
 
     # Test a single channel with one spike
-    signal = np.array([[1, 2, 3, 4, 5]]).T
-    spikestamps = np.array([[2]]) / sampling_rate
-    expected = np.array([8])
-    actual = spike_amplitude_to_background_noise(signal, spikestamps, sampling_rate)
-    assert np.allclose(expected, actual)
+    spikestamps = Spikestamps([[2 / sampling_rate]])
+    expected = np.array([0.0])
+    actual = spike_amplitude_to_background_noise(signal, spikestamps)
+    np.testing.assert_allclose(expected, actual)
 
     # Test multiple channels with no spikes
-    signal = np.array([[1, 2, 3, 4, 5], [6, 7, 8, 9, 10]]).T
-    spikestamps = np.array([[], []])
+    signal = Signal(
+        data=np.array([[1, 2, 3, 4, 5, 6, 7, 8], [6, 7, 8, 9, 10, 11, 12, 13]]).T,
+        timestamps=np.arange(5),
+        rate=sampling_rate,
+    )
+    spikestamps = Spikestamps([[], []])
     expected = np.array([np.nan, np.nan])
-    actual = spike_amplitude_to_background_noise(signal, spikestamps, sampling_rate)
+    actual = spike_amplitude_to_background_noise(signal, spikestamps)
     assert np.allclose(expected, actual, equal_nan=True)
 
     # Test multiple channels with different spikes
-    signal = np.array([[1, 2, 3, 4, 5], [6, 7, 8, 9, 10]]).T
-    spikestamps = np.array([[2], [4]]) / sampling_rate
-    expected = np.array([8.0, 50.0])
-    actual = spike_amplitude_to_background_noise(signal, spikestamps, sampling_rate)
-    assert np.allclose(expected, actual)
+    spikestamps = Spikestamps([[2 / sampling_rate], [4 / sampling_rate]])
+    expected = np.array([0.04761905, 0.04761905])
+    actual = spike_amplitude_to_background_noise(signal, spikestamps)
+    np.testing.assert_allclose(expected, actual)
 
 
 def test_spike_amplitude_to_background_noise_assertion_error():
@@ -73,4 +80,4 @@ def test_spike_amplitude_to_background_noise_assertion_error():
     # Check that the assertion error is raised when the number of channels in the signal
     # does not match the number of channels in spikestamps
     with pytest.raises(AssertionError):
-        spike_amplitude_to_background_noise(signal, spikestamps_2, sampling_rate)
+        spike_amplitude_to_background_noise(signal, spikestamps_2)

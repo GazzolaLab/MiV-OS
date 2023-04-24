@@ -108,11 +108,14 @@ class Data(DataLoaderMixin):
     def __init__(
         self,
         data_path: str,
+        tag: str = "data",
     ):
-        super().__init__()
         self.data_path: str = data_path
+        super().__init__()
         self._analysis_path: str = os.path.join(data_path, "analysis")
         self.masking_channel_set: set[int] = set()
+
+        self.tag: str = f"{tag}"
 
         os.makedirs(self._analysis_path, exist_ok=True)
 
@@ -276,7 +279,10 @@ class Data(DataLoaderMixin):
         """
         Load TTL event data if data contains. Detail implementation is :func:`here <miv.io.binary.load_ttl_event>`.
         """
-        return load_ttl_event(self.data_path)
+        states, full_words, timestamps, sampling_rate, initial_state = load_ttl_event(
+            self.data_path
+        )
+        return Signal(data=states[:, None], timestamps=timestamps, rate=sampling_rate)
 
     def set_channel_mask(self, channel_id: Iterable[int]):
         """

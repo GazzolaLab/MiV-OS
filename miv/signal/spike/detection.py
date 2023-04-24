@@ -1,13 +1,9 @@
 __doc__ = """
 
-Spike Detection
-###############
-
 Code Example::
 
     detection = ThresholdCutoff(cutoff=3.5)
     spiketrains = detection(signal, timestamps, sampling_rate)
-
 
 .. currentmodule:: miv.signal.spike
 
@@ -17,12 +13,21 @@ Code Example::
 
    SpikeDetectionProtocol
    ThresholdCutoff
+   ExtractWaveforms
+   WaveformAverage
+   WaveformStatisticalFilter
 
 """
-__all__ = ["ThresholdCutoff"]
+__all__ = ["ThresholdCutoff", "query_firing_rate_between"]
 
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
+from typing import Any, Dict, Generator, Iterable, List, Optional, Tuple, Union
 
+import csv
+import functools
+import inspect
+import logging
+import multiprocessing
+import os
 import pathlib
 from dataclasses import dataclass
 
@@ -34,7 +39,9 @@ from tqdm import tqdm
 
 from miv.core.datatype import Signal, Spikestamps
 from miv.core.operator import OperatorMixin
-from miv.core.wrapper import wrap_generator_to_generator, wrap_output_generator_collapse
+from miv.core.policy import InternallyMultiprocessing
+from miv.core.wrapper import wrap_cacher
+from miv.statistics.spiketrain_statistics import firing_rates
 from miv.typing import SignalType, SpikestampsType, TimestampsType
 
 
@@ -51,8 +58,6 @@ class ThresholdCutoff(OperatorMixin):
             (default=0.002)
         cutoff : Union[float, np.ndarray]
             (default=5.0)
-        use_mad : bool
-            (default=False)
         tag : str
         units : Union[str, pq.UnitTime]
             (default='sec')
@@ -66,42 +71,63 @@ class ThresholdCutoff(OperatorMixin):
     dead_time: float = 0.003
     search_range: float = 0.002
     cutoff: float = 5.0
-    use_mad: bool = True
-    tag: str = "Threshold Cutoff Spike Detection"
+    tag: str = "spike detection"
     progress_bar: bool = False
-    units: Union[str, pq.UnitTime] = "sec"
+    units: str = "sec"
     return_neotype: bool = False  # TODO: Remove, shift to spikestamps datatype
 
-    @wrap_output_generator_collapse(Spikestamps)
-    @wrap_generator_to_generator
+    num_proc: int = 1
+
+    # @wrap_generator_to_generator
+    @wrap_cacher(cache_tag="spikestamps")
     def __call__(self, signal: SignalType) -> SpikestampsType:
         """Execute threshold-cutoff method and return spike stamps
 
         Parameters
         ----------
         signal : Signal
+        custom_spike_threshold : np.ndarray
+            If not None, use this value * cutoff as spike threshold.
 
         Returns
         -------
         spiketrain_list : List[SpikestampsType]
 
         """
+        if not inspect.isgenerator(
+            signal
+        ):  # TODO: Refactor in multiprocessing-enabling decorator
+            return self._detection(signal)
+        else:
+            collapsed_result = Spikestamps()
+            # with multiprocessing.Pool(self.num_proc) as pool:
+            #    #for result in pool.map(functools.partial(ThresholdCutoff._detection, self=self), signal):
+            #    inputs = list(signal)
+            #    print(inputs)
+            #    for result in pool.map(self._detection, inputs): # TODO: Something is not correct here. Check memory usage.
+            #        collapsed_result.extend(spiketrain)
+            for sig in signal:  # TODO: mp
+                collapsed_result.extend(self._detection(sig))
+            return collapsed_result
+
+    # @staticmethod
+    def _detection(self, signal: SignalType):
         # Spike detection for each channel
         spiketrain_list = []
         num_channels = signal.number_of_channels  # type: ignore
         timestamps = signal.timestamps
         rate = signal.rate
-        for channel in tqdm(range(num_channels), disable=not self.progress_bar):
+        for channel in tqdm(
+            range(num_channels), disable=not self.progress_bar, desc=self.tag
+        ):
             array = signal[channel]  # type: ignore
 
             # Spike Detection: get spikestamp
-            spike_threshold = self.compute_spike_threshold(
-                array, cutoff=self.cutoff, use_mad=self.use_mad
-            )
-            crossings = self.detect_threshold_crossings(
+            spike_threshold = self._compute_spike_threshold(array, cutoff=self.cutoff)
+            crossings = self._detect_threshold_crossings(
                 array, rate, spike_threshold, self.dead_time
             )
-            spikes = self.align_to_minimum(array, rate, crossings, self.search_range)
+            spikes = self._align_to_minimum(array, rate, crossings, self.search_range)
             spikestamp = spikes / rate + timestamps.min()
             # Convert spikestamp to neo.SpikeTrain (for plotting)
             if self.return_neotype:
@@ -114,19 +140,21 @@ class ThresholdCutoff(OperatorMixin):
                 spiketrain_list.append(spiketrain)
             else:
                 spiketrain_list.append(spikestamp.astype(np.float_))
-        return Spikestamps(spiketrain_list)
+        spikestamps = Spikestamps(spiketrain_list)
+        return spikestamps
 
     def __post_init__(self):
         super().__init__()
 
-    def compute_spike_threshold(
-        self, signal: SignalType, cutoff: float = 5.0, use_mad: bool = True
+    def _compute_spike_threshold(
+        self, signal: SignalType, cutoff: float = 5.0
     ) -> (
         float
     ):  # TODO: make this function compatible to array of cutoffs (for each channel)
         """
         Returns the threshold for the spike detection given an array of signal.
 
+        Denoho D. et al., `link <https://web.stanford.edu/dept/statistics/cgi-bin/donoho/wp-content/uploads/2018/08/denoiserelease3.pdf>`_.
         Spike sorting step by step, `step 2 <http://www.scholarpedia.org/article/Spike_sorting>`_.
 
         Parameters
@@ -135,17 +163,12 @@ class ThresholdCutoff(OperatorMixin):
             The signal as a 1-dimensional numpy array
         cutoff : float
             The spike-cutoff multiplier. (default=5.0)
-        use_mad : bool
-            Noise estimation method. If set to false, use standard deviation for estimation. (default=True)
         """
-        if use_mad:
-            noise_mid = np.median(np.absolute(signal)) / 0.6745
-        else:
-            noise_mid = np.std(signal)
+        noise_mid = np.median(np.absolute(signal)) / 0.6745
         spike_threshold = -cutoff * noise_mid
         return spike_threshold
 
-    def detect_threshold_crossings(
+    def _detect_threshold_crossings(
         self, signal: SignalType, fs: float, threshold: float, dead_time: float
     ):
         """
@@ -180,7 +203,7 @@ class ThresholdCutoff(OperatorMixin):
             )
         return threshold_crossings
 
-    def get_next_minimum(self, signal, index, max_samples_to_search):
+    def _get_next_minimum(self, signal, index, max_samples_to_search):
         """
         Returns the index of the next minimum in the signal after an index
 
@@ -192,7 +215,7 @@ class ThresholdCutoff(OperatorMixin):
         min_idx = np.argmin(signal[index:search_end_idx])
         return index + min_idx
 
-    def align_to_minimum(self, signal, fs, threshold_crossings, search_range):
+    def _align_to_minimum(self, signal, fs, threshold_crossings, search_range):
         """
         Returns the index of the next negative spike peak for all threshold crossings
 
@@ -203,7 +226,7 @@ class ThresholdCutoff(OperatorMixin):
         """
         search_end = int(search_range * fs)
         aligned_spikes = [
-            self.get_next_minimum(signal, t, search_end) for t in threshold_crossings
+            self._get_next_minimum(signal, t, search_end) for t in threshold_crossings
         ]
         return np.array(aligned_spikes)
 
@@ -212,15 +235,107 @@ class ThresholdCutoff(OperatorMixin):
         spikestamps,
         show: bool = False,
         save_path: Optional[pathlib.Path] = None,
-        ax: Optional[plt.Axes] = None,
     ) -> plt.Axes:
-        if ax is None:
-            fig, ax = plt.subplots()
-        ax.eventplot(spikestamps, color="k")
-        ax.set_xlabel("Time (s)")
-        ax.set_ylabel("Channel")
-        if save_path is not None:
-            plt.savefig(save_path)
+        """
+        Plot spike train in raster
+        """
+        t0 = spikestamps.get_first_spikestamp()
+        tf = spikestamps.get_last_spikestamp()
+
+        # TODO: REFACTOR. Make single plot, and change xlim
+        term = 60
+        n_terms = int(np.ceil((tf - t0) / term))
+        if n_terms == 0:
+            # TODO: Warning message
+            return None
+        for idx in range(n_terms):
+            spikes = spikestamps.get_view(
+                idx * term + t0, min((idx + 1) * term + t0, tf)
+            )
+            fig, ax = plt.subplots(figsize=(16, 6))
+            ax.eventplot(spikes)
+            ax.set_xlabel("Time (s)")
+            ax.set_ylabel("Channel")
+            if save_path is not None:
+                plt.savefig(os.path.join(save_path, f"spiketrain_raster_{idx:03d}.png"))
+            if not show:
+                plt.close("all")
         if show:
             plt.show()
+            plt.close("all")
         return ax
+
+    def plot_firing_rate_histogram(self, spikestamps, show=False, save_path=None):
+        """Plot firing rate histogram"""
+        threshold = 3
+
+        rates = firing_rates(spikestamps)["rates"]
+        hist, bins = np.histogram(rates, bins=20)
+        logbins = np.logspace(
+            np.log10(max(bins[0], 1e-3)), np.log10(bins[-1]), len(bins)
+        )
+        fig = plt.figure()
+        ax = plt.gca()
+        ax.hist(rates, bins=logbins)
+        ax.axvline(
+            np.mean(rates),
+            color="r",
+            linestyle="dashed",
+            linewidth=1,
+            label=f"Mean {np.mean(rates):.2f} Hz",
+        )
+        ax.axvline(
+            threshold,
+            color="g",
+            linestyle="dashed",
+            linewidth=1,
+            label="Quality Threshold",
+        )
+        ax.set_xscale("log")
+        xlim = ax.get_xlim()
+        ax.set_xlabel("Firing rate (Hz) (log-scale)")
+        ax.set_ylabel("Count")
+        ax.set_xlim([min(xlim[0], 1e-1), max(1e2, xlim[1])])
+        ax.legend()
+        if save_path is not None:
+            fig.savefig(os.path.join(f"{save_path}", "firing_rate_histogram.png"))
+            with open(
+                os.path.join(f"{save_path}", "firing_rate_histogram.csv"), "w"
+            ) as f:
+                writer = csv.writer(f)
+                writer.writerow(["channel", "firing_rate_hz"])
+                data = list(enumerate(rates))
+                data.sort(reverse=True, key=lambda x: x[1])
+                for ch, rate in data:
+                    writer.writerow([ch, rate])
+        if show:
+            plt.show()
+
+        return ax
+
+
+def query_firing_rate_between(
+    spikestamps: Spikestamps,
+    min_firing_rate: float,
+    max_firing_rate: float,
+) -> np.ndarray:
+    """
+    Mask channels with firing rates between min_firing_rate and max_firing_rate
+
+    Parameters
+    ----------
+    spikestamps : Spikestamps
+        Spikestamps
+    min_firing_rate : float
+        Minimum firing rate
+    max_firing_rate : float
+        Maximum firing rate
+
+    Returns
+    -------
+    Spikestamps
+        Mask of channels with firing rates between min_firing_rate and max_firing_rate
+    """
+    rates = np.array(firing_rates(spikestamps)["rates"])
+    masks = np.logical_and(rates >= min_firing_rate, rates <= max_firing_rate)
+    return np.where(masks)[0]

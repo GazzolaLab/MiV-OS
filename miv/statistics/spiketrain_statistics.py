@@ -1,17 +1,19 @@
 __all__ = [
     "firing_rates",
+    "MFRComparison",
     "interspike_intervals",
     "coefficient_variation",
-    "peri_stimulus_time",
-    "binned_spiketrain",
+    "binned_spiketrain",  # Deprecated: Remove in the future version ^0.3.0
     "fano_factor",
     "decay_spike_counts",
     "spike_counts_with_kernel",
 ]
 
-from typing import Any, Dict, Iterable, List, Optional, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Union
 
 import datetime
+import os
+from dataclasses import dataclass
 
 import elephant.statistics
 import matplotlib.pyplot as plt
@@ -21,16 +23,12 @@ import quantities as pq
 import scipy
 import scipy.signal
 
+from miv.core.datatype import Spikestamps
+from miv.core.operator import OperatorMixin
 from miv.typing import SpikestampsType
 
 
-# FIXME: For now, we provide the free function for simple usage. For more
-# advanced statistical analysis, we should have a module wrapper.
-def firing_rates(
-    spiketrains: Union[pq.Quantity, Iterable[neo.core.SpikeTrain]],
-    # t_start: Optional[float] = None,
-    # t_stop: Optional[float] = None,
-) -> Dict[str, Any]:
+def firing_rates(spiketrains: Spikestamps) -> Dict[str, Any]:
     """
     Process basic spiketrains statistics: rates, mean, variance.
 
@@ -44,13 +42,19 @@ def firing_rates(
 
     """
     rates = []
-    for spikestamp in spiketrains:
+    if sum(spiketrains.get_count()) == 0:
+        return {
+            "rates": [0.0 for _ in range(spiketrains.number_of_channels)],
+            "mean": 0.0,
+            "variance": 0.0,
+        }
+    for spikestamp in spiketrains.neo():
         if len(spikestamp) == 0:
             rates.append(0)
             continue
         mfr = elephant.statistics.mean_firing_rate(spikestamp)
         if isinstance(mfr, pq.quantity.Quantity):
-            mfr = mfr.magnitude
+            mfr = mfr.magnitude[()]
         rates.append(mfr)
 
     rates_mean_over_channel = np.mean(rates)
@@ -60,6 +64,67 @@ def firing_rates(
         "mean": rates_mean_over_channel,
         "variance": rates_variance_over_channel,
     }
+
+
+@dataclass
+class MFRComparison(OperatorMixin):
+    recording_duration: float = None
+    tag: str = "Mean Firing Rate Comparison"
+    channels: List[int] = None
+
+    def __call__(self, pre_spiketrains: Spikestamps, post_spiketrains: Spikestamps):
+        assert (
+            pre_spiketrains.number_of_channels == post_spiketrains.number_of_channels
+        ), f"Number of channels does not match: {pre_spiketrains.number_of_channels} vs {post_spiketrains.number_of_channels}"
+        pre_rates = firing_rates(pre_spiketrains)["rates"]
+        post_rates = firing_rates(post_spiketrains)["rates"]
+        if self.recording_duration is None:
+            self.recording_duration = max(
+                pre_spiketrains.get_last_spikestamp(),
+                post_spiketrains.get_last_spikestamp(),
+            ) - min(
+                pre_spiketrains.get_first_spikestamp(),
+                post_spiketrains.get_first_spikestamp(),
+            )
+        return pre_rates, post_rates
+
+    def __post_init__(self):
+        super().__init__()
+
+    def plot_mfr_comparison(self, output, show=False, save_path=None):
+        MFR_pre, MFR_post = output
+
+        if self.channels is not None:
+            MFR_pre = MFR_pre[self.channels]
+            MFR_post = MFR_post[self.channels]
+
+        MFR = np.geomspace(1e-1, 1e2)
+        kl = 7
+        ku = 7
+        sigma = (
+            np.sqrt(np.mean([MFR_pre, MFR_post]) * self.recording_duration)
+            / self.recording_duration
+        )
+
+        fig = plt.figure()
+        plt.plot(MFR, MFR, "b--")
+        plt.plot(MFR, MFR - kl * sigma, "b")
+        plt.plot(MFR, MFR + ku * sigma, "b")
+        plt.scatter(MFR_pre, MFR_post)
+        ax = plt.gca()
+        ax.set_yscale("log")
+        ax.set_xscale("log")
+        ax.set_xlim([1e-1, 1e2])
+        ax.set_ylim([1e-1, 1e2])
+        ax.set_xlabel("MFR pre")
+        ax.set_ylabel("MFR post")
+
+        if show:
+            plt.show()
+        if save_path is not None:
+            fig.savefig(os.path.join(f"{save_path}", "mfr.png"))
+
+        return ax
 
 
 def interspike_intervals(spikes: SpikestampsType):
@@ -117,96 +182,11 @@ def coefficient_variation(self, spikes: SpikestampsType):
     return np.std(interspike) / np.mean(interspike)
 
 
-def peri_stimulus_time(spike_list: List[SpikestampsType]):
-    """
-    Compute the peri-stimulus time of the given spike train.
-
-    Examples
-    --------
-
-    How to draw Peri-stimulus time histogram (ISIH):
-
-        >>> from miv.statistics import peri_stimulus_time
-        >>> import matplotlib.pyplot as plt
-        >>> pst = peri_stimulus_time(spikestamp)
-        >>> plt.hist(pst)
-
-    If one wants to get the bin-count, you can use `numpy.digitize` and `numpy.bincount`:
-
-        >>> import numpy as np
-        >>> max_time = spikestamps.max()
-        >>> num_bins = 20
-        >>> time_interval = np.linspace(0, max_time, num_bins)
-        >>> digitized = np.digitize(pst, time_interval)
-        >>> bin_counts = np.bincount(digitized)
-
-    Parameters
-    ----------
-    spikes : SpikestampsType
-        Single spike-stamps
-
-    Returns
-    -------
-        interval: numpy.ndarray
-
-    """
-
-    peri_stimulus_times = np.sum(np.array(spike_list), 0)
-    return peri_stimulus_times
-
-
-def binned_spiketrain(
-    spiketrain: SpikestampsType,
-    t_start: float,
-    t_end: float,
-    bin_size: float,
-    return_count: bool = False,
-):
-    """
-    Forms a binned spiketrain using the spiketrain
-
-    Parameters
-    ----------
-    spiketrain : SpikestampsType
-        Single spike-stamp
-    t_start : float
-        Binning start time
-    t_end : float
-        Binning end time
-    bin_size : float
-        bin size in seconds
-    return_count : bool
-        If set to true, return the bin count. (default=False)
-
-    Returns
-    -------
-        bin_spike: numpy.ndarray
-        binned spiketrain with 1 corresponding to spike and zero otherwise
-
-    """
-    assert t_start < t_end, "End time cannot be smaller or equal to start time"
-    assert bin_size > 0, "bin size should be greater than 0"
-    n_bins = int(np.ceil((t_end - t_start) / bin_size))
-    time = t_start + (np.arange(n_bins + 1) * bin_size)
-    if isinstance(spiketrain, neo.core.SpikeTrain):
-        bins = np.digitize(spiketrain.magnitude, time)
-    else:
-        bins = np.digitize(spiketrain, time)
-    bincount = np.bincount(bins, minlength=n_bins + 2)[1:-1]
-    if return_count:
-        bin_spike = bincount
-    else:
-        bin_spike = (bincount != 0).astype(np.int_)
-
-    return bin_spike
-
-
 def fano_factor(
     spiketrains: SpikestampsType,
-    channel: float,  # TODO: the function should be independent of channel.
-    t_start: float,
-    t_end: float,
-    n_bins: float,
+    bin_size: float = 0.002,
+    t_start: Optional[float] = None,
+    t_end: Optional[float] = None,
 ):
     """
     Calculates the Fano factor for given signal by dividing it into the specified number of bins
@@ -215,14 +195,12 @@ def fano_factor(
     ----------
     spiketrains : SpikestampsType
         Single spike-stamps
-    channel : float
-        electrode/channel
+    bin_size : int
+        Size of the bin in second. Default is 2ms
     t_start : float
         Binning start time
     t_end : float
         Binning end time
-    n_bins : float
-        Number of bins
 
     Returns
     -------
@@ -230,22 +208,16 @@ def fano_factor(
         fanofactor for the specified channel and conditions
 
     """
-    assert (
-        t_start < t_end
-    ), f"End time {t_end} cannot be smaller or equal to start time {t_start}."
-    assert n_bins > 0, "Number of bins should be a positive integer"
-    bin_spike = binned_spiketrain(spiketrains[channel], t_start, t_end, 0.002)
-    assert np.sum(bin_spike) != 0, "The channel has no spikes"
-    large_bin = []
-    bin_length = np.int32(np.size(bin_spike) / n_bins)
-    count = 0
-    for i in np.arange(n_bins):
-        large_bin.append(np.sum(bin_spike[count : count + bin_length]))
-        count += bin_length
-    bin_array = np.array(large_bin)
-    fano_fac = np.var(bin_array) / np.mean(bin_array)
-
-    return fano_fac
+    bin_spike = spiketrains.binning(
+        bin_size=bin_size, t_start=t_start, t_end=t_end, return_count=True
+    )
+    fano_factor = np.zeros(bin_spike.number_of_channels, dtype=np.float_)
+    for channel in range(bin_spike.number_of_channels):
+        array = bin_spike[channel]
+        if np.sum(array) == 0:
+            fano_factor[channel] = np.nan
+        fano_factor[channel] = np.var(array) / np.mean(array)
+    return fano_factor
 
 
 def decay_spike_counts(
@@ -259,7 +231,7 @@ def decay_spike_counts(
     Parameters
     ----------
     spiketrain :
-        spiketrain
+        Single-channel spiketrain
     probe_times :
         probe_times
     amplitude :
@@ -289,9 +261,10 @@ def decay_spike_counts(
     return result
 
 
-def spike_counts_with_kernel(spiketrain, probe_times, kernel, batchsize=32):
+def spike_counts_with_kernel(spiketrain, probe_times, kernel: Callable, batchsize=32):
     if len(spiketrain) == 0:
         return np.zeros_like(probe_times)
+    spiketrain = np.asarray(spiketrain)
 
     batchsize = min(spiketrain.shape[0], batchsize)
     num_sections = spiketrain.shape[0] // batchsize + (
@@ -310,3 +283,7 @@ def spike_counts_with_kernel(spiketrain, probe_times, kernel, batchsize=32):
         decay_count[mask] = 0
         result += decay_count.sum(axis=0)
     return result
+
+
+def binned_spiketrain(self):
+    raise DeprecationWarning("Use `timestamps.binning` instead.")

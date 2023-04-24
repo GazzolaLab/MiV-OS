@@ -1,7 +1,17 @@
-***********************************************
+*****************************************
 Signal Pre-Processing (:mod:`miv.signal`)
-***********************************************
+*****************************************
 
-.. automodule:: miv.signal.filter.filter_collection
+Signal Filter
+#############
 
-.. automodule:: miv.signal.spike.detection
+.. currentmodule:: miv.signal.filter
+
+.. autosummary::
+   :nosignatures:
+   :toctree: _toctree/FilterAPI
+
+   FilterProtocol
+   ButterBandpass
+   MedianFilter
+   Notch

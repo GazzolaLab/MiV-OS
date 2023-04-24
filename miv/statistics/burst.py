@@ -1,3 +1,5 @@
+__all__ = ["burst"]
+
 import os
 
 import matplotlib.pyplot as plt
@@ -7,20 +9,20 @@ from miv.statistics.spiketrain_statistics import interspike_intervals
 from miv.typing import SpikestampsType
 
 
-def burst(spiketrains: SpikestampsType, channel: float, min_isi: float, min_len: float):
+def burst(spiketrains: SpikestampsType, channel: int, min_isi: float, min_len: int):
     """
-    Calculates parameters critical to characterize bursting phenomenon on a single channel
-    Bursting is defined as the occurence of a specified number of spikes (usually >10), with a small interspike interval (usually < 100ms) [1]_, [2]_
+    Calculates parameters critical to characterize bursting phenomenon on a single channel. [1]_
+    Bursting is defined as the occurence of a specified number of spikes (usually >10), with a small interspike interval (usually < 100ms) [2]_, [3]_
 
     Parameters
     ----------
     spikes : SpikestampsType
        Single spike-stamps
-    Channel : float
+    channel : int
        Channel to analyze
     min_isi : float
        Minimum Interspike Interval (in seconds) to be considered as bursting [standard = 0.1]
-    min_len : float
+    min_len : int
        Minimum number of simultaneous spikes to be considered as bursting [standard = 10]
 
     Returns
@@ -34,9 +36,10 @@ def burst(spiketrains: SpikestampsType, channel: float, min_isi: float, min_len:
     burst_rate: float
        firing rates corresponding to particular bursts
 
-    .. [1] Chiappalone, Michela, et al. "Burst detection algorithms for the analysis of spatio-temporal patterns
+    .. [1] Beggs, John M., and Mark A. Plenz. "Neuronal bursting in cortical circuits." Journal of Neuroscience 23 (2003): 11167-11177.
+    .. [2] Chiappalone, Michela, et al. "Burst detection algorithms for the analysis of spatio-temporal patterns
     in cortical networks of neurons." Neurocomputing 65 (2005): 653-662.
-    .. [2] Eisenman, Lawrence N., et al. "Quantification of bursting and synchrony in cultured
+    .. [3] Eisenman, Lawrence N., et al. "Quantification of bursting and synchrony in cultured
     hippocampal neurons." Journal of neurophysiology 114.2 (2015): 1059-1071.
     """
 

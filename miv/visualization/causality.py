@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from viziphant.spike_train_correlation import plot_corrcoef
 
+from miv.core.datatype import Signal, Spikestamps
 from miv.statistics import pairwise_causality
 from miv.statistics.spiketrain_statistics import binned_spiketrain
 from miv.typing import SignalType, SpikestampsType
@@ -68,9 +69,9 @@ def pairwise_causality_plot(signal: SignalType, start: int, end: int):
 
 
 def spike_triggered_average_plot(
-    signal: SignalType,
+    signal: Signal,
     channel_x: int,
-    spiketrains: SpikestampsType,
+    spiketrains: Spikestamps,
     channel_y: int,
     sampling_freq: float,
     window_length: int,
@@ -107,12 +108,12 @@ def spike_triggered_average_plot(
 
     # Spike Triggered Average
     dt = 1.0 / sampling_freq
-    n = np.shape(signal[:, channel_x])[0] / sampling_freq
+    n = np.shape(signal.data[:, channel_x])[0] / sampling_freq
     assert (
-        window_length < np.shape(signal[:, channel_x])[0] / 2
+        window_length < np.shape(signal.data[:, channel_x])[0] / 2
     ), "Window cannot be longer than signal length"
-    spike = binned_spiketrain(spiketrains[channel_x], 0, n, dt)
-    lfp = signal[:, channel_x]
+    spike = spiketrains[channel_x].get_view(0, n).binning(dt)
+    lfp = signal.data[:, channel_x]
     spike_times = np.where(spike == 1)[0]
     spike_len = np.shape(spike_times)[0]
     sta = np.zeros([2 * window_length + 1])

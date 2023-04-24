@@ -3,17 +3,29 @@ API Documentation
 
 .. toctree::
    :maxdepth: 2
-   :caption: API
+   :caption: Functionalities
 
-   io
-   core
    signal
+   detection
    sorting
    statistics
    causality
    visualization
    signal_generator
+
+.. toctree::
+   :maxdepth: 2
+   :caption: I/O
+
+   io
    coding
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Core
+
+   core
+
 
 Indices and tables
 ==================

@@ -5,9 +5,13 @@ jupytext:
     format_name: myst
     format_version: 0.13
     jupytext_version: 1.13.8
-file_format: mystnb
 kernelspec:
+  display_name: Python 3 (ipykernel)
+  language: python
   name: python3
+file_format: mystnb
+mystnb:
+  execution_mode: 'off'
 ---
 
 # Automatic Channel Masking

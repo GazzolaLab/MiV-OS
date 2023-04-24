@@ -13,6 +13,7 @@ Tutorial
    :caption: Good Exercises
 
    signal_processing
+   custom_callbacks
    spike_cutout
    spike_sorting
 

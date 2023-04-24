@@ -1,13 +1,27 @@
+from __future__ import annotations
+
 __doc__ = """"""
 __all__ = ["_Chainable", "BaseChainingMixin"]
 
 from typing import TypeVar  # TODO: For python 3.11, we can use typing.Self
-from typing import Callable, Iterator, List, Optional, Protocol, Set, Union
+from typing import (
+    TYPE_CHECKING,
+    Callable,
+    Iterator,
+    List,
+    Optional,
+    Protocol,
+    Set,
+    Union,
+)
 
 import functools
 import itertools
 
-from miv.core.datatype import DataTypes
+import matplotlib.pyplot as plt
+
+if TYPE_CHECKING:
+    from miv.core.datatype import DataTypes
 
 SelfChain = TypeVar("SelfChain", bound="_Chainable")
 
@@ -19,6 +33,14 @@ class _Chainable(Protocol):
             - Forward direction defines execution order
             - Backward direction defines dependency order
     """
+
+    @property
+    def tag(self) -> str:
+        ...
+
+    @property
+    def output(self) -> list[DataTypes]:
+        ...
 
     def __rshift__(self, right: SelfChain) -> SelfChain:
         ...
@@ -40,14 +62,16 @@ class _Chainable(Protocol):
 class BaseChainingMixin:
     """
     Base mixin to create chaining structure between objects.
+
+    Need further implementation of: output, tag
     """
 
-    def __init__(self):
-        super().__init__()
-        self._downstream_list: List[_Chainable] = []
-        self._upstream_list: List[_Chainable] = []
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._downstream_list: list[_Chainable] = []
+        self._upstream_list: list[_Chainable] = []
 
-        self._output: Optional[DataTypes] = None
+        self._output: DataTypes | None = None
 
     def __rshift__(self, right: _Chainable) -> _Chainable:
         self._downstream_list.append(right)
@@ -55,6 +79,7 @@ class BaseChainingMixin:
         return right
 
     def clear_connections(self) -> None:
+        """Clear all the connections to other nodes, and remove dependencies."""
         for node in self.iterate_downstream():
             node._upstream_list.remove(self)
         for node in self.iterate_upstream():
@@ -79,6 +104,39 @@ class BaseChainingMixin:
             order.append((depth, current))
         return self._text_visualize_hierarchy(order)
 
+    def visualize(self, show: bool = False, seed: int = 200) -> None:
+        import networkx as nx
+
+        G = nx.DiGraph()
+
+        # BFS
+        visited = []
+        next_list = [self]
+        while next_list:
+            v = next_list.pop()
+            visited.append(v)
+            for node in itertools.chain(v.iterate_downstream()):
+                G.add_edge(v.tag, node.tag)
+                if node in visited or node in next_list:
+                    continue
+                visited.append(node)
+                next_list.append(node)
+
+        # Draw the graph
+        # TODO: Balance layout
+        # TODO: On edge, label the argument order
+        pos = nx.spring_layout(G, seed=seed)
+        nx.draw_networkx_nodes(G, pos, node_size=500, alpha=0.8)
+        nx.draw_networkx_edges(G, pos, width=2, arrows=True)
+        nx.draw_networkx_labels(G, pos, font_size=12, font_family="sans-serif")
+
+        # Display the graph
+        plt.margins(x=0.4)
+        plt.axis("off")
+        if show:
+            plt.show()
+        return G
+
     def _text_visualize_hierarchy(self, string_list, prefix="|__ "):
         output = []
         for i, item in enumerate(string_list):
@@ -89,101 +147,57 @@ class BaseChainingMixin:
                 output.append(str(label))
         return "\n".join(output)
 
-    def _get_full_topology(self) -> List[SelfChain]:
-        """Get all the operators and data loaders in the topology."""
-        visited = []
-        next_list = [self]
-        while next_list:
-            v = next_list.pop()
-            visited.append(v)
-            for node in itertools.chain(v.iterate_downstream(), v.iterate_upstream()):
-                if node in visited or node in next_list:
+    def _get_upstream_topology(self, lst: list[SelfChain] = None) -> list[SelfChain]:
+        if lst is None:
+            lst = []
+        if (
+            hasattr(self, "cacher")
+            and self.cacher is not None
+            and self.cacher.cache_dir is not None
+            and self.cacher.check_cached()
+        ):
+            pass
+        else:
+            for node in self.iterate_upstream():
+                if node in lst:
                     continue
-                visited.append(node)
-                next_list.append(node)
-        return visited
+                node._get_upstream_topology(lst)
+        lst.append(self)
+        return lst
 
     def topological_sort(self):
-        """Topological sort of the topology."""
-        # TODO: Find loop detection
-        # Mark all the vertices as not visited
-        all_nodes = self._get_full_topology()
-        n_nodes = len(all_nodes)
-        visited = [False] * n_nodes
-        visited = []
+        """
+        Topological sort of the graph.
+        Raise RuntimeError if there is a loop in the graph.
+        """
+        # TODO: Make it free function
+        upstream = self._get_upstream_topology()
 
-        stack = []
+        # pos = dict()  # FIXME: Operators are not hashable
+        key = []
+        pos = []
+        ind = 0
+        tsort = []
 
-        # Call the helper function to store Topological
-        # Sort starting from all vertices one by one
-        for v, seed_node in enumerate(all_nodes):
-            if seed_node in visited:
-                continue
-            # working stack contains key and the corresponding current generator
-            working_stack = [seed_node]
-            while working_stack:
-                # get last element from stack
-                node = working_stack.pop()
-                visited.append(node)
+        while len(upstream) > 0:
+            key.append(upstream[-1])
+            pos.append(ind)
+            # pos[upstream[-1]] = ind
+            tsort.append(upstream[-1])
+            ind += 1
+            upstream.pop()
+        for source in tsort:
+            for up in source.iterate_upstream():
+                if up not in key:
+                    continue
+                before = pos[key.index(source)]
+                after = pos[key.index(up)]
 
-                # run through neighbor generator until it's empty
-                for next_node in node.iterate_downstream():
-                    if next_node in visited:
-                        continue
-                    # remember current work
-                    working_stack.append(node)  # TODO: Somebody check this line
-                    # restart with new neighbor
-                    working_stack.append(next_node)
-                    break
-                else:
-                    # no already-visited neighbor (or no more of them)
-                    stack.append(node)
+                # If parent vertex does not appear first
+                if before > after:
+                    raise RuntimeError(
+                        f"Found loop in operation stream: node {source} is already in the upstream : {up}."
+                    )
 
-        # Print contents of the stack in reverse
-        stack.reverse()
-        return stack
-
-
-def test_topological_sort():
-    class V(BaseChainingMixin):
-        def __init__(self, name):
-            super().__init__()
-            self.name = name
-
-        def __repr__(self):
-            return str(self.name)
-
-    a = V(1)
-    b = V(2)
-    c = V(3)
-    d = V(4)
-    e = V(5)
-
-    a >> b >> c >> d >> e
-    print(a.summarize())
-    print(b.summarize())
-    print(a.topological_sort())
-    print(b.topological_sort())
-
-    a.clear_connections()
-    print(a.summarize())
-    print(b.summarize())
-    print(a.topological_sort())
-    print(b.topological_sort())
-
-    a.clear_connections()
-    b.clear_connections()
-    c.clear_connections()
-    d.clear_connections()
-    e.clear_connections()
-
-    a >> e
-    b >> c >> d >> e
-    print(a.summarize())
-    print(b.summarize())
-    print(a.topological_sort())
-    print(b.topological_sort())
-
-
-if __name__ == "__main__":
-    test_topological_sort()
+        tsort.reverse()
+        return tsort

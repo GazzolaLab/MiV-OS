@@ -2,8 +2,8 @@ __all__ = ["signal_to_noise", "spike_amplitude_to_background_noise"]
 
 import numpy as np
 
+from miv.signal.spike.waveform import ExtractWaveforms
 from miv.typing import SignalType, SpikestampsType
-from miv.visualization.waveform import extract_waveforms
 
 
 def signal_to_noise(signal: SignalType, axis: int = 0, ddof: int = 0):
@@ -24,7 +24,7 @@ def signal_to_noise(signal: SignalType, axis: int = 0, ddof: int = 0):
 
 
 def spike_amplitude_to_background_noise(
-    signal: SignalType, spikestamps: SpikestampsType, sampling_rate: float
+    signal: SignalType, spikestamps: SpikestampsType
 ):
     """
     Calculate the signal-to-noise ratio (SNR) for a given signal and spikestamps.
@@ -39,8 +39,6 @@ def spike_amplitude_to_background_noise(
         The signal as a 2-dimensional numpy array (length, num_channel)
     spikestamps: SpikestampsType,
         The sample index of all spikes as a 1-dim numpy array
-    sampling_rate : float
-        The sampling frequency in Hz
 
     Returns
     -------
@@ -50,18 +48,20 @@ def spike_amplitude_to_background_noise(
         spikestamps
     ), f"The number of channel for given signal {signal.shape[1]} is not equal to the number of channels in spikestamps {len(spikestamps)}."
 
-    num_channels = signal.shape[1]
+    extract_waveforms = ExtractWaveforms(plot_n_spikes=None)
+    cutouts = extract_waveforms(signal, spikestamps)
+
+    num_channels = signal.number_of_channels
     snr = np.empty(num_channels)
     for channel in range(num_channels):
         # Compute mean spike amplitude
         if len(spikestamps[channel]) == 0:
             snr[channel] = np.nan
             continue
-        cutouts = extract_waveforms(signal, spikestamps, channel, sampling_rate)
         mean_spike_amplitude = np.mean([np.max(np.abs(cutout)) for cutout in cutouts])
 
         # Compute background noise
-        background_noise_amplitude = signal[:, channel].std()
+        background_noise_amplitude = signal.data[:, channel].std()
 
         snr[channel] = (mean_spike_amplitude / background_noise_amplitude) ** 2
     return snr

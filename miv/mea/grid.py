@@ -5,10 +5,10 @@ from typing import Tuple
 import matplotlib
 import numpy as np
 
-from miv.mea.protocol import MEAGeometryProtocol
+from miv.mea.base import MEAMixin
 
 
-class GridMEA:
+class GridMEA(MEAMixin):
     """
     A class representing a grid-based multi-electrode array (MEA).
 
@@ -17,46 +17,58 @@ class GridMEA:
     For example, you could create an instance of the GridMEA class like this:
     literal blocks::
 
-        nrow = 10
-        ncol = 20
-        xid = np.arange(nrow * ncol) % ncol
-        yid = np.arange(nrow * ncol) // ncol
-        mea = GridMEA(nrow, ncol, xid, yid)
-
-    Attributes
-    ----------
-    nrow: int
-        The number of rows in the grid.
-    ncol: int
-        The number of columns in the grid.
-    xid: np.ndarray
-        A NumPy array containing the x-coordinates of the electrodes in the grid.
-    yid: np.ndarray
-        A NumPy array containing the y-coordinates of the electrodes in the grid.
+        grid = np.arrange(9).reshape(3, 3)
+        mea = GridMEA(grid)
     """
 
-    def __init__(self, nrow: int, ncol: int, xid: np.ndarray, yid: np.ndarray):
-        self.nrow = nrow
-        self.ncol = ncol
-        self.xid = xid
-        self.yid = yid
+    def __init__(
+        self,
+        grid: np.ndarray,
+        spacing: Tuple[float, float] = (200, 200),
+        *args,
+        **kwargs,
+    ):
+        super().__init__(*args, **kwargs)
+        assert grid.ndim == 2, "The grid must be 2-D."
+        assert spacing[0] > 0 and spacing[1] > 0, "The spacing must be positive."
+        self.grid = grid
+        self.spacing = spacing
 
-    def get_closest_node(self, x: float, y: float) -> int:  # pragma: no cover
-        """Given xy coordinate, return closest node idx"""
-        raise NotImplementedError
+        self.nrow, self.ncol = grid.shape
 
-    def get_xy(self, idx: int) -> Tuple[float, float]:  # pragma: no cover
-        """Given node index, return xy coordinate"""
-        raise NotImplementedError
+    def to_json(self) -> dict:
+        """Return a JSON-serializable dictionary"""
+        return {
+            "grid": self.grid.tolist(),
+            "spacing": self.spacing,
+        }
 
-    def view(self) -> matplotlib.pyplot.Figure:  # pragma: no cover
-        """Simplified view of MEA orientation"""
-        raise NotImplementedError
+    def map_data(
+        self, vector: np.ndarray, missing_value: float = 0.0
+    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Map data (1-D array) to MEA (2-D array or N-D array)"""
+        value_grid = np.full_like(self.grid, missing_value)
+        for idx, value in enumerate(vector):
+            if idx not in self.grid:
+                continue
+            value_grid[self.grid == idx] = value
+        X = np.arange(self.ncol) * self.spacing[0]
+        Y = np.arange(self.nrow) * self.spacing[1]
+        Xn, Yn = np.meshgrid(X, Y)
+        return Xn, Yn, value_grid
 
-    def save(self, path: str) -> None:  # pragma: no cover
-        """Export MEA information"""
-        raise NotImplementedError
+    def get_ixiy(self, idx: int):
+        """Given node index, return x y coordinate index"""
+        if idx not in self.grid:
+            return None
+        ys, xs = np.where(self.grid == idx)
+        assert len(xs) == 1 and len(ys) == 1, "The index is not unique."
+        return ys[0], xs[0]
 
-    def load(self, path: str) -> None:  # pragma: no cover
-        """Import MEA from external source"""
-        raise NotImplementedError
+    @property
+    def coordinates(self):
+        """Return the coordinates of the electrodes"""
+        X = np.arange(self.ncol) * self.spacing[0]
+        Y = np.arange(self.nrow) * self.spacing[1]
+        Xn, Yn = np.meshgrid(X, Y)
+        return np.vstack([Xn.ravel(), Yn.ravel()]).T
