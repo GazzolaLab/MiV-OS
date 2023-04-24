@@ -15,6 +15,7 @@ Code Example::
    ThresholdCutoff
    ExtractWaveforms
    WaveformAverage
+   WaveformStatisticalFilter
 
 """
 __all__ = ["ThresholdCutoff", "query_firing_rate_between"]
