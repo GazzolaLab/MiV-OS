@@ -43,6 +43,7 @@ from miv.core.policy import InternallyMultiprocessing
 from miv.core.wrapper import wrap_cacher
 from miv.statistics.spiketrain_statistics import firing_rates
 from miv.typing import SignalType, SpikestampsType, TimestampsType
+from miv.visualization.event import plot_spiketrain_raster
 
 
 @dataclass
@@ -249,13 +250,9 @@ class ThresholdCutoff(OperatorMixin):
             # TODO: Warning message
             return None
         for idx in range(n_terms):
-            spikes = spikestamps.get_view(
-                idx * term + t0, min((idx + 1) * term + t0, tf)
+            fig, ax = plot_spiketrain_raster(
+                spikestamps, idx * term + t0, min((idx + 1) * term + t0, tf)
             )
-            fig, ax = plt.subplots(figsize=(16, 6))
-            ax.eventplot(spikes)
-            ax.set_xlabel("Time (s)")
-            ax.set_ylabel("Channel")
             if save_path is not None:
                 plt.savefig(os.path.join(save_path, f"spiketrain_raster_{idx:03d}.png"))
             if not show:
