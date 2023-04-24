@@ -168,7 +168,7 @@ class PCAClustering(OperatorMixin):
 
     n_clusters: int = 3
     n_pca_components: int = 2
-    tag = "pca clustering"
+    tag: str = "pca clustering"
 
     plot_n_spikes: int = 100
 
