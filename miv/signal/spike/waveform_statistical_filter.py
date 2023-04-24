@@ -48,7 +48,7 @@ class WaveformStatisticalFilter(OperatorMixin):
     """
 
     max_mean: float = 1.0
-    max_std: float = 3.0
+    max_std: float = 10.0
 
     tag: str = "waveform statistical filter"
 
