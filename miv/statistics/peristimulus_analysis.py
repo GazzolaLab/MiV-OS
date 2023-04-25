@@ -67,7 +67,7 @@ class PeristimulusActivity(OperatorMixin):
     interval: float = 0.4  # seconds
     tag: str = "peri-stimulus activity plot"
 
-    stimulus_length = 0.010  # seconds. Skips for removing stimulus artifact
+    stimulus_length: float = 0.010  # seconds. Skips for removing stimulus artifact
 
     def __post_init__(self):
         super().__init__()
@@ -76,7 +76,7 @@ class PeristimulusActivity(OperatorMixin):
         else:
             self.mea_map = mea_map["64_intanRHD"]
 
-    # @wrap_cacher("psth")
+    @wrap_cacher("peristimulus activity")
     def __call__(self, events: Spikestamps, spikestamps: Spikestamps):
         # TODO: Change events datatype to be Event, not Spikestamps
         activity = [Spikestamps() for _ in range(spikestamps.number_of_channels)]
@@ -144,7 +144,7 @@ class PSTH(OperatorMixin):
         else:
             self.mea_map = mea_map["64_intanRHD"]
 
-    # @wrap_cacher("psth")
+    @wrap_cacher("psth")
     def __call__(self, events: Spikestamps, spikestamps: Spikestamps):
         # TODO: Change events datatype to be Event, not Spikestamps
         n_time = int(np.ceil(self.interval / self.binsize))

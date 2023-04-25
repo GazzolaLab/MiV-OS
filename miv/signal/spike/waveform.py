@@ -26,6 +26,7 @@ from miv.core.operator import OperatorMixin
 from miv.core.wrapper import wrap_generator_to_generator
 from miv.mea import MEAGeometryProtocol
 from miv.typing import SignalType, SpikestampsType
+from miv.core.wrapper import wrap_cacher
 
 
 @dataclass
@@ -56,6 +57,7 @@ class ExtractWaveforms(OperatorMixin):
     def __post_init__(self):
         super().__init__()
 
+    @wrap_cacher("waveform")
     def __call__(
         self, signal: Generator[Signal, None, None], spikestamps: Spikestamps
     ) -> Dict[int, Signal]:
