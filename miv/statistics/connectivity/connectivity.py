@@ -14,6 +14,7 @@ import multiprocessing as mp
 import os
 import pathlib
 import pickle as pkl
+import csv
 from dataclasses import dataclass
 
 import matplotlib
@@ -251,12 +252,21 @@ class DirectedConnectivity(OperatorMixin):
     def plot_transfer_entropy_histogram(self, result, save_path=None, show=False):
         connectivity_metric_matrix = result["connectivity_matrix"]
 
+        # Export values in csv
+        with open(os.path.join(save_path, "te_values.csv"), mode="w") as f:
+            writer = csv.writer(f)
+            writer.writerow(["source", "target", "metrics"])
+
+            for i, row in enumerate(connectivity_metric_matrix):
+                for j, value in enumerate(row):
+                    writer.writerow([i, j, value])
+
+        # Plot values in heatmap
         fig, ax = plt.subplots(figsize=(12, 12))
         ax.hist(connectivity_metric_matrix, bins=30)
         ax.set_xlabel("transfer entropy")
         ax.set_ylabel("count")
         ax.set_title("Transfer Entropy Histogram")
-        ax.set_xlim([-0.1, 1.1])
 
         if save_path is not None:
             plt.savefig(os.path.join(save_path, "te_histogram.png"))
@@ -285,6 +295,7 @@ class DirectedConnectivity(OperatorMixin):
             Show plot, by default False
 
         """
+        return
         if show:
             logging.warning(
                 "show is not supported for node-wise connectivity plot. Plots will be saved only, if save_path is specified."
