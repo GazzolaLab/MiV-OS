@@ -188,10 +188,6 @@ class PSTH(OperatorMixin):
         for i in range(nrow):
             axes[i, 0].set_ylabel("mean (channels) spike rate per bin")
 
-        # Legend
-        for i, j in itertools.product(range(nrow), range(ncol)):
-            axes[i, j].legend()
-
         plt.suptitle("PSTH: stimulating electrode")
 
         if show:
@@ -254,7 +250,7 @@ class PSTHOverlay(OperatorMixin):
 
         # Legend
         for i, j in itertools.product(range(nrow), range(ncol)):
-            axes[i, j].legend()
+            axes[i, j].legend(loc="best")
 
         plt.suptitle("PSTH: stimulating electrode")
 

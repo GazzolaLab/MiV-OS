@@ -57,11 +57,11 @@ class GridMEA(MEAMixin):
         Xn, Yn = np.meshgrid(X, Y)
         return Xn, Yn, value_grid
 
-    def get_ixiy(self, idx: int):
+    def get_ixiy(self, channel: int):
         """Given node index, return x y coordinate index"""
-        if idx not in self.grid:
+        if channel not in self.grid:
             return None
-        ys, xs = np.where(self.grid == idx)
+        ys, xs = np.where(self.grid == channel)
         assert len(xs) == 1 and len(ys) == 1, "The index is not unique."
         return ys[0], xs[0]
 

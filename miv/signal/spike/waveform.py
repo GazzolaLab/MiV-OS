@@ -7,11 +7,13 @@ from typing import Any, Dict, Generator, List, Optional, Tuple, Union
 
 import inspect
 import os
+import itertools
 import pathlib
 from dataclasses import dataclass
 
 import matplotlib
 import matplotlib.pyplot as plt
+from matplotlib import cm
 import neo
 import numpy as np
 import quantities as pq
@@ -55,6 +57,7 @@ class ExtractWaveforms(OperatorMixin):
 
     def __post_init__(self):
         super().__init__()
+        self.cacher.policy = "OFF"
 
     @wrap_cacher("waveform")
     def __call__(
@@ -87,9 +90,16 @@ class ExtractWaveforms(OperatorMixin):
         if not inspect.isgenerator(signal):
             signal = [signal]
 
+        def signal_pair_generator():
+            ps = next(signal)
+            for s in signal:
+                yield ps, s
+                ps = s
+            yield s, None
+
         waveforms = {}
         previous_sig = None
-        for sig in tqdm(signal, desc="For each Signal segments"):
+        for sig, next_sig in tqdm(signal_pair_generator(), desc="Iterate signal stream"):
             sampling_rate = sig.rate
             num_channels = sig.number_of_channels
             channels = range(num_channels) if self.channels is None else self.channels
@@ -109,17 +119,15 @@ class ExtractWaveforms(OperatorMixin):
                 padded_signal = np.pad(
                     sig.data[:, ch], ((pre_idx, post_idx),), constant_values=0
                 )
-                if previous_sig is not None:
+                if previous_sig is not None: # TODO: channel axis might change in the future
                     padded_signal[:pre_idx] = previous_sig.data[-pre_idx:, ch]
-                cutout = np.empty(
-                    [pre_idx + post_idx, len(spikestamp)], dtype=np.float_
-                )
+                if next_sig is not None:
+                    padded_signal[-post_idx:] = next_sig.data[:post_idx, ch]
+                cutout = []
                 for idx, time in enumerate(spikestamp):
                     index = int(round((time - sig.get_start_time()) * sampling_rate))
-                    if index + post_idx + pre_idx >= sig.data.shape[0]:
-                        # FIXME: need better algorithm for handling segmented signal
-                        continue
-                    cutout[:, idx] = padded_signal[index : (index + post_idx + pre_idx)]
+                    cutout.append(padded_signal[index : (index + post_idx + pre_idx)])
+                cutout = np.stack(cutout, axis=1)
                 if ch not in waveforms:
                     waveforms[ch] = Signal(
                         data=cutout,
@@ -196,17 +204,36 @@ class WaveformAverage(OperatorMixin):
     def __post_init__(self):
         super().__init__()
 
+    @wrap_cacher("waveform average")
     def __call__(self, waveforms: Dict[int, Signal], mea: MEAGeometryProtocol):
+        mean_waveform = {}
+        std_waveform = {}
+        for channel, cutout in waveforms.items():
+            mean_waveform[channel] = cutout.data.mean(axis=cutout._CHANNELAXIS)
+            std_waveform[channel] = cutout.data.std(axis=cutout._CHANNELAXIS) / np.sqrt(cutout.number_of_channels)
+        return mean_waveform, std_waveform
+
+    def plot_averaged_waveform(self, output, show=False, save_path=None):
+        waveforms, mea = self.receive()
+        mean_waveform, std_waveform = output
         nrow, ncol = mea.nrow, mea.ncol
 
         fig, axes = plt.subplots(nrow, ncol, figsize=(ncol * 6, nrow * 4))
-        for key, cutout in waveforms.items():
-            idx = mea.get_ixiy(key)
+        for channel, cutout in waveforms.items():
+            idx = mea.get_ixiy(channel)
             if idx is None:
                 continue
-            axes[idx[0], idx[1]].plot(
-                cutout.timestamps, cutout.data.mean(axis=cutout._CHANNELAXIS)
+            ax = axes[idx[0], idx[1]]
+            cutout_mean = mean_waveform[channel]
+            cutout_stdmn = std_waveform[channel]
+            ax.fill_between(
+                cutout.timestamps,
+                cutout_mean - 2 * cutout_stdmn,
+                cutout_mean + 2 * cutout_stdmn,
+                alpha=0.5
             )
+            ax.plot(cutout.timestamps, cutout_mean, 'k-')
+            ax.set_title(f"channel {channel}")
         # Bottom row
         for i in range(ncol):
             axes[-1, i].set_xlabel("time (s)")
@@ -219,4 +246,35 @@ class WaveformAverage(OperatorMixin):
 
         os.makedirs(self.analysis_path, exist_ok=True)
         plt.savefig(os.path.join(self.analysis_path, "waveform_average.png"))
+        plt.close(fig)
+
+    def plot_waveform_pregression_3d(self, output, show=False, save_path=None):
+        waveforms, mea = self.receive()
+        mean_waveform, std_waveform = output
+        nrow, ncol = mea.nrow, mea.ncol
+
+        fig, axes = plt.subplots(nrow, ncol, figsize=(ncol * 6, nrow * 4), subplot_kw=dict(projection="3d"))
+        for channel, cutout in waveforms.items():
+            idx = mea.get_ixiy(channel)
+            if idx is None:
+                continue
+            ax = axes[idx[0], idx[1]]
+            time = cutout.timestamps  # X
+            iter_number = np.arange(cutout.number_of_channels)  # Y
+            X, Y = np.meshgrid(iter_number, time)
+            zmax = (mean_waveform[channel]+std_waveform[channel]*2.5).max()
+            zmin = (mean_waveform[channel]-std_waveform[channel]*2.5).min()
+            divnorm = matplotlib.colors.TwoSlopeNorm(vmin=zmin, vcenter=0, vmax=zmax)
+            surf = axes[idx[0], idx[1]].plot_surface(X, Y, cutout.data, cmap=cm.coolwarm, norm=divnorm)
+            ax.set_zlim(zmin, zmax)
+            fig.colorbar(surf, shrink=0.5, ax=ax)
+            
+            ax.set_title(f"channel {channel}")
+            ax.set_xlabel("iteration")
+            ax.set_ylabel("time (s)")
+            ax.set_zlabel("voltage (microV)")
+        plt.suptitle("Waveform Transient Plot")
+
+        os.makedirs(self.analysis_path, exist_ok=True)
+        plt.savefig(os.path.join(self.analysis_path, "waveform_transient.png"))
         plt.close(fig)
