@@ -23,10 +23,9 @@ from tqdm import tqdm
 
 from miv.core.datatype import Signal, Spikestamps
 from miv.core.operator import OperatorMixin
-from miv.core.wrapper import wrap_generator_to_generator
+from miv.core.wrapper import wrap_cacher, wrap_generator_to_generator
 from miv.mea import MEAGeometryProtocol
 from miv.typing import SignalType, SpikestampsType
-from miv.core.wrapper import wrap_cacher
 
 
 @dataclass
@@ -124,9 +123,10 @@ class ExtractWaveforms(OperatorMixin):
                 if ch not in waveforms:
                     waveforms[ch] = Signal(
                         data=cutout,
-                        timestamps=np.arange(pre_idx + post_idx).astype(np.float_)
-                        / sampling_rate
-                        - pre,
+                        timestamps=(
+                            np.arange(pre_idx + post_idx).astype(np.float_) - pre
+                        )
+                        / sampling_rate,
                         rate=sampling_rate,
                     )
                 else:

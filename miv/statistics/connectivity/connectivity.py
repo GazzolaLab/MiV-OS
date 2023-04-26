@@ -5,6 +5,7 @@ __all__ = ["DirectedConnectivity"]  # , 'UndirectedConnectivity']
 
 from typing import Any, List, Optional, Union
 
+import csv
 import functools
 import gc
 import glob
@@ -14,7 +15,6 @@ import multiprocessing as mp
 import os
 import pathlib
 import pickle as pkl
-import csv
 from dataclasses import dataclass
 
 import matplotlib
