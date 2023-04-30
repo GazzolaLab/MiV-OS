@@ -116,6 +116,23 @@ class BaseCallbackMixin:
             for plotter in plotters:
                 print(f"dry run: {plotter}")
             return
+        plotters_for_generator_out = get_methods_from_feature_classes_by_startswith_str(
+            self, "_generator_plot_"
+        )
+        if len(plotters_for_generator_out) > 0:  # TODO: Experimental work
+            inputs = self.receive()
+            for index, (output_seg, zipped_inputs) in enumerate(
+                zip(self._output, zip(*inputs))
+            ):
+                for plotter in plotters_for_generator_out:
+                    plotter(
+                        self,
+                        output_seg,
+                        show=show,
+                        save_path=save_path,
+                        index=index,
+                        zipped_inputs=zipped_inputs,
+                    )
         for plotter in plotters:
             plotter(self, self._output, show=show, save_path=save_path)
         if not show:
