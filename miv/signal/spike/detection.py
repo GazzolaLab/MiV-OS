@@ -77,6 +77,8 @@ class ThresholdCutoff(OperatorMixin):
     units: str = "sec"
     return_neotype: bool = False  # TODO: Remove, shift to spikestamps datatype
 
+    exclude_channels: Optional[List[int]] = None
+
     num_proc: int = 1
 
     # @wrap_generator_to_generator
@@ -121,6 +123,9 @@ class ThresholdCutoff(OperatorMixin):
         for channel in tqdm(
             range(num_channels), disable=not self.progress_bar, desc=self.tag
         ):
+            if self.exclude_channels is not None and channel in self.exclude_channels:
+                spiketrain_list.append(np.array([]))
+                continue
             array = signal[channel]  # type: ignore
 
             # Spike Detection: get spikestamp
