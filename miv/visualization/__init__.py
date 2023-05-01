@@ -1,3 +1,4 @@
+import miv.visualization.colors
 from miv.visualization.activity import *
 from miv.visualization.causality import *
 from miv.visualization.connectivity import *
