@@ -1,4 +1,6 @@
-__all__ = ["interp_2d"]
+__all__ = ["interp_2d", "command_run"]
+
+import subprocess
 
 import numpy as np
 import scipy.signal as sps
@@ -18,3 +20,18 @@ def interp_2d(data, ratio=10):
     Xn, Yn = np.meshgrid(xnew, ynew)
 
     return Xn[:-ratio, :-ratio], Yn[:-ratio, :-ratio], data1[:-ratio, :-ratio]
+
+
+def command_run(cmd, verbose=False):  # TODO: Probably should be in other file
+    args = cmd
+    output = subprocess.run(args, capture_output=True)
+    if verbose:
+        print(f"Running: {cmd=}")
+        print(f"{output.returncode=}")
+        if output.returncode == 0:
+            print(f"{output.stdout.decode('utf-8')=}")
+        else:
+            print(f"{output.stderr.decode('utf-8')=}")
+        print("Done")
+    if output.returncode == 0:
+        raise RuntimeError(f"Error running {cmd=}\n" "output.stderr.decode('utf-8')")

@@ -4,7 +4,10 @@ __all__ = ["ReplayRecording"]
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
 import inspect
+import logging
+import multiprocessing as mp
 import os
+import shutil
 from dataclasses import dataclass
 
 import matplotlib
@@ -16,8 +19,10 @@ from tqdm import tqdm
 
 from miv.core.datatype import Signal, Spikestamps
 from miv.core.operator import OperatorMixin
+from miv.core.policy import StrictMPIRunner
 from miv.mea.protocol import MEAGeometryProtocol
 from miv.typing import SignalType
+from miv.visualization import command_run
 
 
 @dataclass
@@ -38,6 +43,7 @@ class ReplayRecording(OperatorMixin):
 
     def __post_init__(self):
         super().__init__()
+        self.runner = StrictMPIRunner()
 
     def __call__(
         self,
@@ -46,6 +52,9 @@ class ReplayRecording(OperatorMixin):
         cutouts: Dict[int, Signal],
         mea: MEAGeometryProtocol,
     ):  # pragma: no cover
+        comm = self.runner.comm
+        rank = self.runner.get_rank()
+        size = self.runner.get_size()
 
         if not inspect.isgenerator(signals):
             signals = [signals]
@@ -60,63 +69,105 @@ class ReplayRecording(OperatorMixin):
             interval = int(rate // self.fps * self.play_speed)
             n_steps = int((signal.timestamps.size - n_steps_in_window) // interval)
 
-            # Output Images
-            FFMpegWriter = manimation.writers["ffmpeg"]
-            metadata = dict(
-                title="Movie Test", artist="Matplotlib", comment="Movie support!"
-            )
-            writer = FFMpegWriter(fps=self.fps, metadata=metadata)
+            # Distribute tasks
+            if size > n_steps:
+                if rank >= n_steps:
+                    logging.warning(f"rank {rank} is idle")
+                    continue
+                size = n_steps
+            tasks = np.arange(n_steps)
+            mytask = np.array_split(tasks, size)[rank]
 
+            # Output Images
             plt.rcParams.update({"font.size": 10})
 
-            os.makedirs(self.analysis_path, exist_ok=True)
-            video_name = os.path.join(self.analysis_path, f"output_{vidx}.mp4")
+            if self.runner.is_root():
+                os.makedirs(self.analysis_path, exist_ok=True)
+                images_path = os.path.join(self.analysis_path, "render")
+                if os.path.exists(images_path):
+                    shutil.rmtree(images_path)
+                os.makedirs(images_path, exist_ok=True)
+            comm.barrier()
 
             fig = plt.figure(figsize=(16, 16))
-            with writer.saving(fig, video_name, dpi=self.dpi):
-                for step in tqdm(
-                    range(n_steps),
-                    desc="Rendering",
+            if self.runner.is_root():
+                pbar = tqdm(
                     total=n_steps,
+                    desc="Rendering (rank 0)",
                     disable=not self.progress_bar,
-                ):
-                    fig.clf()
-                    outer = gridspec.GridSpec(
-                        mea.nrow, mea.ncol, wspace=0.2, hspace=0.2
+                )
+            for step in mytask:
+                fig.clf()
+                outer = gridspec.GridSpec(mea.nrow, mea.ncol, wspace=0.2, hspace=0.2)
+                for channel in range(signal.number_of_channels):
+                    if channel not in cutouts:
+                        continue
+                    if channel not in mea.grid:
+                        continue
+
+                    loc = mea.get_ixiy(channel)
+                    mea_index = loc[0] * mea.nrow + loc[1]
+                    sindex = int(step * interval)
+                    time = signal.timestamps[sindex : sindex + n_steps_in_window]
+                    inner = gridspec.GridSpecFromSubplotSpec(
+                        2, 1, subplot_spec=outer[mea_index], wspace=0.1, hspace=0.1
                     )
-                    for channel in range(signal.number_of_channels):
-                        if channel not in cutouts:
-                            continue
-                        if channel not in mea.grid:
-                            continue
 
-                        loc = mea.get_ixiy(channel)
-                        mea_index = loc[0] * mea.nrow + loc[1]
-                        sindex = int(step * interval)
-                        time = signal.timestamps[sindex : sindex + n_steps_in_window]
-                        inner = gridspec.GridSpecFromSubplotSpec(
-                            2, 1, subplot_spec=outer[mea_index], wspace=0.1, hspace=0.1
-                        )
+                    # Plot signal on the top
+                    ax = fig.add_subplot(inner[0])
+                    ax.plot(
+                        time,
+                        signal.data[sindex : sindex + n_steps_in_window, channel],
+                    )
+                    ax.set_title(f"Channel {channel}")
+                    y_min = np.min(signal.data[:, channel])
+                    y_max = np.max(signal.data[:, channel])
+                    ax.set_ylim(y_min, y_max)
 
-                        # Plot signal on the top
-                        ax = fig.add_subplot(inner[0])
-                        ax.plot(
-                            time,
-                            signal.data[sindex : sindex + n_steps_in_window, channel],
-                        )
-                        ax.set_title(f"Channel {channel}")
-                        y_min = np.min(signal.data[:, channel])
-                        y_max = np.max(signal.data[:, channel])
-                        ax.set_ylim(y_min, y_max)
+                    # Plot spikestamps on the bottom
+                    ax = fig.add_subplot(inner[1], sharex=ax)
+                    ax.eventplot(
+                        spikestamps_view.get_view(time.min(), time.max())[channel]
+                    )
+                    ax.set_xlabel("time (sec)")
 
-                        # Plot spikestamps on the bottom
-                        ax = fig.add_subplot(inner[1], sharex=ax)
-                        ax.eventplot(
-                            spikestamps_view.get_view(time.min(), time.max())[channel]
-                        )
-                        ax.set_xlabel("time (sec)")
-
-                    writer.grab_frame()
+                plt.savefig(
+                    os.path.join(images_path, f"{step:05d}.png"),
+                    dpi=self.dpi,
+                )
+                if self.runner.is_root():
+                    pbar.update(1)
             plt.close(plt.gcf())
+            comm.barrier()
+
+            if self.runner.is_root():
+                pbar.close()
+
+            if self.runner.is_root():
+                # Concatenate images using ffmpeg
+                ffmpeg_path = shutil.which("ffmpeg")
+                if ffmpeg_path is None:
+                    logging.warning("ffmpeg not found")
+                    return
+                else:
+                    cmd = [
+                        "ffmpeg",
+                        "-threads",
+                        f"{mp.cpu_count()}",
+                        "-r",
+                        f"{self.fps}",
+                        "-i",
+                        f"{images_path}/%05d.png",
+                        "-b:v",
+                        "90M",
+                        "-vcodec",
+                        "mpeg4",
+                        f"{os.path.join(self.analysis_path, 'render.mp4')}",
+                    ]
+                    command_run(cmd)
+
+                if os.path.exists(images_path):
+                    shutil.rmtree(images_path)
+            comm.barrier()
 
         return

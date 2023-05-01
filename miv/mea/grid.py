@@ -72,5 +72,5 @@ class GridMEA(MEAMixin):
 
         https://numpy.org/doc/stable/reference/generated/numpy.meshgrid.html
         """
-        
+
         return np.vstack([self.Xn.ravel(), self.Yn.ravel()]).T
