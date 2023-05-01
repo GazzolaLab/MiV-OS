@@ -63,7 +63,7 @@ class GridMEA(MEAMixin):
         if channel not in self.grid:
             return None
         ys, xs = np.where(self.grid == channel)
-        assert len(xs) == 1 and len(ys) == 1, "The index is not unique."
+        assert len(xs) == 1 and len(ys) == 1, f"The index {channel} is not unique."
         return ys[0], xs[0]
 
     @property

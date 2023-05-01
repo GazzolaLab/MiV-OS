@@ -26,8 +26,8 @@ class ReplayRecording(OperatorMixin):
     Collective rendering of electrophyiological signals from MEA channels.
     """
 
-    window_size: float = 5.0  # sec. TODO: refactor
-    play_speed: float = 0.5
+    window_size: float = 3.0  # sec. TODO: refactor
+    play_speed: float = 1.0
 
     tag: str = "experiment replay"
 
@@ -52,12 +52,12 @@ class ReplayRecording(OperatorMixin):
 
         for vidx, signal in enumerate(signals):
             spikestamps_view = spikestamps.get_view(
-                signals.get_start_time(), signals.get_end_time()
+                signal.get_start_time(), signal.get_end_time()
             )
             rate = signal.rate
 
             n_steps_in_window = int(self.window_size * rate)
-            interval = rate / self.fps * self.play_speed
+            interval = int(rate // self.fps * self.play_speed)
             n_steps = int((signal.timestamps.size - n_steps_in_window) // interval)
 
             # Output Images
@@ -92,14 +92,14 @@ class ReplayRecording(OperatorMixin):
 
                         loc = mea.get_ixiy(channel)
                         mea_index = loc[0] * mea.nrow + loc[1]
-                        sindex = step * interval
+                        sindex = int(step * interval)
                         time = signal.timestamps[sindex : sindex + n_steps_in_window]
                         inner = gridspec.GridSpecFromSubplotSpec(
                             2, 1, subplot_spec=outer[mea_index], wspace=0.1, hspace=0.1
                         )
 
                         # Plot signal on the top
-                        ax = plt.Subplot(fig, inner[0])
+                        ax = fig.add_subplot(inner[0])
                         ax.plot(
                             time,
                             signal.data[sindex : sindex + n_steps_in_window, channel],

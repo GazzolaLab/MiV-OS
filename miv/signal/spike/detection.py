@@ -77,7 +77,7 @@ class ThresholdCutoff(OperatorMixin):
     units: str = "sec"
     return_neotype: bool = False  # TODO: Remove, shift to spikestamps datatype
 
-    exclude_channels: Optional[List[int]] = None
+    exclude_channels = None
 
     num_proc: int = 1
 
