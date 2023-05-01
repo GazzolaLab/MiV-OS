@@ -35,6 +35,9 @@ class GridMEA(MEAMixin):
         self.spacing = spacing
 
         self.nrow, self.ncol = grid.shape
+        X = np.arange(self.ncol) * self.spacing[0]
+        Y = np.arange(self.nrow) * self.spacing[1]
+        self.Xn, self.Yn = np.meshgrid(X, Y)
 
     def to_json(self) -> dict:
         """Return a JSON-serializable dictionary"""
@@ -52,10 +55,8 @@ class GridMEA(MEAMixin):
             if idx not in self.grid:
                 continue
             value_grid[self.grid == idx] = value
-        X = np.arange(self.ncol) * self.spacing[0]
-        Y = np.arange(self.nrow) * self.spacing[1]
-        Xn, Yn = np.meshgrid(X, Y)
-        return Xn, Yn, value_grid
+
+        return self.Xn, self.Yn, value_grid
 
     def get_ixiy(self, channel: int):
         """Given node index, return x y coordinate index"""
@@ -67,8 +68,9 @@ class GridMEA(MEAMixin):
 
     @property
     def coordinates(self):
-        """Return the coordinates of the electrodes"""
-        X = np.arange(self.ncol) * self.spacing[0]
-        Y = np.arange(self.nrow) * self.spacing[1]
-        Xn, Yn = np.meshgrid(X, Y)
-        return np.vstack([Xn.ravel(), Yn.ravel()]).T
+        """Return the coordinates of the electrodes
+
+        https://numpy.org/doc/stable/reference/generated/numpy.meshgrid.html
+        """
+        
+        return np.vstack([self.Xn.ravel(), self.Yn.ravel()]).T

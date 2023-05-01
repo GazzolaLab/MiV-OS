@@ -93,9 +93,10 @@ class MultiChannelSignalVisualization(OperatorMixin):
                     )
 
                     ax.set_aspect("equal")
-                    ax.set_xlabel("channels x-axis")
-                    ax.set_ylabel("channels y-axis")
-                    ax.set_title(f"Signal ({time:.02f} sec)")
+                    ax.set_xlabel("channels x-axis (µm)")
+                    ax.set_ylabel("channels y-axis (µm)")
+                    ax.set_title(f"Signal ({time:.05f} sec)")
+                    ax.invert_yaxis()
 
                     writer.grab_frame()
             plt.close(plt.gcf())
