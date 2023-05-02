@@ -108,8 +108,10 @@ class ButterBandpass(OperatorMixin):
         )
         return sos
 
-    def plot_frequency_response(self, signal, show=False, save_path=None):
+    def _generator_plot_frequency_response(self, signal, show=False, save_path=None, index=None, zipped_inputs=None):
         """plot_frequency_response"""
+        if index > 0:
+            return
         if inspect.isgenerator(
             signal
         ):  # FIXME: this is a temporary solution for generator
@@ -119,9 +121,10 @@ class ButterBandpass(OperatorMixin):
             rate = signal.rate
         sos = self._butter_bandpass(rate)
         w, h = sps.sosfreqz(sos, worN=2000, fs=rate)
+        ah = np.abs(h)
 
         fig = plt.figure()
-        plt.semilogx(w, 20 * np.log10(abs(h)))
+        plt.semilogx(w, 20 * np.log10(np.where(ah>0.0, ah, 1e-300)))
         plt.title("Butterworth filter frequency response")
         plt.xlabel("Frequency [Hz]")
         plt.ylabel("Amplitude [dB]")
