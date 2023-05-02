@@ -72,7 +72,7 @@ pyvis = ">=0.2.1,<0.4.0"
 lyon = { git = "https://github.com/sciforce/lyon.git", rev = "91dd700", optional = true}
 click = "^8.1.3"
 pyserial = {version = "^3.5", optional = true}
-numba = "^0.56.4"
+numba = "^0.57.0"
 machinable = "^4.0"
 coverage = "^7.1.0"
 opencv-python = "^4.7.0.72"
