@@ -5,7 +5,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "MiV-OS"
-version = "0.3.0.post5"
+version = "0.3.0.post6"
 description = "Python software for analysis and computing framework used in MiV project."
 readme = "README.md"
 authors = ["GazzolaLab <skim449@illinois.edu>"]
@@ -41,7 +41,7 @@ miv_extract_spiketrain = "miv.machinary.miv_extract_spiketrain:main"
 
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.11"
+python = ">=3.8,<3.12"
 scipy = "^1.9.1"
 elephant = "^0.11.1"
 matplotlib = "^3.5.2"
