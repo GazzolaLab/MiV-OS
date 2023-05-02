@@ -13,6 +13,7 @@ __all__ = [
 from typing import TYPE_CHECKING, Any, Generator, Literal, Protocol, Union
 
 import collections
+import shutil
 import dataclasses
 import functools
 import glob
@@ -175,6 +176,10 @@ class BaseCacher:
         with open(self.cache_filename(idx), "wb") as f:
             pkl.dump(values, f)
         return True
+
+    def remove_cache(self):
+        if os.path.exists(self.cache_dir):
+            shutil.rmtree(self.cache_dir)
 
 
 class DataclassCacher(BaseCacher):
