@@ -22,7 +22,7 @@ from miv.core.operator import OperatorMixin
 from miv.core.policy import StrictMPIRunner
 from miv.mea.protocol import MEAGeometryProtocol
 from miv.typing import SignalType
-from miv.visualization import command_run
+from miv.visualization.utils import command_run
 
 
 @dataclass
