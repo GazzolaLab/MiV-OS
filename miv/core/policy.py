@@ -80,7 +80,7 @@ class VanillaRunner:
                 if not self.is_root:
                     output = self._execute(func, inputs)
             else:
-                self.comm.bcast(output, root=0)
+                output = self.comm.bcast(output, root=0)
         return output
 
 
