@@ -22,7 +22,7 @@ def interp_2d(data, ratio=10):
     return Xn[:-ratio, :-ratio], Yn[:-ratio, :-ratio], data1[:-ratio, :-ratio]
 
 
-def command_run(cmd, verbose=False):  # TODO: Probably should be in other file
+def command_run(cmd, verbose=False, exception="skip"):  # TODO: Probably should be in other file
     args = cmd
     output = subprocess.run(args, capture_output=True)
     if verbose:
@@ -33,5 +33,8 @@ def command_run(cmd, verbose=False):  # TODO: Probably should be in other file
         else:
             print(f"{output.stderr.decode('utf-8')=}")
         print("Done")
-    if output.returncode == 0:
-        raise RuntimeError(f"Error running {cmd=}\n" "output.stderr.decode('utf-8')")
+    if output.returncode != 0:
+        if exception == "raise":
+            raise RuntimeError(f"Error running {cmd=}\n" f"{output.stderr.decode('utf-8')}")
+    return output.returncode
+    

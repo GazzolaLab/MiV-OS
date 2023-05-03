@@ -48,6 +48,7 @@ class ReplayRecording(OperatorMixin):
     def __call__(
         self,
         signals: Signal,
+        signals2: Signal,
         spikestamps: Spikestamps,
         cutouts: Dict[int, Signal],
         mea: MEAGeometryProtocol,
@@ -56,10 +57,10 @@ class ReplayRecording(OperatorMixin):
         rank = self.runner.get_rank()
         size = self.runner.get_size()
 
-        if not inspect.isgenerator(signals):
-            signals = [signals]
+        assert inspect.isgenerator(signals)
+        assert inspect.isgenerator(signals2)
 
-        for vidx, signal in enumerate(signals):
+        for vidx, (signal, signal2) in enumerate(zip(signals, signals2)):
             spikestamps_view = spikestamps.get_view(
                 signal.get_start_time(), signal.get_end_time()
             )
@@ -81,24 +82,28 @@ class ReplayRecording(OperatorMixin):
             # Output Images
             plt.rcParams.update({"font.size": 10})
 
+            images_path = os.path.join(self.analysis_path, f"render_{vidx=}")
             if self.runner.is_root():
                 os.makedirs(self.analysis_path, exist_ok=True)
-                images_path = os.path.join(self.analysis_path, "render")
                 if os.path.exists(images_path):
                     shutil.rmtree(images_path)
                 os.makedirs(images_path, exist_ok=True)
             comm.barrier()
 
-            fig = plt.figure(figsize=(16, 16))
+            fig = plt.figure(figsize=(16, 20))
             if self.runner.is_root():
                 pbar = tqdm(
-                    total=n_steps,
+                    total=len(mytask),
                     desc="Rendering (rank 0)",
                     disable=not self.progress_bar,
                 )
             for step in mytask:
                 fig.clf()
                 outer = gridspec.GridSpec(mea.nrow, mea.ncol, wspace=0.2, hspace=0.2)
+
+                sindex = int(step * interval)
+                time = signal.timestamps[sindex : sindex + n_steps_in_window]
+
                 for channel in range(signal.number_of_channels):
                     if channel not in cutouts:
                         continue
@@ -106,54 +111,71 @@ class ReplayRecording(OperatorMixin):
                         continue
 
                     loc = mea.get_ixiy(channel)
-                    mea_index = loc[0] * mea.nrow + loc[1]
-                    sindex = int(step * interval)
-                    time = signal.timestamps[sindex : sindex + n_steps_in_window]
+                    mea_index = loc[0] * mea.ncol + loc[1]
                     inner = gridspec.GridSpecFromSubplotSpec(
-                        2, 1, subplot_spec=outer[mea_index], wspace=0.1, hspace=0.1
+                        3, 1, subplot_spec=outer[mea_index], wspace=0.1, hspace=0.1, height_ratios=[0.4,0.4,0.2]
                     )
 
                     # Plot signal on the top
-                    ax = fig.add_subplot(inner[0])
-                    ax.plot(
+                    ax1 = fig.add_subplot(inner[0])
+                    ax1.plot(
                         time,
                         signal.data[sindex : sindex + n_steps_in_window, channel],
                     )
-                    ax.set_title(f"Channel {channel}")
-                    y_min = np.min(signal.data[:, channel])
-                    y_max = np.max(signal.data[:, channel])
-                    ax.set_ylim(y_min, y_max)
+                    ax1.set_title(f"Channel {channel}")
+                    med = np.median(np.abs(signal.data[:,channel])) * 15
+                    y_min = -med
+                    y_max = med
+                    ax1.set_ylim(y_min, y_max)
+
+                    # Plot signal on the middle
+                    ax2 = fig.add_subplot(inner[1], sharex=ax1)
+                    ax2.plot(
+                        time,
+                        signal2.data[sindex : sindex + n_steps_in_window, channel],
+                    )
+                    med = np.median(np.abs(signal2.data[:,channel])) * 15
+                    y_min = -med
+                    y_max = med
+                    ax2.set_ylim(y_min, y_max)
 
                     # Plot spikestamps on the bottom
-                    ax = fig.add_subplot(inner[1], sharex=ax)
-                    ax.eventplot(
+                    ax3 = fig.add_subplot(inner[2], sharex=ax1)
+                    ax3.eventplot(
                         spikestamps_view.get_view(time.min(), time.max())[channel]
                     )
-                    ax.set_xlabel("time (sec)")
+                    ax3.set_yticks([])
 
+                    if loc[0] == mea.nrow - 1:
+                        ax3.set_xlabel("time (sec)")
+                    else:
+                        ax3.set_xticks([])
+                        ax3.set_xticks([], minor=True)
+
+                fig.tight_layout()
                 plt.savefig(
                     os.path.join(images_path, f"{step:05d}.png"),
                     dpi=self.dpi,
                 )
                 if self.runner.is_root():
                     pbar.update(1)
+            if self.runner.is_root():
+                pbar.close()
             plt.close(plt.gcf())
             comm.barrier()
 
-            if self.runner.is_root():
-                pbar.close()
 
             if self.runner.is_root():
                 # Concatenate images using ffmpeg
+                video_name = os.path.join(self.analysis_path, f'render_{vidx=}.mp4')
                 ffmpeg_path = shutil.which("ffmpeg")
                 if ffmpeg_path is None:
                     logging.warning("ffmpeg not found")
-                    return
                 else:
+                    #"-threads",
+                    #f"{mp.cpu_count()}",
                     cmd = [
-                        "ffmpeg",
-                        "-threads",
-                        f"{mp.cpu_count()}",
+                        f"{ffmpeg_path}",
                         "-r",
                         f"{self.fps}",
                         "-i",
@@ -162,12 +184,12 @@ class ReplayRecording(OperatorMixin):
                         "90M",
                         "-vcodec",
                         "mpeg4",
-                        f"{os.path.join(self.analysis_path, 'render.mp4')}",
+                        f"{video_name}",
                     ]
                     command_run(cmd)
 
-                if os.path.exists(images_path):
-                    shutil.rmtree(images_path)
+                #if os.path.exists(images_path):
+                #    shutil.rmtree(images_path)
             comm.barrier()
 
         return
