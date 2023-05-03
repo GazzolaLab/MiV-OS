@@ -120,20 +120,30 @@ class BaseCallbackMixin:
         plotters_for_generator_out = get_methods_from_feature_classes_by_startswith_str(
             self, "_generator_plot_"
         )
-        if len(plotters_for_generator_out) > 0 and inspect.isgenerator(
-            self._output
-        ):  # TODO: Experimental work
-            inputs = self.receive()
-            for index, (output_seg, zipped_inputs) in enumerate(
-                zip(self._output, zip(*inputs))
-            ):
+        if len(plotters_for_generator_out) > 0:  # TODO: Experimental work
+            if inspect.isgenerator(self._output):
+                inputs = self.receive()
+                for index, (output_seg, zipped_inputs) in enumerate(
+                    zip(self._output, zip(*inputs))
+                ):
+                    for plotter in plotters_for_generator_out:
+                        plotter(
+                            self,
+                            output_seg,
+                            show=show,
+                            save_path=save_path,
+                            index=index,
+                            zipped_inputs=zipped_inputs,
+                        )
+            else:
+                zipped_inputs = self.receive()
                 for plotter in plotters_for_generator_out:
                     plotter(
                         self,
-                        output_seg,
+                        self._output,
                         show=show,
                         save_path=save_path,
-                        index=index,
+                        index=0,
                         zipped_inputs=zipped_inputs,
                     )
         for plotter in plotters:
