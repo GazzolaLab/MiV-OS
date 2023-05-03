@@ -36,6 +36,7 @@ class Signal(SupportMultiprocessing, DataNodeMixin):
     rate: int = 30_000
 
     def __post_init__(self):
+        super().__init__()
         self.data = np.asarray(self.data)
         assert len(self.data.shape) == 2, "Signal must be 2D array"
 
