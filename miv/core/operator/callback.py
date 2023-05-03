@@ -4,6 +4,7 @@ __all__ = ["_Callback"]
 from typing import TypeVar  # TODO: For python 3.11, we can use typing.Self
 from typing import Callable, Optional, Protocol, Union
 
+import inspect
 import itertools
 import os
 import pathlib
@@ -119,7 +120,9 @@ class BaseCallbackMixin:
         plotters_for_generator_out = get_methods_from_feature_classes_by_startswith_str(
             self, "_generator_plot_"
         )
-        if len(plotters_for_generator_out) > 0:  # TODO: Experimental work
+        if len(plotters_for_generator_out) > 0 and inspect.isgenerator(
+            self._output
+        ):  # TODO: Experimental work
             inputs = self.receive()
             for index, (output_seg, zipped_inputs) in enumerate(
                 zip(self._output, zip(*inputs))

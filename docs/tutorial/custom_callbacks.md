@@ -65,21 +65,22 @@ In this example, the `signal` argument is the output of the `bandpass_filter` op
 ```{code-cell} ipython3
 def callback_statistics(self, signal:Signal):
     """Print the statistics of the filtered signal"""
-    signal = next(signal)  # Get the first signal fragment
-    for channel in range(5):
-        print(f"{channel=} | mean={signal.data[channel].mean():.2f} | std={signal.data[channel].std():.2f} | median={np.median(signal.data[channel]):.2f}")
-    return signal
+    for s in signal:
+        for channel in range(5):
+            print(f"{channel=} | mean={s[channel].mean():.2f} | std={s[channel].std():.2f} | median={np.median(s[channel]):.2f}")
+        yield s
 
-def callback_median_histogram(self, signal:Signal):
+def callback_median_histogram(self, signals:Signal):
     """Plot the histogram of the median of each channel"""
     medians = []
-    for channel in range(signal.number_of_channels):
-        medians.append(np.median(signal.data[channel]))
-    plt.hist(medians, bins=20)
-    plt.title("Histogram of the median of each channel")
-    plt.xlabel("Median (mV)")
-    plt.ylabel("Count")
-    return signal
+    for signal in signals:
+        for channel in range(signal.number_of_channels):
+            medians.append(np.median(signal.data[channel]))
+        plt.hist(medians, bins=20)
+        plt.title("Histogram of the median of each channel")
+        plt.xlabel("Median (mV)")
+        plt.ylabel("Count")
+        yield signal
 ```
 
 We can then pass the callback function to the operator using `<<` operator.

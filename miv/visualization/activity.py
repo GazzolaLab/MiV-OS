@@ -13,7 +13,7 @@ from miv.core.datatype import Spikestamps
 from miv.core.operator import OperatorMixin
 from miv.core.policy import StrictMPIRunner
 from miv.mea import MEAGeometryProtocol
-from miv.statistics import spike_counts_with_kernel
+from miv.statistics.spiketrain_statistics import spike_counts_with_kernel
 from miv.visualization.utils import interp_2d
 
 
