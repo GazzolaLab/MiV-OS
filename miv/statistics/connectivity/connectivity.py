@@ -253,13 +253,14 @@ class DirectedConnectivity(OperatorMixin):
         connectivity_metric_matrix = result["connectivity_matrix"]
 
         # Export values in csv
-        with open(os.path.join(save_path, "te_values.csv"), mode="w") as f:
-            writer = csv.writer(f)
-            writer.writerow(["source", "target", "metrics"])
+        if save_path is not None:
+            with open(os.path.join(save_path, "te_values.csv"), mode="w") as f:
+                writer = csv.writer(f)
+                writer.writerow(["source", "target", "metrics"])
 
-            for i, row in enumerate(connectivity_metric_matrix):
-                for j, value in enumerate(row):
-                    writer.writerow([i, j, value])
+                for i, row in enumerate(connectivity_metric_matrix):
+                    for j, value in enumerate(row):
+                        writer.writerow([i, j, value])
 
         # Plot values in heatmap
         fig, ax = plt.subplots(figsize=(12, 12))

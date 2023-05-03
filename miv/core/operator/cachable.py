@@ -13,7 +13,6 @@ __all__ = [
 from typing import TYPE_CHECKING, Any, Generator, Literal, Protocol, Union
 
 import collections
-import shutil
 import dataclasses
 import functools
 import glob
@@ -22,6 +21,7 @@ import json
 import os
 import pathlib
 import pickle as pkl
+import shutil
 
 import numpy as np
 

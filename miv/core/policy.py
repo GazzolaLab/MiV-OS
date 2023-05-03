@@ -10,9 +10,9 @@ __all__ = [
 
 from typing import Any, Callable, Generator, Optional, Protocol, Union
 
+import inspect
 import multiprocessing
 import pathlib
-import inspect
 from dataclasses import dataclass
 
 
@@ -43,14 +43,15 @@ class VanillaRunner:
     """Default runner without any high-level parallelism.
 
     If MPI is available, only use first rank (root) to execute, and other ranks recv from the root.
-    
+
     """
 
     def __init__(self):
         try:
             from mpi4py import MPI
-            self.comm  = MPI.COMM_WORLD
-            self.is_root = (self.comm.Get_rank() == 0)
+
+            self.comm = MPI.COMM_WORLD
+            self.is_root = self.comm.Get_rank() == 0
         except ImportError:
             self.comm = None
             self.is_root = True
@@ -75,7 +76,7 @@ class VanillaRunner:
             if self.is_root:
                 is_generator_output = inspect.isgenerator(output)
             is_generator_output = self.comm.bcast(is_generator_output, root=0)
-            
+
             if is_generator_output:
                 if not self.is_root:
                     output = self._execute(func, inputs)
