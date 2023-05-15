@@ -113,7 +113,12 @@ class ReplayRecording(OperatorMixin):
                     loc = mea.get_ixiy(channel)
                     mea_index = loc[0] * mea.ncol + loc[1]
                     inner = gridspec.GridSpecFromSubplotSpec(
-                        3, 1, subplot_spec=outer[mea_index], wspace=0.1, hspace=0.1, height_ratios=[0.4,0.4,0.2]
+                        3,
+                        1,
+                        subplot_spec=outer[mea_index],
+                        wspace=0.1,
+                        hspace=0.1,
+                        height_ratios=[0.4, 0.4, 0.2],
                     )
 
                     # Plot signal on the top
@@ -123,7 +128,7 @@ class ReplayRecording(OperatorMixin):
                         signal.data[sindex : sindex + n_steps_in_window, channel],
                     )
                     ax1.set_title(f"Channel {channel}")
-                    med = np.median(np.abs(signal.data[:,channel])) * 15
+                    med = np.median(np.abs(signal.data[:, channel])) * 15
                     y_min = -med
                     y_max = med
                     ax1.set_ylim(y_min, y_max)
@@ -134,7 +139,7 @@ class ReplayRecording(OperatorMixin):
                         time,
                         signal2.data[sindex : sindex + n_steps_in_window, channel],
                     )
-                    med = np.median(np.abs(signal2.data[:,channel])) * 15
+                    med = np.median(np.abs(signal2.data[:, channel])) * 15
                     y_min = -med
                     y_max = med
                     ax2.set_ylim(y_min, y_max)
@@ -164,16 +169,15 @@ class ReplayRecording(OperatorMixin):
             plt.close(plt.gcf())
             comm.barrier()
 
-
             if self.runner.is_root():
                 # Concatenate images using ffmpeg
-                video_name = os.path.join(self.analysis_path, f'render_{vidx=}.mp4')
+                video_name = os.path.join(self.analysis_path, f"render_{vidx=}.mp4")
                 ffmpeg_path = shutil.which("ffmpeg")
                 if ffmpeg_path is None:
                     logging.warning("ffmpeg not found")
                 else:
-                    #"-threads",
-                    #f"{mp.cpu_count()}",
+                    # "-threads",
+                    # f"{mp.cpu_count()}",
                     cmd = [
                         f"{ffmpeg_path}",
                         "-r",
@@ -188,7 +192,7 @@ class ReplayRecording(OperatorMixin):
                     ]
                     command_run(cmd)
 
-                #if os.path.exists(images_path):
+                # if os.path.exists(images_path):
                 #    shutil.rmtree(images_path)
             comm.barrier()
 
