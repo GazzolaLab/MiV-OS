@@ -52,6 +52,9 @@ class VanillaRunner:
 
             self.comm = MPI.COMM_WORLD
             self.is_root = self.comm.Get_rank() == 0
+            if self.comm.Get_size() == 1:
+                self.comm = None
+                self.is_root = True
         except ImportError:
             self.comm = None
             self.is_root = True
@@ -69,8 +72,9 @@ class VanillaRunner:
             # TODO: support kwargs
             output = self._execute(func, inputs)
 
+        # If MPI is available:
         if self.comm is not None:  # MPI # FIXME
-            # If output is generator, other ranks also runs the function.
+            # If output is generator, other ranks also need to initialize generator.
             # Otherwise, broadcast output
             is_generator_output = None
             if self.is_root:
@@ -81,6 +85,8 @@ class VanillaRunner:
                 if not self.is_root:
                     output = self._execute(func, inputs)
             else:
+                print(output)
+                print(type(output))
                 output = self.comm.bcast(output, root=0)
         return output
 
