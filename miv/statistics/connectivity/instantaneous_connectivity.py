@@ -149,8 +149,10 @@ class InstantaneousConnectivity(OperatorMixin):
 
                     # Make it tight layout
                     fig.tight_layout()
+                    writer.grab_frame()
 
                     sidx += dframe
+            plt.close(plt.gcf())
 
     def _compute_local_directionality(self, source, target, te_history):
         te = pyte.transfer_entropy(source, target, te_history, local=True)
