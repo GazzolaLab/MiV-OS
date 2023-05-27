@@ -98,13 +98,13 @@ class InstantaneousConnectivity(OperatorMixin):
                 binned_spiketrain[i],
                 binned_spiketrain[j],
                 self.te_history,
-            )
+            )[0]
             # compute j -> i
             ji_te = self._compute_local_directionality(
                 binned_spiketrain[j],
                 binned_spiketrain[i],
                 self.te_history,
-            )
+            )[0]
 
             FFMpegWriter = manimation.writers["ffmpeg"]
             metadata = dict(
@@ -119,30 +119,35 @@ class InstantaneousConnectivity(OperatorMixin):
             fig = plt.figure(figsize=(16, 5))
             sidx = 0
             dframe = int(1 / self.bin_size / self.fps)
+            window = int(5.0 / self.bin_size)
+            pbar = tqdm(total=n_timesteps, disable=disable_tqdm)
             with writer.saving(fig, video_name, dpi=200):
-                while sidx + dframe < n_timesteps:
+                while sidx + window < n_timesteps:
                     stime = binned_spiketrain.get_start_time() + sidx * self.bin_size
-                    etime = stime + dframe * self.bin_size
-                    time = binned_spiketrain.timestamps[sidx : sidx + dframe]
+                    etime = stime + window * self.bin_size
+                    time = binned_spiketrain.timestamps[sidx : sidx + window]
 
                     fig.clf()
                     ax1 = fig.add_subplot(311)
                     _lineoffsets = [0, 1]
                     _linelengths = [1, 1]
                     ax1.eventplot(
-                        spikestamps.select([i, j], keepdims=False).view(stime, etime),
+                        spikestamps.select([i, j], keepdims=False).get_view(stime, etime),
                         lineoffsets=_lineoffsets,
                         linelengths=_linelengths,
                     )
                     ax1.set_yticklabels(["i", "j"])
+                    ax1.set_xlim([stime, etime])
 
                     ax2 = fig.add_subplot(312)
-                    ax2.plot(time, ij_te[sidx : sidx + dframe])
+                    ax2.plot(time, ij_te[sidx : sidx + window])
                     ax2.set_ylabel("i -> j")
+                    ax2.set_ylim([ij_te.min(), ij_te.max()])
 
                     ax3 = fig.add_subplot(313)
-                    ax3.plot(time, ji_te[sidx : sidx + dframe])
+                    ax3.plot(time, ji_te[sidx : sidx + window])
                     ax3.set_ylabel("j -> i")
+                    ax3.set_ylim([ji_te.min(), ji_te.max()])
 
                     ax2.sharex(ax1)
                     ax3.sharex(ax1)
@@ -152,7 +157,9 @@ class InstantaneousConnectivity(OperatorMixin):
                     writer.grab_frame()
 
                     sidx += dframe
+                    pbar.update(dframe)
             plt.close(plt.gcf())
+            pbar.close()
 
     def _compute_local_directionality(self, source, target, te_history):
         te = pyte.transfer_entropy(source, target, te_history, local=True)
