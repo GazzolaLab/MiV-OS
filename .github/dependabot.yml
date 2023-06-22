@@ -12,7 +12,7 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 99
-    target-branch: "update-dependencies"
+    target-branch: "bump-dependencies"
     versioning-strategy: increase-if-necessary
   - package-ecosystem: "github-actions"
     directory: "/"
