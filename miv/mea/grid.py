@@ -6,6 +6,7 @@ import matplotlib
 import numpy as np
 
 from miv.mea.base import MEAMixin
+from miv.core.datatype import Signal
 
 
 class GridMEA(MEAMixin):
@@ -56,6 +57,18 @@ class GridMEA(MEAMixin):
                 continue
             value_grid[self.grid == idx] = value
 
+        return self.Xn, self.Yn, value_grid
+
+    def map_temporal_data(
+        self, signal: Signal, missing_value: float=0.0
+    ):
+        """Map signal data to MEA"""
+        n_time = signal.shape[signal._SIGNALAXIS]
+        value_grid = np.full([n_time, self.nrow, self.ncol], missing_value, dtype=np.float_)
+        for idx in range(signal.number_of_channels):
+            if idx not in self.grid:
+                continue
+            value_grid[:, self.grid == idx] = signal[idx][:,None]
         return self.Xn, self.Yn, value_grid
 
     def get_ixiy(self, channel: int):
