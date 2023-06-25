@@ -132,7 +132,9 @@ class InstantaneousConnectivity(OperatorMixin):
                     _lineoffsets = [0, 1]
                     _linelengths = [1, 1]
                     ax1.eventplot(
-                        spikestamps.select([i, j], keepdims=False).get_view(stime, etime),
+                        spikestamps.select([i, j], keepdims=False).get_view(
+                            stime, etime
+                        ),
                         lineoffsets=_lineoffsets,
                         linelengths=_linelengths,
                     )
