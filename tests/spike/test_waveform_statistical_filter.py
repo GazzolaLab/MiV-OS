@@ -57,7 +57,23 @@ def test_waveform_statistical_filter_std_over():
 def test_waveform_statistical_filter_mix():
     testing_waveform = {}
 
-    wave1 = np.random.random(10) * 5
+    wave1 = (
+        np.array(
+            [
+                0.7624612,
+                0.06174284,
+                0.48327534,
+                0.23766127,
+                0.93223255,
+                0.65475898,
+                0.84306566,
+                0.79945695,
+                0.75793425,
+                0.1380648,
+            ]
+        )
+        * 5
+    )
     wave2 = np.zeros(10)
     wave3 = np.zeros(10) + 10
     wave4 = np.zeros(10) - 3
