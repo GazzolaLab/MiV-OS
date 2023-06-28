@@ -78,7 +78,7 @@ coverage = "^7.1.0"
 opencv-python = "^4.7.0.72"
 
 [tool.poetry.dev-dependencies]
-black = "^22.8.0"
+black = "^23.3.0"
 isort = {extras = ["colors"], version = "^5.10.1"}
 mypy = "^1.0.1"
 mypy-extensions = "^1.0.0"
