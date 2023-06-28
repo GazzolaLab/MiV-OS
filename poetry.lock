@@ -1883,23 +1883,25 @@ test = ["pep440", "pre-commit", "pytest", "testpath"]
 
 [[package]]
 name = "neo"
-version = "0.11.1"
+version = "0.12.0"
 description = "Neo is a package for representing electrophysiology data in Python, together with support for reading a wide range of neurophysiology file formats"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 files = [
-    {file = "neo-0.11.1.tar.gz", hash = "sha256:f4a206044b332ad00b10072b0dc7a70b359fa365ec786f92ab757ef4ae588474"},
+    {file = "neo-0.12.0-py3-none-any.whl", hash = "sha256:758f1938b6e3d1a21e465265e6859dc925cc1f0a4a347658cd4bc6293b99545d"},
+    {file = "neo-0.12.0.tar.gz", hash = "sha256:3b6ca4fc05dfdb4e953e253e70994bfbbc8fe2e90958fbda7fa5860caf3fa63a"},
 ]
 
 [package.dependencies]
-numpy = ">=1.18.5"
+numpy = ">=1.19.5"
 packaging = "*"
-quantities = ">=0.12.1"
+quantities = ">=0.14.1"
 
 [package.extras]
-all = ["h5py", "igor", "klusta", "nixio (>=1.5.0)", "pillow", "pyedflib", "pynwb", "scipy (>=1.0.0)", "sonpy"]
+all = ["coverage", "coveralls", "h5py", "igor", "ipython", "klusta", "matplotlib", "nixio (>=1.5.0)", "pillow", "probeinterface", "pyedflib", "pynwb", "pytest", "pytest-cov", "scipy (>=1.0.0)", "sonpy", "tqdm"]
 biocam = ["h5py"]
 ced = ["sonpy"]
+docs = ["docutils (<0.18)"]
 edf = ["pyedflib"]
 igorproio = ["igor"]
 kwikio = ["klusta"]
@@ -1908,6 +1910,7 @@ neomatlabio = ["scipy (>=1.0.0)"]
 nixio = ["nixio (>=1.5.0)"]
 nwb = ["pynwb"]
 stimfitio = ["stfio"]
+test = ["coverage", "coveralls", "h5py", "igor", "ipython", "klusta", "matplotlib", "nixio", "pillow", "probeinterface", "pyedflib", "pynwb", "pytest", "pytest-cov", "scipy (>=1.0.0)", "sonpy", "tqdm"]
 tiffio = ["pillow"]
 
 [[package]]
@@ -3866,4 +3869,4 @@ experiment = ["lyon", "pyserial"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<3.12"
-content-hash = "676c6e16571bc786c4490f4dec1a9f1b09d8e2ed77bb9eb84edb0933c3629650"
+content-hash = "9055efa82f9df3f83a2dc73f9e5df63b29bcfa0a9a74e32eff81d106964564a4"
