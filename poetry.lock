@@ -685,37 +685,34 @@ vis = ["matplotlib (>=3.0.0)"]
 
 [[package]]
 name = "elephant"
-version = "0.11.2"
+version = "0.12.0"
 description = "Elephant is a package for analysis of electrophysiology data in Python"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 files = [
-    {file = "elephant-0.11.2-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:08d3daa6792c6c3aadb431d23e17f7fb53b1bc5df1c022bf6b4552b1cb7c5fe1"},
-    {file = "elephant-0.11.2-cp310-cp310-musllinux_1_1_x86_64.whl", hash = "sha256:0c6aa6e1cfdad87e187af5f31b6e1809d58d663fafd49c08b666a6c4864ca050"},
-    {file = "elephant-0.11.2-cp310-cp310-win_amd64.whl", hash = "sha256:68a50fd587f8734282196c40c8e13899b0554993ed23260bd0e6087da8eb1e43"},
-    {file = "elephant-0.11.2-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:5f3b3937200b08a79801712738ef0ca7bf520b441880d0793dd052437dc52548"},
-    {file = "elephant-0.11.2-cp37-cp37m-musllinux_1_1_x86_64.whl", hash = "sha256:7cf0826192ae007515a50d9275d3a337df99c0b7579e9b02ebf5e8aa0a00743a"},
-    {file = "elephant-0.11.2-cp37-cp37m-win_amd64.whl", hash = "sha256:1315a9494704d586b7e7edabf4bda55ac8cb0aefa7134af9f43e079ce934baa0"},
-    {file = "elephant-0.11.2-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:3f69eaf0fb9f8fce0e00163914ffd9ccbba586851dc6b14123a943b4c850db3c"},
-    {file = "elephant-0.11.2-cp38-cp38-musllinux_1_1_x86_64.whl", hash = "sha256:e011a59c2a90e3d39b71a086cc4d1997f692cfdd0546ddac31b977209e6fabcd"},
-    {file = "elephant-0.11.2-cp38-cp38-win_amd64.whl", hash = "sha256:92bac510fbabdf82b1e935f4117d5f9c0f2d9798e2ddc6f270b2b1a0b0654553"},
-    {file = "elephant-0.11.2-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:6cae476e00aaf4b8ef0ce0526159579a94ce26f1f987ee943354e7a95fa17548"},
-    {file = "elephant-0.11.2-cp39-cp39-musllinux_1_1_x86_64.whl", hash = "sha256:912d1ebb29ea211d84211948ff7fb111604028043e7d894f7f70a14d0e52dafa"},
-    {file = "elephant-0.11.2-cp39-cp39-win_amd64.whl", hash = "sha256:a27ef5312d47bbe86b619aaa9ea7b4dc90a4c26607865ba1c03b98920c9890fc"},
-    {file = "elephant-0.11.2.tar.gz", hash = "sha256:f8759fff0bbb136ae4ffc8d1eacadeea8ba56610d705c3bf207de87ada3ba240"},
+    {file = "elephant-0.12.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:6e557b9e59563e3fe921f82ce9f7efabfaea7b758a09d8ba0389f8303f78a242"},
+    {file = "elephant-0.12.0-cp310-cp310-musllinux_1_1_x86_64.whl", hash = "sha256:c52116eca78a4378900d613267c78d551e3c478dc64733794e95fdd282c175ce"},
+    {file = "elephant-0.12.0-cp310-cp310-win_amd64.whl", hash = "sha256:76f650869242e2f21fffbf0f010567269e548e240dc5c74829ea5636ee66389b"},
+    {file = "elephant-0.12.0-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:871a45e218f95b4dce000d26fd6eb3b83b36f3b7cfe9b84ca78e83e3cee21d04"},
+    {file = "elephant-0.12.0-cp38-cp38-musllinux_1_1_x86_64.whl", hash = "sha256:f6d4ce3b10197469ae2295047489901b8c9021e887b7bb23a1724034709dd13a"},
+    {file = "elephant-0.12.0-cp38-cp38-win_amd64.whl", hash = "sha256:c0a5c5f216bcd414de3ba316065f992d7c34916398ea7c4d04ddef0c3a9b7a72"},
+    {file = "elephant-0.12.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:65919188c6c320dff6dab3b89eef9a66c0a44ec49101107c5382a30f94eb7948"},
+    {file = "elephant-0.12.0-cp39-cp39-musllinux_1_1_x86_64.whl", hash = "sha256:ca6018d83498892f3b8daa52b0be252e84e876588aead526ce34411eaae4e20c"},
+    {file = "elephant-0.12.0-cp39-cp39-win_amd64.whl", hash = "sha256:a9bd0ab60aecabb96de9931d4908a0bf3bf395c1c356599820d9f7c5dab18d3d"},
+    {file = "elephant-0.12.0.tar.gz", hash = "sha256:81f8d668f92d8688344bb7a9c5abaa8438d824560c935a411e6e36ddf7dc7c72"},
 ]
 
 [package.dependencies]
 neo = ">=0.10.0"
-numpy = ">=1.18.1"
-quantities = ">=0.12.1"
+numpy = ">=1.19.5"
+quantities = ">=0.14.1"
 scipy = ">=1.5.4"
 six = ">=1.10.0"
 tqdm = "*"
 
 [package.extras]
 cuda = ["pycuda (>=2020.1)"]
-docs = ["jupyter (>=1.0.0)", "matplotlib (>=3.3.2)", "nbsphinx (>=0.8.0)", "numpydoc (>=1.1.0)", "sphinx (>=3.3.0)", "sphinx-tabs (>=1.3.0)", "sphinxcontrib-bibtex (==1.0.0)"]
+docs = ["jupyter (>=1.0.0)", "matplotlib (>=3.3.2)", "nbsphinx (>=0.8.0)", "numpydoc (>=1.1.0)", "sphinx (>=3.3.0)", "sphinx-tabs (>=1.3.0)", "sphinxcontrib-bibtex (>1.0.0)"]
 extras = ["jinja2 (>=2.11.2)", "pandas (>=0.18.0)", "scikit-learn (>=0.23.2)", "statsmodels (>=0.12.1)"]
 opencl = ["pyopencl (>=2020.2.2)"]
 tests = ["nixio (>=1.5.0)", "pytest"]
@@ -3866,4 +3863,4 @@ experiment = ["lyon", "pyserial"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<3.12"
-content-hash = "676c6e16571bc786c4490f4dec1a9f1b09d8e2ed77bb9eb84edb0933c3629650"
+content-hash = "fbdafa7efdce1344d4ead3a4a411c37d8be03a4cab5c05dfa66b37c97cc881ce"
