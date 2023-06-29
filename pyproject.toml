@@ -116,7 +116,7 @@ optional = true
 
 [tool.poetry.group.sortingExtension.dependencies]
 dtaidistance = "^2.3.10"
-scikit-learn-extra = "^0.2.0"
+scikit-learn-extra = "^0.3.0"
 
 
 [tool.poetry.group.algorithmExtension]
