@@ -3755,20 +3755,20 @@ test = ["covdefaults (>=2.3)", "coverage (>=7.2.3)", "coverage-enable-subprocess
 
 [[package]]
 name = "viziphant"
-version = "0.2.0"
+version = "0.3.0"
 description = "Viziphant is a package for the visualization of the analysisresults of electrophysiology data in Python"
 optional = false
 python-versions = "*"
 files = [
-    {file = "viziphant-0.2.0.tar.gz", hash = "sha256:044b5c92de169dfafd9665efe2c310e917d2c21980bcc9f560d5c727161f9bd8"},
+    {file = "viziphant-0.3.0.tar.gz", hash = "sha256:40d2970b8384d8e1c5d324caf1b1188391d7e651375ce08dd518bcf4ac6477f2"},
 ]
 
 [package.dependencies]
 elephant = ">=0.9.0"
 matplotlib = ">=3.3.2"
 neo = ">=0.9.0"
-numpy = ">=1.18.1"
-quantities = ">=0.12.1"
+numpy = ">=1.19.5"
+quantities = ">=0.14.1"
 seaborn = ">=0.9.0"
 
 [[package]]
@@ -3902,4 +3902,4 @@ experiment = ["lyon", "pyserial"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<3.12"
-content-hash = "f2d318af04685fac76c4777932b3f411772000d11d0c6503f1f21e88d910a585"
+content-hash = "7db8c06176c03e04d13c19d5cfca71be6aa29ae778feaaba56a9dbf4c550f2ba"
