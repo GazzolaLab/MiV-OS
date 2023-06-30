@@ -53,7 +53,7 @@ scikit-learn = "^1.1.1"
 seaborn = ">=0.11.2,<0.13.0"
 tqdm = "^4.64.0"
 numpy = "^1.23.2"
-viziphant = "^0.2.0"
+viziphant = "^0.3.0"
 Sphinx = {version = "^5.3.0", optional = true}
 pydata-sphinx-theme = {version = "^0.13", optional = true}
 readthedocs-sphinx-search = {version = "^0.3.1", optional = true}
