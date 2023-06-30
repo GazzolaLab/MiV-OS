@@ -166,5 +166,6 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin):
         self.make_analysis_path()
         self._execute()
         cache_called = self.cacher.cache_called
+        # TODO
         if not skip_plot and not cache_called:
             self.plot(show=False, save_path=True, dry_run=dry_run)

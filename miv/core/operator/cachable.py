@@ -252,6 +252,7 @@ class FunctionalCacher(BaseCacher):
     def check_cached(self, params=None) -> bool:
         if self.policy == "MUST":  # TODO: fix this, remove redundancy
             return True
+        flag = True
         if params is not None:
             current_config = self._compile_parameters_as_dict(params)
             cached_config = self._load_configuration_from_cache()
@@ -260,8 +261,7 @@ class FunctionalCacher(BaseCacher):
             else:
                 # Json equality
                 flag = current_config == cached_config
-        flag = flag and os.path.exists(self.cache_filename(0))
-        return flag
+        return flag and os.path.exists(self.cache_filename(0))
 
     @when_policy_is("ON", "AUTO", "MUST")
     @when_initialized

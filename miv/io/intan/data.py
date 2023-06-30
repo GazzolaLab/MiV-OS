@@ -189,7 +189,12 @@ class DataIntan(Data):
         return ret
 
     @wrap_cacher(cache_tag="ttl_events")
-    def load_ttl_event(self, deadtime: float = 0.002, progress_bar: bool = False):
+    def load_ttl_event(
+        self,
+        deadtime: float = 0.002,
+        compress: bool = False,
+        progress_bar: bool = False,
+    ):
         """
         Load TTL events recorded data.
 
@@ -197,6 +202,10 @@ class DataIntan(Data):
         ----------
         deadtime : float
             Deadtime between two TTL events. (default: 0.002)
+        compress : bool
+            If True, reduce rate of the signal. (default: False)
+        progress_bar : bool
+            If True, show progress bar. (default: False)
         """
 
         signals, timestamps = [], []
@@ -226,11 +235,13 @@ class DataIntan(Data):
             timestamps.append(data.timestamps)
             sampling_rate = data.rate
 
-        return Signal(
-            data=np.concatenate(signals, axis=0),
-            timestamps=np.concatenate(timestamps),
-            rate=sampling_rate,
-        )
+        data = np.concatenate(signals, axis=0)
+        timestamps = np.concatenate(timestamps)
+
+        if compress:  # TODO
+            raise NotImplementedError
+
+        return Signal(data=data, timestamps=timestamps, rate=sampling_rate)
 
 
 class DataIntanTriggered(DataIntan):
