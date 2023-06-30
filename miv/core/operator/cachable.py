@@ -191,7 +191,7 @@ class BaseCacher:
 class DataclassCacher(BaseCacher):
     @when_policy_is("ON", "AUTO", "MUST")
     @when_initialized
-    def check_cached(self) -> bool:
+    def check_cached(self, *args, **kwargs) -> bool:
         self.cache_called = False  # FIXME: Maybe better place to switch then this
         if self.policy == "MUST":
             return True
@@ -215,7 +215,7 @@ class DataclassCacher(BaseCacher):
 
     @when_policy_is("ON", "AUTO", "MUST")
     @when_initialized
-    def save_config(self):
+    def save_config(self, *args, **kwargs) -> bool:
         config = self._compile_configuration_as_dict()
         os.makedirs(self.cache_dir, exist_ok=True)
         try:
