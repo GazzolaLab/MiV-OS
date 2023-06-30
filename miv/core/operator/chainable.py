@@ -68,6 +68,7 @@ class BaseChainingMixin:
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.pipeline_called = False
         self._downstream_list: list[_Chainable] = []
         self._upstream_list: list[_Chainable] = []
 
