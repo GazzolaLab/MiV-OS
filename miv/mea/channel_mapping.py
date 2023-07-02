@@ -8,37 +8,55 @@ from miv.mea import mea_map, rhd_64, rhs_32
 
 
 class MEA128:
-    def __init__(self, map_key="128_dual_connector_two_64_rhd"):
+    def __init__(
+        self, map_key="128_dual_connector_two_64_rhd", reverse=False, num_electrodes=128
+    ):
         """
+        [[ MEA side
         OE Arangement:
-        (2)rhd_64 ->, (1)rhd_64 <-
+        (1)rhd_64 ->, (2)rhd_64 <-
         Intan Arangement
         (D)rhs_32 ->, (C)rhs_32 ->, (B)rhs_32 <-, (A)rhs_32 <-
+        ]] Out-side
 
         -> means chip-side on bottom
+
+        Parameters
+        ----------
+        reverse : bool
+            If false, mapping is from OE RHD
+            If true, mapping is from Intan RHS
         """
         rhd_64_1 = rhd_64[::-1, ::-1].copy()
-        rhd_64_1[rhd_64_1 != -1] += 64
         rhd_64_2 = rhd_64.copy()
+        rhd_64_1[rhd_64_1 != -1] += 64 * 0
+        rhd_64_2[rhd_64_2 != -1] += 64 * 1
         self.oe_map = np.concatenate([rhd_64_1, rhd_64_2], axis=0)
 
         rhs_32_1 = rhs_32[::-1, ::-1].copy()
-        rhs_32_1[rhs_32_1 != -1] += 32 * 3
         rhs_32_2 = rhs_32[::-1, ::-1].copy()
-        rhs_32_2[rhs_32_2 != -1] += 32 * 2
         rhs_32_3 = rhs_32.copy()
-        rhs_32_3[rhs_32_3 != -1] += 32 * 1
         rhs_32_4 = rhs_32.copy()
+        rhs_32_1[rhs_32_1 != -1] += 32 * 3
+        rhs_32_2[rhs_32_2 != -1] += 32 * 2
+        rhs_32_3[rhs_32_3 != -1] += 32 * 1
         rhs_32_4[rhs_32_4 != -1] += 32 * 0
         self.intan_map = np.concatenate(
             [rhs_32_1, rhs_32_2, rhs_32_3, rhs_32_4], axis=0
         )
 
-        self.mea = mea_map[map_key]
-        self.mea_intan = np.zeros_like(self.mea, dtype=np.int_) - 1
-        for channel in range(128):
-            oe_channel = self.channel_mapping(channel, reverse=True)
-            self.mea_intan[self.mea == oe_channel] = channel
+        if not reverse:  # Given map is in RHD
+            self.mea = mea_map[map_key]
+            self.mea_intan = np.zeros_like(self.mea, dtype=np.int_) - 1
+            for channel in range(num_electrodes):
+                in_channel = self.channel_mapping(channel, reverse=reverse)
+                self.mea_intan[self.mea == channel] = in_channel
+        else:  # Given map is in RHS
+            self.mea_intan = mea_map[map_key]
+            self.mea = np.zeros_like(self.mea_intan, dtype=np.int_) - 1
+            for channel in range(num_electrodes):
+                oe_channel = self.channel_mapping(channel, reverse=reverse)
+                self.mea[self.mea_intan == channel] = oe_channel
 
     def channel_mapping(self, channel, reverse=False):
         """

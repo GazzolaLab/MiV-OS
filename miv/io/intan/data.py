@@ -188,9 +188,60 @@ class DataIntan(Data):
         ret = Spikestamps([eventstrain])  # TODO: use datatype.Events
         return ret
 
-    # Disable
-    def load_ttl_event(self):
-        raise AttributeError("DataIntan does not have laod_ttl_event method")
+    @wrap_cacher(cache_tag="ttl_events")
+    def load_ttl_event(
+        self,
+        deadtime: float = 0.002,
+        compress: bool = False,
+        progress_bar: bool = False,
+    ):
+        """
+        Load TTL events recorded data.
+
+        Parameters
+        ----------
+        deadtime : float
+            Deadtime between two TTL events. (default: 0.002)
+        compress : bool
+            If True, reduce rate of the signal. (default: False)
+        progress_bar : bool
+            If True, show progress bar. (default: False)
+        """
+
+        signals, timestamps = [], []
+        sampling_rate = None
+        for data in self._generator_by_channel_name("stim_data", progress_bar):
+            dead_time_idx = int(deadtime * data.rate)
+            num_channels = data.number_of_channels
+
+            signal = np.zeros((data.shape[data._SIGNALAXIS], 1), dtype=np.int_)
+            for channel in range(num_channels):
+                array = data.data[:, channel]
+                threshold_crossings = np.nonzero(array)[0]
+                if len(threshold_crossings) == 0:
+                    continue
+
+                distance_sufficient = np.insert(
+                    np.diff(threshold_crossings) >= dead_time_idx, 0, True
+                )
+                while not np.all(distance_sufficient):
+                    # repeatedly remove all threshold crossings that violate the dead_time
+                    threshold_crossings = threshold_crossings[distance_sufficient]
+                    distance_sufficient = np.insert(
+                        np.diff(threshold_crossings) >= dead_time_idx, 0, True
+                    )
+                signal[threshold_crossings, 0] = channel
+            signals.append(signal)
+            timestamps.append(data.timestamps)
+            sampling_rate = data.rate
+
+        data = np.concatenate(signals, axis=0)
+        timestamps = np.concatenate(timestamps)
+
+        if compress:  # TODO
+            raise NotImplementedError
+
+        return Signal(data=data, timestamps=timestamps, rate=sampling_rate)
 
 
 class DataIntanTriggered(DataIntan):

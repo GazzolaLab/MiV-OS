@@ -65,7 +65,17 @@ class Pipeline:
                 print("Running: ", node)
             if hasattr(node, "cacher"):
                 node.cacher.cache_policy = "OFF" if no_cache else "AUTO"
-            node.run(dry_run=dry_run, save_path=working_directory, skip_plot=skip_plot)
+
+            # in case of error, add message
+            try:
+                node.pipeline_called = False
+                node.run(
+                    dry_run=dry_run, save_path=working_directory, skip_plot=skip_plot
+                )
+                node.pipeline_called = True
+            except Exception as e:
+                raise Exception(f'Error while running the operator "{node.tag}"') from e
+
             if verbose:
                 print(f"Finished: {time.time() - stime:.03f} sec")
         if verbose:

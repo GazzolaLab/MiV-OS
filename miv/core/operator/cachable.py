@@ -181,11 +181,17 @@ class BaseCacher:
         if os.path.exists(self.cache_dir):
             shutil.rmtree(self.cache_dir)
 
+    def _load_configuration_from_cache(self) -> dict:
+        if os.path.exists(self.config_filename):
+            with open(self.config_filename) as f:
+                return json.load(f)
+        return None
+
 
 class DataclassCacher(BaseCacher):
     @when_policy_is("ON", "AUTO", "MUST")
     @when_initialized
-    def check_cached(self) -> bool:
+    def check_cached(self, *args, **kwargs) -> bool:
         self.cache_called = False  # FIXME: Maybe better place to switch then this
         if self.policy == "MUST":
             return True
@@ -194,14 +200,9 @@ class DataclassCacher(BaseCacher):
         if cached_config is None:
             flag = False
         else:
-            flag = current_config == cached_config  # TODO: fix this
+            # Json equality
+            flag = current_config == cached_config
         return flag
-
-    def _load_configuration_from_cache(self) -> dict:
-        if os.path.exists(self.config_filename):
-            with open(self.config_filename) as f:
-                return json.load(f)
-        return None
 
     def _compile_configuration_as_dict(self) -> dict:
         config = dataclasses.asdict(self.parent, dict_factory=collections.OrderedDict)
@@ -214,7 +215,7 @@ class DataclassCacher(BaseCacher):
 
     @when_policy_is("ON", "AUTO", "MUST")
     @when_initialized
-    def save_config(self):
+    def save_config(self, *args, **kwargs) -> bool:
         config = self._compile_configuration_as_dict()
         os.makedirs(self.cache_dir, exist_ok=True)
         try:
@@ -236,18 +237,45 @@ class DataclassCacher(BaseCacher):
 
 
 class FunctionalCacher(BaseCacher):
-    @when_policy_is("ON", "AUTO", "MUST")
-    @when_initialized
-    def check_cached(self) -> bool:
-        if self.policy == "MUST":  # TODO: fix this, remove redundancy
-            return True
-        flag = os.path.exists(self.cache_filename(0))
-        return flag
+    def _compile_parameters_as_dict(self, params=None) -> dict:
+        # Safe to assume params is a tuple, and all elements are hashable
+        config = collections.OrderedDict()
+        if params is None:
+            return config
+        for idx, arg in enumerate(params[0]):
+            config[f"arg_{idx}"] = arg
+        config.update(params[1])
+        return config
 
     @when_policy_is("ON", "AUTO", "MUST")
     @when_initialized
-    def save_config(self):
-        pass
+    def check_cached(self, params=None) -> bool:
+        if self.policy == "MUST":  # TODO: fix this, remove redundancy
+            return True
+        flag = True
+        if params is not None:
+            current_config = self._compile_parameters_as_dict(params)
+            cached_config = self._load_configuration_from_cache()
+            if cached_config is None:
+                flag = False
+            else:
+                # Json equality
+                flag = current_config == cached_config
+        return flag and os.path.exists(self.cache_filename(0))
+
+    @when_policy_is("ON", "AUTO", "MUST")
+    @when_initialized
+    def save_config(self, params=None):
+        config = self._compile_parameters_as_dict(params)
+        os.makedirs(self.cache_dir, exist_ok=True)
+        try:
+            with open(self.config_filename, "w") as f:
+                json.dump(config, f, indent=4)
+        except (TypeError, OverflowError):
+            raise TypeError(
+                "Some property of caching objects are not JSON serializable."
+            )
+        return True
 
     @when_initialized
     def load_cached(self) -> Generator[DataTypes, None, None]:
