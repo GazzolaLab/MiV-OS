@@ -163,7 +163,7 @@ class BaseCacher:
 
     @property
     def config_filename(self) -> str:
-        return os.path.join(self.cache_dir, "config.json")
+        return os.path.join(self.cache_dir, f"config_{self.cache_tag}.json")
 
     def cache_filename(self, idx) -> str:
         index = idx if isinstance(idx, str) else f"{idx:04}"
