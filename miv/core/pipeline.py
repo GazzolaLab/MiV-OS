@@ -77,10 +77,10 @@ class Pipeline:
                 raise Exception(f'Error while running the operator "{node.tag}"') from e
 
             if verbose:
-                print(f"Finished: {time.time() - stime:.03f} sec")
+                print(f"Finished: {time.time() - stime:.03f} sec", flush=True)
         if verbose:
             print(f"Pipeline done: computing {self._start_node}")
-            self.summarize()
+            print(self.summarize(), flush=True)
 
     def summarize(self):
         strs = []
