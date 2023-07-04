@@ -22,7 +22,6 @@ import elephant.statistics
 import matplotlib.pyplot as plt
 import neo
 import numpy as np
-import pyinform
 import quantities as pq
 import scipy
 import scipy.signal
@@ -159,6 +158,8 @@ def block_entropy(
         Block entropy for the given channel
 
     """
+    import pyinform
+
     assert history > 0, "history length should be a finite positive value"
     bin_spike = spiketrains.binning(bin_size=bin_size, t_start=t_start, t_end=t_end)
     block_entropy = np.zeros((bin_spike.shape[bin_spike._CHANNELAXIS],))
@@ -199,6 +200,8 @@ def entropy_rate(
         entropy rate for the given channel
 
     """
+    import pyinform
+
     assert history > 0, "history length should be a finite positive value"
     bin_spike = spiketrains.binning(bin_size=bin_size, t_start=t_start, t_end=t_end)
     entropy_rate = []
@@ -241,6 +244,8 @@ def active_information(
         Active information for the given channel
 
     """
+    import pyinform
+
     assert history > 0, "history length should be a finite positive value"
     bin_spike = spiketrains.binning(bin_size=bin_size, t_start=t_start, t_end=t_end)
     active_information = np.zeros((bin_spike.shape[bin_spike._CHANNELAXIS],))
@@ -281,6 +286,8 @@ def transfer_entropy(
         Transfer_entropy for the given pair of electrodes
 
     """
+    import pyinform
+
     assert history > 0, "history length should be a finite positive value"
     bin_spike = spiketrains.binning(bin_size=bin_size, t_start=t_start, t_end=t_end)
 
@@ -344,6 +351,8 @@ def mutual_information(
         Mutual information for the given pair of electrodes
 
     """
+    import pyinform
+
     assert t_start < t_end, "start time cannot be equal or greater than end time"
     assert bin_size > 0, "bin_size should be a finite positive value"
     bin_spike_x = binned_spiketrain(spiketrains, channelx, t_start, t_end, bin_size)
@@ -432,6 +441,8 @@ def relative_entropy(
         Relative_entropy for the given pair of electrodes
 
     """
+    import pyinform
+
     assert t_start < t_end, "start time cannot be equal or greater than end time"
     assert bin_size > 0, "bin_size should be a finite positive value"
 
@@ -476,6 +487,8 @@ def conditional_entropy(
         conditional entropy for the given pair of electrodes
 
     """
+    import pyinform
+
     assert t_start < t_end, "start time cannot be equal or greater than end time"
     assert bin_size > 0, "bin_size should be a finite positive value"
 
