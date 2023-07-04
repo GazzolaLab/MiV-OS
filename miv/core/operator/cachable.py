@@ -37,15 +37,10 @@ class _CacherProtocol(Protocol):
         ...
 
     @property
-    def cache_tag(self) -> str:
-        ...
-
-    @property
     def cache_called(self) -> bool:
         """Return true if last call was cached."""
         ...
 
-    @property
     def config_filename(self) -> str | pathlib.Path:
         ...
 
@@ -96,7 +91,6 @@ class SkipCache:  # TODO
     def __init__(self, parent, cache_dir: str | pathlib.Path):
         super().__init__()
 
-    @property
     def config_filename(self) -> str:
         raise NotImplementedError(
             "If you are using SkipCache, you should not be calling this method."
@@ -157,23 +151,21 @@ class BaseCacher:
         self.policy: CACHE_POLICY = "AUTO"  # TODO: make this a property
         self.parent = parent
         self.cache_dir = None  # TODO: Public. Make proper setter
-        self.cache_tag = "data"
 
         self.cache_called = False
 
-    @property
-    def config_filename(self) -> str:
-        return os.path.join(self.cache_dir, f"config_{self.cache_tag}.json")
+    def config_filename(self, tag="data") -> str:
+        return os.path.join(self.cache_dir, f"config_{tag}.json")
 
-    def cache_filename(self, idx) -> str:
+    def cache_filename(self, idx, tag="data") -> str:
         index = idx if isinstance(idx, str) else f"{idx:04}"
-        return os.path.join(self.cache_dir, f"cache_{self.cache_tag}_{index}.pkl")
+        return os.path.join(self.cache_dir, f"cache_{tag}_{index}.pkl")
 
     @when_policy_is("ON", "AUTO", "MUST")
     @when_initialized
-    def save_cache(self, values, idx=0) -> bool:
+    def save_cache(self, values, idx=0, tag="data") -> bool:
         os.makedirs(self.cache_dir, exist_ok=True)
-        with open(self.cache_filename(idx), "wb") as f:
+        with open(self.cache_filename(idx, tag), "wb") as f:
             pkl.dump(values, f)
         return True
 
@@ -181,9 +173,10 @@ class BaseCacher:
         if os.path.exists(self.cache_dir):
             shutil.rmtree(self.cache_dir)
 
-    def _load_configuration_from_cache(self) -> dict:
-        if os.path.exists(self.config_filename):
-            with open(self.config_filename) as f:
+    def _load_configuration_from_cache(self, tag="data") -> dict:
+        path = self.config_filename(tag)
+        if os.path.exists(path):
+            with open(path) as f:
                 return json.load(f)
         return None
 
@@ -219,7 +212,7 @@ class DataclassCacher(BaseCacher):
         config = self._compile_configuration_as_dict()
         os.makedirs(self.cache_dir, exist_ok=True)
         try:
-            with open(self.config_filename, "w") as f:
+            with open(self.config_filename(), "w") as f:
                 json.dump(config, f, indent=4)
         except (TypeError, OverflowError):
             raise TypeError(
@@ -249,27 +242,27 @@ class FunctionalCacher(BaseCacher):
 
     @when_policy_is("ON", "AUTO", "MUST")
     @when_initialized
-    def check_cached(self, params=None) -> bool:
+    def check_cached(self, params=None, tag="data") -> bool:
         if self.policy == "MUST":  # TODO: fix this, remove redundancy
             return True
         flag = True
         if params is not None:
             current_config = self._compile_parameters_as_dict(params)
-            cached_config = self._load_configuration_from_cache()
+            cached_config = self._load_configuration_from_cache(tag)
             if cached_config is None:
                 flag = False
             else:
                 # Json equality
                 flag = current_config == cached_config
-        return flag and os.path.exists(self.cache_filename(0))
+        return flag and os.path.exists(self.cache_filename(0, tag))
 
     @when_policy_is("ON", "AUTO", "MUST")
     @when_initialized
-    def save_config(self, params=None):
+    def save_config(self, params=None, tag="data"):
         config = self._compile_parameters_as_dict(params)
         os.makedirs(self.cache_dir, exist_ok=True)
         try:
-            with open(self.config_filename, "w") as f:
+            with open(self.config_filename(tag), "w") as f:
                 json.dump(config, f, indent=4)
         except (TypeError, OverflowError):
             raise TypeError(
@@ -278,8 +271,16 @@ class FunctionalCacher(BaseCacher):
         return True
 
     @when_initialized
-    def load_cached(self) -> Generator[DataTypes, None, None]:
+    def load_cached(self, tag="data") -> Generator[DataTypes, None, None]:
         self.cache_called = True
-        path = glob.glob(self.cache_filename(0))[0]
+        path = glob.glob(self.cache_filename(0, tag))[0]
         with open(path, "rb") as f:
             yield pkl.load(f)
+
+    @when_policy_is("ON", "AUTO", "MUST")
+    @when_initialized
+    def save_cache(self, values, tag="data") -> bool:
+        os.makedirs(self.cache_dir, exist_ok=True)
+        with open(self.cache_filename(0, tag), "wb") as f:
+            pkl.dump(values, f)
+        return True

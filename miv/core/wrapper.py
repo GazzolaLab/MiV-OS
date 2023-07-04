@@ -33,16 +33,13 @@ def wrap_cacher(cache_tag):
     def decorator(func):
         # @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            if not hasattr(wrapper, "cache_tag"):
-                setattr(wrapper, "cache_tag", cache_tag)
             self: Operator = args[0]
-            self.cacher.cache_tag = wrapper.cache_tag
-            if self.cacher.check_cached(params=(args[1:], kwargs)):
-                return next(self.cacher.load_cached())
+            if self.cacher.check_cached(params=(args[1:], kwargs), tag=cache_tag):
+                return next(self.cacher.load_cached(tag=cache_tag))
             else:
                 result = func(*args, **kwargs)
-                self.cacher.save_cache(result)
-                self.cacher.save_config(params=(args[1:], kwargs))
+                self.cacher.save_cache(result, tag=cache_tag)
+                self.cacher.save_config(params=(args[1:], kwargs), tag=cache_tag)
                 return result
 
         return wrapper
