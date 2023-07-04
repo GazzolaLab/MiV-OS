@@ -184,12 +184,12 @@ class BaseCacher:
 class DataclassCacher(BaseCacher):
     @when_policy_is("ON", "AUTO", "MUST")
     @when_initialized
-    def check_cached(self, *args, **kwargs) -> bool:
+    def check_cached(self, tag="data", *args, **kwargs) -> bool:
         self.cache_called = False  # FIXME: Maybe better place to switch then this
         if self.policy == "MUST":
             return True
         current_config = self._compile_configuration_as_dict()
-        cached_config = self._load_configuration_from_cache()
+        cached_config = self._load_configuration_from_cache(tag=tag)
         if cached_config is None:
             flag = False
         else:
@@ -208,11 +208,11 @@ class DataclassCacher(BaseCacher):
 
     @when_policy_is("ON", "AUTO", "MUST")
     @when_initialized
-    def save_config(self, *args, **kwargs) -> bool:
+    def save_config(self, tag="data", *args, **kwargs) -> bool:
         config = self._compile_configuration_as_dict()
         os.makedirs(self.cache_dir, exist_ok=True)
         try:
-            with open(self.config_filename(), "w") as f:
+            with open(self.config_filename(tag=tag), "w") as f:
                 json.dump(config, f, indent=4)
         except (TypeError, OverflowError):
             raise TypeError(
@@ -221,9 +221,10 @@ class DataclassCacher(BaseCacher):
         return True
 
     @when_initialized
-    def load_cached(self) -> Generator[DataTypes, None, None]:
+    def load_cached(self, tag="data") -> Generator[DataTypes, None, None]:
         self.cache_called = True
         paths = glob.glob(self.cache_filename("*"))
+        breakpoint()
         for path in paths:
             with open(path, "rb") as f:
                 yield pkl.load(f)
