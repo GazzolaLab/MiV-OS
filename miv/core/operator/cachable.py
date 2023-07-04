@@ -224,7 +224,6 @@ class DataclassCacher(BaseCacher):
     def load_cached(self, tag="data") -> Generator[DataTypes, None, None]:
         self.cache_called = True
         paths = glob.glob(self.cache_filename("*"))
-        breakpoint()
         for path in paths:
             with open(path, "rb") as f:
                 yield pkl.load(f)
