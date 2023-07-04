@@ -223,7 +223,7 @@ class DataclassCacher(BaseCacher):
     @when_initialized
     def load_cached(self, tag="data") -> Generator[DataTypes, None, None]:
         self.cache_called = True
-        paths = glob.glob(self.cache_filename("*"))
+        paths = glob.glob(self.cache_filename("*", tag=tag))
         for path in paths:
             with open(path, "rb") as f:
                 yield pkl.load(f)
@@ -254,7 +254,7 @@ class FunctionalCacher(BaseCacher):
             else:
                 # Json equality
                 flag = current_config == cached_config
-        return flag and os.path.exists(self.cache_filename(0, tag))
+        return flag and os.path.exists(self.cache_filename(0, tag=tag))
 
     @when_policy_is("ON", "AUTO", "MUST")
     @when_initialized
@@ -273,7 +273,7 @@ class FunctionalCacher(BaseCacher):
     @when_initialized
     def load_cached(self, tag="data") -> Generator[DataTypes, None, None]:
         self.cache_called = True
-        path = glob.glob(self.cache_filename(0, tag))[0]
+        path = glob.glob(self.cache_filename(0, tag=tag))[0]
         with open(path, "rb") as f:
             yield pkl.load(f)
 
@@ -281,6 +281,6 @@ class FunctionalCacher(BaseCacher):
     @when_initialized
     def save_cache(self, values, tag="data") -> bool:
         os.makedirs(self.cache_dir, exist_ok=True)
-        with open(self.cache_filename(0, tag), "wb") as f:
+        with open(self.cache_filename(0, tag=tag), "wb") as f:
             pkl.dump(values, f)
         return True
