@@ -20,7 +20,7 @@ def test_peri_stimulus_time_function(spike_train_set, true_pst):
     assert np.isclose(PST, true_pst).all()
 
 
-def test_psth():
+def test_psth(tmp_path):
     # create example events and spikestamps
     events = Spikestamps([np.array([0.01, 0.03, 0.05]), np.array([])])
     spikestamps = Spikestamps(
@@ -32,6 +32,7 @@ def test_psth():
 
     # create PSTH instance
     psth = PSTH(binsize=0.001, interval=0.1)
+    psth.set_save_path(tmp_path)
 
     # call PSTH with example events and spikestamps
     result = psth(events, spikestamps)
