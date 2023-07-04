@@ -65,6 +65,9 @@ class AvalancheDetection(OperatorMixin):
     allow_multiple_spike_per_bin: bool = False
     minimum_bins_in_avalanche: int = 10
 
+    pre_burst_extension: float = 0.0
+    post_burst_extension: float = 0.0
+
     tag: str = "Avalanche and Criticality Analysis"
 
     @wrap_cacher("avalanche_detection")
@@ -107,6 +110,10 @@ class AvalancheDetection(OperatorMixin):
             starts = starts[np.concatenate([[0], inds + 1])]
             ends = ends[np.concatenate([inds, [len(ends) - 1]])]
 
+        # Include residual windows
+        starts = starts - int(self.pre_burst_extension / self.bin_size)
+        ends = ends + int(self.post_burst_extension / self.bin_size)
+
         return starts, ends, bincount
 
     def __post_init__(self):
@@ -140,7 +147,7 @@ class AvalancheDetection(OperatorMixin):
 
         # Save
         left, right = ax.get_xlim()
-        interval = 30  # sec
+        interval = 10  # sec
         for i in range(int(np.ceil((right - left) / interval))):
             ax.set_xlim(left + i * interval, left + (i + 1) * interval)
             if save_path is not None:
