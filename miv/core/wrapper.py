@@ -35,11 +35,13 @@ def wrap_cacher(cache_tag):
         def wrapper(*args, **kwargs):
             self: Operator = args[0]
             if self.cacher.check_cached(params=(args[1:], kwargs), tag=cache_tag):
+                self.cacher.cache_called = True
                 return next(self.cacher.load_cached(tag=cache_tag))
             else:
                 result = func(*args, **kwargs)
                 self.cacher.save_cache(result, tag=cache_tag)
                 self.cacher.save_config(params=(args[1:], kwargs), tag=cache_tag)
+                self.cacher.cache_called = False
                 return result
 
         return wrapper
@@ -62,11 +64,13 @@ def wrap_generator_to_generator(func):
         )
         if is_all_generator:
             if self.cacher.check_cached():
+                self.cacher.cache_called = True
 
                 def generator_func(*args, **kwargs):
                     yield from self.cacher.load_cached()
 
             else:
+                self.cacher.cache_called = False
 
                 def generator_func(*args, **kwargs):
                     for idx, zip_arg in enumerate(zip(*args)):
@@ -79,12 +83,14 @@ def wrap_generator_to_generator(func):
             return generator_func(*args, **kwargs)
         else:
             if self.cacher.check_cached():
+                self.cacher.cache_called = True
                 return next(self.cacher.load_cached())
             else:
                 result = func(self, *args, **kwargs)
                 self.cacher.save_cache(result)
                 self.cacher.save_config()
-            return result
+                self.cacher.cache_called = False
+                return result
 
     return wrapper
 

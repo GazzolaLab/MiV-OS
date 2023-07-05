@@ -185,7 +185,6 @@ class DataclassCacher(BaseCacher):
     @when_policy_is("ON", "AUTO", "MUST")
     @when_initialized
     def check_cached(self, tag="data", *args, **kwargs) -> bool:
-        self.cache_called = False  # FIXME: Maybe better place to switch then this
         if self.policy == "MUST":
             return True
         current_config = self._compile_configuration_as_dict()
@@ -222,7 +221,6 @@ class DataclassCacher(BaseCacher):
 
     @when_initialized
     def load_cached(self, tag="data") -> Generator[DataTypes, None, None]:
-        self.cache_called = True
         paths = glob.glob(self.cache_filename("*", tag=tag))
         for path in paths:
             with open(path, "rb") as f:
@@ -272,7 +270,6 @@ class FunctionalCacher(BaseCacher):
 
     @when_initialized
     def load_cached(self, tag="data") -> Generator[DataTypes, None, None]:
-        self.cache_called = True
         path = glob.glob(self.cache_filename(0, tag=tag))[0]
         with open(path, "rb") as f:
             yield pkl.load(f)

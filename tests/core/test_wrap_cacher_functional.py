@@ -90,3 +90,47 @@ def test_two_function_caching(cls, tmp_path):
     assert os.path.exists(tmp_path / ".cache" / "cache_function_2_0000.pkl")
     assert os.path.exists(tmp_path / ".cache" / "config_function_2.json")
     assert os.path.exists(tmp_path / ".cache" / "config_function_1.json")
+
+
+@pytest.mark.parametrize("cls", [MockDataLoader])
+def test_two_function_caching_cacher_called_flag_test(cls, tmp_path):
+    runner = cls(tmp_path)
+
+    # Case
+    a = 1
+    b = 2
+
+    assert not runner.run_check_flag
+    ans1 = runner.func1(a, b)
+    assert runner.run_check_flag
+    assert not runner.cacher.cache_called
+    runner.reset_flag()
+    ans2 = runner.func2(a, b)
+    assert runner.run_check_flag
+    assert not runner.cacher.cache_called
+    runner.reset_flag()
+    ans3 = runner.func3(a, b)
+    assert runner.run_check_flag
+    assert not runner.cacher.cache_called
+
+    assert ans1 == a + b
+    assert ans2 == a - b
+    assert ans3 == a * b
+    assert ans1 != ans2, "If this fail, change the test cases"
+    assert ans1 != ans3, "If this fail, change the test cases"
+
+    # Check for multiple run
+    runner.reset_flag()
+    cached_ans1 = runner.func1(a, b)
+    assert cached_ans1 == ans1
+    assert runner.cacher.cache_called
+    cached_ans2 = runner.func2(a, b)
+    assert cached_ans2 == ans2
+    assert runner.cacher.cache_called
+    cached_ans3 = runner.func3(a, b)
+    assert cached_ans3 == ans3
+    assert runner.cacher.cache_called
+    assert not runner.run_check_flag
+
+    assert ans1 == cached_ans1
+    assert ans2 == cached_ans2
