@@ -124,9 +124,13 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin):
     def set_caching_policy(self, cacher: _CacherProtocol):
         self.cacher = cacher(self)
 
-    def set_save_path(self, path: str | pathlib.Path):
+    def set_save_path(self, path: str | pathlib.Path, recursive: bool = False):
         self.analysis_path = os.path.join(path, self.tag.replace(" ", "_"))
         self.cacher.cache_dir = os.path.join(self.analysis_path, ".cache")
+        if recursive:
+            # TODO: if circular dependency exists, this will cause infinite loop
+            for node in self.iterate_upstream():
+                node.set_save_path(path, recursive=True)
 
     def make_analysis_path(self):
         os.makedirs(self.analysis_path, exist_ok=True)
@@ -152,14 +156,10 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin):
 
     def run(
         self,
-        save_path: str | pathlib.Path | None = None,
         dry_run: bool = False,
         skip_plot: bool = False,
     ) -> None:
         # Execute the module
-        if save_path is not None:
-            self.set_save_path(save_path)
-
         if dry_run:
             print("Dry run: ", self.__class__.__name__)
             return

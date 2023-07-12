@@ -35,7 +35,7 @@ class Pipeline:
 
     def __init__(self, node: _Chainable):
         self._start_node = node
-        self.execution_order: List[_Runnable] = self._start_node.topological_sort()
+        self.execution_order: List[_Runnable] = node.topological_sort()
 
     def run(
         self,
@@ -59,19 +59,19 @@ class Pipeline:
         verbose : bool, optional
             If True, the pipeline will log debugging informations. By default False
         """
+        self._start_node.set_save_path(working_directory, recursive=True)
+        self.execution_order = self._start_node.topological_sort()
         for node in self.execution_order:
             if verbose:
                 stime = time.time()
                 print("Running: ", node)
-            if hasattr(node, "cacher"):
+            if hasattr(node, "cacher"):  # TODO: Remove this option
                 node.cacher.cache_policy = "OFF" if no_cache else "AUTO"
 
             # in case of error, add message
             try:
                 node.pipeline_called = False
-                node.run(
-                    dry_run=dry_run, save_path=working_directory, skip_plot=skip_plot
-                )
+                node.run(dry_run=dry_run, skip_plot=skip_plot)
                 node.pipeline_called = True
             except Exception as e:
                 raise Exception(f'Error while running the operator "{node.tag}"') from e

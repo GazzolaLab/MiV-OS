@@ -148,7 +148,9 @@ class BaseChainingMixin:
                 output.append(str(label))
         return "\n".join(output)
 
-    def _get_upstream_topology(self, lst: list[SelfChain] = None) -> list[SelfChain]:
+    def _get_upstream_topology(
+        self, lst: list[SelfChain] | None = None
+    ) -> list[SelfChain]:
         if lst is None:
             lst = []
         if (
