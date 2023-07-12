@@ -41,6 +41,7 @@ from typing import (
 
 import logging
 import os
+import re
 import pickle
 from collections.abc import MutableSequence
 from glob import glob
@@ -518,9 +519,9 @@ class DataManager(MutableSequence):
     def __init__(self, data_collection_path: str):
         super().__init__()
         self.data_collection_path: str | pathlib.Path = data_collection_path
-        self.data_list: list[DataProtocol] = []
 
         # From the path get data paths and create data objects
+        self.data_list: list[DataProtocol] = []
         self._load_data_paths()
 
     def __call__(self):
@@ -615,7 +616,10 @@ class DataManager(MutableSequence):
             ):
                 path_list.append(path)
         if sort:
-            path_list = sorted(path_list)
+            pattern = r"(\d+)\/recording(\d+)"  # TODO: probably need better pattern
+            matches = [re.search(pattern, path) for path in path_list]
+            tags = [(int(match.group(1)), int(match.group(2))) for match in matches]
+            path_list = [path for _, path in sorted(zip(tags, path_list))]
         return path_list
 
     def save(self, tag: str, format: str):  # pragma: no cover
