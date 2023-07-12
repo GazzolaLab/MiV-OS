@@ -44,6 +44,9 @@ class Operator(
     def run(self, dry_run: bool = False) -> None:
         ...
 
+    def set_save_path(self, path: str | pathlib.Path, recursive: bool = False) -> None:
+        ...
+
 
 class DataLoader(
     _Callback,
@@ -77,6 +80,9 @@ class DataNodeMixin(BaseChainingMixin):
     def run(self, **kwargs):
         pass
 
+    def set_save_path(self, path: str | pathlib.Path, recursive: bool = False) -> None:
+        pass
+
 
 class DataLoaderMixin(BaseChainingMixin, BaseCallbackMixin):
     """ """
@@ -95,6 +101,9 @@ class DataLoaderMixin(BaseChainingMixin, BaseCallbackMixin):
         return self._output
 
     def run(self, **kwargs):
+        pass
+
+    def set_save_path(self, path: str | pathlib.Path, recursive: bool = False) -> None:
         pass
 
 
