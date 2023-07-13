@@ -40,7 +40,7 @@ def test_spike_amplitude_to_background_noise_arbitrary_signal_and_timestamps():
 
     # Test a single channel with one spike
     spikestamps = Spikestamps([[2 / sampling_rate]])
-    expected = np.array([0.0])
+    expected = np.array([64.0 / 21.0])
     actual = spike_amplitude_to_background_noise(signal, spikestamps)
     np.testing.assert_allclose(expected, actual)
 
@@ -57,7 +57,7 @@ def test_spike_amplitude_to_background_noise_arbitrary_signal_and_timestamps():
 
     # Test multiple channels with different spikes
     spikestamps = Spikestamps([[2 / sampling_rate], [4 / sampling_rate]])
-    expected = np.array([0.04761905, 0.04761905])
+    expected = np.array([64.0 / 21.0, 484.0 / 21.0])
     actual = spike_amplitude_to_background_noise(signal, spikestamps)
     np.testing.assert_allclose(expected, actual)
 
