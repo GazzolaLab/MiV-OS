@@ -685,37 +685,34 @@ vis = ["matplotlib (>=3.0.0)"]
 
 [[package]]
 name = "elephant"
-version = "0.11.2"
+version = "0.13.0"
 description = "Elephant is a package for analysis of electrophysiology data in Python"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 files = [
-    {file = "elephant-0.11.2-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:08d3daa6792c6c3aadb431d23e17f7fb53b1bc5df1c022bf6b4552b1cb7c5fe1"},
-    {file = "elephant-0.11.2-cp310-cp310-musllinux_1_1_x86_64.whl", hash = "sha256:0c6aa6e1cfdad87e187af5f31b6e1809d58d663fafd49c08b666a6c4864ca050"},
-    {file = "elephant-0.11.2-cp310-cp310-win_amd64.whl", hash = "sha256:68a50fd587f8734282196c40c8e13899b0554993ed23260bd0e6087da8eb1e43"},
-    {file = "elephant-0.11.2-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:5f3b3937200b08a79801712738ef0ca7bf520b441880d0793dd052437dc52548"},
-    {file = "elephant-0.11.2-cp37-cp37m-musllinux_1_1_x86_64.whl", hash = "sha256:7cf0826192ae007515a50d9275d3a337df99c0b7579e9b02ebf5e8aa0a00743a"},
-    {file = "elephant-0.11.2-cp37-cp37m-win_amd64.whl", hash = "sha256:1315a9494704d586b7e7edabf4bda55ac8cb0aefa7134af9f43e079ce934baa0"},
-    {file = "elephant-0.11.2-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:3f69eaf0fb9f8fce0e00163914ffd9ccbba586851dc6b14123a943b4c850db3c"},
-    {file = "elephant-0.11.2-cp38-cp38-musllinux_1_1_x86_64.whl", hash = "sha256:e011a59c2a90e3d39b71a086cc4d1997f692cfdd0546ddac31b977209e6fabcd"},
-    {file = "elephant-0.11.2-cp38-cp38-win_amd64.whl", hash = "sha256:92bac510fbabdf82b1e935f4117d5f9c0f2d9798e2ddc6f270b2b1a0b0654553"},
-    {file = "elephant-0.11.2-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:6cae476e00aaf4b8ef0ce0526159579a94ce26f1f987ee943354e7a95fa17548"},
-    {file = "elephant-0.11.2-cp39-cp39-musllinux_1_1_x86_64.whl", hash = "sha256:912d1ebb29ea211d84211948ff7fb111604028043e7d894f7f70a14d0e52dafa"},
-    {file = "elephant-0.11.2-cp39-cp39-win_amd64.whl", hash = "sha256:a27ef5312d47bbe86b619aaa9ea7b4dc90a4c26607865ba1c03b98920c9890fc"},
-    {file = "elephant-0.11.2.tar.gz", hash = "sha256:f8759fff0bbb136ae4ffc8d1eacadeea8ba56610d705c3bf207de87ada3ba240"},
+    {file = "elephant-0.13.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:f7599eb2b6100f4f0ed5bf3a56f491fc5263eb03646ab514a391566be9475fe9"},
+    {file = "elephant-0.13.0-cp310-cp310-musllinux_1_1_x86_64.whl", hash = "sha256:30accf984c04853b3714e42ba19fd77ebb3dfd784186448c2f101513cd026f55"},
+    {file = "elephant-0.13.0-cp310-cp310-win_amd64.whl", hash = "sha256:e95f06e582c919a93ab920e9ddc28cae25100652899d050e6ea6d16afb9bfec7"},
+    {file = "elephant-0.13.0-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:ed66e083f817b841ce83392d4c95ea6a52389e55a24b32a48e503ed1f4e6e680"},
+    {file = "elephant-0.13.0-cp38-cp38-musllinux_1_1_x86_64.whl", hash = "sha256:e13332c4ee3bfa0b41a95bd278a29884b35730e09205a196d137c87e57a891bf"},
+    {file = "elephant-0.13.0-cp38-cp38-win_amd64.whl", hash = "sha256:88adfdf1d65dae793fbf1985ddabb8a7f1b17dcf969a13ffea0e54fdb509fa7b"},
+    {file = "elephant-0.13.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:83d939a1f92b341dfe5e0e17a8776252567e78ee84c1639df1e0037c4050a236"},
+    {file = "elephant-0.13.0-cp39-cp39-musllinux_1_1_x86_64.whl", hash = "sha256:1bf29b386381d943fab1bd8cd74b8ea77691c77eff388e1a661a77ab59019a96"},
+    {file = "elephant-0.13.0-cp39-cp39-win_amd64.whl", hash = "sha256:6572246f0c1c8ddc2f15fa667ddb189b1c0528aeeafb99f8b83bc8b356ab0a2a"},
+    {file = "elephant-0.13.0.tar.gz", hash = "sha256:2c6463cf9ace41631f2af196c5b80b468bf1c4b264d3a6b1ea0fb587d9e7dd67"},
 ]
 
 [package.dependencies]
 neo = ">=0.10.0"
-numpy = ">=1.18.1"
-quantities = ">=0.12.1"
+numpy = ">=1.19.5"
+quantities = ">=0.14.1"
 scipy = ">=1.5.4"
 six = ">=1.10.0"
 tqdm = "*"
 
 [package.extras]
 cuda = ["pycuda (>=2020.1)"]
-docs = ["jupyter (>=1.0.0)", "matplotlib (>=3.3.2)", "nbsphinx (>=0.8.0)", "numpydoc (>=1.1.0)", "sphinx (>=3.3.0)", "sphinx-tabs (>=1.3.0)", "sphinxcontrib-bibtex (==1.0.0)"]
+docs = ["jupyter (>=1.0.0)", "matplotlib (>=3.3.2)", "nbsphinx (>=0.8.0)", "numpydoc (>=1.1.0)", "sphinx (>=3.3.0)", "sphinx-tabs (>=1.3.0)", "sphinxcontrib-bibtex (>1.0.0)"]
 extras = ["jinja2 (>=2.11.2)", "pandas (>=0.18.0)", "scikit-learn (>=0.23.2)", "statsmodels (>=0.12.1)"]
 opencl = ["pyopencl (>=2020.2.2)"]
 tests = ["nixio (>=1.5.0)", "pytest"]
@@ -2258,6 +2255,7 @@ files = [
     {file = "Pillow-10.0.0-cp311-cp311-musllinux_1_1_aarch64.whl", hash = "sha256:3b08d4cc24f471b2c8ca24ec060abf4bebc6b144cb89cba638c720546b1cf538"},
     {file = "Pillow-10.0.0-cp311-cp311-musllinux_1_1_x86_64.whl", hash = "sha256:d737a602fbd82afd892ca746392401b634e278cb65d55c4b7a8f48e9ef8d008d"},
     {file = "Pillow-10.0.0-cp311-cp311-win_amd64.whl", hash = "sha256:3a82c40d706d9aa9734289740ce26460a11aeec2d9c79b7af87bb35f0073c12f"},
+    {file = "Pillow-10.0.0-cp311-cp311-win_arm64.whl", hash = "sha256:bc2ec7c7b5d66b8ec9ce9f720dbb5fa4bace0f545acd34870eff4a369b44bf37"},
     {file = "Pillow-10.0.0-cp312-cp312-macosx_10_10_x86_64.whl", hash = "sha256:d80cf684b541685fccdd84c485b31ce73fc5c9b5d7523bf1394ce134a60c6883"},
     {file = "Pillow-10.0.0-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:76de421f9c326da8f43d690110f0e79fe3ad1e54be811545d7d91898b4c8493e"},
     {file = "Pillow-10.0.0-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:81ff539a12457809666fef6624684c008e00ff6bf455b4b89fd00a140eecd640"},
@@ -2267,6 +2265,7 @@ files = [
     {file = "Pillow-10.0.0-cp312-cp312-musllinux_1_1_aarch64.whl", hash = "sha256:d50b6aec14bc737742ca96e85d6d0a5f9bfbded018264b3b70ff9d8c33485551"},
     {file = "Pillow-10.0.0-cp312-cp312-musllinux_1_1_x86_64.whl", hash = "sha256:00e65f5e822decd501e374b0650146063fbb30a7264b4d2744bdd7b913e0cab5"},
     {file = "Pillow-10.0.0-cp312-cp312-win_amd64.whl", hash = "sha256:f31f9fdbfecb042d046f9d91270a0ba28368a723302786c0009ee9b9f1f60199"},
+    {file = "Pillow-10.0.0-cp312-cp312-win_arm64.whl", hash = "sha256:1ce91b6ec08d866b14413d3f0bbdea7e24dfdc8e59f562bb77bc3fe60b6144ca"},
     {file = "Pillow-10.0.0-cp38-cp38-macosx_10_10_x86_64.whl", hash = "sha256:349930d6e9c685c089284b013478d6f76e3a534e36ddfa912cde493f235372f3"},
     {file = "Pillow-10.0.0-cp38-cp38-macosx_11_0_arm64.whl", hash = "sha256:3a684105f7c32488f7153905a4e3015a3b6c7182e106fe3c37fbb5ef3e6994c3"},
     {file = "Pillow-10.0.0-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:b4f69b3700201b80bb82c3a97d5e9254084f6dd5fb5b16fc1a7b974260f89f43"},
@@ -3895,4 +3894,4 @@ experiment = ["lyon", "pyserial"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<3.12"
-content-hash = "35641f883ca7bc926c2bb2eadad84d9bf189cd41cac7d57ba781200185e9b2b7"
+content-hash = "e9680b9d5d784187e2c08541a72e3c58dc2bece01c77959ec5b8d3088cb9e4dd"

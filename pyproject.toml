@@ -43,7 +43,7 @@ miv_extract_spiketrain = "miv.machinary.miv_extract_spiketrain:main"
 [tool.poetry.dependencies]
 python = ">=3.8,<3.12"
 scipy = "^1.9.1"
-elephant = "^0.11.1"
+elephant = "^0.13.0"
 matplotlib = "^3.5.2"
 neo = ">=0.11.0,<0.12.0"
 pandas = "^2.0.2"
