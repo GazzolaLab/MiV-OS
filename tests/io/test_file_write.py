@@ -24,7 +24,6 @@ def isEmpty(dictionary):
 
 
 def test_initialize():
-
     test_data = miv_file.initialize()
 
     assert isinstance(test_data, dict)
@@ -44,7 +43,6 @@ def test_clear_container(mock_h5_file):
 
 
 def test_create_container():
-
     data = miv_file.initialize()
 
     miv_file.create_group(data, "coordinates", counter="ncoords")
@@ -60,7 +58,6 @@ def test_create_container():
 
 
 def test_create_group():
-
     data = miv_file.initialize()
     miv_file.create_group(data, "coordinates", counter="ncoords")
 
@@ -74,7 +71,6 @@ def test_create_group():
 
 
 def test_pack():
-
     data = miv_file.initialize()
     miv_file.create_group(data, "obj", counter="nobj")
     miv_file.create_dataset(data, ["myfloat"], group="obj", dtype=float)
@@ -147,7 +143,6 @@ def test_pack():
 
 
 def test_create_dataset():
-
     data = miv_file.initialize()
     miv_file.create_group(data, "coordinates", counter="ncoords")
     miv_file.create_dataset(data, ["px", "py", "pz"], group="coordinates", dtype=float)
@@ -163,7 +158,6 @@ def test_create_dataset():
 
 
 def test_write_metadata(mock_h5_file):
-
     filename = mock_h5_file
     file = h5.File(filename, "r")
 

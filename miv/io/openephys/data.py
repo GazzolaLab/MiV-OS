@@ -41,8 +41,8 @@ from typing import (
 
 import logging
 import os
-import re
 import pickle
+import re
 from collections.abc import MutableSequence
 from glob import glob
 

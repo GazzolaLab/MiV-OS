@@ -57,7 +57,6 @@ def read(
     # Determine if only a subset of the data should be read
     subset_: Union[None, List[int]] = None
     if subset is not None:
-
         try:
             subset_ = validate_subset(subset, ncontainers)
         except RuntimeError:
@@ -78,7 +77,6 @@ def read(
     # Get the datasets and counters
     dc = infile["_MAP_DATASETS_TO_COUNTERS_"]
     for vals in dc:
-
         # The decode is there because vals were stored as numpy.bytes
         counter = vals[1].decode()
         index_name = f"{counter}_INDEX"
@@ -105,7 +103,6 @@ def read(
     full_file_indices = {}
 
     for counter_name in data["_LIST_OF_COUNTERS_"]:
-
         full_file_counters = infile[counter_name]
         full_file_index = calculate_index_from_counters(full_file_counters)
 
@@ -132,7 +129,6 @@ def read(
 
     # Loop over the all_datasets we want and pull out the data.
     for name in all_datasets:
-
         # If this is a counter, we're going to have to grab the indices
         # differently than for a "normal" dataset
         IS_COUNTER = True
@@ -181,10 +177,8 @@ def select_datasets(
     groups: Optional[Union[str, List[str]]] = None,
     logger: Optional[Logger] = None,
 ) -> List[str]:
-
     # Only keep select data from file, if we have specified datasets
     if groups is not None:
-
         if isinstance(groups, str):
             groups = list(groups)
 
@@ -221,7 +215,6 @@ def validate_subset(
     ncontainers: int,
     logger: Optional[Logger] = None,
 ) -> List[int]:
-
     if isinstance(subset, tuple):
         subset_ = list(subset)
 
@@ -291,7 +284,6 @@ def unpack(
     data: Dict[str, Any],
     n: int = 0,
 ) -> None:
-
     """Fills the container dictionary with selected rows from the data dictionary.
 
     Args:
@@ -308,7 +300,6 @@ def unpack(
     keys = container.keys()
 
     for key in keys:
-
         # if "num" in key:
         if key in data["_LIST_OF_COUNTERS_"]:
             container[key] = data[key][n]
@@ -328,7 +319,6 @@ def unpack(
 def get_ncontainers_in_file(
     filename: str, logger: Optional[Logger] = None
 ) -> Union[None, int64]:
-
     """Get the number of containers in the file."""
 
     with h5py.File(filename, "r+") as f:
@@ -348,7 +338,6 @@ def get_ncontainers_in_file(
 
 
 def get_ncontainers_in_data(data, logger=None) -> Union[None, int64]:
-
     """Get the number of containers in the data dictionary.
 
     This is useful in case you've only pulled out subsets of the data
@@ -372,7 +361,6 @@ def get_ncontainers_in_data(data, logger=None) -> Union[None, int64]:
 
 
 def get_file_metadata(filename: str) -> Union[None, Dict[str, Any]]:
-
     """Get the file metadata and return it as a dictionary"""
 
     f = h5py.File(filename, "r+")
@@ -394,7 +382,6 @@ def get_file_metadata(filename: str) -> Union[None, Dict[str, Any]]:
 
 
 def print_file_metadata(filename: str):
-
     """Pretty print the file metadata"""
 
     metadata = get_file_metadata(filename)
