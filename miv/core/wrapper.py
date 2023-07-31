@@ -18,30 +18,39 @@ from typing import Protocol, Union
 
 import functools
 import inspect
+import logging
 from collections import UserList
 from dataclasses import dataclass, make_dataclass
 
 from miv.core.datatype import DataTypes, Extendable
+from miv.core.operator.cachable import _CacherProtocol
 from miv.core.operator.operator import Operator, OperatorMixin
 
 
-def wrap_cacher(cache_tag):
+def wrap_cacher(cache_tag=None):
     """
     Decorator to wrap the function to use cacher.
+
+    Note: Keep cache_tag=None for __call__ function.
     """
 
     def decorator(func):
         # @functools.wraps(func)
         def wrapper(*args, **kwargs):
             self: Operator = args[0]
-            if self.cacher.check_cached(params=(args[1:], kwargs), tag=cache_tag):
-                self.cacher.cache_called = True
-                return next(self.cacher.load_cached(tag=cache_tag))
+            cacher: _CacherProtocol = self.cacher
+            tag = "data" if cache_tag is None else cache_tag
+
+            if cacher.check_cached(params=(args[1:], kwargs), tag=tag):
+                cacher.cache_called = True
+                logging.info(f"Cache called: {self.tag}")
+                return next(self.cacher.load_cached(tag=tag))
             else:
                 result = func(*args, **kwargs)
-                self.cacher.save_cache(result, tag=cache_tag)
-                self.cacher.save_config(params=(args[1:], kwargs), tag=cache_tag)
-                self.cacher.cache_called = False
+                cacher.save_cache(result, tag=tag)
+                cacher.save_config(params=(args[1:], kwargs), tag=tag)
+                cacher.cache_called = False
+                logging.info(f"Cache not found: {self.tag}")
                 return result
 
         return wrapper

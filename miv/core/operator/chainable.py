@@ -153,11 +153,12 @@ class BaseChainingMixin:
     ) -> list[SelfChain]:
         if lst is None:
             lst = []
+
+        cacher = getattr(self, "cacher", None)
         if (
-            hasattr(self, "cacher")
-            and self.cacher is not None
-            and self.cacher.cache_dir is not None
-            and self.cacher.check_cached()
+            cacher is not None
+            and cacher.cache_dir is not None
+            and cacher.check_cached()
         ):
             pass
         else:

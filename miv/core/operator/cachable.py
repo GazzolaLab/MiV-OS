@@ -247,6 +247,7 @@ class FunctionalCacher(BaseCacher):
         if params is not None:
             current_config = self._compile_parameters_as_dict(params)
             cached_config = self._load_configuration_from_cache(tag)
+
             if cached_config is None:
                 flag = False
             else:

@@ -68,9 +68,9 @@ class AvalancheDetection(OperatorMixin):
     pre_burst_extension: float = 0.0
     post_burst_extension: float = 0.0
 
-    tag: str = "Avalanche and Criticality Analysis"
+    tag: str = "avalanche detection"
 
-    @wrap_cacher("avalanche_detection")
+    @wrap_cacher()
     def __call__(self, spikestamps: Spikestamps):
         bincount = spikestamps.binning(
             bin_size=self.bin_size, return_count=self.allow_multiple_spike_per_bin
@@ -177,13 +177,11 @@ class AvalancheAnalysis(OperatorMixin):
         The tag for the operator. Default is "Avalanche and Criticality Analysis".
     """
 
-    tag: str = (
-        "Avalanche and Criticality Analysis"  # keep this same as AvalancheDetection
-    )
+    tag: str = "avalanche criticality analysis"
 
     progress_bar: bool = False
 
-    @wrap_cacher("shape_analysis")
+    @wrap_cacher()
     def __call__(self, inputs):
         starts, ends, bincount = inputs
         bin_size = 1.0 / bincount.rate
