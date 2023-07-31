@@ -35,7 +35,6 @@ class MultiChannelSignalVisualization(OperatorMixin):
         super().__init__()
 
     def __call__(self, signals: Spikestamps, mea: MEAGeometryProtocol):
-
         if not inspect.isgenerator(signals):
             signals = [signals]
 
