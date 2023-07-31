@@ -35,12 +35,11 @@ class Pipeline:
 
     def __init__(self, node: _Chainable):
         self._start_node = node
-        self.execution_order: List[_Runnable] = node.topological_sort()
+        self.execution_order = None
 
     def run(
         self,
         working_directory: Optional[Union[str, pathlib.Path]] = "./results",
-        no_cache: bool = False,
         skip_plot: bool = False,
         dry_run: bool = False,
         verbose: bool = False,  # Use logging
@@ -52,8 +51,6 @@ class Pipeline:
         ----------
         working_directory : Optional[Union[str, pathlib.Path]], optional
             The working directory where the pipeline will be executed. By default "./results"
-        no_cache : bool, optional
-            If True, the cache will be disabled. By default False
         dry_run : bool, optional
             If True, the pipeline will not be executed. By default False
         verbose : bool, optional
@@ -61,12 +58,13 @@ class Pipeline:
         """
         self._start_node.set_save_path(working_directory, recursive=True)
         self.execution_order = self._start_node.topological_sort()
+        if verbose:
+            stime = time.time()
+            print("Execution order = ", self.execution_order, flush=True)
         for node in self.execution_order:
             if verbose:
                 stime = time.time()
-                print("Running: ", node)
-            if hasattr(node, "cacher"):  # TODO: Remove this option
-                node.cacher.cache_policy = "OFF" if no_cache else "AUTO"
+                print("Running: ", node, flush=True)
 
             # in case of error, add message
             try:
@@ -83,6 +81,9 @@ class Pipeline:
             print(self.summarize(), flush=True)
 
     def summarize(self):
+        if self.execution_order is None:
+            self.execution_order = self._start_node.topological_sort()
+
         strs = []
         strs.append("Execution order:")
         for i, op in enumerate(self.execution_order):

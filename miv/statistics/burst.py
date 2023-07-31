@@ -1,12 +1,36 @@
-__all__ = ["burst"]
+__all__ = ["burst", "burst_array"]
 
 import os
 
 import matplotlib.pyplot as plt
 import numpy as np
 
+from miv.core.datatype import Spikestamps
 from miv.statistics.spiketrain_statistics import interspike_intervals
 from miv.typing import SpikestampsType
+
+
+def burst_array(spiketrain: Spikestamps, min_isi: float, min_len: int):
+    """ """
+
+    spike_interval = interspike_intervals(spiketrain)
+    assert spike_interval.all() > 0, "Inter Spike Interval cannot be zero"
+    burst_spike = (spike_interval <= min_isi).astype(
+        np.bool_
+    )  # Only spikes within specified min ISI are 1 otherwise 0 and are stored
+
+    # Try to find the start and end indices for burst interval
+    delta = np.logical_xor(burst_spike[:-1], burst_spike[1:])
+    interval = np.where(delta)[0]
+    if len(interval) % 2:
+        interval = np.append(interval, len(delta))
+    interval += 1
+    interval = interval.reshape([-1, 2])
+    mask = np.diff(interval) >= min_len
+    interval = interval[mask.ravel(), :]
+    Q = np.array(interval)
+
+    return Q
 
 
 def burst(spiketrains: SpikestampsType, channel: int, min_isi: float, min_len: int):
@@ -43,22 +67,7 @@ def burst(spiketrains: SpikestampsType, channel: int, min_isi: float, min_len: i
     hippocampal neurons." Journal of neurophysiology 114.2 (2015): 1059-1071.
     """
 
-    spike_interval = interspike_intervals(spiketrains[channel])
-    assert spike_interval.all() > 0, "Inter Spike Interval cannot be zero"
-    burst_spike = (spike_interval <= min_isi).astype(
-        np.bool_
-    )  # Only spikes within specified min ISI are 1 otherwise 0 and are stored
-
-    # Try to find the start and end indices for burst interval
-    delta = np.logical_xor(burst_spike[:-1], burst_spike[1:])
-    interval = np.where(delta)[0]
-    if len(interval) % 2:
-        interval = np.append(interval, len(delta))
-    interval += 1
-    interval = interval.reshape([-1, 2])
-    mask = np.diff(interval) >= min_len
-    interval = interval[mask.ravel(), :]
-    Q = np.array(interval)
+    Q = burst_array(spiketrains[channel], min_isi, min_len)
 
     if np.sum(Q) == 0:
         start_time = 0

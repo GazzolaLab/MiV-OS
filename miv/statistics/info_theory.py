@@ -55,7 +55,6 @@ def probability_distribution(
     t_start: Optional[float] = None,
     t_end: Optional[float] = None,
 ):
-
     """
     Forms the probability distribution required to compute the information theory measures. Probability is computed based on the binned spiketrain generated for the specified bin size.
 

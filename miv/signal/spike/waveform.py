@@ -59,7 +59,7 @@ class ExtractWaveforms(OperatorMixin):
         super().__init__()
         self.cacher.policy = "OFF"
 
-    @wrap_cacher("waveform")
+    @wrap_cacher()
     def __call__(
         self, signal: Generator[Signal, None, None], spikestamps: Spikestamps
     ) -> Dict[int, Signal]:
@@ -208,7 +208,7 @@ class WaveformAverage(OperatorMixin):
     def __post_init__(self):
         super().__init__()
 
-    @wrap_cacher("waveform average")
+    @wrap_cacher()
     def __call__(self, waveforms: Dict[int, Signal], mea: MEAGeometryProtocol):
         mean_waveform = {}
         std_waveform = {}

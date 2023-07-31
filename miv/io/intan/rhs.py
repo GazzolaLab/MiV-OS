@@ -420,7 +420,6 @@ def find_channel_in_group(channel_name, signal_group):  # pragma: no cover
 
 # Define find_channel_in_header function
 def find_channel_in_header(channel_name, header):  # pragma: no cover
-
     # Look through all present signal groups
 
     # 1. Look through amplifier_channels
@@ -993,7 +992,6 @@ def load_file(filename):  # pragma: no cover
 
 # Define function print_all_channel_names
 def print_all_channel_names(result):  # pragma: no cover
-
     # Print all amplifier_channels
     if "amplifier_channels" in result:
         print_names_in_group(result["amplifier_channels"])

@@ -31,7 +31,6 @@ from tqdm import tqdm
 from miv.core.datatype import Signal, Spikestamps
 from miv.core.operator import OperatorMixin
 from miv.core.policy import StrictMPIRunner
-from miv.core.wrapper import wrap_cacher
 from miv.mea import mea_map
 
 

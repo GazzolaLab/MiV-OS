@@ -12,6 +12,7 @@ class MockDataLoader(DataLoaderMixin):
         self.data_path = path
         super().__init__()
         self.run_check_flag = False
+        self.tag = "mock module"
 
     @wrap_cacher(cache_tag="function_1")
     def func1(self, a, b):
