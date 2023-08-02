@@ -79,11 +79,11 @@ class AvalancheDetection(OperatorMixin):
             axis=bincount._CHANNELAXIS
         )  # Spike count accross channel per bin
         if self.threshold is None:
-            self.threshold = (
-                population_firing[np.nonzero(population_firing)].mean() / 2.0
-            )
+            threshold = population_firing[np.nonzero(population_firing)].mean() / 2.0
+        else:
+            threshold = self.threshold
         # TODO: try to reuse the code from miv.statistics.burst.burst
-        events = (population_firing > self.threshold).astype(np.bool_)
+        events = (population_firing > threshold).astype(np.bool_)
 
         # pad and find where avalanches start or end based on where 0s change to
         # 1s and vice versa
