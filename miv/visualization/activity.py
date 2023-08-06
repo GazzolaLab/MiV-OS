@@ -64,7 +64,9 @@ class NeuralActivity(OperatorMixin):
         probe_times = np.array_split(probe_times, size)[rank]
         start_time = probe_times[0]
         end_time = probe_times[-1]
-        spiketrains_bins = spikestamps.get_view(start_time, end_time).binning(self.bin_size, return_count=True)
+        spiketrains_bins = spikestamps.get_view(start_time, end_time).binning(
+            self.bin_size, return_count=True
+        )
         logging.info(
             f"{rank=} | rendering from {start_time=:.03f} to {end_time=:.03f}: {probe_times.shape[0]} frames."
         )

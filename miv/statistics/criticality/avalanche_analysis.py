@@ -12,6 +12,7 @@ import sys
 from collections import defaultdict
 from dataclasses import dataclass
 
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import quantities as pq
@@ -94,6 +95,9 @@ class AvalancheDetection(OperatorMixin):
         starts = np.where(diff_events == 1)[0]
         ends = np.where(diff_events == -1)[0]
 
+        if len(starts) == 0 or len(ends) == 0:
+            return np.array([]), np.array([]), bincount
+
         # remove avalanches that are too short
         if self.minimum_bins_in_avalanche > 1:
             inds = np.where(ends - starts >= self.minimum_bins_in_avalanche)[0]
@@ -113,6 +117,12 @@ class AvalancheDetection(OperatorMixin):
         # Include residual windows
         starts = starts - int(self.pre_burst_extension / self.bin_size)
         ends = ends + int(self.post_burst_extension / self.bin_size)
+
+        # Coalace overlapped intervals
+        # TODO: if two avalanches are too close, consider combining them
+        coalace_index = np.where(starts[1:] <= ends[:-1])[0]
+        starts = np.delete(starts, coalace_index + 1)
+        ends = np.delete(ends, coalace_index)
 
         return starts, ends, bincount
 
@@ -146,8 +156,13 @@ class AvalancheDetection(OperatorMixin):
         ax.set_ylabel("Channel")
 
         # Save
-        left, right = ax.get_xlim()
-        interval = 10  # sec
+        interval = 10  # sec TODO
+        left, right = (
+            spikestamps.get_first_spikestamp(),
+            spikestamps.get_last_spikestamp(),
+        )
+        left -= interval * 0.1
+        right += interval * 0.1
         for i in range(int(np.ceil((right - left) / interval))):
             ax.set_xlim(left + i * interval, left + (i + 1) * interval)
             if save_path is not None:
