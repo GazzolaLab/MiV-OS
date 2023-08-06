@@ -44,6 +44,8 @@ class AvalancheDetection(OperatorMixin):
         This influence the threshold of the avalanche size.
     minimum_bins_in_avalanche : int
         The minimum number of bins in an avalanche. Default is 10.
+    min_interburst_interval_bound : float
+        The minimum interburst interval in seconds. If burst interval is shorter, two burst will be coalaced. Default is 0.1.
 
     Returns
     -------
@@ -66,6 +68,7 @@ class AvalancheDetection(OperatorMixin):
     allow_multiple_spike_per_bin: bool = False
     minimum_bins_in_avalanche: int = 10
 
+    min_interburst_interval_bound: float = 0.1  # sec
     pre_burst_extension: float = 0.0
     post_burst_extension: float = 0.0
 
@@ -119,10 +122,14 @@ class AvalancheDetection(OperatorMixin):
         ends = ends + int(self.post_burst_extension / self.bin_size)
 
         # Coalace overlapped intervals
-        # TODO: if two avalanches are too close, consider combining them
-        coalace_index = np.where(starts[1:] <= ends[:-1])[0]
-        starts = np.delete(starts, coalace_index + 1)
-        ends = np.delete(ends, coalace_index)
+        while True:
+            coalace_index = np.where(
+                starts[1:] <= ends[:-1] + self.min_interburst_interval_bound
+            )[0]
+            if coalace_index.size == 0:
+                break
+            starts = np.delete(starts, coalace_index + 1)
+            ends = np.delete(ends, coalace_index)
 
         return starts, ends, bincount
 
