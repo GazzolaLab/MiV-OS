@@ -419,16 +419,6 @@ test = ["pytest"]
 typing = ["mypy (>=0.990)"]
 
 [[package]]
-name = "commandlib"
-version = "0.3.5"
-description = "Pythonic command runner"
-optional = false
-python-versions = "*"
-files = [
-    {file = "commandlib-0.3.5.tar.gz", hash = "sha256:07b4d2a64a6858e36b185e3512d24ea2f34267d035450035d9bd8437c0ad7d38"},
-]
-
-[[package]]
 name = "contourpy"
 version = "1.0.7"
 description = "Python library for calculating contours of 2D quadrilateral grids"
@@ -619,13 +609,13 @@ files = [
 
 [[package]]
 name = "dill"
-version = "0.3.6"
-description = "serialize all of python"
+version = "0.3.7"
+description = "serialize all of Python"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "dill-0.3.6-py3-none-any.whl", hash = "sha256:a07ffd2351b8c678dfc4a856a3005f8067aea51d6ba6c700796a4d9e280f39f0"},
-    {file = "dill-0.3.6.tar.gz", hash = "sha256:e5db55f3687856d8fbdab002ed78544e1c4559a130302693d839dfe8f93f2373"},
+    {file = "dill-0.3.7-py3-none-any.whl", hash = "sha256:76b122c08ef4ce2eedcd4d1abd8e641114bfc6c2867f49f3c41facf65bf19f5e"},
+    {file = "dill-0.3.7.tar.gz", hash = "sha256:cc1c8b182eb3013e24bd475ff2e9295af86c1a38eb1aff128dac8962a9ce3c03"},
 ]
 
 [package.extras]
@@ -1479,24 +1469,23 @@ resolved_reference = "91dd700dc7bb45f98ac490a2adfcfe6bc35e6310"
 
 [[package]]
 name = "machinable"
-version = "4.2.0"
+version = "4.5.0"
 description = "A modular configuration system for research projects"
 optional = false
 python-versions = ">=3.7,<4.0"
 files = [
-    {file = "machinable-4.2.0-py3-none-any.whl", hash = "sha256:d4c49788d9b9ced907b3407efef98c00f9a261db4b4054fefeb882f3ae02373e"},
-    {file = "machinable-4.2.0.tar.gz", hash = "sha256:146f0c10b60891aa9bab1a9f2ab1a402a90bf0308cd49d60fc75719dba481b7e"},
+    {file = "machinable-4.5.0-py3-none-any.whl", hash = "sha256:4cc3ee2051e0ab83ff9641073fd38d9f0e3c1a8383b835523ec1c7964385dc7c"},
+    {file = "machinable-4.5.0.tar.gz", hash = "sha256:3e02931546fc3e3040ad26af218d239c138abef7992e38ecb431450862cf86d0"},
 ]
 
 [package.dependencies]
 arrow = ">=1.2,<2.0"
-commandlib = ">=0.3.5,<0.4.0"
+dill = ">=0.3.7,<0.4.0"
 flatten-dict = ">=0.4,<0.5"
 jsonlines = ">=3.1,<4.0"
-observable = ">=1.0,<2.0"
 omegaconf = ">=2.3.0,<3.0.0"
-pydantic = ">=1.10.4,<2.0.0"
-python-baseconv = ">=1.2,<2.0"
+pydantic = "==1.*"
+typing-extensions = {version = ">=4.7.0,<5.0.0", markers = "python_version < \"3.11\""}
 
 [[package]]
 name = "markdown-it-py"
@@ -2047,17 +2036,6 @@ sphinx = ">=4.2"
 
 [package.extras]
 testing = ["matplotlib", "pytest", "pytest-cov"]
-
-[[package]]
-name = "observable"
-version = "1.0.3"
-description = "minimalist event system"
-optional = false
-python-versions = "*"
-files = [
-    {file = "observable-1.0.3-py2.py3-none-any.whl", hash = "sha256:955a721a225fe3a1df28b58c0d7add38e08cd49afd88d14669b2884410f47d10"},
-    {file = "observable-1.0.3.tar.gz", hash = "sha256:97fe8e9d8c2a6185cee3661fa5fba9ce38c7ba388894132940cd6a81633626d9"},
-]
 
 [[package]]
 name = "omegaconf"
@@ -2753,16 +2731,6 @@ files = [
 
 [package.dependencies]
 pytest = ">=3.0.0,<8.0.0"
-
-[[package]]
-name = "python-baseconv"
-version = "1.2.2"
-description = "Convert numbers from base 10 integers to base X strings and back again."
-optional = false
-python-versions = "*"
-files = [
-    {file = "python-baseconv-1.2.2.tar.gz", hash = "sha256:0539f8bd0464013b05ad62e0a1673f0ac9086c76b43ebf9f833053527cd9931b"},
-]
 
 [[package]]
 name = "python-dateutil"
@@ -3688,13 +3656,13 @@ test = ["argcomplete (>=2.0)", "pre-commit", "pytest", "pytest-mock"]
 
 [[package]]
 name = "typing-extensions"
-version = "4.5.0"
+version = "4.7.1"
 description = "Backported and Experimental Type Hints for Python 3.7+"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "typing_extensions-4.5.0-py3-none-any.whl", hash = "sha256:fb33085c39dd998ac16d1431ebc293a8b3eedd00fd4a32de0ff79002c19511b4"},
-    {file = "typing_extensions-4.5.0.tar.gz", hash = "sha256:5cb5f4a79139d699607b3ef622a1dedafa84e115ab0024e0d9c044a9479ca7cb"},
+    {file = "typing_extensions-4.7.1-py3-none-any.whl", hash = "sha256:440d5dd3af93b060174bf433bccd69b0babc3b15b1a8dca43789fd7f61514b36"},
+    {file = "typing_extensions-4.7.1.tar.gz", hash = "sha256:b75ddc264f0ba5615db7ba217daeb99701ad295353c45f9e95963337ceeeffb2"},
 ]
 
 [[package]]
