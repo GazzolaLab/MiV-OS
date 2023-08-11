@@ -36,9 +36,8 @@ def clean_cache(path, dry, verbose):
     """
     if dry:
         print("Dry run. No folders will be actually deleted.")
-
-    path = pathlib.Path(path) / "**/.cache"
-    for path in glob.glob("**/.cache", recursive=True):
+    pattern = pathlib.Path(path).glob("**/.cache")
+    for path in pattern:
         if verbose:
             print(f"Removing: {path}", flush=True)
         if not dry:
