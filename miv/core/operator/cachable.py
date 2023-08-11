@@ -146,6 +146,10 @@ def when_initialized(func):  # TODO: refactor
 
 
 class BaseCacher:
+    """
+    Base class for cacher.
+    """
+
     def __init__(self, parent):
         super().__init__()
         self.policy: CACHE_POLICY = "AUTO"  # TODO: make this a property
@@ -180,20 +184,28 @@ class BaseCacher:
                 return json.load(f)
         return None
 
+    def log_cache_status(self, flag):
+        if flag:
+            self.parent.logger.info("Cache exist")
+        else:
+            self.parent.logger.info("No cache")
+
 
 class DataclassCacher(BaseCacher):
     @when_policy_is("ON", "AUTO", "MUST")
     @when_initialized
     def check_cached(self, tag="data", *args, **kwargs) -> bool:
         if self.policy == "MUST":
-            return True
-        current_config = self._compile_configuration_as_dict()
-        cached_config = self._load_configuration_from_cache(tag=tag)
-        if cached_config is None:
-            flag = False
+            flag = True
         else:
-            # Json equality
-            flag = current_config == cached_config
+            current_config = self._compile_configuration_as_dict()
+            cached_config = self._load_configuration_from_cache(tag=tag)
+            if cached_config is None:
+                flag = False
+            else:
+                # Json equality
+                flag = current_config == cached_config
+        self.log_cache_status(flag)
         return flag
 
     def _compile_configuration_as_dict(self) -> dict:
@@ -242,18 +254,21 @@ class FunctionalCacher(BaseCacher):
     @when_initialized
     def check_cached(self, params=None, tag="data") -> bool:
         if self.policy == "MUST":  # TODO: fix this, remove redundancy
-            return True
-        flag = True
-        if params is not None:
-            current_config = self._compile_parameters_as_dict(params)
-            cached_config = self._load_configuration_from_cache(tag)
+            flag = True
+        else:
+            flag = True
+            if params is not None:
+                current_config = self._compile_parameters_as_dict(params)
+                cached_config = self._load_configuration_from_cache(tag)
 
-            if cached_config is None:
-                flag = False
-            else:
-                # Json equality
-                flag = current_config == cached_config
-        return flag and os.path.exists(self.cache_filename(0, tag=tag))
+                if cached_config is None:
+                    flag = False
+                else:
+                    # Json equality
+                    flag = current_config == cached_config
+            flag = flag and os.path.exists(self.cache_filename(0, tag=tag))
+        self.log_cache_status(flag)
+        return flag
 
     @when_policy_is("ON", "AUTO", "MUST")
     @when_initialized

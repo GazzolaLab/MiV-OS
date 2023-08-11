@@ -18,7 +18,6 @@ from typing import Protocol, Union
 
 import functools
 import inspect
-import logging
 from collections import UserList
 from dataclasses import dataclass, make_dataclass
 
@@ -43,14 +42,12 @@ def wrap_cacher(cache_tag=None):
 
             if cacher.check_cached(params=(args[1:], kwargs), tag=tag):
                 cacher.cache_called = True
-                logging.info(f"Cache called: {self.tag}")
                 return next(self.cacher.load_cached(tag=tag))
             else:
                 result = func(*args, **kwargs)
                 cacher.save_cache(result, tag=tag)
                 cacher.save_config(params=(args[1:], kwargs), tag=tag)
                 cacher.cache_called = False
-                logging.info(f"Cache not found: {self.tag}")
                 return result
 
         return wrapper

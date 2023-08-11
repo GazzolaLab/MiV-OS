@@ -1,6 +1,9 @@
 from __future__ import annotations
 
-__doc__ = """"""
+__doc__ = """
+Here, we define the behavior of basic operator class, and useful mixin classes that can
+be used to create new operators that conform to required behaviors.
+"""
 __all__ = [
     "Operator",
     "DataLoader",
@@ -29,6 +32,7 @@ from miv.core.operator.cachable import (
 )
 from miv.core.operator.callback import BaseCallbackMixin, _Callback
 from miv.core.operator.chainable import BaseChainingMixin, _Chainable
+from miv.core.operator.loggable import DefaultLoggerMixin, _Loggable
 from miv.core.policy import VanillaRunner, _Runnable, _RunnerProtocol
 
 
@@ -37,6 +41,7 @@ class Operator(
     _Chainable,
     _Cachable,
     _Runnable,
+    _Loggable,
     Protocol,
 ):
     """ """
@@ -53,6 +58,7 @@ class DataLoader(
     _Chainable,
     _Cachable,
     _Runnable,
+    _Loggable,
     Protocol,
 ):
     """ """
@@ -61,11 +67,11 @@ class DataLoader(
         ...
 
 
-class DataNode(_Chainable, _Runnable, Protocol):
+class DataNode(_Chainable, _Runnable, _Loggable, Protocol):
     ...
 
 
-class DataNodeMixin(BaseChainingMixin):
+class DataNodeMixin(BaseChainingMixin, DefaultLoggerMixin):
     """ """
 
     def __init__(self):
@@ -84,7 +90,7 @@ class DataNodeMixin(BaseChainingMixin):
         pass
 
 
-class DataLoaderMixin(BaseChainingMixin, BaseCallbackMixin):
+class DataLoaderMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
     """ """
 
     def __init__(self):
@@ -107,7 +113,7 @@ class DataLoaderMixin(BaseChainingMixin, BaseCallbackMixin):
         pass
 
 
-class OperatorMixin(BaseChainingMixin, BaseCallbackMixin):
+class OperatorMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
     """
     Behavior includes:
         - Whenever "run()" method is executed:
