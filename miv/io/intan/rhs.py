@@ -867,7 +867,7 @@ def load_file(filename):  # pragma: no cover
         indices["board_dig_in"] = 0
         indices["board_dig_out"] = 0
 
-        print_increment = 10
+        print_increment = 25
         percent_done = print_increment
         for i in range(num_data_blocks):
             read_one_data_block(data, header, indices, fid)
@@ -876,10 +876,10 @@ def load_file(filename):  # pragma: no cover
 
             fraction_done = 100 * (1.0 * i / num_data_blocks)
             if fraction_done >= percent_done:
-                logging.info(f"{percent_done}% done...")
+                logging.info(f"{percent_done}% ...")
                 percent_done = percent_done + print_increment
 
-        logging.info("100% done...")
+        logging.info("100% done")
 
         # Make sure we have read exactly the right amount of data
         bytes_remaining = filesize - fid.tell()
