@@ -76,6 +76,7 @@ numba = "^0.56.4"
 machinable = "^4.0"
 coverage = "^7.1.0"
 opencv-python = "^4.7.0.72"
+pytest-mock = "^3.11.1"
 
 [tool.poetry.dev-dependencies]
 black = "^22.8.0"

@@ -159,6 +159,7 @@ class AvalancheDetection(OperatorMixin):
         for start, end in zip(starts_time, ends_time):
             ax.axvspan(start, end, facecolor="r", alpha=0.5)
 
+        ax.set_title("Avalanche Marks on Raster")
         ax.set_xlabel("Time (s)")
         ax.set_ylabel("Channel")
 
@@ -320,7 +321,7 @@ class AvalancheAnalysis(OperatorMixin):
         plt.close(fig)
 
     def plot_branching_ratio_histogram(self, outputs, show=False, save_path=None):
-        durations, size, branching_ratio, _, _ = outputs
+        _, _, branching_ratio, _, _ = outputs
 
         nbins = 100
 
@@ -343,7 +344,7 @@ class AvalancheAnalysis(OperatorMixin):
         plt.close(fig)
 
     def plot_avalanche_shape_collapse(self, outputs, show=False, save_path=None):
-        durations, _, _, avalanches, bin_size = outputs
+        _, _, _, avalanches, bin_size = outputs
 
         shapes = defaultdict(list)
         for avalanche in avalanches:
