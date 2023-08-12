@@ -18,7 +18,6 @@ API Documentation
    :caption: I/O
 
    io
-   coding
 
 .. toctree::
    :maxdepth: 2

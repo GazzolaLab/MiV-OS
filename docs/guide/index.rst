@@ -9,7 +9,6 @@ Here we provide number of example scripts using `MiV` tools. Some examples provi
 
    connectivity_network
    info_theory
-   lyon_ear_model
 
 .. toctree::
    :hidden:
@@ -19,12 +18,6 @@ Here we provide number of example scripts using `MiV` tools. Some examples provi
    channel_correlation
    granger_causality_psd_cpsd_coherence
    burst_analysis
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Experiment
-
-   stimjim_spiketrain
 
 .. toctree::
    :maxdepth: 2
