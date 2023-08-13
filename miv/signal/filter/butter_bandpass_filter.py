@@ -130,6 +130,7 @@ class ButterBandpass(OperatorMixin):
             plt.axvline(self.lowcut, color="red")
         if self.highcut is not None:
             plt.axvline(self.highcut, color="red")
+        plt.ylim(-50, 10)
 
         if show:
             plt.show()
