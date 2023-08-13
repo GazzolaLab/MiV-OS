@@ -39,6 +39,7 @@ packages = [
 convert_open_ephys_to_miv = "miv.machinary.convert_open_ephys_to_miv:main"
 miv_extract_spiketrain = "miv.machinary.miv_extract_spiketrain:main"
 miv_clean_cache = "miv.machinary.clean_cache:clean_cache"
+miv_zip_results = "miv.machinary.zip_results:zip_results"
 
 
 [tool.poetry.dependencies]
