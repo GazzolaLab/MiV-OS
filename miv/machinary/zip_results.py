@@ -41,20 +41,30 @@ def zip_directory_recursively(
     ignore_directory = ignore_directory or []
     ignore_extension = ignore_extension or []
 
+    path = pathlib.Path(path)
+    root_dir = pathlib.Path(root_dir)
+
     if path.is_file():
         if is_path_valid(path, ignore_directory, ignore_extension):
             if zipfile_handle is not None:  # dry run
                 zipfile_handle.write(path, path.relative_to(root_dir))
-            if verbose:
-                print(f"    {path.as_posix()}")
         return
 
+    if verbose:
+        print(f"    {path.as_posix()}")
     for sub_dir in path.iterdir():
         if not is_path_valid(sub_dir, ignore_directory, ignore_extension):
+            if verbose:
+                print(f"    ignored: {sub_dir.as_posix()}")
             continue
 
         zip_directory_recursively(
-            path / sub_dir, root_dir, zipfile_handle, ignore_directory, ignore_extension
+            sub_dir,
+            root_dir,
+            zipfile_handle,
+            ignore_directory,
+            ignore_extension,
+            verbose,
         )
 
 

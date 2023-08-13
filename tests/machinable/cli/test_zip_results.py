@@ -107,7 +107,7 @@ def test_zip_directory_recursively_single_file(tmp_path, capfd):
         )
 
         output, error = capfd.readouterr()
-        assert file.as_posix() in output
+        assert tmp_path.as_posix() in output
 
 
 def test_zip_directory_recursively_single_file_negative(tmp_path):
