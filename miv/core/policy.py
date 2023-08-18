@@ -6,14 +6,19 @@ __all__ = [
     "MultiprocessingRunner",
     "InternallyMultiprocessing",
     "StrictMPIRunner",
+    "SupportMPIMerge",
 ]
 
-from typing import Any, Callable, Generator, Optional, Protocol, Union
+from typing import TYPE_CHECKING, Any, Callable, Generator, Optional, Protocol, Union
 
 import inspect
 import multiprocessing
 import pathlib
 from dataclasses import dataclass
+
+if TYPE_CHECKING:
+    # This will likely cause circular import error
+    from miv.core.datatype.collapsable import _Collapsable
 
 
 class _RunnerProtocol(Callable, Protocol):
@@ -142,6 +147,26 @@ class StrictMPIRunner:
         else:
             output = func(*inputs)
         return output
+
+
+class SupportMPIMerge(StrictMPIRunner):
+    """
+    This runner policy is used for operators that can be merged by MPI.
+    """
+
+    def __call__(self, func, inputs=None, **kwargs):
+        if inputs is None:
+            output: _Collapsable = func()
+        else:
+            output: _Collapsable = func(*inputs)
+
+        outputs = self.comm.gather(output, root=self.root)
+        if self.is_root():
+            result = output.from_collapse(outputs)  # Class method
+        else:
+            result = None
+        result = self.comm.bcast(result, root=self.root)
+        return result
 
 
 class SupportMPI(StrictMPIRunner):
