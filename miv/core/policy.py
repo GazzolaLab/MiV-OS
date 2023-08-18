@@ -85,6 +85,7 @@ class VanillaRunner:
                 if not self.is_root:
                     output = self._execute(func, inputs)
             else:
+                # If input is not generator, broadcast output to all ranks
                 output = self.comm.bcast(output, root=0)
         return output
 

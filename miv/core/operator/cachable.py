@@ -163,7 +163,11 @@ class BaseCacher:
 
     def cache_filename(self, idx, tag="data") -> str:
         index = idx if isinstance(idx, str) else f"{idx:04}"
-        return os.path.join(self.cache_dir, f"cache_{tag}_{index}.pkl")
+        if self.parent.runner.is_root:
+            mpi_tag = f"{0:03d}"
+        else:
+            mpi_tag = f"{self.parent.runner.get_rank():03d}"
+        return os.path.join(self.cache_dir, f"cache_{tag}_rank{mpi_tag}_{index}.pkl")
 
     @when_policy_is("ON", "AUTO", "MUST")
     @when_initialized

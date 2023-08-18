@@ -87,8 +87,9 @@ def test_two_function_caching(cls, tmp_path):
     assert ans2 == cached_ans2
 
     print(os.listdir(tmp_path))
-    assert os.path.exists(tmp_path / ".cache" / "cache_function_1_0000.pkl")
-    assert os.path.exists(tmp_path / ".cache" / "cache_function_2_0000.pkl")
+    print(os.listdir(tmp_path / ".cache"))
+    assert os.path.exists(tmp_path / ".cache" / "cache_function_1_rank000_0000.pkl")
+    assert os.path.exists(tmp_path / ".cache" / "cache_function_2_rank000_0000.pkl")
     assert os.path.exists(tmp_path / ".cache" / "config_function_2.json")
     assert os.path.exists(tmp_path / ".cache" / "config_function_1.json")
 
