@@ -29,6 +29,7 @@ import logging
 import multiprocessing
 import os
 import pathlib
+import time
 from dataclasses import dataclass
 
 import matplotlib.pyplot as plt
@@ -109,8 +110,11 @@ class ThresholdCutoff(OperatorMixin):
             #    print(inputs)
             #    for result in pool.map(self._detection, inputs): # TODO: Something is not correct here. Check memory usage.
             #        collapsed_result.extend(spiketrain)
-            for sig in signal:  # TODO: mp
+            self.logger.info(f"Spike detection with {self.num_proc} processes...")
+            for idx, sig in enumerate(signal):  # TODO: mp
+                stime = time.time()
                 collapsed_result.extend(self._detection(sig))
+                self.logger.info(f"Processing {idx}: {time.time()-stime:.02f} sec")
             return collapsed_result
 
     # @staticmethod
