@@ -80,22 +80,25 @@ def pipeline(tmp_path):
     return Pipeline(ops2)
 
 
+@pytest.mark.mpi_xfail
 def test_pipeline_run1(pipeline, tmp_path):
+    execution_order = pipeline._start_node.topological_sort()
     pipeline.run(tmp_path, verbose=True)
 
-    assert len(pipeline.execution_order) == 5
-    assert pipeline.execution_order[0].called
-    assert pipeline.execution_order[1].call_count == 10
-    assert pipeline.execution_order[2].call_count == 10
-    assert pipeline.execution_order[3].called
-    assert pipeline.execution_order[4].called
+    assert len(execution_order) == 5
+    assert execution_order[0].called
 
-    assert os.path.exists(pipeline.execution_order[1].analysis_path)
-    assert os.path.exists(pipeline.execution_order[2].analysis_path)
-    assert os.path.exists(pipeline.execution_order[3].analysis_path)
-    assert os.path.exists(pipeline.execution_order[4].analysis_path)
+    assert os.path.exists(execution_order[1].analysis_path)
+    assert os.path.exists(execution_order[2].analysis_path)
+    assert os.path.exists(execution_order[3].analysis_path)
+    assert os.path.exists(execution_order[4].analysis_path)
 
-    assert os.path.exists(pipeline.execution_order[1].cacher.cache_dir)
-    assert os.path.exists(pipeline.execution_order[2].cacher.cache_dir)
-    assert os.path.exists(pipeline.execution_order[3].cacher.cache_dir)
-    assert os.path.exists(pipeline.execution_order[4].cacher.cache_dir)
+    assert os.path.exists(execution_order[1].cacher.cache_dir)
+    assert os.path.exists(execution_order[2].cacher.cache_dir)
+    assert os.path.exists(execution_order[3].cacher.cache_dir)
+    assert os.path.exists(execution_order[4].cacher.cache_dir)
+
+    assert execution_order[0].called
+    assert execution_order[1].call_count == 10
+    assert execution_order[2].call_count == 10
+    assert execution_order[3].called

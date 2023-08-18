@@ -57,7 +57,9 @@ class Pipeline:
             If True, the pipeline will log debugging informations. By default False
         """
         self._start_node.set_save_path(working_directory, recursive=True)
-        self.execution_order = self._start_node.topological_sort()
+        self.execution_order = [
+            self._start_node
+        ]  # TODO: allow running multiple operation
         if verbose:
             stime = time.time()
             print("Execution order = ", self.execution_order, flush=True)

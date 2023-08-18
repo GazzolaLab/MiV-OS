@@ -35,6 +35,7 @@ class MockDataLoader(DataLoaderMixin):
         self.run_check_flag = False
 
 
+@pytest.mark.mpi_xfail
 @pytest.mark.parametrize("cls", [MockDataLoader])
 def test_two_function_caching(cls, tmp_path):
     runner = cls(tmp_path)

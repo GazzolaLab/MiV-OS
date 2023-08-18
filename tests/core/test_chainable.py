@@ -1,8 +1,6 @@
 import pytest
 from mock_chain import MockChain
 
-from miv.core.operator.chainable import BaseChainingMixin
-
 
 def test_chaining_topological_sort():
     a = MockChain(1)
