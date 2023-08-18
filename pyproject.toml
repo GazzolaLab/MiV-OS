@@ -77,7 +77,6 @@ numba = "^0.56.4"
 machinable = "^4.0"
 coverage = "^7.1.0"
 opencv-python = "^4.7.0.72"
-pytest-mock = "^3.11.1"
 
 [tool.poetry.dev-dependencies]
 black = "^22.8.0"
@@ -92,7 +91,9 @@ pyupgrade = "^3.2.2"
 coverage = {extras = ["toml"], version = "^7.0.0"}
 pytest-html = "^3.1.1"
 pytest-cov = "^4.0.0"
+pytest-mock = "^3.11.1"
 flake8 = "^5.0.4"
+pytest-mpi = "^0.6"
 
 [tool.poetry.extras]
 docs = [
