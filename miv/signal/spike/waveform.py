@@ -48,8 +48,8 @@ class ExtractWaveforms(OperatorMixin):
     """
 
     channels: Optional[List[int]] = None
-    pre: pq.Quantity = 0.001 * pq.s
-    post: pq.Quantity = 0.002 * pq.s
+    pre: float = 0.001
+    post: float = 0.002
     plot_n_spikes: int = 100
     tag: str = "extract waveform"
 

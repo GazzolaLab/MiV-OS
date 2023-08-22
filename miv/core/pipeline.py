@@ -70,9 +70,7 @@ class Pipeline:
 
             # in case of error, add message
             try:
-                node.pipeline_called = False
                 node.run(dry_run=dry_run, skip_plot=skip_plot)
-                node.pipeline_called = True
             except Exception as e:
                 raise Exception(f'Error while running the operator "{node.tag}"') from e
 

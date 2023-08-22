@@ -80,11 +80,11 @@ class DataNodeMixin(BaseChainingMixin, DefaultLoggerMixin):
 
     @property
     def output(self) -> list[DataTypes]:
-        self._output = self
         return self._output
 
-    def run(self, **kwargs):
-        pass
+    def run(self, *args, **kwargs):
+        self._output = self
+        return self._output
 
     def set_save_path(self, path: str | pathlib.Path, recursive: bool = False) -> None:
         pass
@@ -103,11 +103,11 @@ class DataLoaderMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
 
     @property
     def output(self) -> list[DataTypes]:
-        self._output = self.load()
         return self._output
 
-    def run(self, **kwargs):
-        pass
+    def run(self, *args, **kwargs):
+        self._output = self.load()
+        return self._output
 
     def set_save_path(self, path: str | pathlib.Path, recursive: bool = False) -> None:
         pass
@@ -150,37 +150,49 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
     def make_analysis_path(self):
         os.makedirs(self.analysis_path, exist_ok=True)
 
-    def receive(self) -> list[DataTypes]:
-        return [node.output for node in self.iterate_upstream()]
-
     @property
-    def output(self) -> list[DataTypes]:
-        self._execute()
-        return self._output  # TODO: Just use upstream caller instead of .output
+    def output(self):
+        """
+        Output viewer
+        """
+        # TODO: try to add warning if the operation is never executed
+        return self._output
 
-    def _execute(self):
-        args: list[DataTypes] = self.receive()  # Receive data from upstream
-        # TODO : implement pre-run callback
-        # args = self.callback_before_run(args)
-        if len(args) == 0:
-            output = self.runner(self.__call__)
-        else:
-            output = self.runner(self.__call__, args)
-        # Post Processing
-        self._output = self.callback_after_run(output)
+    def receive(self, dry_run=False, skip_plot=False) -> list[DataTypes]:
+        return [
+            node.run(dry_run=dry_run, skip_plot=skip_plot)
+            for node in self.iterate_upstream()
+        ]
 
     def run(
         self,
         dry_run: bool = False,
         skip_plot: bool = False,
     ) -> None:
+
         # Execute the module
         if dry_run:
             print("Dry run: ", self.__class__.__name__)
             return
         self.make_analysis_path()
-        self._execute()
+
+        # Execution
+        args = self.receive(
+            dry_run=dry_run, skip_plot=skip_plot
+        )  # Receive data from upstream
+        # TODO : implement pre-run callback
+        # args = self.callback_before_run(args)
+        if len(args) == 0:
+            output = self.runner(self.__call__)
+        else:
+            output = self.runner(self.__call__, args)
+
+        # Callback: After-run
+        self._output = self.callback_after_run(output)
+
+        # Plotting
         cache_called = self.cacher.cache_called
-        # TODO
-        if not skip_plot and not cache_called and not self.pipeline_called:
+        if not skip_plot and not cache_called:
             self.plot(show=False, save_path=True, dry_run=dry_run)
+
+        return self._output
