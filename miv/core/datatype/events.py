@@ -30,7 +30,7 @@ class Events(CollapseExtendableMixin, DataNodeMixin):
 
     def __init__(self, data: List[float] = None):
         super().__init__()
-        self.data = data if data is not None else []
+        self.data = np.asarray(data) if data is not None else []
 
     def append(self, item):
         raise NotImplementedError("Not implemented yet. Need to append and sort")
