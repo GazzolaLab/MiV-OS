@@ -15,6 +15,7 @@ __all__ = [
 
 from typing import TYPE_CHECKING, Callable, Generator, List, Optional, Protocol, Union
 
+import inspect
 import functools
 import itertools
 import os
@@ -177,22 +178,23 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
         self.make_analysis_path()
 
         # Execution
-        args = self.receive(
-            dry_run=dry_run, skip_plot=skip_plot
-        )  # Receive data from upstream
+        #args = self.receive(
+        #    dry_run=dry_run, skip_plot=skip_plot
+        #)  # Receive data from upstream
         # TODO : implement pre-run callback
         # args = self.callback_before_run(args)
-        if len(args) == 0:
-            output = self.runner(self.__call__)
-        else:
-            output = self.runner(self.__call__, args)
+        #if len(args) == 0:
+        #    output = self.runner(self.__call__)
+        #else:
+        #    output = self.runner(self.__call__, args)
+        output = self.runner(self.__call__)
 
         # Callback: After-run
         self._output = self.callback_after_run(output)
 
         # Plotting
         cache_called = self.cacher.cache_called
-        if not skip_plot and not cache_called:
+        if not skip_plot and not cache_called and not inspect.isgenerator(self._output):  # TODO: temporary
             self.plot(show=False, save_path=True, dry_run=dry_run)
 
         return self._output

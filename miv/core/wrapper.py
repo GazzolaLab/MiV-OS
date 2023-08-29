@@ -22,7 +22,7 @@ from collections import UserList
 from dataclasses import dataclass, make_dataclass
 
 from miv.core.datatype import DataTypes, Extendable
-from miv.core.operator.cachable import _CacherProtocol
+from miv.core.operator.cachable import _CacherProtocol, FunctionalCacher, DataclassCacher
 from miv.core.operator.operator import Operator, OperatorMixin
 
 
@@ -42,9 +42,15 @@ def wrap_cacher(cache_tag=None):
 
             if cacher.check_cached(params=(args[1:], kwargs), tag=tag):
                 cacher.cache_called = True
-                return next(self.cacher.load_cached(tag=tag))
+                return next(cacher.load_cached(tag=tag))
             else:
-                result = func(*args, **kwargs)
+                # TODO: Need to clean this part
+                if isinstance(cacher, FunctionalCacher):
+                    result = func(*args, **kwargs)
+                elif isinstance(cacher, DataclassCacher):
+                    inputs = self.receive()
+                    print(inputs)
+                    result = func(self, *inputs)
                 cacher.save_cache(result, tag=tag)
                 cacher.save_config(params=(args[1:], kwargs), tag=tag)
                 cacher.cache_called = False
@@ -69,6 +75,10 @@ def wrap_generator_to_generator(func):
             inspect.isgenerator(v) for v in kwargs.values()
         )
         if is_all_generator:
+            # TODO: Temporary fix
+            if isinstance(self.cacher, DataclassCacher):
+                args = self.receive()
+
             if self.cacher.check_cached():
                 self.cacher.cache_called = True
 
@@ -86,7 +96,8 @@ def wrap_generator_to_generator(func):
                     else:
                         self.cacher.save_config()
 
-            return generator_func(*args, **kwargs)
+            #return generator_func(*args, **kwargs)
+            return generator_func(*args)
         else:
             if self.cacher.check_cached():
                 self.cacher.cache_called = True
