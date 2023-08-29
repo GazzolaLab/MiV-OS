@@ -22,6 +22,9 @@ if TYPE_CHECKING:
 
 
 class _RunnerProtocol(Callable, Protocol):
+    def __init__(self, comm, root: int):
+        ...
+
     def __call__(self, func: Callable, inputs: Optional[tuple], **kwargs) -> object:
         ...
 

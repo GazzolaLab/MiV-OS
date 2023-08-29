@@ -26,10 +26,16 @@ import shutil
 
 import numpy as np
 
+from miv.utils.formatter import TColors
+
 if TYPE_CHECKING:
     from miv.core.datatype import DataTypes
 
-CACHE_POLICY = Literal["AUTO", "ON", "OFF", "MUST"]
+# ON: always use cache
+# OFF: never use cache functions (always run) (no cache save)
+# MUST: must use cache. If no cache exist, raise error
+# OVERWRITE: force run and overwrite cache.
+CACHE_POLICY = Literal["AUTO", "ON", "OFF", "MUST", "RUN", "OVERWRITE"]
 
 
 class _CacherProtocol(Protocol):
@@ -170,7 +176,7 @@ class BaseCacher:
             mpi_tag = f"{self.parent.runner.comm.Get_rank():03d}"
         return os.path.join(self.cache_dir, f"cache_{tag}_rank{mpi_tag}_{index}.pkl")
 
-    @when_policy_is("ON", "AUTO", "MUST")
+    @when_policy_is("ON", "AUTO", "MUST", "OVERWRITE")
     @when_initialized
     def save_cache(self, values, idx=0, tag="data") -> bool:
         os.makedirs(self.cache_dir, exist_ok=True)
@@ -190,18 +196,22 @@ class BaseCacher:
         return None
 
     def log_cache_status(self, flag):
+        msg = f"Caching policy: {self.policy} - "
         if flag:
-            self.parent.logger.info("Cache exist")
+            msg += "Cache exist"
         else:
-            self.parent.logger.info("No cache")
+            msg += TColors.red + "No cache" + TColors.reset
+        self.parent.logger.info(msg)
 
 
 class DataclassCacher(BaseCacher):
-    @when_policy_is("ON", "AUTO", "MUST")
+    @when_policy_is("ON", "AUTO", "MUST", "OVERWRITE")
     @when_initialized
     def check_cached(self, tag="data", *args, **kwargs) -> bool:
         if self.policy == "MUST":
             flag = True
+        elif self.policy == "OVERWRITE":
+            flag = False
         else:
             current_config = self._compile_configuration_as_dict()
             cached_config = self._load_configuration_from_cache(tag=tag)
@@ -222,7 +232,7 @@ class DataclassCacher(BaseCacher):
                 config[key] = config[key].to_json()
         return config
 
-    @when_policy_is("ON", "AUTO", "MUST")
+    @when_policy_is("ON", "AUTO", "MUST", "OVERWRITE")
     @when_initialized
     def save_config(self, tag="data", *args, **kwargs) -> bool:
         config = self._compile_configuration_as_dict()
@@ -255,11 +265,13 @@ class FunctionalCacher(BaseCacher):
         config.update(params[1])
         return config
 
-    @when_policy_is("ON", "AUTO", "MUST")
+    @when_policy_is("ON", "AUTO", "MUST", "OVERWRITE")
     @when_initialized
     def check_cached(self, params=None, tag="data") -> bool:
-        if self.policy == "MUST":  # TODO: fix this, remove redundancy
+        if self.policy == "MUST":
             flag = True
+        elif self.policy == "OVERWRITE":
+            flag = False
         else:
             flag = True
             if params is not None:
@@ -275,7 +287,7 @@ class FunctionalCacher(BaseCacher):
         self.log_cache_status(flag)
         return flag
 
-    @when_policy_is("ON", "AUTO", "MUST")
+    @when_policy_is("ON", "AUTO", "MUST", "OVERWRITE")
     @when_initialized
     def save_config(self, params=None, tag="data"):
         config = self._compile_parameters_as_dict(params)
@@ -295,7 +307,7 @@ class FunctionalCacher(BaseCacher):
         with open(path, "rb") as f:
             yield pkl.load(f)
 
-    @when_policy_is("ON", "AUTO", "MUST")
+    @when_policy_is("ON", "AUTO", "MUST", "OVERWRITE")
     @when_initialized
     def save_cache(self, values, tag="data") -> bool:
         os.makedirs(self.cache_dir, exist_ok=True)
