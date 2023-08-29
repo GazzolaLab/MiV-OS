@@ -79,5 +79,5 @@ _Names arranged alphabetically_
 [badge-CI]: https://github.com/GazzolaLab/MiV-OS/workflows/CI/badge.svg
 [badge-LICENSE]: https://img.shields.io/badge/License-MIT-yellow.svg
 [badge-pypi]: https://badge.fury.io/py/MiV-OS.svg
-[badge-pepy-download-count]: https://pepy.tech/badge/MiV-OS
+[badge-pepy-download-count]: https://static.pepy.tech/badge/MiV-OS
 [badge-codecov]: https://codecov.io/gh/GazzolaLab/MiV-OS/branch/main/graph/badge.svg?token=OM5LYWF5KP
