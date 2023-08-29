@@ -22,7 +22,11 @@ from collections import UserList
 from dataclasses import dataclass, make_dataclass
 
 from miv.core.datatype import DataTypes, Extendable
-from miv.core.operator.cachable import _CacherProtocol, FunctionalCacher, DataclassCacher
+from miv.core.operator.cachable import (
+    DataclassCacher,
+    FunctionalCacher,
+    _CacherProtocol,
+)
 from miv.core.operator.operator import Operator, OperatorMixin
 
 
@@ -96,7 +100,7 @@ def wrap_generator_to_generator(func):
                     else:
                         self.cacher.save_config()
 
-            #return generator_func(*args, **kwargs)
+            # return generator_func(*args, **kwargs)
             return generator_func(*args)
         else:
             if self.cacher.check_cached():

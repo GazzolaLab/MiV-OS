@@ -4,12 +4,14 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 
-from miv.mea import mea_map, rhd_64, rhs_32
+from miv.mea import mea_map, rhd_32, rhd_64, rhs_32
 
 
 class MEA128:
     def __init__(
-        self, map_key="128_dual_connector_two_64_rhd", reverse=False, num_electrodes=128
+        self,
+        map_key="128_dual_connector_two_64_rhd",
+        reverse=False,
     ):
         """
         [[ MEA side
@@ -27,6 +29,8 @@ class MEA128:
             If false, mapping is from OE RHD
             If true, mapping is from Intan RHS
         """
+        num_electrodes = 128
+
         rhd_64_1 = rhd_64[::-1, ::-1].copy()
         rhd_64_2 = rhd_64.copy()
         rhd_64_1[rhd_64_1 != -1] += 64 * 0
@@ -206,6 +210,80 @@ class MEA128:
             plt.show()
 
         return
+
+
+class MEA64:
+    def __init__(
+        self,
+        map_key="64_intanRHD",
+        reverse=False,
+    ):
+        """
+        [[ MEA side
+        OE Arangement:
+        (2)rhd_32 ->, (1)rhd_32 <-
+        Intan Arangement
+        (B)rhs_32 ->, (A)rhs_32 <-
+        ]] Out-side
+
+        -> means chip-side on bottom
+
+        Parameters
+        ----------
+        reverse : bool
+            If false, mapping is from OE RHD
+            If true, mapping is from Intan RHS
+        """
+        num_electrodes = 64
+
+        rhd_32_1 = rhd_32.copy()
+        rhd_32_2 = rhd_32.copy()
+        rhd_32_1[rhd_32_1 != -1] += 32 * 0
+        rhd_32_2[rhd_32_2 != -1] += 32 * 1
+        self.oe_map = np.concatenate([rhd_32_1, rhd_32_2], axis=0)
+
+        rhs_32_1 = rhs_32.copy()
+        rhs_32_2 = rhs_32.copy()
+        rhs_32_1[rhs_32_1 != -1] += 32 * 0
+        rhs_32_2[rhs_32_2 != -1] += 32 * 1
+        self.intan_map = np.concatenate([rhs_32_1, rhs_32_2], axis=0)
+
+        if not reverse:  # Given map is in RHD
+            self.mea = mea_map[map_key]
+            self.mea_intan = np.zeros_like(self.mea, dtype=np.int_) - 1
+            for channel in range(num_electrodes):
+                in_channel = self.channel_mapping(channel, reverse=reverse)
+                self.mea_intan[self.mea == channel] = in_channel
+        else:  # Given map is in RHS
+            self.mea_intan = mea_map[map_key]
+            self.mea = np.zeros_like(self.mea_intan, dtype=np.int_) - 1
+            for channel in range(num_electrodes):
+                oe_channel = self.channel_mapping(channel, reverse=reverse)
+                self.mea[self.mea_intan == channel] = oe_channel
+
+    def channel_mapping(self, channel, reverse=False):
+        """
+
+        Parameters
+        ----------
+        channel : int or str
+        reverse : bool
+            If false, mapping is from "given OE channel, output Intan channel"
+            If true, mapping is from "given Intan channel, output OE channel"
+        """
+        if reverse:
+            oe = self.oe_map[self.intan_map == channel][0]
+            return oe
+        else:
+            intan = self.intan_map[self.oe_map == channel][0]
+            return intan
+
+    def intan_channel_int_to_str(self, intan_channel):
+        return chr((intan_channel // 32) + ord("A")) + "-" + str(intan_channel % 32)
+
+    def intan_channel_str_to_int(self, intan_channel):
+        group, channel = intan_channel.split("-")
+        return (ord(group) - ord("A")) * 32 + int(channel)
 
 
 if __name__ == "__main__":
