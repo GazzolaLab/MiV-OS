@@ -6,6 +6,7 @@ __all__ = [
     "_CacherProtocol",
     "_Jsonable",
     "_Cachable",
+    "SkipCacher",
     "DataclassCacher",
     "FunctionalCacher",
 ]
@@ -83,41 +84,41 @@ class _Cachable(Protocol):
         ...
 
 
-class SkipCache:  # TODO
+class SkipCacher:
     """
     Always run without saving.
     """
 
-    def __init__(self, parent, cache_dir: str | pathlib.Path):
-        super().__init__()
+    MSG = "If you are using SkipCache, you should not be calling this method."
 
-    def config_filename(self) -> str:
-        raise NotImplementedError(
-            "If you are using SkipCache, you should not be calling this method."
-        )
+    def __init__(self, parent=None, cache_dir=None):
+        pass
 
-    def cache_filename(self, idx) -> str:
-        raise NotImplementedError(
-            "If you are using SkipCache, you should not be calling this method."
-        )
-
-    def check_cached(self) -> bool:
+    def check_cached(self, *args, **kwargs) -> bool:
         return False
 
-    def save_config(self):
-        raise NotImplementedError(
-            "If you are using SkipCache, you should not be calling this method."
-        )
+    @property
+    def cache_called(self) -> bool:
+        return False
 
-    def load_cached(self):
-        raise NotImplementedError(
-            "If you are using SkipCache, you should not be calling this method."
-        )
+    def config_filename(self, *args, **kwargs) -> str:
+        raise NotImplementedError(self.MSG)
 
-    def save_cache(self, values, idx):
-        raise NotImplementedError(
-            "If you are using SkipCache, you should not be calling this method."
-        )
+    def cache_filename(self, *args, **kwargs) -> str:
+        raise NotImplementedError(self.MSG)
+
+    def save_config(self, *args, **kwargs):
+        raise NotImplementedError(self.MSG)
+
+    def load_cached(self, *args, **kwargs):
+        raise NotImplementedError(self.MSG)
+
+    def save_cache(self, *args, kwargs):
+        raise NotImplementedError(self.MSG)
+
+    @property
+    def cache_dir(self) -> str | pathlib.Path:
+        raise NotImplementedError(self.MSG)
 
 
 def when_policy_is(*allowed_policy):

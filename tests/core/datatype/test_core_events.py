@@ -1,3 +1,4 @@
+import numpy as np
 import pytest
 import quantities as pq
 
@@ -28,7 +29,7 @@ class TestEvents:
 
     def test_get_view(self, events):
         view = events.get_view(1.0, 2.0)
-        assert view.data == [1.2, 1.5]
+        np.testing.assert_array_equal(view.data, [1.2, 1.5])
 
     def test_binning(self, events):
         signal = events.binning(bin_size=0.5)
