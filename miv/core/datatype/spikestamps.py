@@ -141,6 +141,7 @@ class Spikestamps(CollapseExtendableMixin, DataNodeMixin, Sequence):
         bin_size: float = 1 * pq.ms,
         t_start: Optional[float] = None,
         t_end: Optional[float] = None,
+        minimum_count: int = 1,
         return_count: bool = False,
     ) -> Signal:
         """
@@ -150,6 +151,13 @@ class Spikestamps(CollapseExtendableMixin, DataNodeMixin, Sequence):
         ----------
         bin_size : float | pq.Quantity
             bin size in the unit of time.
+        t_start : float
+            start time of the binned spiketrain. (default=None)
+        t_end : float
+            end time of the binned spiketrain. (default=None)
+        minimum_count : int
+            Minimum number of spikes in a bin to be considered as a spike. (default=1)
+            If return_count is set to True, this parameter is ignored.
         return_count : bool
             If set to true, return the bin count. (default=False)
 
@@ -188,6 +196,6 @@ class Spikestamps(CollapseExtendableMixin, DataNodeMixin, Sequence):
             if return_count:
                 bin_spike = bincount
             else:
-                bin_spike = (bincount != 0).astype(np.bool_)
+                bin_spike = (bincount >= minimum_count).astype(np.bool_)
             signal.data[:, idx] = bin_spike
         return signal
