@@ -1,7 +1,7 @@
 __doc__ = """
 
 Module (Intan)
-##################
+##############
 
 .. autoclass:: DataIntan
    :members:
@@ -56,7 +56,6 @@ class DataIntan(Data):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.header = self._read_header()
 
     def load(self):
         """
@@ -187,11 +186,17 @@ class DataIntan(Data):
         return True
 
     def get_recording_files(self):
+        """
+        Get list of path of all recording files.
+        """
         paths = glob(os.path.join(self.data_path, "*.rhs"), recursive=True)
         paths.sort()
         return paths
 
     def get_stimulation_events(self):  # TODO: refactor
+        """
+        Get stimulation in Spikestamps form, where each stamps represent the stimulus event.
+        """
         minimum_stimulation_length = 0.010
         data = self.get_stimulation()
         stim = data.data
@@ -228,7 +233,13 @@ class DataIntan(Data):
         """
         Load recorded data from digital input ports.
         Result is a list of timestamps for each channel, in Spikestamps format.
+
+        Parameters
+        ----------
+        progress_bar : bool, optional
+            Show progress bar, by default False
         """
+        self.header = self._read_header()
         num_channels = self.header["num_board_dig_in_channels"]
         return self._load_digital_event_common(
             "board_dig_in_data", num_channels, progress_bar=progress_bar
@@ -242,7 +253,13 @@ class DataIntan(Data):
         """
         Load recorded data from digital output ports.
         Result is a list of timestamps for each channel, in Spikestamps format.
+
+        Parameters
+        ----------
+        progress_bar : bool, optional
+            Show progress bar, by default False
         """
+        self.header = self._read_header()
         num_channels = self.header["num_board_dig_out_channels"]
         return self._load_digital_event_common(
             "board_dig_out_data", num_channels, progress_bar=progress_bar
