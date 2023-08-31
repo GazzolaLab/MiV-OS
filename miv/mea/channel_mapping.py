@@ -1,4 +1,4 @@
-__all__ = ["MEA128"]
+__all__ = ["MEA128", "MEA64"]
 
 import matplotlib.pyplot as plt
 import networkx as nx

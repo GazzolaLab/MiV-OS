@@ -64,6 +64,7 @@ class DirectedConnectivity(OperatorMixin):
     channels: Optional[List[int]] = None
     exclude_channels: Optional[List[int]] = None
     bin_size: float = 0.001
+    minimum_count: int = 1
     tag: str = "directional connectivity analysis"
     progress_bar: bool = False
 
@@ -95,7 +96,9 @@ class DirectedConnectivity(OperatorMixin):
         spikestamps : Spikestamps
         """
 
-        binned_spiketrain: Signal = spikestamps.binning(bin_size=self.bin_size)
+        binned_spiketrain: Signal = spikestamps.binning(
+            bin_size=self.bin_size, minimum_count=self.minimum_count
+        )
 
         # Channel Selection
         if self.channels is None:
