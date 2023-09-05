@@ -36,8 +36,8 @@ class GridMEA(MEAMixin):
         self.spacing = spacing
 
         self.nrow, self.ncol = grid.shape
-        X = np.arange(self.ncol) * self.spacing[0]
-        Y = [np.arange(self.nrow) * self.spacing[1]][::-1]
+        X = np.linspace(0, self.spacing[0] * self.ncol, self.ncol)
+        Y = np.linspace(0, -self.spacing[1] * self.nrow, self.nrow)
         self.Xn, self.Yn = np.meshgrid(X, Y)
 
     def to_json(self) -> dict:

@@ -9,6 +9,7 @@ Useful wrapper functions for MIV operators.
 """
 
 __all__ = [
+    "wrap",
     "wrap_cacher",
     "wrap_generator_to_generator",
 ]
@@ -30,6 +31,15 @@ from miv.core.operator.cachable import (
 from miv.core.operator.operator import Operator, OperatorMixin
 
 
+def wrap(func):
+    def wrapper(self, *args, **kwargs):
+        inputs = self.receive()
+        result = func(self, *inputs)
+        if result is None:
+            return None
+        return result
+    return wrapper
+
 def wrap_cacher(cache_tag=None):
     """
     Decorator to wrap the function to use cacher.
@@ -46,15 +56,18 @@ def wrap_cacher(cache_tag=None):
 
             if cacher.check_cached(params=(args[1:], kwargs), tag=tag):
                 cacher.cache_called = True
-                return next(cacher.load_cached(tag=tag))
+                loader = cacher.load_cached(tag=tag)
+                value = next(loader)
+                return value
             else:
                 # TODO: Need to clean this part
                 if isinstance(cacher, FunctionalCacher):
                     result = func(*args, **kwargs)
                 elif isinstance(cacher, DataclassCacher):
                     inputs = self.receive()
-                    print(inputs)
                     result = func(self, *inputs)
+                if result is None:
+                    return None
                 cacher.save_cache(result, tag=tag)
                 cacher.save_config(params=(args[1:], kwargs), tag=tag)
                 cacher.cache_called = False
@@ -95,7 +108,8 @@ def wrap_generator_to_generator(func):
                 def generator_func(*args, **kwargs):
                     for idx, zip_arg in enumerate(zip(*args)):
                         result = func(self, *zip_arg, **kwargs)
-                        self.cacher.save_cache(result, idx)
+                        if result is not None:
+                            self.cacher.save_cache(result, idx)
                         yield result
                     else:
                         self.cacher.save_config()
@@ -108,6 +122,8 @@ def wrap_generator_to_generator(func):
                 return next(self.cacher.load_cached())
             else:
                 result = func(self, *args, **kwargs)
+                if result is None:
+                    return None
                 self.cacher.save_cache(result)
                 self.cacher.save_config()
                 self.cacher.cache_called = False

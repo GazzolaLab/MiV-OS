@@ -187,6 +187,7 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
         #    output = self.runner(self.__call__)
         # else:
         #    output = self.runner(self.__call__, args)
+        self.logger.info(f"Using runner: {self.runner.__class__} type.")
         output = self.runner(self.__call__)
 
         # Callback: After-run

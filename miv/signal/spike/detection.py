@@ -114,7 +114,7 @@ class ThresholdCutoff(OperatorMixin):
             for idx, sig in enumerate(signal):  # TODO: mp
                 stime = time.time()
                 collapsed_result.extend(self._detection(sig))
-                self.logger.info(f"Processing {idx}: {time.time()-stime:.02f} sec")
+                self.logger.info(f"Processing segment {idx}: {time.time()-stime:.02f} sec")
             return collapsed_result
 
     # @staticmethod
