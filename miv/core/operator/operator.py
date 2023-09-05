@@ -9,6 +9,7 @@ __all__ = [
     "DataLoader",
     "DataLoaderMixin",
     "OperatorMixin",
+    "GeneratorOperatorMixin",
     "DataNodeMixin",
     "DataNode",
 ]

@@ -9,13 +9,13 @@ import numpy as np
 import numpy.typing as npt
 
 from miv.core.datatype import Signal
-from miv.core.operator import OperatorMixin
+from miv.core.operator import GeneratorOperatorMixin
 from miv.core.wrapper import wrap_cacher_generator
 from miv.typing import SignalType
 
 
 @dataclass
-class MedianFilter(OperatorMixin):
+class MedianFilter(GeneratorOperatorMixin):
     """Median filter with threshold
 
     If the signal exceed the threshold, the value is replaced by median of neighboring

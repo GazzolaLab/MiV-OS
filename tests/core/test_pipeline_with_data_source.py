@@ -11,7 +11,7 @@ import pytest
 from miv.core.datatype.signal import Signal
 from miv.core.operator.operator import DataLoaderMixin, OperatorMixin
 from miv.core.pipeline import Pipeline
-from miv.core.wrapper import wrap_cacher, wrap_generator_to_generator
+from miv.core.wrapper import wrap_cacher, wrap_cacher_generator
 
 
 class MockDataLoaderNode(DataLoaderMixin):
@@ -44,7 +44,7 @@ class MockGeneratorOperator(OperatorMixin):
         super().__init__()
         self.call_count = 0
 
-    @wrap_generator_to_generator
+    @wrap_cacher_generator
     def __call__(self, data):
         self.call_count += 1
         assert self.call_count <= 10
@@ -59,7 +59,7 @@ class MockOperator(OperatorMixin):
         super().__init__()
         self.called = False
 
-    @wrap_cacher()
+    @wrap_cacher
     def __call__(self, data):
         assert not self.called
         self.called = True

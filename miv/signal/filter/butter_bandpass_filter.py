@@ -13,13 +13,13 @@ import numpy.typing as npt
 import scipy.signal as sps
 
 from miv.core.datatype import Signal
-from miv.core.operator import OperatorMixin
+from miv.core.operator import GeneratorOperatorMixin
 from miv.core.wrapper import wrap_cacher_generator
 from miv.typing import SignalType
 
 
 @dataclass
-class ButterBandpass(OperatorMixin):
+class ButterBandpass(GeneratorOperatorMixin):
     """Classical bandpass filter using `scipy` butterworth filter
 
     Parameters

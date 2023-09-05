@@ -22,7 +22,7 @@ def pipeline():
 
 
 def test_pipeline_run(pipeline):
-    pipeline.run(dry_run=True, verbose=True)
+    pipeline.run(verbose=True)
 
 
 def test_pipeline_summarize(pipeline):
