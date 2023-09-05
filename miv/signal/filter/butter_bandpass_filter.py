@@ -14,7 +14,7 @@ import scipy.signal as sps
 
 from miv.core.datatype import Signal
 from miv.core.operator import OperatorMixin
-from miv.core.wrapper import wrap_generator_to_generator
+from miv.core.wrapper import wrap_cacher
 from miv.typing import SignalType
 
 
@@ -45,7 +45,7 @@ class ButterBandpass(OperatorMixin):
     tag: str = "bandpass filter"
     btype: str = "bandpass"
 
-    @wrap_generator_to_generator
+    @wrap_cacher
     def __call__(self, signal: Signal) -> Signal:
         """__call__.
 

@@ -10,7 +10,7 @@ import numpy.typing as npt
 
 from miv.core.datatype import Signal
 from miv.core.operator import OperatorMixin
-from miv.core.wrapper import wrap_generator_to_generator
+from miv.core.wrapper import wrap_cacher
 from miv.typing import SignalType
 
 
@@ -41,7 +41,7 @@ class MedianFilter(OperatorMixin):
     k: Union[int, Tuple[int, int]] = 20
     tag: str = "median filter"
 
-    @wrap_generator_to_generator
+    @wrap_cacher
     def __call__(
         self,
         signal: SignalType,

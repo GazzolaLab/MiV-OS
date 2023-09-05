@@ -43,6 +43,11 @@ class _CacherProtocol(Protocol):
     def cache_dir(self) -> str | pathlib.Path:
         ...
 
+    @property
+    def cache_called(self) -> bool:
+        """Return true if last call was cached."""
+        ...
+
     def config_filename(self) -> str | pathlib.Path:
         ...
 
@@ -96,6 +101,10 @@ class SkipCacher:
         pass
 
     def check_cached(self, *args, **kwargs) -> bool:
+        return False
+
+    @property
+    def cache_called(self) -> bool:
         return False
 
     def config_filename(self, *args, **kwargs) -> str:
@@ -153,6 +162,8 @@ class BaseCacher:
         self.policy: CACHE_POLICY = "AUTO"  # TODO: make this a property
         self.parent = parent
         self.cache_dir = None  # TODO: Public. Make proper setter
+
+        self.cache_called = False
 
     def config_filename(self, tag="data") -> str:
         return os.path.join(self.cache_dir, f"config_{tag}.json")

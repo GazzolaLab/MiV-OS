@@ -76,7 +76,7 @@ class PeristimulusActivity(OperatorMixin):
         else:
             self.mea_map = mea_map["64_intanRHD"]
 
-    @wrap_cacher()
+    @wrap_cacher
     def __call__(self, events: Spikestamps, spikestamps: Spikestamps):
         # TODO: Change events datatype to be Event, not Spikestamps
         activity = [Spikestamps() for _ in range(spikestamps.number_of_channels)]
@@ -144,7 +144,7 @@ class PSTH(OperatorMixin):
         else:
             self.mea_map = mea_map["64_intanRHD"]
 
-    @wrap_cacher()
+    @wrap_cacher
     def __call__(self, events: Spikestamps, spikestamps: Spikestamps):
         # TODO: Change events datatype to be Event, not Spikestamps
         n_time = int(np.ceil(self.interval / self.binsize))

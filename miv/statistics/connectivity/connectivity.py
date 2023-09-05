@@ -87,7 +87,7 @@ class DirectedConnectivity(OperatorMixin):
         if self.exclude_channels is None:  # FIXME: Use dataclass default value
             self.exclude_channels = []
 
-    @wrap_cacher()
+    @wrap_cacher
     def __call__(self, spikestamps: Spikestamps) -> np.ndarray:
         """__call__.
 

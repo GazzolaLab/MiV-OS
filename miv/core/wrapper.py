@@ -4,14 +4,13 @@ Useful wrapper functions for MIV operators.
 
 .. autofunction:: miv.core.wrapper.wrap_cacher
 
-.. autofunction:: miv.core.wrapper.wrap_generator_to_generator
+.. autofunction:: miv.core.wrapper.cache_functional
 
 """
 
 __all__ = [
-    "wrap",
     "wrap_cacher",
-    "wrap_generator_to_generator",
+    "cache_functional",
 ]
 
 import types
@@ -31,43 +30,63 @@ from miv.core.operator.cachable import (
 from miv.core.operator.operator import Operator, OperatorMixin
 
 
-def wrap(func):
-    def wrapper(self, *args, **kwargs):
-        inputs = self.receive()
-        result = func(self, *inputs)
-        if result is None:
-            return None
-        return result
+def wrap_cacher(func):
+    """
+    Cache the methods of the operator.
+    Save the cache in the cacher object.
+    """
+
+    def wrapper(self: Operator, *args, **kwargs):
+        is_all_generator = all(inspect.isgenerator(v) for v in args) and all(
+            inspect.isgenerator(v) for v in kwargs.values()
+        )
+
+        tag = "data"
+        cacher: DataclassCacher = self.cacher
+        if is_all_generator:
+            self.cacher.cache_called = False
+
+            def generator_func(*args):
+                for idx, zip_arg in enumerate(zip(*args)):
+                    result = func(self, *zip_arg, **kwargs)
+                    if result is not None:
+                        # In case the module does not return anything
+                        self.cacher.save_cache(result, idx)
+                    yield result
+                else:
+                    self.cacher.save_config()
+
+            return generator_func(*args, *kwargs.values())
+            # return generator_func(*args)
+        else:
+            result = func(self, *args, **kwargs)
+            if result is None:
+                # In case the module does not return anything
+                return None
+            cacher.save_cache(result, tag=tag)
+            cacher.save_config(tag=tag)
+            return result
 
     return wrapper
 
 
-def wrap_cacher(cache_tag=None):
+def cache_functional(cache_tag=None):
     """
-    Decorator to wrap the function to use cacher.
-
-    Note: Keep cache_tag=None for __call__ function.
+    Cache the functionals.
     """
 
     def decorator(func):
-        # @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            self: Operator = args[0]
+        def wrapper(self, *args, **kwargs):
             cacher: _CacherProtocol = self.cacher
             tag = "data" if cache_tag is None else cache_tag
 
-            if cacher.check_cached(params=(args[1:], kwargs), tag=tag):
+            if cacher.check_cached(params=(args, kwargs), tag=tag):
                 cacher.cache_called = True
                 loader = cacher.load_cached(tag=tag)
                 value = next(loader)
                 return value
             else:
-                # TODO: Need to clean this part
-                if isinstance(cacher, FunctionalCacher):
-                    result = func(*args, **kwargs)
-                elif isinstance(cacher, DataclassCacher):
-                    inputs = self.receive()
-                    result = func(self, *inputs)
+                result = func(*args, **kwargs)
                 if result is None:
                     return None
                 cacher.save_cache(result, tag=tag)
@@ -78,57 +97,3 @@ def wrap_cacher(cache_tag=None):
         return wrapper
 
     return decorator
-
-
-def wrap_generator_to_generator(func):
-    """
-    If all input arguments are generator, then the output will be a generator.
-
-    TODO: Fix to accomodate free functions
-    Current implementation only works for class methods.
-    """
-
-    # @functools.wraps(func)
-    def wrapper(self, *args, **kwargs):
-        is_all_generator = all(inspect.isgenerator(v) for v in args) and all(
-            inspect.isgenerator(v) for v in kwargs.values()
-        )
-        if is_all_generator:
-            # TODO: Temporary fix
-            if isinstance(self.cacher, DataclassCacher):
-                args = self.receive()
-
-            if self.cacher.check_cached():
-                self.cacher.cache_called = True
-
-                def generator_func(*args, **kwargs):
-                    yield from self.cacher.load_cached()
-
-            else:
-                self.cacher.cache_called = False
-
-                def generator_func(*args, **kwargs):
-                    for idx, zip_arg in enumerate(zip(*args)):
-                        result = func(self, *zip_arg, **kwargs)
-                        if result is not None:
-                            self.cacher.save_cache(result, idx)
-                        yield result
-                    else:
-                        self.cacher.save_config()
-
-            # return generator_func(*args, **kwargs)
-            return generator_func(*args)
-        else:
-            if self.cacher.check_cached():
-                self.cacher.cache_called = True
-                return next(self.cacher.load_cached())
-            else:
-                result = func(self, *args, **kwargs)
-                if result is None:
-                    return None
-                self.cacher.save_cache(result)
-                self.cacher.save_config()
-                self.cacher.cache_called = False
-                return result
-
-    return wrapper

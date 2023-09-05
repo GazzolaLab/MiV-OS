@@ -82,8 +82,7 @@ class ThresholdCutoff(OperatorMixin):
 
     num_proc: int = 1
 
-    # @wrap_generator_to_generator
-    @wrap_cacher()
+    @wrap_cacher
     def __call__(self, signal: SignalType) -> SpikestampsType:
         """Execute threshold-cutoff method and return spike stamps
 
