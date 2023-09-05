@@ -10,6 +10,7 @@ Useful wrapper functions for MIV operators.
 
 __all__ = [
     "wrap_cacher",
+    "wrap_cacher_generator",
     "cache_functional",
 ]
 
@@ -37,35 +38,48 @@ def wrap_cacher(func):
     """
 
     def wrapper(self: Operator, *args, **kwargs):
+        tag = "data"
+        cacher: DataclassCacher = self.cacher
+
+        result = func(self, *args, **kwargs)
+        if result is None:
+            # In case the module does not return anything
+            return None
+        cacher.save_cache(result, tag=tag)
+        cacher.save_config(tag=tag)
+        return result
+
+    return wrapper
+
+
+def wrap_cacher_generator(func):
+    """
+    Cache the methods of the operator.
+    Save the cache in the cacher object.
+    """
+
+    def wrapper(self: Operator, *args, **kwargs):
         is_all_generator = all(inspect.isgenerator(v) for v in args) and all(
             inspect.isgenerator(v) for v in kwargs.values()
         )
+        assert is_all_generator, "All arguments must be generator."
 
         tag = "data"
         cacher: DataclassCacher = self.cacher
-        if is_all_generator:
-            self.cacher.cache_called = False
+        cacher.cache_called = False
 
-            def generator_func(*args):
-                for idx, zip_arg in enumerate(zip(*args)):
-                    result = func(self, *zip_arg, **kwargs)
-                    if result is not None:
-                        # In case the module does not return anything
-                        self.cacher.save_cache(result, idx)
-                    yield result
-                else:
-                    self.cacher.save_config()
+        def generator_func(*args):
+            for idx, zip_arg in enumerate(zip(*args)):
+                result = func(self, *zip_arg, **kwargs)
+                if result is not None:
+                    # In case the module does not return anything
+                    cacher.save_cache(result, idx, tag=tag)
+                yield result
+            else:
+                cacher.save_config(tag=tag)
 
-            return generator_func(*args, *kwargs.values())
-            # return generator_func(*args)
-        else:
-            result = func(self, *args, **kwargs)
-            if result is None:
-                # In case the module does not return anything
-                return None
-            cacher.save_cache(result, tag=tag)
-            cacher.save_config(tag=tag)
-            return result
+        return generator_func(*args, *kwargs.values())
+        # return generator_func(*args)
 
     return wrapper
 
@@ -77,7 +91,7 @@ def cache_functional(cache_tag=None):
 
     def decorator(func):
         def wrapper(self, *args, **kwargs):
-            cacher: _CacherProtocol = self.cacher
+            cacher: FunctionalCacher = self.cacher
             tag = "data" if cache_tag is None else cache_tag
 
             if cacher.check_cached(params=(args, kwargs), tag=tag):
