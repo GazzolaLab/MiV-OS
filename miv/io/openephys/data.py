@@ -210,7 +210,6 @@ class Data(DataLoaderMixin):
 
     def load(
         self,
-        num_fragments: int | None = None,
         start_at_zero: bool = False,
         progress_bar=False,
         mpi_comm: mpi4py.MPI.Intercomm | None = None,
@@ -220,9 +219,6 @@ class Data(DataLoaderMixin):
 
         Parameters
         ----------
-        num_fragments : Optional[int]
-            Instead of loading entire data at once, split the data into `num_fragment`
-            number of subdata to process separately. (default=None)
         start_at_zero : bool
             If set to True, time first timestamps will be shifted to zero. To achieve synchronized
             timestamps with other recordings/events, set this to False.
@@ -257,22 +253,12 @@ class Data(DataLoaderMixin):
         if not self.check_path_validity():
             raise FileNotFoundError("Data directory does not have all necessary files.")
 
-        start_index = None
-        end_index = None
-        if mpi_comm is not None:
-            rank = mpi_comm.Get_rank()
-            size = mpi_comm.Get_size()
-            tasks = np.array_split(np.arange(num_fragments), size)[rank]
-            start_index = tasks.min()
-            end_index = tasks.max() + 1
         for signal, timestamps, rate in load_recording(
             self.data_path,
             self.masking_channel_set,
             start_at_zero=start_at_zero,
-            num_fragments=num_fragments,
-            start_index=start_index,
-            end_index=end_index,
             progress_bar=progress_bar,
+            mpi_comm=mpi_comm,
         ):
             yield Signal(data=signal, timestamps=timestamps, rate=rate)
 

@@ -38,7 +38,9 @@ def wrap(func):
         if result is None:
             return None
         return result
+
     return wrapper
+
 
 def wrap_cacher(cache_tag=None):
     """

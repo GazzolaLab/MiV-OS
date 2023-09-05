@@ -102,12 +102,20 @@ class DataLoaderMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
         self.cacher = FunctionalCacher(self)
         self.cacher.cache_dir = os.path.join(self.data_path, ".cache")
 
+        self._load_param = {}
+
+    def configure_load(self, **kwargs):
+        """
+        (Experimental Feature)
+        """
+        self._load_param = kwargs
+
     @property
     def output(self) -> list[DataTypes]:
         return self._output
 
     def run(self, *args, **kwargs):
-        self._output = self.load()
+        self._output = self.load(**self._load_param)
         return self._output
 
     def set_save_path(self, path: str | pathlib.Path, recursive: bool = False) -> None:
@@ -170,7 +178,6 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
         dry_run: bool = False,
         skip_plot: bool = False,
     ) -> None:
-
         # Execute the module
         if dry_run:
             print("Dry run: ", self.__class__.__name__)
