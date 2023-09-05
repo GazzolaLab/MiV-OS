@@ -47,7 +47,7 @@ class Operator(
 ):
     """ """
 
-    def run(self, dry_run: bool = False) -> None:
+    def run(self) -> None:
         ...
 
     def set_save_path(self, path: str | pathlib.Path, recursive: bool = False) -> None:
@@ -159,29 +159,24 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
     def make_analysis_path(self):
         os.makedirs(self.analysis_path, exist_ok=True)
 
-    @property
-    def output(self):
+    def receive(self, skip_plot=False) -> list[DataTypes]:
         """
-        Output viewer
+        Receive input data from each upstream operator.
+        Essentially, this method recursively call upstream operators' run() method.
         """
-        # TODO: try to add warning if the operation is never executed
-        return self._output
-
-    def receive(self, dry_run=False, skip_plot=False) -> list[DataTypes]:
         return [
-            node.run(dry_run=dry_run, skip_plot=skip_plot)
+            node.run(skip_plot=skip_plot)
             for node in self.iterate_upstream()
         ]
 
     def run(
         self,
-        dry_run: bool = False,
         skip_plot: bool = False,
     ) -> None:
-        # Execute the module
-        if dry_run:
-            print("Dry run: ", self.__class__.__name__)
-            return
+        """
+        Execute the module. This is the function called by the pipeline.
+        Input to the parameters are received from upstream operators.
+        """
         self.make_analysis_path()
 
         # Execution
@@ -201,10 +196,9 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
         self._output = self.callback_after_run(output)
 
         # Plotting
-        cache_called = self.cacher.cache_called
         if (
             not skip_plot and not cache_called and not inspect.isgenerator(self._output)
         ):  # TODO: temporary
-            self.plot(show=False, save_path=True, dry_run=dry_run)
+            self.plot(show=False, save_path=True)
 
         return self._output

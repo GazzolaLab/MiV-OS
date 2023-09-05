@@ -88,7 +88,6 @@ class BaseCallbackMixin:
         self,
         show: bool = False,
         save_path: Optional[Union[bool, str, pathlib.Path]] = None,
-        dry_run: bool = False,
     ):
         if self.skip_plotting:
             return
@@ -96,10 +95,6 @@ class BaseCallbackMixin:
             os.makedirs(self.analysis_path, exist_ok=True)
             save_path = self.analysis_path
         plotters = get_methods_from_feature_classes_by_startswith_str(self, "plot")
-        if dry_run:
-            for plotter in plotters:
-                print(f"dry run: {plotter}")
-            return
         plotters_for_generator_out = get_methods_from_feature_classes_by_startswith_str(
             self, "_generator_plot_"
         )
