@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from miv.core.operator import DataLoaderMixin
-from miv.core.wrapper import wrap_cacher
+from miv.core.wrapper import cache_functional
 
 
 class MockDataLoader(DataLoaderMixin):
@@ -14,17 +14,17 @@ class MockDataLoader(DataLoaderMixin):
         self.run_check_flag = False
         self.tag = "mock module"
 
-    @wrap_cacher(cache_tag="function_1")
+    @cache_functional(cache_tag="function_1")
     def func1(self, a, b):
         self.run_check_flag = True
         return a + b
 
-    @wrap_cacher(cache_tag="function_2")
+    @cache_functional(cache_tag="function_2")
     def func2(self, a, b):
         self.run_check_flag = True
         return a - b
 
-    @wrap_cacher(cache_tag="function_3")
+    @cache_functional(cache_tag="function_3")
     def func3(self, a, b):
         self.run_check_flag = True
         # This part is to test if the cache is working properly in nested case

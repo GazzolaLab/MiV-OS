@@ -30,7 +30,7 @@ def test_data_module_data_check(create_mock_data_file):
         expected_sampling_rate,
     ) = create_mock_data_file
     data = Data(dirname)
-    for Signal in data.load(1):
+    for Signal in data.load():
         signal = Signal.data
         timestamps = Signal.timestamps
         sampling_rate = Signal.rate

@@ -12,13 +12,13 @@ import numpy.typing as npt
 import scipy.signal as sps
 
 from miv.core.datatype import Signal
-from miv.core.operator import OperatorMixin
-from miv.core.wrapper import wrap_generator_to_generator
+from miv.core.operator import GeneratorOperatorMixin
+from miv.core.wrapper import cache_generator_call
 from miv.typing import SignalType
 
 
 @dataclass
-class Notch(OperatorMixin):
+class Notch(GeneratorOperatorMixin):
     """Notch filter using `scipy` second-order notch filter, wrapped in operator mixin.
 
     Parameters
@@ -35,7 +35,7 @@ class Notch(OperatorMixin):
     Q: Optional[float] = 30.0
     tag: str = "notch filter"
 
-    @wrap_generator_to_generator
+    @cache_generator_call
     def __call__(self, signal: Signal) -> Signal:
         """__call__.
 

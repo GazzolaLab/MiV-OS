@@ -41,7 +41,6 @@ class Pipeline:
         self,
         working_directory: Optional[Union[str, pathlib.Path]] = "./results",
         skip_plot: bool = False,
-        dry_run: bool = False,
         verbose: bool = False,  # Use logging
     ):
         """
@@ -51,8 +50,6 @@ class Pipeline:
         ----------
         working_directory : Optional[Union[str, pathlib.Path]], optional
             The working directory where the pipeline will be executed. By default "./results"
-        dry_run : bool, optional
-            If True, the pipeline will not be executed. By default False
         verbose : bool, optional
             If True, the pipeline will log debugging informations. By default False
         """
@@ -70,7 +67,7 @@ class Pipeline:
 
             # in case of error, add message
             try:
-                node.run(dry_run=dry_run, skip_plot=skip_plot)
+                node.run(skip_plot=skip_plot)
             except Exception as e:
                 raise Exception(f'Error while running the operator "{node.tag}"') from e
 

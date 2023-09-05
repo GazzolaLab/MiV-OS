@@ -54,17 +54,17 @@ class _CacherProtocol(Protocol):
     def cache_filename(self) -> str | pathlib.Path:
         ...
 
-    def load_cached(self) -> Generator[Any, None, None]:
+    def load_cached(self, tag: str) -> Generator[Any, None, None]:
         """Load the cached values."""
         ...
 
-    def save_cache(self, values: Any, idx: int) -> bool:
+    def save_cache(self, values: Any, idx: int, tag: str) -> bool:
         ...
 
-    def save_config(self) -> None:
+    def save_config(self, tag: str) -> None:
         ...
 
-    def check_cached(self) -> bool:
+    def check_cached(self, tag: str) -> bool:
         """Check if the current configuration is the same as the cached one."""
         ...
 

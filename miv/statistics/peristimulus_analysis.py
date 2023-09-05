@@ -17,7 +17,7 @@ from tqdm import tqdm
 
 from miv.core.datatype import Signal, Spikestamps
 from miv.core.operator import OperatorMixin
-from miv.core.wrapper import wrap_cacher
+from miv.core.wrapper import cache_call
 from miv.mea import mea_map
 
 
@@ -76,7 +76,7 @@ class PeristimulusActivity(OperatorMixin):
         else:
             self.mea_map = mea_map["64_intanRHD"]
 
-    @wrap_cacher()
+    @cache_call
     def __call__(self, events: Spikestamps, spikestamps: Spikestamps):
         # TODO: Change events datatype to be Event, not Spikestamps
         activity = [Spikestamps() for _ in range(spikestamps.number_of_channels)]
@@ -144,7 +144,7 @@ class PSTH(OperatorMixin):
         else:
             self.mea_map = mea_map["64_intanRHD"]
 
-    @wrap_cacher()
+    @cache_call
     def __call__(self, events: Spikestamps, spikestamps: Spikestamps):
         # TODO: Change events datatype to be Event, not Spikestamps
         n_time = int(np.ceil(self.interval / self.binsize))

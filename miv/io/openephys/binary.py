@@ -303,7 +303,7 @@ def load_recording(
     # Read timestamps first
     dirname = os.path.dirname(file_path[0])
     timestamps_path = os.path.join(dirname, "timestamps.npy")
-    timestamps = load_timestamps(timestamps_path, sampling_rate)
+    timestamps = load_timestamps(timestamps_path, sampling_rate, _old_oe_version)
     total_length = timestamps.shape[0]
 
     # Define task
@@ -376,7 +376,7 @@ def load_recording(
 def load_continuous_data(
     data_path: str,
     num_channels: int,
-    _recorded_dtype: Union[np.dtype, str],
+    _recorded_dtype: Union[np.dtype, str] = "int16",
     offset: int = 0,
     shape: Tuple[int, int] = None,
 ):
@@ -450,8 +450,6 @@ def load_timestamps(
         Path for the timestamps file.
     sampling_rate : float
         data sampling rate.
-    _recorded_dtype: Union[np.dtype, str]
-        Recorded data type. (default="int16")
 
     Returns
     -------
