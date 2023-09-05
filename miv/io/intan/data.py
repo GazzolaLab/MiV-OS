@@ -26,7 +26,7 @@ from tqdm import tqdm
 
 import miv.io.intan.rhs as rhs
 from miv.core.datatype import Events, Signal, Spikestamps
-from miv.core.wrapper import wrap_cacher
+from miv.core.wrapper import cache_functional
 from miv.io.openephys.data import Data, DataManager
 from miv.typing import SignalType
 
@@ -225,7 +225,7 @@ class DataIntan(Data):
                 stamps[channel].extend(np.asarray(sig.timestamps)[index])
         return Spikestamps(stamps)
 
-    @wrap_cacher(cache_tag="digital_in")
+    @cache_functional(cache_tag="digital_in")
     def load_digital_in_event(
         self,
         progress_bar: bool = False,
@@ -245,7 +245,7 @@ class DataIntan(Data):
             "board_dig_in_data", num_channels, progress_bar=progress_bar
         )
 
-    @wrap_cacher(cache_tag="digital_out")
+    @cache_functional(cache_tag="digital_out")
     def load_digital_out_event(
         self,
         progress_bar: bool = False,
@@ -265,7 +265,7 @@ class DataIntan(Data):
             "board_dig_out_data", num_channels, progress_bar=progress_bar
         )
 
-    @wrap_cacher(cache_tag="ttl_events")
+    @cache_functional(cache_tag="ttl_events")
     def load_ttl_event(
         self,
         deadtime: float = 0.002,
@@ -366,7 +366,7 @@ class DataIntanTriggered(DataIntan):
             progress_bar=self.progress_bar,
         )
 
-    @wrap_cacher(cache_tag="trigger_grouping")
+    @cache_functional(cache_tag="trigger_grouping")
     def _trigger_grouping(self):
         def _find_sequence(arr):
             if arr.size == 0:
