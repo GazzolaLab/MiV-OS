@@ -21,7 +21,7 @@ from tqdm import tqdm
 
 from miv.core.datatype import Signal, Spikestamps
 from miv.core.operator import OperatorMixin
-from miv.core.wrapper import wrap_cacher
+from miv.core.wrapper import cache_call
 
 
 @dataclass
@@ -74,7 +74,7 @@ class AvalancheDetection(OperatorMixin):
 
     tag: str = "avalanche detection"
 
-    @wrap_cacher
+    @cache_call
     def __call__(self, spikestamps: Spikestamps):
         bincount = spikestamps.binning(
             bin_size=self.bin_size, return_count=self.allow_multiple_spike_per_bin
@@ -204,7 +204,7 @@ class AvalancheAnalysis(OperatorMixin):
 
     progress_bar: bool = False
 
-    @wrap_cacher
+    @cache_call
     def __call__(self, inputs):
         starts, ends, bincount = inputs
         bin_size = 1.0 / bincount.rate

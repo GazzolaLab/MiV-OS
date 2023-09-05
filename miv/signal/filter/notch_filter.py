@@ -13,7 +13,7 @@ import scipy.signal as sps
 
 from miv.core.datatype import Signal
 from miv.core.operator import GeneratorOperatorMixin
-from miv.core.wrapper import wrap_cacher_generator
+from miv.core.wrapper import cache_generator_call
 from miv.typing import SignalType
 
 
@@ -35,7 +35,7 @@ class Notch(GeneratorOperatorMixin):
     Q: Optional[float] = 30.0
     tag: str = "notch filter"
 
-    @wrap_cacher_generator
+    @cache_generator_call
     def __call__(self, signal: Signal) -> Signal:
         """__call__.
 

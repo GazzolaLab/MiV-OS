@@ -25,7 +25,7 @@ from tqdm import tqdm
 
 from miv.core.datatype import Signal, Spikestamps
 from miv.core.operator import OperatorMixin
-from miv.core.wrapper import wrap_cacher
+from miv.core.wrapper import cache_call
 from miv.mea import MEAGeometryProtocol
 from miv.typing import SignalType, SpikestampsType
 
@@ -59,7 +59,7 @@ class ExtractWaveforms(OperatorMixin):
         super().__init__()
         self.cacher.policy = "OFF"
 
-    @wrap_cacher
+    @cache_call
     def __call__(
         self, signal: Generator[Signal, None, None], spikestamps: Spikestamps
     ) -> Dict[int, Signal]:
@@ -208,7 +208,7 @@ class WaveformAverage(OperatorMixin):
     def __post_init__(self):
         super().__init__()
 
-    @wrap_cacher
+    @cache_call
     def __call__(self, waveforms: Dict[int, Signal], mea: MEAGeometryProtocol):
         mean_waveform = {}
         std_waveform = {}

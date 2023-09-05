@@ -41,7 +41,7 @@ from tqdm import tqdm
 from miv.core.datatype import Signal, Spikestamps
 from miv.core.operator import OperatorMixin
 from miv.core.policy import InternallyMultiprocessing
-from miv.core.wrapper import wrap_cacher
+from miv.core.wrapper import cache_call
 from miv.statistics.spiketrain_statistics import firing_rates
 from miv.typing import SignalType, SpikestampsType, TimestampsType
 from miv.visualization.event import plot_spiketrain_raster
@@ -82,7 +82,7 @@ class ThresholdCutoff(OperatorMixin):
 
     num_proc: int = 1
 
-    @wrap_cacher
+    @cache_call
     def __call__(self, signal: SignalType) -> SpikestampsType:
         """Execute threshold-cutoff method and return spike stamps
 

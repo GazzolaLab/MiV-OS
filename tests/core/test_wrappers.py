@@ -1,6 +1,6 @@
 import pytest
 
-from miv.core.wrapper import cache_functional, wrap_cacher, wrap_cacher_generator
+from miv.core.wrapper import cache_call, cache_functional, cache_generator_call
 
 
 class MockObjectWithoutCache:
@@ -71,11 +71,11 @@ def mock_object_with_cache():
 
 
 def test_wrap_generator_no_cache(mock_object_without_cache):
-    @wrap_cacher
+    @cache_call
     def foo(self, x, y):
         return x + y
 
-    @wrap_cacher_generator
+    @cache_generator_call
     def foo2(self, x, y):
         return x + y
 
@@ -88,11 +88,11 @@ def test_wrap_generator_no_cache(mock_object_without_cache):
     assert tuple(foo2(mock_object_without_cache, bar(), bar())) == (2, 4, 6)
 
     class FooClass(MockObjectWithoutCache):
-        @wrap_cacher
+        @cache_call
         def __call__(self, x, y):
             return x + y
 
-        @wrap_cacher_generator
+        @cache_generator_call
         def other(self, x, y):
             return x + y
 
@@ -102,7 +102,7 @@ def test_wrap_generator_no_cache(mock_object_without_cache):
 
 
 def test_wrap_generator_cache(mock_object_with_cache):
-    @wrap_cacher_generator
+    @cache_generator_call
     def foo(self, x, y):
         return x + y
 
@@ -120,7 +120,7 @@ def test_wrap_generator_cache(mock_object_with_cache):
             super().__init__()
             self.called = False
 
-        @wrap_cacher_generator
+        @cache_generator_call
         def __call__(self, x, y):
             return x + y
 
@@ -133,7 +133,7 @@ def test_wrap_generator_cache(mock_object_with_cache):
             self.called = True
             return x + y
 
-    # Test wrap_cacher_generator
+    # Test cache_generator_call
     a = FooClass()
     assert tuple(a(bar(), bar())) == (2, 4, 6)
     for v in a.cacher.load_cached():

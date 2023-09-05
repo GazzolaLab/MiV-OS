@@ -30,7 +30,7 @@ from tqdm import tqdm
 from miv.core.datatype import Signal, Spikestamps
 from miv.core.operator import OperatorMixin
 from miv.core.policy import InternallyMultiprocessing
-from miv.core.wrapper import wrap_cacher
+from miv.core.wrapper import cache_call
 from miv.mea import mea_map
 
 
@@ -87,7 +87,7 @@ class DirectedConnectivity(OperatorMixin):
         if self.exclude_channels is None:  # FIXME: Use dataclass default value
             self.exclude_channels = []
 
-    @wrap_cacher
+    @cache_call
     def __call__(self, spikestamps: Spikestamps) -> np.ndarray:
         """__call__.
 

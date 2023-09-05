@@ -2,15 +2,17 @@ __doc__ = """
 
 Useful wrapper functions for MIV operators.
 
-.. autofunction:: miv.core.wrapper.wrap_cacher
+.. autofunction:: miv.core.wrapper.cache_call
+
+.. autofunction:: miv.core.wrapper.cache_generator_call
 
 .. autofunction:: miv.core.wrapper.cache_functional
 
 """
 
 __all__ = [
-    "wrap_cacher",
-    "wrap_cacher_generator",
+    "cache_call",
+    "cache_generator_call",
     "cache_functional",
 ]
 
@@ -31,7 +33,7 @@ from miv.core.operator.cachable import (
 from miv.core.operator.operator import Operator, OperatorMixin
 
 
-def wrap_cacher(func):
+def cache_call(func):
     """
     Cache the methods of the operator.
     Save the cache in the cacher object.
@@ -52,7 +54,7 @@ def wrap_cacher(func):
     return wrapper
 
 
-def wrap_cacher_generator(func):
+def cache_generator_call(func):
     """
     Cache the methods of the operator.
     It is special case for the generator in-out stream.
