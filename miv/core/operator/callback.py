@@ -54,9 +54,6 @@ class _Callback(Protocol):
     def output(self):
         ...
 
-    def callback_before_run(self):
-        ...
-
     def callback_after_run(self):
         ...
 
@@ -64,30 +61,16 @@ class _Callback(Protocol):
 class BaseCallbackMixin:
     def __init__(self):
         super().__init__()
-        self._callback_before_run = []
         self._callback_after_run = []
         self._callback_plot = []
         self.skip_plotting: bool = False
 
     def __lshift__(self, right: Callable) -> SelfCallback:
-        if right.__name__.startswith(
-            "__prepend"
-        ):  # TODO: need better way to prepend callbacks
-            self._callback_before_run.append(right)
-            return self
         if right.__name__.startswith("plot_"):
             self._callback_plot.append(right)
             return self
         self._callback_after_run.append(right)
         return self
-
-    def callback_before_run(self, inputs):
-        predefined_callbacks = get_methods_from_feature_classes_by_startswith_str(
-            self, "before_run"
-        )
-        for callback in predefined_callbacks + self._callback_before_run:
-            inputs = callback(self, inputs)
-        return inputs
 
     def callback_after_run(self, output):
         predefined_callbacks = get_methods_from_feature_classes_by_startswith_str(
