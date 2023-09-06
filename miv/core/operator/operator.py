@@ -139,7 +139,6 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
 
     def __init__(self):
         super().__init__()
-        self._output: DataTypes | None = None
         self.runner = VanillaRunner()
         self.cacher = DataclassCacher(self)
 
@@ -176,7 +175,7 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
             self.cacher.cache_called = True
             self.logger.info(f"Using cache: {self.cacher.cache_dir}")
             loader = self.cacher.load_cached()
-            output = next(loader)
+            output = next(loader, None)
         else:
             self.cacher.cache_called = False
             self.logger.info("Cache not found.")
