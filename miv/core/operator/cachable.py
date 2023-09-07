@@ -202,6 +202,7 @@ class BaseCacher:
         else:
             msg += TColors.red + "No cache" + TColors.reset
         self.parent.logger.info(msg)
+        self.parent.logger.info(f"Using runner: {self.parent.runner.__class__} type.")
 
 
 class DataclassCacher(BaseCacher):
@@ -251,6 +252,7 @@ class DataclassCacher(BaseCacher):
         paths = glob.glob(self.cache_filename("*", tag=tag))
         for path in paths:
             with open(path, "rb") as f:
+                self.parent.logger.info(f"Loading cache from: {path}")
                 yield pkl.load(f)
 
 
@@ -305,6 +307,7 @@ class FunctionalCacher(BaseCacher):
     def load_cached(self, tag="data") -> Generator[DataTypes, None, None]:
         path = glob.glob(self.cache_filename(0, tag=tag))[0]
         with open(path, "rb") as f:
+            self.parent.logger.info(f"Loading cache from: {path}")
             yield pkl.load(f)
 
     @when_policy_is("ON", "AUTO", "MUST", "OVERWRITE")

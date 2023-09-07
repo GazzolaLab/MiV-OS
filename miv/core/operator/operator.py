@@ -173,13 +173,10 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
         """
         if self.cacher.check_cached():
             self.cacher.cache_called = True
-            self.logger.info(f"Using cache: {self.cacher.cache_dir}")
             loader = self.cacher.load_cached()
             output = next(loader, None)
         else:
             self.cacher.cache_called = False
-            self.logger.info("Cache not found.")
-            self.logger.info(f"Using runner: {self.runner.__class__} type.")
             args = self.receive(skip_plot=skip_plot)  # Receive data from upstream
             if len(args) == 0:
                 output = self.runner(self.__call__)
