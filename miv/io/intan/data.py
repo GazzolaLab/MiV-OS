@@ -1,7 +1,7 @@
 __doc__ = """
 
 Module (Intan)
-##################
+##############
 
 .. autoclass:: DataIntan
    :members:
@@ -25,8 +25,8 @@ import numpy as np
 from tqdm import tqdm
 
 import miv.io.intan.rhs as rhs
-from miv.core.datatype import Signal, Spikestamps
-from miv.core.wrapper import wrap_cacher
+from miv.core.datatype import Events, Signal, Spikestamps
+from miv.core.wrapper import cache_functional
 from miv.io.openephys.data import Data, DataManager
 from miv.typing import SignalType
 
@@ -54,6 +54,9 @@ class DataIntan(Data):
         data_path : str
     """
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
     def load(self):
         """
         Iterator to load data fragmentally.
@@ -79,7 +82,10 @@ class DataIntan(Data):
             If some key files are missing.
         """
 
-        yield from self._generator_by_channel_name("amplifier_data")
+        active_channels, total = self._get_active_channels()
+        for sig in self._generator_by_channel_name("amplifier_data"):
+            self._expand_channels(sig, active_channels, total)
+            yield sig
 
     def get_stimulation(self, progress_bar=False):
         """
@@ -92,11 +98,14 @@ class DataIntan(Data):
             timestamps.append(data.timestamps)
             sampling_rate = data.rate
 
-        return Signal(
+        signal = Signal(
             data=np.concatenate(signals, axis=0),
             timestamps=np.concatenate(timestamps),
             rate=sampling_rate,
         )
+        active_channels, total = self._get_active_channels()
+        self._expand_channels(signal, active_channels, total)
+        return signal
 
     def _generator_by_channel_name(self, name: str, progress_bar: bool = False):
         if not self.check_path_validity():
@@ -105,21 +114,16 @@ class DataIntan(Data):
         # Get sampling rate from setting file
         setting_path = os.path.join(self.data_path, "settings.xml")
         sampling_rate = int(ET.parse(setting_path).getroot().attrib["SampleRateHertz"])
-        active_channels, total = self._get_active_channels()
         # Read each files
         for filename in tqdm(files, disable=not progress_bar):
             result, data_present = rhs.load_file(filename)
             assert data_present, f"Data does not present: {filename=}."
             assert not hasattr(result, name), f"No {name} in the file ({filename=})."
 
-            signal = np.asarray(result[name])
-            if total != signal.shape[0]:
-                _signal = np.zeros([total, signal.shape[1]], dtype=signal.dtype)
-                _signal[active_channels, :] = signal
-                signal = _signal
+            signal = np.asarray(result[name]).T
 
             yield Signal(
-                data=signal.T,
+                data=signal,
                 timestamps=np.asarray(result["t"]),
                 rate=sampling_rate,
             )
@@ -139,6 +143,25 @@ class DataIntan(Data):
                     active_channels.append(total)
                 total += 1
         return np.array(active_channels), total
+
+    def _expand_channels(
+        self, signal: SignalType, active_channels, num_active_channels: int
+    ):
+        """
+        Expand number of channels in `signal` to match the active channels.
+        """
+        if num_active_channels != signal.number_of_channels:
+            _data = np.zeros(
+                [signal.shape[0], num_active_channels], dtype=signal.data.dtype
+            )
+            _data[:, active_channels] = signal.data
+            signal.data = _data
+
+    def _read_header(self):
+        filename = self.get_recording_files()[0]
+        fid = open(filename, "rb")
+        header = rhs.read_header(fid)
+        return header
 
     def check_path_validity(self):
         """
@@ -163,11 +186,17 @@ class DataIntan(Data):
         return True
 
     def get_recording_files(self):
+        """
+        Get list of path of all recording files.
+        """
         paths = glob(os.path.join(self.data_path, "*.rhs"), recursive=True)
         paths.sort()
         return paths
 
     def get_stimulation_events(self):  # TODO: refactor
+        """
+        Get stimulation in Spikestamps form, where each stamps represent the stimulus event.
+        """
         minimum_stimulation_length = 0.010
         data = self.get_stimulation()
         stim = data.data
@@ -188,9 +217,110 @@ class DataIntan(Data):
         ret = Spikestamps([eventstrain])  # TODO: use datatype.Events
         return ret
 
-    # Disable
-    def load_ttl_event(self):
-        raise AttributeError("DataIntan does not have laod_ttl_event method")
+    def _load_digital_event_common(self, name, num_channels, progress_bar=False):
+        stamps = [[] for _ in range(num_channels)]
+        for sig in self._generator_by_channel_name(name, progress_bar=progress_bar):
+            for channel in range(num_channels):
+                index = np.where(sig.data[:, channel])[0]
+                stamps[channel].extend(np.asarray(sig.timestamps)[index])
+        return Spikestamps(stamps)
+
+    @cache_functional(cache_tag="digital_in")
+    def load_digital_in_event(
+        self,
+        progress_bar: bool = False,
+    ):  # pragma: no cover
+        """
+        Load recorded data from digital input ports.
+        Result is a list of timestamps for each channel, in Spikestamps format.
+
+        Parameters
+        ----------
+        progress_bar : bool, optional
+            Show progress bar, by default False
+        """
+        self.header = self._read_header()
+        num_channels = self.header["num_board_dig_in_channels"]
+        return self._load_digital_event_common(
+            "board_dig_in_data", num_channels, progress_bar=progress_bar
+        )
+
+    @cache_functional(cache_tag="digital_out")
+    def load_digital_out_event(
+        self,
+        progress_bar: bool = False,
+    ):  # pragma: no cover
+        """
+        Load recorded data from digital output ports.
+        Result is a list of timestamps for each channel, in Spikestamps format.
+
+        Parameters
+        ----------
+        progress_bar : bool, optional
+            Show progress bar, by default False
+        """
+        self.header = self._read_header()
+        num_channels = self.header["num_board_dig_out_channels"]
+        return self._load_digital_event_common(
+            "board_dig_out_data", num_channels, progress_bar=progress_bar
+        )
+
+    @cache_functional(cache_tag="ttl_events")
+    def load_ttl_event(
+        self,
+        deadtime: float = 0.002,
+        compress: bool = False,
+        progress_bar: bool = False,
+    ):
+        """
+        Load TTL events recorded data.
+
+        Parameters
+        ----------
+        deadtime : float
+            Deadtime between two TTL events. (default: 0.002)
+        compress : bool
+            If True, reduce rate of the signal. (default: False)
+        progress_bar : bool
+            If True, show progress bar. (default: False)
+        """
+
+        signals, timestamps = [], []
+        sampling_rate = None
+        active_channels, total = self._get_active_channels()
+        for data in self._generator_by_channel_name("stim_data", progress_bar):
+            self._expand_channels(data, active_channels, total)
+            dead_time_idx = int(deadtime * data.rate)
+            num_channels = data.number_of_channels
+
+            signal = np.zeros((data.shape[data._SIGNALAXIS], 1), dtype=np.int_)
+            for channel in range(num_channels):
+                array = data.data[:, channel]
+                threshold_crossings = np.nonzero(array)[0]
+                if len(threshold_crossings) == 0:
+                    continue
+
+                distance_sufficient = np.insert(
+                    np.diff(threshold_crossings) >= dead_time_idx, 0, True
+                )
+                while not np.all(distance_sufficient):
+                    # repeatedly remove all threshold crossings that violate the dead_time
+                    threshold_crossings = threshold_crossings[distance_sufficient]
+                    distance_sufficient = np.insert(
+                        np.diff(threshold_crossings) >= dead_time_idx, 0, True
+                    )
+                signal[threshold_crossings, 0] = channel
+            signals.append(signal)
+            timestamps.append(data.timestamps)
+            sampling_rate = data.rate
+
+        data = np.concatenate(signals, axis=0)
+        timestamps = np.concatenate(timestamps)
+
+        if compress:  # TODO
+            raise NotImplementedError
+
+        return Signal(data=data, timestamps=timestamps, rate=sampling_rate)
 
 
 class DataIntanTriggered(DataIntan):
@@ -236,7 +366,7 @@ class DataIntanTriggered(DataIntan):
             progress_bar=self.progress_bar,
         )
 
-    @wrap_cacher(cache_tag="trigger_grouping")
+    @cache_functional(cache_tag="trigger_grouping")
     def _trigger_grouping(self):
         def _find_sequence(arr):
             if arr.size == 0:
@@ -298,6 +428,7 @@ class DataIntanTriggered(DataIntan):
         return groups[self.index]["paths"]
 
     def _generator_by_channel_name(self, name: str, progress_bar: bool = False):
+        # TODO: move out _get_active_channels
         if not self.check_path_validity():
             raise FileNotFoundError("Data directory does not have all necessary files.")
         groups = self._trigger_grouping()

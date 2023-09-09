@@ -12,6 +12,7 @@ import sys
 from collections import defaultdict
 from dataclasses import dataclass
 
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import quantities as pq
@@ -20,7 +21,7 @@ from tqdm import tqdm
 
 from miv.core.datatype import Signal, Spikestamps
 from miv.core.operator import OperatorMixin
-from miv.core.wrapper import wrap_cacher
+from miv.core.wrapper import cache_call
 
 
 @dataclass
@@ -43,6 +44,8 @@ class AvalancheDetection(OperatorMixin):
         This influence the threshold of the avalanche size.
     minimum_bins_in_avalanche : int
         The minimum number of bins in an avalanche. Default is 10.
+    min_interburst_interval_bound : float
+        The minimum interburst interval in seconds. If burst interval is shorter, two burst will be coalaced. Default is 0.1.
 
     Returns
     -------
@@ -65,9 +68,13 @@ class AvalancheDetection(OperatorMixin):
     allow_multiple_spike_per_bin: bool = False
     minimum_bins_in_avalanche: int = 10
 
-    tag: str = "Avalanche and Criticality Analysis"
+    min_interburst_interval_bound: float = 0.1  # sec
+    pre_burst_extension: float = 0.0
+    post_burst_extension: float = 0.0
 
-    @wrap_cacher("avalanche_detection")
+    tag: str = "avalanche detection"
+
+    @cache_call
     def __call__(self, spikestamps: Spikestamps):
         bincount = spikestamps.binning(
             bin_size=self.bin_size, return_count=self.allow_multiple_spike_per_bin
@@ -76,11 +83,11 @@ class AvalancheDetection(OperatorMixin):
             axis=bincount._CHANNELAXIS
         )  # Spike count accross channel per bin
         if self.threshold is None:
-            self.threshold = (
-                population_firing[np.nonzero(population_firing)].mean() / 2.0
-            )
+            threshold = population_firing[np.nonzero(population_firing)].mean() / 2.0
+        else:
+            threshold = self.threshold
         # TODO: try to reuse the code from miv.statistics.burst.burst
-        events = (population_firing > self.threshold).astype(np.bool_)
+        events = (population_firing > threshold).astype(np.bool_)
 
         # pad and find where avalanches start or end based on where 0s change to
         # 1s and vice versa
@@ -90,6 +97,9 @@ class AvalancheDetection(OperatorMixin):
         )
         starts = np.where(diff_events == 1)[0]
         ends = np.where(diff_events == -1)[0]
+
+        if len(starts) == 0 or len(ends) == 0:
+            return np.array([]), np.array([]), bincount
 
         # remove avalanches that are too short
         if self.minimum_bins_in_avalanche > 1:
@@ -106,6 +116,20 @@ class AvalancheDetection(OperatorMixin):
 
             starts = starts[np.concatenate([[0], inds + 1])]
             ends = ends[np.concatenate([inds, [len(ends) - 1]])]
+
+        # Include residual windows
+        starts = starts - int(self.pre_burst_extension / self.bin_size)
+        ends = ends + int(self.post_burst_extension / self.bin_size)
+
+        # Coalace overlapped intervals
+        while True:
+            coalace_index = np.where(
+                starts[1:] <= ends[:-1] + self.min_interburst_interval_bound
+            )[0]
+            if coalace_index.size == 0:
+                break
+            starts = np.delete(starts, coalace_index + 1)
+            ends = np.delete(ends, coalace_index)
 
         return starts, ends, bincount
 
@@ -135,12 +159,18 @@ class AvalancheDetection(OperatorMixin):
         for start, end in zip(starts_time, ends_time):
             ax.axvspan(start, end, facecolor="r", alpha=0.5)
 
+        ax.set_title("Avalanche Marks on Raster")
         ax.set_xlabel("Time (s)")
         ax.set_ylabel("Channel")
 
         # Save
-        left, right = ax.get_xlim()
-        interval = 30  # sec
+        interval = 10  # sec TODO
+        left, right = (
+            spikestamps.get_first_spikestamp(),
+            spikestamps.get_last_spikestamp(),
+        )
+        left -= interval * 0.1
+        right += interval * 0.1
         for i in range(int(np.ceil((right - left) / interval))):
             ax.set_xlim(left + i * interval, left + (i + 1) * interval)
             if save_path is not None:
@@ -170,13 +200,11 @@ class AvalancheAnalysis(OperatorMixin):
         The tag for the operator. Default is "Avalanche and Criticality Analysis".
     """
 
-    tag: str = (
-        "Avalanche and Criticality Analysis"  # keep this same as AvalancheDetection
-    )
+    tag: str = "avalanche criticality analysis"
 
     progress_bar: bool = False
 
-    @wrap_cacher("shape_analysis")
+    @cache_call
     def __call__(self, inputs):
         starts, ends, bincount = inputs
         bin_size = 1.0 / bincount.rate
@@ -293,7 +321,7 @@ class AvalancheAnalysis(OperatorMixin):
         plt.close(fig)
 
     def plot_branching_ratio_histogram(self, outputs, show=False, save_path=None):
-        durations, size, branching_ratio, _, _ = outputs
+        _, _, branching_ratio, _, _ = outputs
 
         nbins = 100
 
@@ -316,7 +344,7 @@ class AvalancheAnalysis(OperatorMixin):
         plt.close(fig)
 
     def plot_avalanche_shape_collapse(self, outputs, show=False, save_path=None):
-        durations, _, _, avalanches, bin_size = outputs
+        _, _, _, avalanches, bin_size = outputs
 
         shapes = defaultdict(list)
         for avalanche in avalanches:

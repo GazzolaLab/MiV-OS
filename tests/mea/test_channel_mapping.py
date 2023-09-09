@@ -10,8 +10,8 @@ def mea():
 
 
 def test_channel_mapping(mea):
-    assert mea.channel_mapping(1) == 7
-    assert mea.channel_mapping(7, reverse=True) == 1
+    assert mea.channel_mapping(1) == 103
+    assert mea.channel_mapping(103, reverse=True) == 1
 
 
 @pytest.mark.parametrize(

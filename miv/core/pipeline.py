@@ -9,6 +9,7 @@ __all__ = ["Pipeline"]
 from typing import List, Optional, Union
 
 import pathlib
+import time
 
 from miv.core.operator.chainable import _Chainable
 from miv.core.policy import _Runnable
@@ -33,14 +34,13 @@ class Pipeline:
     """
 
     def __init__(self, node: _Chainable):
-        self.execution_order: List[_Runnable] = node.topological_sort()
+        self._start_node = node
+        self.execution_order = None
 
     def run(
         self,
         working_directory: Optional[Union[str, pathlib.Path]] = "./results",
-        no_cache: bool = False,
         skip_plot: bool = False,
-        dry_run: bool = False,
         verbose: bool = False,  # Use logging
     ):
         """
@@ -50,25 +50,37 @@ class Pipeline:
         ----------
         working_directory : Optional[Union[str, pathlib.Path]], optional
             The working directory where the pipeline will be executed. By default "./results"
-        no_cache : bool, optional
-            If True, the cache will be disabled. By default False
-        dry_run : bool, optional
-            If True, the pipeline will not be executed. By default False
         verbose : bool, optional
             If True, the pipeline will log debugging informations. By default False
         """
+        self._start_node.set_save_path(working_directory, recursive=True)
+        self.execution_order = [
+            self._start_node
+        ]  # TODO: allow running multiple operation
+        if verbose:
+            stime = time.time()
+            print("Execution order = ", self.execution_order, flush=True)
         for node in self.execution_order:
             if verbose:
-                print("Running: ", node)
-            if hasattr(node, "cacher"):
-                node.cacher.cache_policy = "OFF" if no_cache else "AUTO"
-            node.run(dry_run=dry_run, save_path=working_directory, skip_plot=skip_plot)
+                stime = time.time()
+                print("Running: ", node, flush=True)
+
+            # in case of error, add message
+            try:
+                node.run(skip_plot=skip_plot)
+            except Exception as e:
+                raise Exception(f'Error while running the operator "{node.tag}"') from e
+
+            if verbose:
+                print(f"Finished: {time.time() - stime:.03f} sec", flush=True)
         if verbose:
-            print("Pipeline done:")
-            self.summarize()
-            print("-" * 46)
+            print(f"Pipeline done: computing {self._start_node}")
+            print(self.summarize(), flush=True)
 
     def summarize(self):
+        if self.execution_order is None:
+            self.execution_order = self._start_node.topological_sort()
+
         strs = []
         strs.append("Execution order:")
         for i, op in enumerate(self.execution_order):
@@ -77,4 +89,4 @@ class Pipeline:
 
     def export(self, working_directory: Optional[Union[str, pathlib.Path]]):
         # TODO
-        pass
+        raise NotImplementedError

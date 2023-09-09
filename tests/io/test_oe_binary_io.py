@@ -9,6 +9,7 @@ from miv.io.openephys.binary import (
     bits_to_voltage,
     load_continuous_data,
     load_recording,
+    load_timestamps,
     oebin_read,
 )
 from tests.io.mock_data import fixture_create_mock_data_file
@@ -55,6 +56,7 @@ def test_oebin_read_functionality():
 
 @pytest.mark.parametrize("num_channels, signal_length", [(4, 100), (1, 50), (10, 5)])
 def test_load_continuous_data_temp_file_without_timestamps(num_channels, signal_length):
+    # Create signal file
     signal = np.arange(signal_length * num_channels).reshape(
         [signal_length, num_channels]
     )
@@ -62,8 +64,13 @@ def test_load_continuous_data_temp_file_without_timestamps(num_channels, signal_
     fp = np.memmap(filename, dtype="int16", mode="w+", shape=signal.shape)
     fp[:] = signal[:]
     fp.flush()
+    # Create timestamps file
+    timestamps_filename = os.path.join(tempfile.mkdtemp(), "timestamps.npy")
+    timestamps = np.arange(signal_length)
+    np.save(timestamps_filename, timestamps)
 
-    raw_data, timestamps = load_continuous_data(fp.filename, num_channels, 1)
+    raw_data = load_continuous_data(fp.filename, num_channels)
+    timestamps = load_timestamps(timestamps_filename, 1)
     np.testing.assert_allclose(timestamps, np.arange(signal_length))
     np.testing.assert_allclose(raw_data, signal)
 
@@ -89,11 +96,8 @@ def test_load_continuous_data_temp_file_with_timestamps_shift(
     np.save(timestamps_filename, timestamps)
 
     # Without shift
-    raw_data, out_timestamps = load_continuous_data(
-        fp.filename,
-        num_channels,
-        freq,
-    )
+    raw_data = load_continuous_data(fp.filename, num_channels)
+    out_timestamps = load_timestamps(timestamps_filename, freq)
     np.testing.assert_allclose(out_timestamps, timestamps)
     np.testing.assert_allclose(raw_data, signal)
 
@@ -119,9 +123,8 @@ def test_load_continuous_data_temp_file_timestamps_path_test(
     np.save(timestamps_filename, timestamps)
 
     # With shift
-    raw_data, out_timestamps = load_continuous_data(
-        fp.filename, num_channels, freq, "a.npy"
-    )
+    raw_data = load_continuous_data(fp.filename, num_channels)
+    out_timestamps = load_timestamps(timestamps_filename, freq, True)
     np.testing.assert_allclose(out_timestamps, timestamps / freq)
     np.testing.assert_allclose(raw_data, signal)
 

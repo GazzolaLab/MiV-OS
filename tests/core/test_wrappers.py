@@ -1,6 +1,6 @@
 import pytest
 
-from miv.core.wrapper import wrap_generator_to_generator
+from miv.core.wrapper import cache_call, cache_functional, cache_generator_call
 
 
 class MockObjectWithoutCache:
@@ -13,16 +13,16 @@ class MockObjectWithoutCache:
         def cache_filename(self):
             return "mock_cache_file"
 
-        def load_cached(self):
+        def load_cached(self, tag=None):
             yield 0
 
-        def save_cache(self, data, idx=0):
+        def save_cache(self, data, idx=0, tag=None):
             return True
 
-        def save_config(self):
+        def save_config(self, tag=None, *args, **kwargs):
             return None
 
-        def check_cached(self):
+        def check_cached(self, tag=None, *args, **kwargs):
             return False
 
     def __init__(self):
@@ -41,19 +41,19 @@ class MockObjectWithCache:
         def cache_filename(self):
             return "mock_cache_file"
 
-        def load_cached(self):
+        def load_cached(self, tag=None):
             for k, v in self.cache.items():
                 yield v
 
-        def save_cache(self, data, idx=0):
+        def save_cache(self, data, idx=0, tag=None):
             self.cache[idx] = 0
             self.flag = True
             return True
 
-        def save_config(self):
+        def save_config(self, tag=None, *args, **kwargs):
             return None
 
-        def check_cached(self):
+        def check_cached(self, tag=None, *args, **kwargs):
             return self.flag
 
     def __init__(self):
@@ -71,8 +71,12 @@ def mock_object_with_cache():
 
 
 def test_wrap_generator_no_cache(mock_object_without_cache):
-    @wrap_generator_to_generator
+    @cache_call
     def foo(self, x, y):
+        return x + y
+
+    @cache_generator_call
+    def foo2(self, x, y):
         return x + y
 
     def bar():
@@ -81,26 +85,24 @@ def test_wrap_generator_no_cache(mock_object_without_cache):
         yield 3
 
     assert foo(mock_object_without_cache, 1, 2) == 3
-    assert tuple(foo(mock_object_without_cache, bar(), bar())) == (2, 4, 6)
+    assert tuple(foo2(mock_object_without_cache, bar(), bar())) == (2, 4, 6)
 
     class FooClass(MockObjectWithoutCache):
-        @wrap_generator_to_generator
+        @cache_call
         def __call__(self, x, y):
             return x + y
 
-        @wrap_generator_to_generator
+        @cache_generator_call
         def other(self, x, y):
             return x + y
 
     a = FooClass()
-    assert a.other(1, 2) == 3
     assert a(1, 2) == 3
     assert tuple(a.other(bar(), bar())) == (2, 4, 6)
-    assert tuple(a(bar(), bar())) == (2, 4, 6)
 
 
 def test_wrap_generator_cache(mock_object_with_cache):
-    @wrap_generator_to_generator
+    @cache_generator_call
     def foo(self, x, y):
         return x + y
 
@@ -110,23 +112,35 @@ def test_wrap_generator_cache(mock_object_with_cache):
         yield 3
 
     assert tuple(foo(mock_object_with_cache, bar(), bar())) == (2, 4, 6)
-    assert tuple(foo(mock_object_with_cache, bar(), bar())) == (
-        0,
-        0,
-        0,
-    )  # mock cache only saves zero. (above)
+    for v in mock_object_with_cache.cacher.load_cached():
+        assert v == 0  # mock cache only saves zero. (above)
 
     class FooClass(MockObjectWithCache):
-        @wrap_generator_to_generator
+        def __init__(self):
+            super().__init__()
+            self.called = False
+
+        @cache_generator_call
         def __call__(self, x, y):
             return x + y
 
-        @wrap_generator_to_generator
+        @cache_functional("test1")
         def other(self, x, y):
+            if self.called:
+                return (
+                    -100
+                )  # This should not be returned, since cached value is 0 (above)
+            self.called = True
             return x + y
 
+    # Test cache_generator_call
     a = FooClass()
-    assert tuple(a.other(bar(), bar())) == (2, 4, 6)
-    assert tuple(a.other(bar(), bar())) == (0, 0, 0)
-    assert tuple(a(bar(), bar())) == (0, 0, 0)  # Sample class share cache
-    assert tuple(a(bar(), bar())) == (0, 0, 0)
+    assert tuple(a(bar(), bar())) == (2, 4, 6)
+    for v in a.cacher.load_cached():
+        assert v == 0  # mock cache only saves zero. (above)
+
+    # Test cache_functional
+    a = FooClass()
+    assert a.other(1, 5) == 6
+    assert a.other(1, 5) != -100
+    assert a.other(1, 5) == 0

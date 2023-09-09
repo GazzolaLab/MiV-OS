@@ -10,6 +10,14 @@ import numpy as np
 
 # source: https://github.com/Intan-Technologies/load-rhs-notebook-python/tree/423aa7dd8d4287232e86fba829ac3fad12cd79ed
 
+try:
+    from mpi4py import MPI
+
+    comm = MPI.COMM_WORLD
+    logger = logging.getLogger(f"rank[{comm.Get_rank()}]-RHSImport")
+except ImportError:
+    logger = logging.getLogger(__name__)
+
 
 # Define plural function
 def plural(n):  # pragma: no cover
@@ -36,7 +44,7 @@ def read_qstring(fid):  # pragma: no cover
         return ""
 
     if length > (os.fstat(fid.fileno()).st_size - fid.tell() + 1):
-        logging.info(length)
+        logger.info(length)
         raise Exception("Length too long.")
 
     # convert length from bytes to 16-bit Unicode words
@@ -68,13 +76,13 @@ def read_header(fid):  # pragma: no cover
     (version["major"], version["minor"]) = struct.unpack("<hh", fid.read(4))
     header["version"] = version
 
-    logging.info("")
-    logging.info(
+    logger.info("")
+    logger.info(
         "Reading Intan Technologies RHS2000 Data File, Version {}.{}".format(
             version["major"], version["minor"]
         )
     )
-    logging.info("")
+    logger.info("")
 
     # Read information of sampling rate and amplifier frequency settings.
     (header["sample_rate"],) = struct.unpack("<f", fid.read(4))
@@ -420,7 +428,6 @@ def find_channel_in_group(channel_name, signal_group):  # pragma: no cover
 
 # Define find_channel_in_header function
 def find_channel_in_header(channel_name, header):  # pragma: no cover
-
     # Look through all present signal groups
 
     # 1. Look through amplifier_channels
@@ -733,43 +740,44 @@ def load_file(filename):  # pragma: no cover
     # Open file
     fid = open(filename, "rb")
     filesize = os.path.getsize(filename)
+    logger.info("Loading file %s (%d bytes)", filename, filesize)
 
     # Read file header
     header = read_header(fid)
 
     # Output a summary of recorded data
-    logging.info(
+    logger.info(
         "Found {} amplifier channel{}.".format(
             header["num_amplifier_channels"], plural(header["num_amplifier_channels"])
         )
     )
-    logging.info(
+    logger.info(
         "Found {} board ADC channel{}.".format(
             header["num_board_adc_channels"], plural(header["num_board_adc_channels"])
         )
     )
-    logging.info(
+    logger.info(
         "Found {} board DAC channel{}.".format(
             header["num_board_dac_channels"], plural(header["num_board_dac_channels"])
         )
     )
-    logging.info(
+    logger.info(
         "Found {} board digital input channel{}.".format(
             header["num_board_dig_in_channels"],
             plural(header["num_board_dig_in_channels"]),
         )
     )
-    logging.info(
+    logger.info(
         "Found {} board digital output channel{}.".format(
             header["num_board_dig_out_channels"],
             plural(header["num_board_dig_out_channels"]),
         )
     )
-    logging.info("")
+    logger.info("")
 
     # Determine how many samples the data file contains
     bytes_per_block = get_bytes_per_data_block(header)
-    logging.info(f"{bytes_per_block} bytes per data block")
+    logger.info(f"{bytes_per_block} bytes per data block")
     # How many data blocks remain in this file?
     data_present = False
     bytes_remaining = filesize - fid.tell()
@@ -794,13 +802,13 @@ def load_file(filename):  # pragma: no cover
 
     # Output a summary of contents of header file
     if data_present:
-        logging.info(
+        logger.info(
             "File contains {:0.3f} seconds of data.  Amplifiers were sampled at {:0.2f} kS/s.".format(
                 record_time, header["sample_rate"] / 1000
             )
         )
     else:
-        logging.info(
+        logger.info(
             "Header file contains no data.  Amplifiers were sampled at {:0.2f} kS/s.".format(
                 header["sample_rate"] / 1000
             )
@@ -808,8 +816,8 @@ def load_file(filename):  # pragma: no cover
 
     if data_present:
         # Pre-allocate memory for data
-        logging.info("")
-        logging.info("Allocating memory for data...")
+        logger.info("")
+        logger.info("Allocating memory for data...")
 
         data = {}
         data["t"] = np.zeros(num_amplifier_samples, dtype=np.int_)
@@ -858,7 +866,7 @@ def load_file(filename):  # pragma: no cover
         data["board_dig_out_raw"] = np.zeros(num_board_dig_out_samples, dtype=np.uint)
 
         # Read sampled data from file.
-        logging.info("Reading data from file...")
+        logger.info("Reading data from file...")
 
         # Initialize indices used in looping
         indices = {}
@@ -868,7 +876,7 @@ def load_file(filename):  # pragma: no cover
         indices["board_dig_in"] = 0
         indices["board_dig_out"] = 0
 
-        print_increment = 10
+        print_increment = 25
         percent_done = print_increment
         for i in range(num_data_blocks):
             read_one_data_block(data, header, indices, fid)
@@ -877,10 +885,10 @@ def load_file(filename):  # pragma: no cover
 
             fraction_done = 100 * (1.0 * i / num_data_blocks)
             if fraction_done >= percent_done:
-                logging.info(f"{percent_done}% done...")
+                logger.info(f"{percent_done}% ...")
                 percent_done = percent_done + print_increment
 
-        logging.info("100% done...")
+        logger.info("100% done")
 
         # Make sure we have read exactly the right amount of data
         bytes_remaining = filesize - fid.tell()
@@ -890,7 +898,7 @@ def load_file(filename):  # pragma: no cover
     fid.close()
 
     if data_present:
-        logging.info("Parsing data...")
+        logger.info("Parsing data...")
 
         # Extract digital input channels to separate variables.
         for i in range(header["num_board_dig_in_channels"]):
@@ -956,9 +964,9 @@ def load_file(filename):  # pragma: no cover
         # Check for gaps in timestamps.
         num_gaps = np.sum(np.not_equal(data["t"][1:] - data["t"][:-1], 1))
         if num_gaps == 0:
-            logging.info("No missing timestamps in data.")
+            logger.info("No missing timestamps in data.")
         else:
-            logging.info(
+            logger.info(
                 f"Warning: {num_gaps} gaps in timestamp data found.  Time scale will not be uniform!"
             )
 
@@ -968,7 +976,7 @@ def load_file(filename):  # pragma: no cover
         # If the software notch filter was selected during the recording, apply the
         # same notch filter to amplifier data here.
         if header["notch_filter_frequency"] > 0 and header["version"]["major"] < 3:
-            print_increment = 10
+            print_increment = 25
             percent_done = print_increment
             for i in range(header["num_amplifier_channels"]):
                 data["amplifier_data"][i, :] = notch_filter(
@@ -978,22 +986,22 @@ def load_file(filename):  # pragma: no cover
                     10,
                 )
                 if fraction_done >= percent_done:
-                    logging.info(f"{percent_done}% done...")
+                    logger.info(f"{percent_done}% ...")
                     percent_done = percent_done + print_increment
+            logger.info("100% done")
     else:
         data = []
 
     # Move variables to result struct.
     result = data_to_result(header, data, data_present)
 
-    logging.info(f"Done!  Elapsed time: {time.time() - tic:0.1f} seconds")
+    logger.info(f"Done!  Elapsed time: {time.time() - tic:0.1f} seconds")
 
     return result, data_present
 
 
 # Define function print_all_channel_names
 def print_all_channel_names(result):  # pragma: no cover
-
     # Print all amplifier_channels
     if "amplifier_channels" in result:
         print_names_in_group(result["amplifier_channels"])
@@ -1038,4 +1046,4 @@ def print_all_channel_names(result):  # pragma: no cover
 # Define function print_names_in_group
 def print_names_in_group(signal_group):  # pragma: no cover
     for this_channel in signal_group:
-        logging.info(this_channel["custom_channel_name"])
+        logger.info(this_channel["custom_channel_name"])

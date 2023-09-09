@@ -24,6 +24,7 @@ Available Feature Extractor
    SpikeFeatureExtractionProtocol
    WaveletDecomposition
    PCADecomposition
+   PCAClustering
 
 Unsupervised Clustering
 #######################
@@ -49,13 +50,15 @@ Sklearn Clustering
 """
 __all__ = [
     "SpikeSorting",
-    "WaveletDecomposition",
     "PCADecomposition",
+    "PCAClustering",
+    "WaveletDecomposition",
     "SuperParamagneticClustering",
 ]
 
 from typing import Any, Optional, Union
 
+import os
 from dataclasses import dataclass
 
 import matplotlib.pyplot as plt
@@ -69,6 +72,7 @@ from sklearn.decomposition import PCA
 from sklearn.mixture import GaussianMixture
 from sklearn.preprocessing import StandardScaler
 
+from miv.core.operator import Operator, OperatorMixin
 from miv.signal.spike.protocol import (
     SpikeFeatureExtractionProtocol,
     UnsupervisedFeatureClusteringProtocol,
@@ -80,13 +84,13 @@ class SpikeSorting:
     """
     Spike sorting module.
     User can specify the method for feature extraction (e.g. WaveletDecomposition, PCADecomposition, etc)
-    and the method for clustering (e.g. MeanShift, KMeans, SuperParamagneticClustering, etc).
+    and the method for clustering (e.g. MeanShift, KMeans, etc).
 
 
     Examples
     --------
     >>> spike_sorting = SpikeSorting(
-    ...    feature_extractor=WaveletDecomposition(),
+    ...    feature_extractor=PCADecomposition(),
     ...    clustering_method=sklearn.cluster.MeanShift()
     ... )
 
@@ -122,7 +126,8 @@ class SuperParamagneticClustering:  # pragma : no cover
 
     """
 
-    pass
+    def __init__(self):
+        raise NotImplementedError
 
 
 class PCADecomposition:
@@ -138,7 +143,7 @@ class PCADecomposition:
     def __init__(self):
         pass
 
-    def project(self, n_components, cutouts):
+    def project(self, n_components, cutouts, n_features=2):
         scaler = StandardScaler()
         scaled_cutouts = scaler.fit_transform(cutouts)
 
@@ -146,7 +151,7 @@ class PCADecomposition:
         pca.fit(scaled_cutouts)
         # print(pca.explained_variance_ratio_)
 
-        pca.n_components = 2
+        pca.n_components = n_features
         transformed = pca.fit_transform(scaled_cutouts)
 
         # Clustering
@@ -154,45 +159,103 @@ class PCADecomposition:
         labels = gmm.fit_predict(transformed)
         return labels, transformed
 
-        """
-        tmp_list = []
-        for i in range(n_components):
-            idx = labels == i
-            tmp_list.append(timestamps[idx])
-            spikestamps_clustered.append(tmp_list)
 
-        _ = plt.figure(figsize=(8, 8))
-        for i in range(n_components):
-            idx = labels == i
-            _ = plt.plot(transformed[idx, 0], transformed[idx, 1], ".")
-            _ = plt.title("Cluster assignments by a GMM")
-            _ = plt.xlabel("Principal Component 1")
-            _ = plt.ylabel("Principal Component 2")
-            _ = plt.legend([0, 1, 2])
-            _ = plt.axis("tight")
+@dataclass
+class PCAClustering(OperatorMixin):
+    """
+    PCA Clustering Operator
+    """
 
-        _ = plt.figure(figsize=(8, 8))
-        for i in range(n_components):
-            idx = labels == i
-            color = plt.rcParams["axes.prop_cycle"].by_key()["color"][i]
-            plot_waveforms(
-                cutouts[idx, :],
-                rate,
-                n_spikes=100,
-                color=color,
+    n_clusters: int = 3
+    n_pca_components: int = 2
+    tag: str = "pca clustering"
+
+    plot_n_spikes: int = 100
+
+    def __post_init__(self):
+        super().__init__()
+        self.decomposition = PCADecomposition()
+
+    def __call__(self, cutouts):
+        labeled_cutout = {}
+        features = {}
+        labels_each_channel = {}
+        for ch, cutout in cutouts.items():
+            if cutout.shape[1] < self.n_clusters:
+                continue
+            # FIXME: refactor below
+            labels, transformed = self.decomposition.project(
+                self.n_clusters, cutout.data.T, self.n_pca_components
             )
-        # custom legend
-        custom_lines = [
-            plt.Line2D(
-                [0],
-                [0],
-                color=plt.rcParams["axes.prop_cycle"].by_key()["color"][i],
-                lw=4,
+
+            cutout_for_each_labels = []
+            for i in range(self.n_clusters):
+                idx = labels == i
+                cutout_for_each_labels.append(cutout.data[:, idx])
+
+            labeled_cutout[ch] = cutout_for_each_labels
+            features[ch] = transformed
+            labels_each_channel[ch] = labels
+
+        return dict(
+            labeled_cutout=labeled_cutout, features=features, labels=labels_each_channel
+        )
+
+    def plot_pca_clustered_spikes_all_channels(
+        self, output, show=False, save_path=None
+    ):
+        labeled_cutout = output["labeled_cutout"]
+        features = output["features"]
+        labels = output["labels"]
+
+        for ch, cutout in labeled_cutout.items():
+            if len(cutout) < self.n_clusters:
+                continue
+            fig, axes = plt.subplots(1, 2, figsize=(16, 8))
+            for i in range(self.n_clusters):
+                idx = labels[ch] == i
+                axes[0].plot(
+                    features[ch][idx, 0], features[ch][idx, 1], ".", label=f"group {i}"
+                )
+
+            for label in range(self.n_clusters):
+                color = plt.rcParams["axes.prop_cycle"].by_key()["color"][label]
+                for i in range(min(self.plot_n_spikes, cutout[label].shape[1])):
+                    axes[1].plot(
+                        # time,
+                        cutout[label][:, i],
+                        alpha=0.3,
+                        linewidth=1,
+                        color=color,
+                    )
+            axes[0].set_title("Cluster assignments by a GMM")
+            axes[0].set_xlabel("Principal Component 1")
+            axes[0].set_ylabel("Principal Component 2")
+            axes[0].legend()
+            axes[0].axis("tight")
+
+            axes[1].set_xlabel("Time (ms)")
+            axes[1].set_ylabel("Voltage (microV)")
+            axes[1].set_title("Spike Cutouts")
+
+            # custom legend
+            custom_lines = [
+                plt.Line2D(
+                    [0],
+                    [0],
+                    color=plt.rcParams["axes.prop_cycle"].by_key()["color"][i],
+                    lw=4,
+                )
+                for i in range(self.n_clusters)
+            ]
+            axes[1].legend(
+                custom_lines, [f"component {i}" for i in range(self.n_clusters)]
             )
-            for i in range(n_components)
-        ]
-        plt.legend(custom_lines, [f"component {i}" for i in range(n_components)])
-        """
+
+            if save_path is not None:
+                plt.savefig(os.path.join(save_path, f"pca_channel{ch}.png"))
+            plt.close(fig)
+            plt.close("all")
 
 
 class WaveletDecomposition:  # TODO

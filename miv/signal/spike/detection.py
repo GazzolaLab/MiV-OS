@@ -13,6 +13,9 @@ Code Example::
 
    SpikeDetectionProtocol
    ThresholdCutoff
+   ExtractWaveforms
+   WaveformAverage
+   WaveformStatisticalFilter
 
 """
 __all__ = ["ThresholdCutoff", "query_firing_rate_between"]
@@ -26,6 +29,7 @@ import logging
 import multiprocessing
 import os
 import pathlib
+import time
 from dataclasses import dataclass
 
 import matplotlib.pyplot as plt
@@ -37,9 +41,10 @@ from tqdm import tqdm
 from miv.core.datatype import Signal, Spikestamps
 from miv.core.operator import OperatorMixin
 from miv.core.policy import InternallyMultiprocessing
-from miv.core.wrapper import wrap_cacher
-from miv.statistics import firing_rates
+from miv.core.wrapper import cache_call
+from miv.statistics.spiketrain_statistics import firing_rates
 from miv.typing import SignalType, SpikestampsType, TimestampsType
+from miv.visualization.event import plot_spiketrain_raster
 
 
 @dataclass
@@ -55,8 +60,6 @@ class ThresholdCutoff(OperatorMixin):
             (default=0.002)
         cutoff : Union[float, np.ndarray]
             (default=5.0)
-        use_mad : bool
-            (default=False)
         tag : str
         units : Union[str, pq.UnitTime]
             (default='sec')
@@ -70,22 +73,24 @@ class ThresholdCutoff(OperatorMixin):
     dead_time: float = 0.003
     search_range: float = 0.002
     cutoff: float = 5.0
-    use_mad: bool = True
     tag: str = "spike detection"
     progress_bar: bool = False
     units: str = "sec"
     return_neotype: bool = False  # TODO: Remove, shift to spikestamps datatype
 
+    exclude_channels = None
+
     num_proc: int = 1
 
-    # @wrap_generator_to_generator
-    @wrap_cacher(cache_tag="spikestamps")
+    @cache_call
     def __call__(self, signal: SignalType) -> SpikestampsType:
         """Execute threshold-cutoff method and return spike stamps
 
         Parameters
         ----------
         signal : Signal
+        custom_spike_threshold : np.ndarray
+            If not None, use this value * cutoff as spike threshold.
 
         Returns
         -------
@@ -104,8 +109,13 @@ class ThresholdCutoff(OperatorMixin):
             #    print(inputs)
             #    for result in pool.map(self._detection, inputs): # TODO: Something is not correct here. Check memory usage.
             #        collapsed_result.extend(spiketrain)
-            for sig in signal:  # TODO: mp
+            self.logger.info(f"Spike detection with {self.num_proc} processes...")
+            for idx, sig in enumerate(signal):  # TODO: mp
+                stime = time.time()
                 collapsed_result.extend(self._detection(sig))
+                self.logger.info(
+                    f"Processing segment {idx}: {time.time()-stime:.02f} sec"
+                )
             return collapsed_result
 
     # @staticmethod
@@ -115,13 +125,16 @@ class ThresholdCutoff(OperatorMixin):
         num_channels = signal.number_of_channels  # type: ignore
         timestamps = signal.timestamps
         rate = signal.rate
-        for channel in tqdm(range(num_channels), disable=not self.progress_bar):
+        for channel in tqdm(
+            range(num_channels), disable=not self.progress_bar, desc=self.tag
+        ):
+            if self.exclude_channels is not None and channel in self.exclude_channels:
+                spiketrain_list.append(np.array([]))
+                continue
             array = signal[channel]  # type: ignore
 
             # Spike Detection: get spikestamp
-            spike_threshold = self._compute_spike_threshold(
-                array, cutoff=self.cutoff, use_mad=self.use_mad
-            )
+            spike_threshold = self._compute_spike_threshold(array, cutoff=self.cutoff)
             crossings = self._detect_threshold_crossings(
                 array, rate, spike_threshold, self.dead_time
             )
@@ -145,13 +158,14 @@ class ThresholdCutoff(OperatorMixin):
         super().__init__()
 
     def _compute_spike_threshold(
-        self, signal: SignalType, cutoff: float = 5.0, use_mad: bool = True
+        self, signal: SignalType, cutoff: float = 5.0
     ) -> (
         float
     ):  # TODO: make this function compatible to array of cutoffs (for each channel)
         """
         Returns the threshold for the spike detection given an array of signal.
 
+        Denoho D. et al., `link <https://web.stanford.edu/dept/statistics/cgi-bin/donoho/wp-content/uploads/2018/08/denoiserelease3.pdf>`_.
         Spike sorting step by step, `step 2 <http://www.scholarpedia.org/article/Spike_sorting>`_.
 
         Parameters
@@ -160,13 +174,8 @@ class ThresholdCutoff(OperatorMixin):
             The signal as a 1-dimensional numpy array
         cutoff : float
             The spike-cutoff multiplier. (default=5.0)
-        use_mad : bool
-            Noise estimation method. If set to false, use standard deviation for estimation. (default=True)
         """
-        if use_mad:
-            noise_mid = np.median(np.absolute(signal)) / 0.6745
-        else:
-            noise_mid = np.std(signal)
+        noise_mid = np.median(np.absolute(signal)) / 0.6745
         spike_threshold = -cutoff * noise_mid
         return spike_threshold
 
@@ -245,19 +254,15 @@ class ThresholdCutoff(OperatorMixin):
         tf = spikestamps.get_last_spikestamp()
 
         # TODO: REFACTOR. Make single plot, and change xlim
-        term = 60
+        term = 10
         n_terms = int(np.ceil((tf - t0) / term))
         if n_terms == 0:
             # TODO: Warning message
             return None
         for idx in range(n_terms):
-            spikes = spikestamps.get_view(
-                idx * term + t0, min((idx + 1) * term + t0, tf)
+            fig, ax = plot_spiketrain_raster(
+                spikestamps, idx * term + t0, min((idx + 1) * term + t0, tf)
             )
-            fig, ax = plt.subplots(figsize=(16, 6))
-            ax.eventplot(spikes)
-            ax.set_xlabel("Time (s)")
-            ax.set_ylabel("Channel")
             if save_path is not None:
                 plt.savefig(os.path.join(save_path, f"spiketrain_raster_{idx:03d}.png"))
             if not show:

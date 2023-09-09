@@ -13,7 +13,7 @@ from miv.core.datatype import Spikestamps
 from miv.core.operator import OperatorMixin
 from miv.core.policy import StrictMPIRunner
 from miv.mea import MEAGeometryProtocol
-from miv.statistics import spike_counts_with_kernel
+from miv.statistics.spiketrain_statistics import spike_counts_with_kernel
 from miv.visualization.utils import interp_2d
 
 
@@ -41,12 +41,10 @@ class NeuralActivity(OperatorMixin):
 
         # Binning in first rank
         if self.runner.is_root():
-            spiketrains_bins = spikestamps.binning(self.bin_size, return_count=True)
-            probe_times = spiketrains_bins.timestamps[:: self.skip_interval]
+            binned = spikestamps.binning(self.bin_size, return_count=True)
+            probe_times = binned.timestamps[:: self.skip_interval]
         else:
-            spiketrains_bins = None
             probe_times = None
-        spiketrains_bins = comm.bcast(spiketrains_bins, root=self.runner.get_root())
         probe_times = comm.bcast(probe_times, root=self.runner.get_root())
 
         # Split Tasks
@@ -62,13 +60,18 @@ class NeuralActivity(OperatorMixin):
             if rank >= size:
                 return
 
+        # Get spikestamps view
         probe_times = np.array_split(probe_times, size)[rank]
         start_time = probe_times[0]
         end_time = probe_times[-1]
+        spiketrains_bins = spikestamps.get_view(start_time, end_time).binning(
+            self.bin_size, return_count=True
+        )
         logging.info(
             f"{rank=} | rendering from {start_time=:.03f} to {end_time=:.03f}: {probe_times.shape[0]} frames."
         )
 
+        # Find firing rate
         xs = []
         for i in range(spiketrains_bins.number_of_channels):
             x = spike_counts_with_kernel(

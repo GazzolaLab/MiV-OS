@@ -21,13 +21,17 @@ class MEAGeometryProtocol(_Jsonable, _Chainable, _Runnable, Protocol):
         """Given node index, return xy coordinate"""
         ...
 
+    def get_ixiy(self, idx: int) -> Tuple[int, int]:
+        """Given node index, return coordinate index"""
+        ...
+
     def save(self, path: str) -> None:
         ...
 
     def load(self, path: str) -> None:
         ...
 
-    def view(self) -> matplotlib.pyplot.Figure:
+    def view(self):
         """Simplified view of MEA orientation"""
         ...
 

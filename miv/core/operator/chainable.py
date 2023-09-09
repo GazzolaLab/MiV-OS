@@ -147,14 +147,17 @@ class BaseChainingMixin:
                 output.append(str(label))
         return "\n".join(output)
 
-    def _get_upstream_topology(self, lst: list[SelfChain] = None) -> list[SelfChain]:
+    def _get_upstream_topology(
+        self, lst: list[SelfChain] | None = None
+    ) -> list[SelfChain]:
         if lst is None:
             lst = []
+
+        cacher = getattr(self, "cacher", None)
         if (
-            hasattr(self, "cacher")
-            and self.cacher is not None
-            and self.cacher.cache_dir is not None
-            and self.cacher.check_cached()
+            cacher is not None
+            and cacher.cache_dir is not None
+            and cacher.check_cached()
         ):
             pass
         else:

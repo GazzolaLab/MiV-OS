@@ -8,7 +8,6 @@ from miv.visualization.connectivity import (
 
 
 def test_plot_connectivity_output():
-
     # Initialize the spiketrain as below
     mea_map = np.array([[1, 2], [3, 4], [5, 6]])
     mea_map1 = np.array([[0, 0], [0, 0], [0, 0]])
@@ -33,7 +32,6 @@ def test_plot_connectivity_output():
 
 
 def test_plot_connectivity_interactive_output():
-
     # Initialize the spiketrain as below
     mea_map = np.array([[1, 2], [3, 4], [5, 6]])
     mea_map1 = np.array([[0, 0], [0, 0], [0, 0]])

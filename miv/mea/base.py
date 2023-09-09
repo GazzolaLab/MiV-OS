@@ -43,8 +43,11 @@ class MEAMixin(BaseChainingMixin):
         return self
 
     def run(self, **kwargs):
-        pass
+        return self.output
 
     def map_data(self, vector: np.ndarray) -> np.ndarray:
         """Map data (1-D array) to MEA (2-D array or N-D array)"""
         raise NotImplementedError
+
+    def set_save_path(self, *args, **kwargs):
+        pass

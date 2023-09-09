@@ -2,7 +2,7 @@ __all__ = ["signal_to_noise", "spike_amplitude_to_background_noise"]
 
 import numpy as np
 
-from miv.signal.events.waveform import ExtractWaveforms
+from miv.signal.spike.waveform import ExtractWaveforms
 from miv.typing import SignalType, SpikestampsType
 
 
@@ -58,7 +58,9 @@ def spike_amplitude_to_background_noise(
         if len(spikestamps[channel]) == 0:
             snr[channel] = np.nan
             continue
-        mean_spike_amplitude = np.mean([np.max(np.abs(cutout)) for cutout in cutouts])
+        mean_spike_amplitude = np.mean(
+            [np.max(np.abs(cutout)) for cutout in cutouts[channel]]
+        )
 
         # Compute background noise
         background_noise_amplitude = signal.data[:, channel].std()

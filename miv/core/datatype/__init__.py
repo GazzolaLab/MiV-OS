@@ -1,5 +1,6 @@
 from typing import Any, Union
 
+from miv.core.datatype.collapsable import *
 from miv.core.datatype.events import *
 from miv.core.datatype.protocol import *
 from miv.core.datatype.pure_python import *

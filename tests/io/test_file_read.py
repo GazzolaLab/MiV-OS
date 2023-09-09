@@ -26,7 +26,6 @@ def isEmpty(dictionary):
 
 @pytest.fixture(name="mock_h5_file")
 def fixture_mock_h5_file(tmp_path):
-
     filename = os.path.join(tmp_path, "MiV_TESTS.h5")
 
     data = miv_file.initialize()
@@ -39,7 +38,6 @@ def fixture_mock_h5_file(tmp_path):
     event = miv_file.create_container(data)
 
     for i in range(0, 10):
-
         ncoords = 5
         event["coordinates/ncoords"] = ncoords
 

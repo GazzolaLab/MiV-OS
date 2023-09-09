@@ -1,6 +1,6 @@
 from mock_runner import MockRunner
 
-from miv.core.operator.chainable import BaseChainingMixin
+from miv.core.operator import BaseChainingMixin
 
 
 class MockChain(BaseChainingMixin):
@@ -28,3 +28,6 @@ class MockChainRunnable(MockChain):
 
     def run(self, save_path=None, dry_run=False, cache_dir=None, skip_plot=False):
         print("run ", self.tag)
+
+    def set_save_path(self, *args, **kwargs):
+        pass

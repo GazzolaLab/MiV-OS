@@ -5,6 +5,7 @@ from typing import Tuple
 import matplotlib
 import numpy as np
 
+from miv.core.datatype import Signal
 from miv.mea.base import MEAMixin
 
 
@@ -24,7 +25,7 @@ class GridMEA(MEAMixin):
     def __init__(
         self,
         grid: np.ndarray,
-        spacing: Tuple[float, float] = (100, 100),
+        spacing: Tuple[float, float] = (200, 200),
         *args,
         **kwargs,
     ):
@@ -35,6 +36,9 @@ class GridMEA(MEAMixin):
         self.spacing = spacing
 
         self.nrow, self.ncol = grid.shape
+        X = np.linspace(0, self.spacing[0] * self.ncol, self.ncol)
+        Y = np.linspace(0, -self.spacing[1] * self.nrow, self.nrow)
+        self.Xn, self.Yn = np.meshgrid(X, Y)
 
     def to_json(self) -> dict:
         """Return a JSON-serializable dictionary"""
@@ -47,20 +51,39 @@ class GridMEA(MEAMixin):
         self, vector: np.ndarray, missing_value: float = 0.0
     ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Map data (1-D array) to MEA (2-D array or N-D array)"""
-        value_grid = np.full_like(self.grid, missing_value)
+        value_grid = np.full_like(self.grid, missing_value, dtype=np.float_)
         for idx, value in enumerate(vector):
             if idx not in self.grid:
                 continue
             value_grid[self.grid == idx] = value
-        X = np.arange(self.ncol) * self.spacing[0]
-        Y = np.arange(self.nrow) * self.spacing[1]
-        Xn, Yn = np.meshgrid(X, Y)
-        return Xn, Yn, value_grid
+
+        return self.Xn, self.Yn, value_grid
+
+    def map_temporal_data(self, signal: Signal, missing_value: float = 0.0):
+        """Map signal data to MEA"""
+        n_time = signal.shape[signal._SIGNALAXIS]
+        value_grid = np.full(
+            [n_time, self.nrow, self.ncol], missing_value, dtype=np.float_
+        )
+        for idx in range(signal.number_of_channels):
+            if idx not in self.grid:
+                continue
+            value_grid[:, self.grid == idx] = signal[idx][:, None]
+        return self.Xn, self.Yn, value_grid
+
+    def get_ixiy(self, channel: int):
+        """Given node index, return x y coordinate index"""
+        if channel not in self.grid:
+            return None
+        ys, xs = np.where(self.grid == channel)
+        assert len(xs) == 1 and len(ys) == 1, f"The index {channel} is not unique."
+        return ys[0], xs[0]
 
     @property
     def coordinates(self):
-        """Return the coordinates of the electrodes"""
-        X = np.arange(self.ncol) * self.spacing[0]
-        Y = np.arange(self.nrow) * self.spacing[1]
-        Xn, Yn = np.meshgrid(X, Y)
-        return np.vstack([Xn.ravel(), Yn.ravel()]).T
+        """Return the coordinates of the electrodes
+
+        https://numpy.org/doc/stable/reference/generated/numpy.meshgrid.html
+        """
+
+        return np.vstack([self.Xn.ravel(), self.Yn.ravel()]).T

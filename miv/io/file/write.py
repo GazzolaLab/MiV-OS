@@ -48,7 +48,6 @@ def clear_container(container: Dict[str, Any]) -> None:
     """
 
     for key in container.keys():
-
         if key == "_LIST_OF_COUNTERS_":
             continue
 
@@ -149,7 +148,6 @@ def create_group(
             break
 
     if not keyfound:
-
         data["_GROUPS_"][group_id] = []
 
         data["_GROUPS_"][group_id].append(counter_id)
@@ -287,7 +285,6 @@ def pack(
     # value of that counter.
     if AUTO_SET_COUNTER:
         for group in data["_GROUPS_"]:
-
             datasets = data["_GROUPS_"][group]
             counter = data["_MAP_DATASETS_TO_COUNTERS_"][group]
 
@@ -338,7 +335,6 @@ def pack(
     # Then pack the container into the data
     keys = list(container.keys())
     for key in keys:
-
         if key in data["_PROTECTED_NAMES_"]:
             continue
 
@@ -410,7 +406,6 @@ def write_metadata(
     write_default_values: bool = True,
     append: bool = True,
 ) -> File:
-
     """Writes file metadata in the attributes of an HDF5 file
 
     Args:
@@ -459,7 +454,6 @@ def write(
     comp_opts: Optional[int] = None,
     logger: Optional[Logger] = None,
 ) -> File:
-
     """Writes the selected data to an HDF5 file
 
     Args:
@@ -492,7 +486,6 @@ def write(
     # Convert this to a 2xN array for writing to the hdf5 file.
     # This has the _GROUPS_ and the datasets in them.
     for group in _GROUPS_:
-
         hdoutfile.create_group(group)
         hdoutfile[group].attrs["counter"] = np.string_(
             data["_MAP_DATASETS_TO_COUNTERS_"][group]
@@ -510,7 +503,6 @@ def write(
         datasets = data["_GROUPS_"][group]
 
         for dataset in datasets:
-
             name = None
             name = f"{group}/{dataset}"
 

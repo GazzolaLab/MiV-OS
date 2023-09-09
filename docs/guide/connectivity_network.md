@@ -45,7 +45,7 @@ Before we dive into connectivity analysis, it's important to ensure that the dat
 ```{code-cell} ipython3
 # Create operator modules:
 bandpass_filter: Operator = ButterBandpass(lowcut=300, highcut=3000, order=4, tag="bandpass")
-spike_detection: Operator = ThresholdCutoff(cutoff=4.0, use_mad=True, dead_time=0.002, tag="spikes")
+spike_detection: Operator = ThresholdCutoff(cutoff=4.0, dead_time=0.002, tag="spikes")
 
 data >> bandpass_filter >> spike_detection
 ```

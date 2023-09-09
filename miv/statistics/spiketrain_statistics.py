@@ -3,10 +3,11 @@ __all__ = [
     "MFRComparison",
     "interspike_intervals",
     "coefficient_variation",
-    "binned_spiketrain",  # Deprecated: Remove in the future version ^0.3.0
+    "binned_spiketrain",
     "fano_factor",
-    "decay_spike_counts",
     "spike_counts_with_kernel",
+    "decay_spike_counts",
+    "instantaneous_spike_rate",
 ]
 
 from typing import Any, Callable, Dict, Iterable, List, Optional, Union
@@ -220,12 +221,9 @@ def fano_factor(
     return fano_factor
 
 
-def decay_spike_counts(
-    spiketrain, probe_times, amplitude=1.0, decay_rate=5, batchsize=256
-):
+# TODO: combine the class of spike counting functions with various kernels.
+def spike_counts_with_kernel(spiketrain, probe_times, kernel: Callable, batchsize=32):
     """
-    decay_spike_counts.
-
     Both spiketrain and probe_times should be a 1-d array representing time.
 
     Parameters
@@ -234,34 +232,11 @@ def decay_spike_counts(
         Single-channel spiketrain
     probe_times :
         probe_times
-    amplitude :
-        amplitude
-    decay_rate :
-        decay_rate
+    kernel :
+        kernel function
     batchsize :
         batchsize
     """
-    if len(spiketrain) == 0:
-        return np.zeros_like(probe_times)
-    batchsize = min(spiketrain.shape[0], batchsize)
-    num_sections = spiketrain.shape[0] // batchsize + (
-        1 if spiketrain.shape[0] % batchsize > 0 else 0
-    )
-
-    result = np.zeros_like(probe_times)
-    for subspiketrain in np.array_split(spiketrain, num_sections):
-        exponent = (
-            np.tile(probe_times, (len(subspiketrain), 1)) - subspiketrain[:, None]
-        )
-        mask = exponent < 0
-        exponent[mask] = 0
-        decay_count = np.exp(-decay_rate * exponent)
-        decay_count[mask] = 0
-        result += decay_count.sum(axis=0)
-    return result
-
-
-def spike_counts_with_kernel(spiketrain, probe_times, kernel: Callable, batchsize=32):
     if len(spiketrain) == 0:
         return np.zeros_like(probe_times)
     spiketrain = np.asarray(spiketrain)
@@ -283,6 +258,26 @@ def spike_counts_with_kernel(spiketrain, probe_times, kernel: Callable, batchsiz
         decay_count[mask] = 0
         result += decay_count.sum(axis=0)
     return result
+
+
+def decay_spike_counts(
+    spiketrain, probe_times, amplitude=1.0, decay_rate=5, batchsize=256
+):
+    def kernel(x):
+        return amplitude * np.exp(-decay_rate * x)
+
+    return spike_counts_with_kernel(spiketrain, probe_times, kernel, batchsize)
+
+
+def instantaneous_spike_rate(spiketrain, probe_times, window=1, batchsize=32):
+    """
+    Set window=1 for unit Hz.
+    """
+
+    def kernel(x):
+        return np.logical_and(x >= 0, x <= window).astype(np.float_)
+
+    return spike_counts_with_kernel(spiketrain, probe_times, kernel, batchsize)
 
 
 def binned_spiketrain(self):

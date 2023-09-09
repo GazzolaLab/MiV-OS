@@ -24,7 +24,7 @@ from miv.core.operator import DataLoaderMixin
 class DataASDF(DataLoaderMixin):
     """ASDF file type loader"""
 
-    def __init__(self, data_path, rate: float):  # pragma: no cover
+    def __init__(self, data_path, rate: float, *args, **kwargs):  # pragma: no cover
         """
         Constructor
 
@@ -33,6 +33,7 @@ class DataASDF(DataLoaderMixin):
         """
         self.data_path = data_path
         self.rate = rate
+        super().__init__(*args, **kwargs)
 
     def load(self):  # pragma: no cover
         """

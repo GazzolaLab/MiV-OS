@@ -14,7 +14,7 @@ __all__ = [
     "load_ttl_event",
 ]
 
-from typing import Any, Dict, List, Optional, Sequence, Set, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Set, Tuple, Union
 
 import logging
 import os
@@ -27,6 +27,17 @@ import quantities as pq
 from tqdm import tqdm
 
 from miv.typing import SignalType, TimestampsType
+
+if TYPE_CHECKING:
+    import mpi4py
+
+try:
+    from mpi4py import MPI
+
+    comm = MPI.COMM_WORLD
+    logger = logging.getLogger(f"rank[{comm.Get_rank()}]-OpenEphys")
+except ImportError:
+    logger = logging.getLogger(__name__)
 
 
 def apply_channel_mask(signal: np.ndarray, channel_mask: Set[int]):
@@ -218,12 +229,10 @@ def load_recording(
     folder: str,
     channel_mask: Optional[Set[int]] = None,
     start_at_zero: bool = True,
-    num_fragments: int = 1,
-    start_index: Optional[int] = None,
-    end_index: Optional[int] = None,
     dtype: np.dtype = np.float32,
-    verbose: bool = False,
     progress_bar: bool = False,
+    mpi_comm=None,
+    _recorded_dtype="int16",
 ):
     """
     Loads data recorded by Open Ephys in Binary format as numpy memmap.
@@ -257,8 +266,6 @@ def load_recording(
     dtype: np.dtype
         If None, skip data-type conversion. If the filesize is too large, it is advisable
         to keep `dtype=None` and convert slice by slice. (default=float32)
-    verbose: bool
-        Include logging.info messages for intermediate progresses. (default=False)
 
     Returns
     -------
@@ -284,7 +291,7 @@ def load_recording(
     info_file: str = os.path.join(folder, "structure.oebin")
     info: Dict[str, Any] = oebin_read(info_file)
     num_channels: int = info["continuous"][0]["num_channels"]
-    sampling_rate: float = float(info["continuous"][0]["sample_rate"])
+    sampling_rate: int = int(info["continuous"][0]["sample_rate"])
     # channel_info: Dict[str, Any] = info["continuous"][0]["channels"]
 
     _old_oe_version = False
@@ -292,27 +299,66 @@ def load_recording(
         version = info["GUI version"]
         v_major, v_minor, v_sub = list(map(int, version.split(".")))[:3]
         _old_oe_version = v_major == 0 and v_minor <= 5  # Legacy
-    signal, timestamps = load_continuous_data(
-        file_path[0], num_channels, sampling_rate, _old_oe_version=_old_oe_version
+
+    # Read timestamps first
+    dirname = os.path.dirname(file_path[0])
+    timestamps_path = os.path.join(dirname, "timestamps.npy")
+    timestamps = load_timestamps(timestamps_path, sampling_rate, _old_oe_version)
+    total_length = timestamps.shape[0]
+
+    # Define task
+    filesize = os.path.getsize(file_path[0])
+    itemsize = np.dtype(_recorded_dtype).itemsize
+    assert (
+        filesize == itemsize * total_length * num_channels
+    ), f"{filesize=} does not match the expected {itemsize*total_length*num_channels=}"
+    samples_per_block = sampling_rate * 60
+    num_fragments = int(max((timestamps.shape[0] // samples_per_block) + 1, 1))
+    tasks = None
+    if mpi_comm is not None:
+        rank = mpi_comm.Get_rank()
+        size = mpi_comm.Get_size()
+
+        tasks = np.array_split(np.arange(num_fragments), size)[rank].tolist()
+    else:
+        # None-mpi case: Load all data and parse
+        tasks = list(range(num_fragments))
+    logger.info(f"tasks: {tasks}")
+    if len(tasks) == 0:
+        logger.warning("Number of processor(size) exceeded the available tasks.")
+        return
+
+    # Data readout
+    offset = itemsize * num_channels * tasks[0] * samples_per_block
+    if tasks[-1] == num_fragments - 1:  # include last block
+        shape = None  # Read rest
+    else:
+        shape = (len(tasks) * samples_per_block, num_channels)
+    signal = load_continuous_data(
+        file_path[0], num_channels, _recorded_dtype, offset, shape
     )
-    if num_fragments is None:
-        num_fragments = int(max(timestamps.shape[0] // sampling_rate // (60 + 1), 1))
-    fragmented_signal = np.array_split(signal, num_fragments, axis=0)[
-        start_index:end_index
-    ]
-    fragmented_timestamps = np.array_split(timestamps, num_fragments)[
-        start_index:end_index
-    ]
-    for frag_id in tqdm(range(num_fragments), disable=not progress_bar):
-        _signal = fragmented_signal[frag_id]
-        _timestamps = fragmented_timestamps[frag_id]
-        if _signal.shape[0] > 6.0e6:
-            logging.warn(
-                "The recording data is too long. Consider using more num_fragments."
-            )
+    logger.info(f"Memory read: {signal.shape=}")
+
+    # Output
+    for i, task in enumerate(tasks):
+        _signal = signal[
+            i * samples_per_block : min((i + 1) * samples_per_block, signal.shape[0])
+        ]
+        _timestamps = timestamps[
+            task * samples_per_block : min((task + 1) * samples_per_block, total_length)
+        ]
+        logger.info(
+            f"generate {_signal.shape=}, {_timestamps.shape=}, {sampling_rate=}"
+        )
+        logger.info(
+            f"signal: {i*samples_per_block} - {min((i+1)*samples_per_block, signal.shape[0])}"
+        )
+        logger.info(
+            f"timestamps: {task*samples_per_block} - {min((task+1)*samples_per_block, total_length)}"
+        )
+
         _signal = _signal.astype(dtype)
-        if verbose:
-            logging.info("Cast done")
+        logger.info("Array cast done")
 
         # To Voltage
         _signal = bits_to_voltage(_signal, info["continuous"][0]["channels"])
@@ -330,10 +376,9 @@ def load_recording(
 def load_continuous_data(
     data_path: str,
     num_channels: int,
-    sampling_rate: float,
-    timestamps_path: Optional[str] = None,
     _recorded_dtype: Union[np.dtype, str] = "int16",
-    _old_oe_version: bool = False,
+    offset: int = 0,
+    shape: Tuple[int, int] = None,
 ):
     """
     Load single continous data file and return timestamps and raw data in numpy array.
@@ -351,14 +396,8 @@ def load_continuous_data(
     num_channels : int
         number of recording channels recorded. Note, this method will not throw an error
         if you don't provide the correct number of channels.
-    sampling_rate : float
-        data sampling rate.
-    timestamps_path : Optional[str]
-        If None, first check if the file "timestamps.npy" exists on the same directory.
-        If the file doesn't exist, we deduce the timestamps based on the sampling rate
-        and the length of the data.
     _recorded_dtype: Union[np.dtype, str]
-        Recorded data type. (default="int16")
+        Recorded data type.
 
     Returns
     -------
@@ -377,24 +416,60 @@ def load_continuous_data(
 
     # Read raw data signal
     raw_data: np.ndarray = np.memmap(
-        data_path, dtype=_recorded_dtype, mode="r", order="C"
+        data_path,
+        dtype=_recorded_dtype,
+        mode="r",
+        offset=offset,
+        shape=shape,
+        order="C",
     )
-    length = raw_data.size // num_channels
-    raw_data = raw_data.reshape(length, num_channels)
+    if shape is None:
+        length = raw_data.size // num_channels
+        raw_data = raw_data.reshape(length, num_channels)
 
-    # Get timestamps_path
-    if timestamps_path is None:
-        dirname = os.path.dirname(data_path)
-        timestamps_path = os.path.join(dirname, "timestamps.npy")
+    return raw_data
 
+
+def load_timestamps(
+    timestamps_path: str,
+    sampling_rate: float,
+    _old_oe_version: bool = False,
+):
+    """
+    Load single continous data file and return timestamps and raw data in numpy array.
+    Typical `data_path` from OpenEphys has a name `continuous.dat`.
+
+    .. note::
+        The output data is raw-data without unit conversion. In order to convert the unit
+        to voltage, you need to multiply by `bit_volts` conversion ratio. This ratio and
+        units are typially saved in `structure.oebin` file.
+
+    Parameters
+    ----------
+    timestamps_path : str
+        Path for the timestamps file.
+    sampling_rate : float
+        data sampling rate.
+
+    Returns
+    -------
+    raw_data: SignalType, numpy array
+    timestamps: TimestampsType, numpy array
+
+    Raises
+    ------
+    FileNotFoundError
+        If data_path is invalid.
+    ValueError
+        If the error message shows the array cannot be reshaped due to shape,
+        make sure the num_channels is set accurately.
+
+    """
     # Get timestamps
-    if os.path.exists(timestamps_path):
-        timestamps = np.asarray(
-            np.load(timestamps_path)
-        )  # TODO: check if npy file includes dtype. else, add "dtype=np.float32"
-        if _old_oe_version:
-            timestamps = timestamps / float(sampling_rate)
-    else:  # If timestamps_path doesn't exist, deduce the stamps
-        timestamps = np.array(range(0, length)) / sampling_rate
+    timestamps = np.asarray(
+        np.load(timestamps_path)
+    )  # TODO: check if npy file includes dtype. else, add "dtype=np.float32"
+    if _old_oe_version:
+        timestamps = timestamps / float(sampling_rate)
 
-    return raw_data, timestamps
+    return timestamps
