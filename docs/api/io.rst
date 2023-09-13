@@ -15,6 +15,11 @@ Intan
 
 .. automodule:: miv.io.intan.data
 
+MiV-Simulator
+=============
+
+.. automodule:: miv.io.simulator.data
+
 External Datafile (H5)
 ======================
 
