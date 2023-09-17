@@ -48,9 +48,8 @@ class _Runnable(Protocol):
 
 class VanillaRunner:
     """Default runner without any high-level parallelism.
-
-    If MPI is available, only use first rank (root) to execute, and other ranks recv from the root.
-
+    Simply, the operator will be executed in root-rank, and distributed across other ranks.
+    If MPI is not available, the operator will be executed in root-rank only.
     """
 
     def __init__(self):
@@ -76,24 +75,10 @@ class VanillaRunner:
     def __call__(self, func, inputs=None, **kwargs):
         output = None
         if self.is_root:
-            # TODO: support kwargs
             output = self._execute(func, inputs)
 
-        # If MPI is available:
-        if self.comm is not None:  # MPI # FIXME
-            # If output is generator, other ranks also need to initialize generator.
-            # Otherwise, broadcast output
-            is_generator_output = None
-            if self.is_root:
-                is_generator_output = inspect.isgenerator(output)
-            is_generator_output = self.comm.bcast(is_generator_output, root=0)
-
-            if is_generator_output:
-                if not self.is_root:
-                    output = self._execute(func, inputs)
-            else:
-                # If input is not generator, broadcast output to all ranks
-                output = self.comm.bcast(output, root=0)
+        if self.comm is not None:
+            output = self.comm.bcast(output, root=0)
         return output
 
 

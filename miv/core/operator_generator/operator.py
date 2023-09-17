@@ -1,9 +1,5 @@
 from __future__ import annotations
 
-__doc__ = """
-Here, we define the behavior of basic operator class, and useful mixin classes that can
-be used to create new operators that conform to required behaviors.
-"""
 __all__ = [
     "GeneratorOperatorMixin",
 ]
@@ -22,13 +18,13 @@ if TYPE_CHECKING:
 
 from miv.core.operator.cachable import DataclassCacher
 from miv.core.operator.operator import OperatorMixin
-from miv.core.policy import VanillaRunner, _Runnable, _RunnerProtocol
+from miv.core.operator_generator.policy import VanillaGeneratorRunner
 
 
 class GeneratorOperatorMixin(OperatorMixin):
     def __init__(self):
         super().__init__()
-        self.runner = VanillaRunner()
+        self.runner = VanillaGeneratorRunner()
         self.cacher = DataclassCacher(self)
 
         assert self.tag != ""
