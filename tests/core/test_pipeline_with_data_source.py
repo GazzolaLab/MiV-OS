@@ -10,8 +10,9 @@ import pytest
 
 from miv.core.datatype.signal import Signal
 from miv.core.operator.operator import DataLoaderMixin, OperatorMixin
+from miv.core.operator_generator.wrapper import cache_generator_call
 from miv.core.pipeline import Pipeline
-from miv.core.wrapper import cache_call, cache_generator_call
+from miv.core.wrapper import cache_call
 
 
 class MockDataLoaderNode(DataLoaderMixin):
