@@ -9,7 +9,6 @@ __all__ = [
     "DataLoader",
     "DataLoaderMixin",
     "OperatorMixin",
-    "GeneratorOperatorMixin",
     "DataNodeMixin",
     "DataNode",
 ]
@@ -202,33 +201,4 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
         if not skip_plot and not self.cacher.cache_called:
             self.plot(show=False, save_path=True)
 
-        return output
-
-
-class GeneratorOperatorMixin(OperatorMixin):
-    def output(self, skip_plot=False):
-        """
-        Output viewer. If cache exist, read result from cache value.
-        Otherwise, execute (__call__) the module and return the value.
-        """
-        if self.cacher.check_cached():
-            self.cacher.cache_called = True
-            self.logger.info(f"Using cache: {self.cacher.cache_dir}")
-
-            def generator_func():
-                yield from self.cacher.load_cached()
-
-            output = generator_func()
-        else:
-            self._cache_called = False
-            self.logger.info("Cache not found.")
-            self.logger.info(f"Using runner: {self.runner.__class__} type.")
-            args = self.receive(skip_plot=skip_plot)  # Receive data from upstream
-            if len(args) == 0:
-                output = self.runner(self.__call__)
-            else:
-                output = self.runner(self.__call__, args)
-
-        # Callback: After-run
-        output = self.callback_after_run(output)
         return output

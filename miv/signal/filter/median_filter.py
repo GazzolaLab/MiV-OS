@@ -9,7 +9,7 @@ import numpy as np
 import numpy.typing as npt
 
 from miv.core.datatype import Signal
-from miv.core.operator import GeneratorOperatorMixin
+from miv.core.operator_generator import GeneratorOperatorMixin
 from miv.core.wrapper import cache_generator_call
 from miv.typing import SignalType
 
