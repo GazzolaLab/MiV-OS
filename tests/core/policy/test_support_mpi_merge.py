@@ -32,7 +32,7 @@ class CollapsableData(CollapseExtendableMixin):
 def test_support_mpi_merge_policy():
     from mpi4py import MPI
 
-    from miv.core.policy import SupportMPIMerge
+    from miv.core.operator.policy import SupportMPIMerge
 
     comm = MPI.COMM_WORLD
     size = comm.Get_size()

@@ -2,7 +2,7 @@ import multiprocessing
 
 import pytest
 
-from miv.core.policy import MultiprocessingRunner, VanillaRunner
+from miv.core.operator.policy import MultiprocessingRunner, VanillaRunner
 
 
 @pytest.mark.parametrize(

@@ -8,7 +8,7 @@ import numpy as np
 
 from miv.core.operator.cachable import _Jsonable
 from miv.core.operator.chainable import _Chainable
-from miv.core.policy import _Runnable
+from miv.core.operator.policy import _Runnable
 
 
 class MEAGeometryProtocol(_Jsonable, _Chainable, _Runnable, Protocol):

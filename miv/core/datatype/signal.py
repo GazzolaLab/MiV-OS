@@ -16,7 +16,7 @@ from dataclasses import dataclass
 import numpy as np
 
 from miv.core.operator.operator import DataNodeMixin
-from miv.core.policy import SupportMultiprocessing
+from miv.core.operator.policy import SupportMultiprocessing
 from miv.typing import SignalType, TimestampsType
 
 

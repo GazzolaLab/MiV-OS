@@ -29,8 +29,8 @@ from tqdm import tqdm
 
 from miv.core.datatype import Signal, Spikestamps
 from miv.core.operator import OperatorMixin
-from miv.core.policy import InternallyMultiprocessing
-from miv.core.wrapper import cache_call
+from miv.core.operator.policy import InternallyMultiprocessing
+from miv.core.operator.wrapper import cache_call
 from miv.mea import mea_map
 
 

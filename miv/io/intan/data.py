@@ -26,7 +26,7 @@ from tqdm import tqdm
 
 import miv.io.intan.rhs as rhs
 from miv.core.datatype import Events, Signal, Spikestamps
-from miv.core.wrapper import cache_functional
+from miv.core.operator.wrapper import cache_functional
 from miv.io.openephys.data import Data, DataManager
 from miv.typing import SignalType
 

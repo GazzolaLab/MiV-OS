@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from miv.core.operator import DataLoaderMixin
-from miv.core.wrapper import cache_functional
+from miv.core.operator.wrapper import cache_functional
 
 
 class MockDataLoader(DataLoaderMixin):

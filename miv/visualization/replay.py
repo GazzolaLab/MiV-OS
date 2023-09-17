@@ -18,8 +18,8 @@ from matplotlib import pyplot as plt
 from tqdm import tqdm
 
 from miv.core.datatype import Signal, Spikestamps
-from miv.core.operator import OperatorMixin
-from miv.core.policy import StrictMPIRunner
+from miv.core.operator.operator import OperatorMixin
+from miv.core.operator.policy import StrictMPIRunner
 from miv.mea.protocol import MEAGeometryProtocol
 from miv.typing import SignalType
 from miv.visualization.utils import command_run

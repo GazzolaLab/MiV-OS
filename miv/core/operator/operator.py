@@ -34,7 +34,7 @@ from miv.core.operator.cachable import (
 from miv.core.operator.callback import BaseCallbackMixin, _Callback
 from miv.core.operator.chainable import BaseChainingMixin, _Chainable
 from miv.core.operator.loggable import DefaultLoggerMixin, _Loggable
-from miv.core.policy import VanillaRunner, _Runnable, _RunnerProtocol
+from miv.core.operator.policy import VanillaRunner, _Runnable, _RunnerProtocol
 
 
 class Operator(
