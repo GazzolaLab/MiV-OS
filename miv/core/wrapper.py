@@ -4,15 +4,15 @@ Useful wrapper functions for MIV operators.
 
 .. autofunction:: miv.core.wrapper.cache_call
 
-.. autofunction:: miv.core.wrapper.cache_generator_call
-
 .. autofunction:: miv.core.wrapper.cache_functional
+
+.. autofunction:: miv.core.operator_generator.wrapper.cache_generator_call
+
 
 """
 
 __all__ = [
     "cache_call",
-    "cache_generator_call",
     "cache_functional",
 ]
 
@@ -50,49 +50,6 @@ def cache_call(func):
         cacher.save_cache(result, tag=tag)
         cacher.save_config(tag=tag)
         return result
-
-    return wrapper
-
-
-def cache_generator_call(func):
-    """
-    Cache the methods of the operator.
-    It is special case for the generator in-out stream.
-    Save the cache in the cacher object with appropriate tag.
-
-    If inputs are not all generators, it will run regular function.
-    """
-
-    def wrapper(self: Operator, *args, **kwargs):
-        is_all_generator = all(inspect.isgenerator(v) for v in args) and all(
-            inspect.isgenerator(v) for v in kwargs.values()
-        )
-
-        tag = "data"
-        cacher: DataclassCacher = self.cacher
-
-        if is_all_generator:
-
-            def generator_func(*args):
-                for idx, zip_arg in enumerate(zip(*args)):
-                    result = func(self, *zip_arg, **kwargs)
-                    if result is not None:
-                        # In case the module does not return anything
-                        cacher.save_cache(result, idx, tag=tag)
-                    yield result
-                else:
-                    cacher.save_config(tag=tag)
-
-            generator = generator_func(*args, *kwargs.values())
-            return generator
-        else:
-            result = func(self, *args, **kwargs)
-            if result is None:
-                # In case the module does not return anything
-                return None
-            cacher.save_cache(result, tag=tag)
-            cacher.save_config(tag=tag)
-            return result
 
     return wrapper
 
