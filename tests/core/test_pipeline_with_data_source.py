@@ -11,6 +11,7 @@ import pytest
 from miv.core.datatype.signal import Signal
 from miv.core.operator.operator import DataLoaderMixin, OperatorMixin
 from miv.core.operator.wrapper import cache_call
+from miv.core.operator_generator.operator import GeneratorOperatorMixin
 from miv.core.operator_generator.wrapper import cache_generator_call
 from miv.core.pipeline import Pipeline
 
@@ -38,7 +39,7 @@ class MockDataLoaderNode(DataLoaderMixin):
 
 
 @dataclass
-class MockGeneratorOperator(OperatorMixin):
+class MockGeneratorOperator(GeneratorOperatorMixin):
     tag: str = "test generator operator"
 
     def __post_init__(self):

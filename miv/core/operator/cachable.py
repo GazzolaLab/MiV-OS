@@ -44,10 +44,6 @@ class _CacherProtocol(Protocol):
         ...
 
     @property
-    def cache_called(self) -> bool:
-        """Return true if last call was cached."""
-        ...
-
     def config_filename(self) -> str | pathlib.Path:
         ...
 
@@ -101,10 +97,6 @@ class SkipCacher:
         pass
 
     def check_cached(self, *args, **kwargs) -> bool:
-        return False
-
-    @property
-    def cache_called(self) -> bool:
         return False
 
     def config_filename(self, *args, **kwargs) -> str:
@@ -163,14 +155,12 @@ class BaseCacher:
         self.parent = parent
         self.cache_dir = None  # TODO: Public. Make proper setter
 
-        self.cache_called = False
-
     def config_filename(self, tag="data") -> str:
         return os.path.join(self.cache_dir, f"config_{tag}.json")
 
     def cache_filename(self, idx, tag="data") -> str:
         index = idx if isinstance(idx, str) else f"{idx:04}"
-        if self.parent.runner.comm is None:
+        if getattr(self.parent.runner, "comm", None) is None:
             mpi_tag = f"{0:03d}"
         else:
             mpi_tag = f"{self.parent.runner.comm.Get_rank():03d}"

@@ -44,6 +44,8 @@ def cache_generator_call(func):
                     if result is not None:
                         # In case the module does not return anything
                         cacher.save_cache(result, idx, tag=tag)
+                    if self.skip_plot:
+                        self.generator_plot(result, zip_arg, save_path=True)
                     yield result
                 else:
                     cacher.save_config(tag=tag)

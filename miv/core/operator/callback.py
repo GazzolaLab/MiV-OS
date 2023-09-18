@@ -61,70 +61,45 @@ class _Callback(Protocol):
 class BaseCallbackMixin:
     def __init__(self):
         super().__init__()
-        self._callback_after_run = []
-        self._callback_plot = []
-        self.skip_plotting: bool = False
+        self._callback_collection = []
+        self._callback_names = []
+        self.skip_plot = False
 
     def __lshift__(self, right: Callable) -> SelfCallback:
-        if right.__name__.startswith("plot_"):
-            self._callback_plot.append(right)
-            return self
-        self._callback_after_run.append(right)
+        self._callback_collection.append(right)
+        self._callback_names.append(right.__name__)
         return self
 
     def callback_after_run(self, output):
         predefined_callbacks = get_methods_from_feature_classes_by_startswith_str(
             self, "after_run"
         )
-        for callback in predefined_callbacks + self._callback_after_run:
+        callback_after_run = []
+        for func, name in zip(self._callback_collection, self._callback_names):
+            if name.startswith("after_run_"):
+                callback_after_run.append(func)
+
+        for callback in predefined_callbacks + callback_after_run:
             output = callback(self, output)
-        return output
 
     def plot_from_callbacks(self, *args, **kwargs):
-        for callback in self._callback_plot:
-            callback(self, *args, **kwargs)
+        for func, name in zip(self._callback_collection, self._callback_names):
+            if name.startswith("plot_"):
+                func(self, *args, **kwargs)
 
     def plot(
         self,
+        output,
+        inputs=None,
         show: bool = False,
         save_path: Optional[Union[bool, str, pathlib.Path]] = None,
     ):
-        if self.skip_plotting:
-            return
         if save_path is True:
             os.makedirs(self.analysis_path, exist_ok=True)
             save_path = self.analysis_path
-        plotters = get_methods_from_feature_classes_by_startswith_str(self, "plot")
-        plotters_for_generator_out = get_methods_from_feature_classes_by_startswith_str(
-            self, "_generator_plot_"
-        )
-        if len(plotters_for_generator_out) > 0:  # TODO: Experimental work
-            if inspect.isgenerator(self._output):
-                inputs = self.receive()
-                for index, (output_seg, zipped_inputs) in enumerate(
-                    zip(self._output, zip(*inputs))
-                ):
-                    for plotter in plotters_for_generator_out:
-                        plotter(
-                            self,
-                            output_seg,
-                            show=show,
-                            save_path=save_path,
-                            index=index,
-                            zipped_inputs=zipped_inputs,
-                        )
-            else:
-                zipped_inputs = self.receive()
-                for plotter in plotters_for_generator_out:
-                    plotter(
-                        self,
-                        self._output,
-                        show=show,
-                        save_path=save_path,
-                        index=0,
-                        zipped_inputs=zipped_inputs,
-                    )
+
+        plotters = get_methods_from_feature_classes_by_startswith_str(self, "plot_")
         for plotter in plotters:
-            plotter(self, self._output, show=show, save_path=save_path)
+            plotter(self, output, inputs, show=show, save_path=save_path)
         if not show:
             plt.close("all")

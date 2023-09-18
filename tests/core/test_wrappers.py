@@ -4,7 +4,13 @@ from miv.core.operator.wrapper import cache_call, cache_functional
 from miv.core.operator_generator.wrapper import cache_generator_call
 
 
-class MockObjectWithoutCache:
+class GeneratorPlotMixin:
+    # TODO: This is a temporary solution to avoid issue. calling generator_plot in wrapper should be reconsidered
+    def generator_plot(self, *args, **kwargs):
+        pass
+
+
+class MockObjectWithoutCache(GeneratorPlotMixin):
     class MockCacher:
         def __init__(self):
             self.cache_dir = ""
@@ -28,9 +34,10 @@ class MockObjectWithoutCache:
 
     def __init__(self):
         self.cacher = self.MockCacher()
+        self.skip_plot = True
 
 
-class MockObjectWithCache:
+class MockObjectWithCache(GeneratorPlotMixin):
     class MockCacher:
         def __init__(self):
             self.cache_dir = ""
@@ -59,6 +66,7 @@ class MockObjectWithCache:
 
     def __init__(self):
         self.cacher = self.MockCacher()
+        self.skip_plot = True
 
 
 @pytest.fixture

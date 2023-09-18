@@ -121,6 +121,9 @@ class DataLoaderMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
     def set_save_path(self, path: str | pathlib.Path, recursive: bool = False) -> None:
         pass
 
+    def load(self):
+        raise NotImplementedError("load() method must be implemented to be DataLoader.")
+
 
 class OperatorMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
     """
@@ -158,32 +161,39 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
     def make_analysis_path(self):
         os.makedirs(self.analysis_path, exist_ok=True)
 
-    def receive(self, skip_plot=False) -> list[DataTypes]:
+    def receive(self) -> list[DataTypes]:
         """
         Receive input data from each upstream operator.
         Essentially, this method recursively call upstream operators' run() method.
         """
-        return [node.run(skip_plot=skip_plot) for node in self.iterate_upstream()]
+        return [node.run(skip_plot=self.skip_plot) for node in self.iterate_upstream()]
 
-    def output(self, skip_plot=False):
+    def output(self):
         """
         Output viewer. If cache exist, read result from cache value.
         Otherwise, execute (__call__) the module and return the value.
         """
-        if self.cacher.check_cached():
-            self.cacher.cache_called = True
+        cache_called = self.cacher.check_cached()
+        if cache_called:
+            self.logger.info(f"Using cache: {self.cacher.cache_dir}")
             loader = self.cacher.load_cached()
             output = next(loader, None)
         else:
-            self.cacher.cache_called = False
-            args = self.receive(skip_plot=skip_plot)  # Receive data from upstream
+            self.logger.info("Cache not found.")
+            self.logger.info(f"Using runner: {self.runner.__class__} type.")
+            args = self.receive()  # Receive data from upstream
             if len(args) == 0:
                 output = self.runner(self.__call__)
             else:
                 output = self.runner(self.__call__, args)
 
-        # Callback: After-run
-        output = self.callback_after_run(output)
+            # Callback: After-run
+            self.callback_after_run(output)
+
+            # Plotting: Only happened when cache is not called
+            if not self.skip_plot:
+                self.plot(output, args, show=False, save_path=True)
+
         return output
 
     def run(
@@ -195,10 +205,8 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
         Input to the parameters are received from upstream operators.
         """
         self.make_analysis_path()
-        output = self.output(skip_plot=skip_plot)
+        self.skip_plot = skip_plot
 
-        # Plotting
-        if not skip_plot and not self.cacher.cache_called:
-            self.plot(show=False, save_path=True)
+        output = self.output()
 
         return output
