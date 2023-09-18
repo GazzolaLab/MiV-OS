@@ -138,9 +138,17 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
     def set_caching_policy(self, cacher: _CacherProtocol):
         self.cacher = cacher(self)
 
-    def set_save_path(self, path: str | pathlib.Path):
+    def set_save_path(
+        self, path: str | pathlib.Path, cache_path: str | pathlib.Path = None
+    ):
+        if cache_path is None:
+            cache_path = path
+
+        # Set analysis path
         self.analysis_path = os.path.join(path, self.tag.replace(" ", "_"))
-        self.cacher.cache_dir = os.path.join(self.analysis_path, ".cache")
+        # Set cache path
+        _cache_path = os.path.join(cache_path, self.tag.replace(" ", "_"), ".cache")
+        self.cacher.cache_dir = _cache_path
 
     def make_analysis_path(self):
         os.makedirs(self.analysis_path, exist_ok=True)

@@ -38,7 +38,8 @@ class Pipeline:
 
     def run(
         self,
-        working_directory: Optional[Union[str, pathlib.Path]] = "./results",
+        working_directory: Union[str, pathlib.Path] = "./results",
+        cache_directory: Optional[Union[str, pathlib.Path]] = None,
         skip_plot: bool = False,
         verbose: bool = False,  # Use logging
     ):
@@ -49,13 +50,19 @@ class Pipeline:
         ----------
         working_directory : Optional[Union[str, pathlib.Path]], optional
             The working directory where the pipeline will be executed. By default "./results"
+        cache_directory : Optional[Union[str, pathlib.Path]], optional
+            The cache directory where the pipeline will be executed. By default None
+            If None, the cache directory will be the same as the working directory.
         verbose : bool, optional
             If True, the pipeline will log debugging informations. By default False
         """
         # Set working directory
+        if cache_directory is None:
+            cache_directory = working_directory
         for node in self._start_node.topological_sort():
             if hasattr(node, "set_save_path"):
-                node.set_save_path(working_directory)
+                node.set_save_path(working_directory, cache_directory)
+
         self.execution_order = [
             self._start_node
         ]  # TODO: allow running multiple operation
@@ -88,7 +95,3 @@ class Pipeline:
         for i, op in enumerate(self.execution_order):
             strs.append(f"{i}: {op}")
         return "\n".join(strs)
-
-    def export(self, working_directory: Optional[Union[str, pathlib.Path]]):
-        # TODO
-        raise NotImplementedError
