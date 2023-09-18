@@ -1,6 +1,5 @@
-from mock_runner import MockRunner
-
 from miv.core.operator import BaseChainingMixin
+from tests.core.mock_runner import MockRunner
 
 
 class MockChain(BaseChainingMixin):

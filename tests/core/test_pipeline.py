@@ -1,7 +1,7 @@
 import pytest
-from mock_chain import MockChainRunnable
 
 from miv.core.pipeline import Pipeline
+from tests.core.mock_chain import MockChainRunnable
 
 
 def test_pipeline():

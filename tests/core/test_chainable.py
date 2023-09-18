@@ -1,5 +1,6 @@
 import pytest
-from mock_chain import MockChain
+
+from tests.core.mock_chain import MockChain
 
 
 def test_chaining_topological_sort():
