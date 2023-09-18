@@ -51,6 +51,7 @@ def cache_generator_call(func):
                     yield result
                 else:
                     cacher.save_config(tag=tag)
+                    # TODO: add lastiter_plot
 
             generator = generator_func(*args, *kwargs.values())
             return generator

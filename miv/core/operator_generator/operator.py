@@ -47,10 +47,10 @@ class GeneratorOperatorMixin(OperatorMixin, GeneratorCallbackMixin):
             self.logger.info("Cache not found.")
             self.logger.info(f"Using runner: {self.runner.__class__} type.")
             args = self.receive()  # Receive data from upstream
-            if len(args) == 0:
-                output = self.runner(self.__call__)
-            else:
-                output = self.runner(self.__call__, args)
+            assert (
+                len(args) > 0
+            ), "No data received from upstream. Generator-operator must receive other generators from upstream."
+            output = self.runner(self.__call__, args)
 
             # Callback: After-run
             self.callback_after_run(output)

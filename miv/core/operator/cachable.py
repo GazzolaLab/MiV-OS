@@ -240,6 +240,7 @@ class DataclassCacher(BaseCacher):
     @when_initialized
     def load_cached(self, tag="data") -> Generator[DataTypes, None, None]:
         paths = glob.glob(self.cache_filename("*", tag=tag))
+        paths.sort()
         for path in paths:
             with open(path, "rb") as f:
                 self.parent.logger.info(f"Loading cache from: {path}")
