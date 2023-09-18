@@ -20,14 +20,13 @@ class ValuesMixin(BaseChainingMixin):
 
     def __init__(self, value, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._output = value
+        self.value = value
 
-    @property
     def output(self):
-        return self._output
+        return self.value
 
     def run(self, **kwargs):
-        pass
+        return self.output()
 
 
 class PythonDataType(ValuesMixin):
@@ -51,3 +50,21 @@ class NumpyDType(ValuesMixin):
     @staticmethod
     def is_valid(value):
         return isinstance(value, np.ndarray)
+
+
+class GeneratorType(BaseChainingMixin):
+    def __init__(self, iterator, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.iterator = iterator
+
+    def output(self):
+        yield from self.iterator
+
+    def run(self, **kwargs):
+        yield from self.output()
+
+    @staticmethod
+    def is_valid(value):
+        import inspect
+
+        return inspect.isgenerator(value)

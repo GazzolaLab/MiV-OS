@@ -71,8 +71,6 @@ class BaseChainingMixin:
         self._downstream_list: list[_Chainable] = []
         self._upstream_list: list[_Chainable] = []
 
-        self._output: DataTypes | None = None
-
     def __rshift__(self, right: _Chainable) -> _Chainable:
         self._downstream_list.append(right)
         right._upstream_list.append(self)

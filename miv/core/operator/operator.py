@@ -77,15 +77,12 @@ class DataNodeMixin(BaseChainingMixin, DefaultLoggerMixin):
 
     def __init__(self):
         super().__init__()
-        self._output = None
 
-    @property
     def output(self) -> list[DataTypes]:
-        return self._output
+        return self
 
     def run(self, *args, **kwargs):
-        self._output = self
-        return self._output
+        return self.output()
 
     def set_save_path(self, path: str | pathlib.Path, recursive: bool = False) -> None:
         pass
@@ -96,7 +93,6 @@ class DataLoaderMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
 
     def __init__(self):
         super().__init__()
-        self._output: DataTypes | None = None
 
         self.runner = VanillaRunner()
         self.cacher = FunctionalCacher(self)
@@ -110,13 +106,11 @@ class DataLoaderMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
         """
         self._load_param = kwargs
 
-    @property
     def output(self) -> list[DataTypes]:
-        return self._output
+        return self.load(**self._load_param)
 
     def run(self, *args, **kwargs):
-        self._output = self.load(**self._load_param)
-        return self._output
+        return self.output()
 
     def set_save_path(self, path: str | pathlib.Path, recursive: bool = False) -> None:
         pass

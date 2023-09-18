@@ -109,11 +109,13 @@ class ButterBandpass(GeneratorOperatorMixin):
         return sos
 
     def firstiter_plot_frequency_response(
-        self, signal, show=False, save_path=None, index=None, zipped_inputs=None
+        self,
+        signal,
+        inputs,
+        show=False,
+        save_path=None,
     ):
         """plot_frequency_response"""
-        if index > 0:
-            return
         rate = signal.rate
         sos = self._butter_bandpass(rate)
         w, h = sps.sosfreqz(sos, worN=2000, fs=rate)

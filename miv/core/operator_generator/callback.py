@@ -35,6 +35,7 @@ class GeneratorCallbackMixin:
 
     def generator_plot(
         self,
+        iter_index,
         output,
         inputs=None,
         show: bool = False,
@@ -47,17 +48,15 @@ class GeneratorCallbackMixin:
         plotters_for_generator_out = get_methods_from_feature_classes_by_startswith_str(
             self, "generator_plot_"
         )
-
-        for index, (output_seg, zipped_inputs) in enumerate(zip(output, zip(*inputs))):
-            for plotter in plotters_for_generator_out:
-                plotter(
-                    self,
-                    output_seg,
-                    show=show,
-                    save_path=save_path,
-                    index=index,
-                    zipped_inputs=zipped_inputs,
-                )
+        for plotter in plotters_for_generator_out:
+            plotter(
+                self,
+                output,
+                inputs,
+                show=show,
+                save_path=save_path,
+                index=iter_index,
+            )
         if not show:
             plt.close("all")
 
@@ -81,15 +80,13 @@ class GeneratorCallbackMixin:
             self, "firstiter_plot_"
         )
 
-        for index, (output_seg, zipped_inputs) in enumerate(zip(output, zip(*inputs))):
-            for plotter in plotters_for_generator_out:
-                plotter(
-                    self,
-                    output_seg,
-                    show=show,
-                    save_path=save_path,
-                    index=index,
-                    zipped_inputs=zipped_inputs,
-                )
+        for plotter in plotters_for_generator_out:
+            plotter(
+                self,
+                output,
+                inputs,
+                show=show,
+                save_path=save_path,
+            )
         if not show:
             plt.close("all")
