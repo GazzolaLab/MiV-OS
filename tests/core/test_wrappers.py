@@ -9,6 +9,9 @@ class GeneratorPlotMixin:
     def generator_plot(self, *args, **kwargs):
         pass
 
+    def fistiter_plot(self, *args, **kwargs):
+        pass
+
 
 class MockObjectWithoutCache(GeneratorPlotMixin):
     class MockCacher:

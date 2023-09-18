@@ -108,7 +108,7 @@ class ButterBandpass(GeneratorOperatorMixin):
         )
         return sos
 
-    def _generator_plot_frequency_response(
+    def firstiter_plot_frequency_response(
         self, signal, show=False, save_path=None, index=None, zipped_inputs=None
     ):
         """plot_frequency_response"""
