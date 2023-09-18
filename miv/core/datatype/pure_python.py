@@ -1,4 +1,4 @@
-__all__ = ["PythonDataType", "NumpyDType"]
+__all__ = ["PythonDataType", "NumpyDType", "GeneratorType"]
 
 from typing import Protocol, Union
 

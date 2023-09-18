@@ -50,7 +50,7 @@ class Operator(
     def run(self) -> None:
         ...
 
-    def set_save_path(self, path: str | pathlib.Path, recursive: bool = False) -> None:
+    def set_save_path(self, path: str | pathlib.Path) -> None:
         ...
 
 
@@ -84,9 +84,6 @@ class DataNodeMixin(BaseChainingMixin, DefaultLoggerMixin):
     def run(self, *args, **kwargs):
         return self.output()
 
-    def set_save_path(self, path: str | pathlib.Path, recursive: bool = False) -> None:
-        pass
-
 
 class DataLoaderMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
     """ """
@@ -111,9 +108,6 @@ class DataLoaderMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
 
     def run(self, *args, **kwargs):
         return self.output()
-
-    def set_save_path(self, path: str | pathlib.Path, recursive: bool = False) -> None:
-        pass
 
     def load(self):
         raise NotImplementedError("load() method must be implemented to be DataLoader.")
@@ -144,13 +138,9 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
     def set_caching_policy(self, cacher: _CacherProtocol):
         self.cacher = cacher(self)
 
-    def set_save_path(self, path: str | pathlib.Path, recursive: bool = False):
+    def set_save_path(self, path: str | pathlib.Path):
         self.analysis_path = os.path.join(path, self.tag.replace(" ", "_"))
         self.cacher.cache_dir = os.path.join(self.analysis_path, ".cache")
-        if recursive:
-            # TODO: if circular dependency exists, this will cause infinite loop
-            for node in self.iterate_upstream():
-                node.set_save_path(path, recursive=True)
 
     def make_analysis_path(self):
         os.makedirs(self.analysis_path, exist_ok=True)

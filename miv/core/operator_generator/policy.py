@@ -21,9 +21,5 @@ class VanillaGeneratorRunner:
     def __init__(self):
         pass
 
-    def __call__(self, func, inputs=None, **kwargs):
-        if inputs is None:
-            output = func()
-        else:
-            output = func(*inputs)
-        return output
+    def __call__(self, func, inputs, **kwargs):
+        return func(*inputs)

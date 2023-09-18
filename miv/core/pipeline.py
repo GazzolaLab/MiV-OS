@@ -52,7 +52,10 @@ class Pipeline:
         verbose : bool, optional
             If True, the pipeline will log debugging informations. By default False
         """
-        self._start_node.set_save_path(working_directory, recursive=True)
+        # Set working directory
+        for node in self._start_node.topological_sort():
+            if hasattr(node, "set_save_path"):
+                node.set_save_path(working_directory)
         self.execution_order = [
             self._start_node
         ]  # TODO: allow running multiple operation
