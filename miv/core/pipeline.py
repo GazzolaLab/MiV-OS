@@ -12,7 +12,6 @@ import pathlib
 import time
 
 from miv.core.operator.chainable import _Chainable
-from miv.core.policy import _Runnable
 
 
 class Pipeline:

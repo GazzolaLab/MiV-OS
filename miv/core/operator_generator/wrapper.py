@@ -1,19 +1,5 @@
-__doc__ = """
-
-Useful wrapper functions for MIV operators.
-
-.. autofunction:: miv.core.wrapper.cache_call
-
-.. autofunction:: miv.core.wrapper.cache_generator_call
-
-.. autofunction:: miv.core.wrapper.cache_functional
-
-"""
-
 __all__ = [
-    "cache_call",
     "cache_generator_call",
-    "cache_functional",
 ]
 
 import types
@@ -31,27 +17,6 @@ from miv.core.operator.cachable import (
     _CacherProtocol,
 )
 from miv.core.operator.operator import Operator, OperatorMixin
-
-
-def cache_call(func):
-    """
-    Cache the methods of the operator.
-    Save the cache in the cacher object.
-    """
-
-    def wrapper(self: Operator, *args, **kwargs):
-        tag = "data"
-        cacher: DataclassCacher = self.cacher
-
-        result = func(self, *args, **kwargs)
-        if result is None:
-            # In case the module does not return anything
-            return None
-        cacher.save_cache(result, tag=tag)
-        cacher.save_config(tag=tag)
-        return result
-
-    return wrapper
 
 
 def cache_generator_call(func):
@@ -79,6 +44,10 @@ def cache_generator_call(func):
                     if result is not None:
                         # In case the module does not return anything
                         cacher.save_cache(result, idx, tag=tag)
+                    if not self.skip_plot:
+                        self.generator_plot(result, zip_arg, save_path=True)
+                        if idx == 0:
+                            self.firstiter_plot(result, zip_arg, save_path=True)
                     yield result
                 else:
                     cacher.save_config(tag=tag)
@@ -95,33 +64,3 @@ def cache_generator_call(func):
             return result
 
     return wrapper
-
-
-def cache_functional(cache_tag=None):
-    """
-    Cache the functionals.
-    """
-
-    def decorator(func):
-        def wrapper(self, *args, **kwargs):
-            cacher: FunctionalCacher = self.cacher
-            tag = "data" if cache_tag is None else cache_tag
-
-            # TODO: check cache by parameters should be improved
-            if cacher.check_cached(params=(args, kwargs), tag=tag):
-                cacher.cache_called = True
-                loader = cacher.load_cached(tag=tag)
-                value = next(loader)
-                return value
-            else:
-                result = func(self, *args, **kwargs)
-                if result is None:
-                    return None
-                cacher.save_cache(result, tag=tag)
-                cacher.save_config(params=(args, kwargs), tag=tag)
-                cacher.cache_called = False
-                return result
-
-        return wrapper
-
-    return decorator

@@ -39,9 +39,9 @@ import quantities as pq
 from tqdm import tqdm
 
 from miv.core.datatype import Signal, Spikestamps
-from miv.core.operator import OperatorMixin
-from miv.core.policy import InternallyMultiprocessing
-from miv.core.wrapper import cache_call
+from miv.core.operator.operator import OperatorMixin
+from miv.core.operator.policy import InternallyMultiprocessing
+from miv.core.operator.wrapper import cache_call
 from miv.statistics.spiketrain_statistics import firing_rates
 from miv.typing import SignalType, SpikestampsType, TimestampsType
 from miv.visualization.event import plot_spiketrain_raster

@@ -29,8 +29,8 @@ import scipy.stats as spst
 from tqdm import tqdm
 
 from miv.core.datatype import Signal, Spikestamps
-from miv.core.operator import OperatorMixin
-from miv.core.policy import StrictMPIRunner
+from miv.core.operator.operator import OperatorMixin
+from miv.core.operator.policy import StrictMPIRunner
 from miv.mea import mea_map
 
 
