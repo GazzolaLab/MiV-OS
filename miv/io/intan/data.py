@@ -19,6 +19,7 @@ import os
 import pickle
 import xml.etree.ElementTree as ET
 from glob import glob
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -56,6 +57,39 @@ class DataIntan(Data):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+    def export(self, filename: str | Path, channels=None, progress_bar: bool = False):
+        """
+        Export data to the specified path.
+        TODO: implement "view" time range
+
+        Parameters
+        ----------
+        filename : str or Path
+            Path to export data.
+        """
+        from miv.io import file as miv_file
+
+        data = miv_file.initialize()
+        miv_file.create_group(data, "Ephys", counter="nobj")
+        miv_file.create_dataset(data, "Timestamps", group="Ephys", dtype=np.float32)
+        miv_file.create_dataset(data, "Rate", group="Ephys", dtype=np.float32)
+        miv_file.create_dataset(data, "Data", group="Ephys", dtype=np.float32)
+
+        container = miv_file.create_container(data)
+        for signal in tqdm(self.load(), disable=not progress_bar):
+            if channels is None:
+                matrix = signal.data
+            else:
+                channels = np.asarray(channels)
+                matrix = signal.data[:, channels]
+            container["Ephys/Data"] = matrix
+            container["Ephys/Timestamps"] = signal.timestamps
+            container["Ephys/Rate"] = signal.rate
+            test = miv_file.pack(data, container)
+            assert test == 0
+
+            miv_file.write(filename, data)
 
     def load(self):
         """

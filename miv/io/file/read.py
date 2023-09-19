@@ -305,15 +305,17 @@ def unpack(
             container[key] = data[key][n]
 
         elif "INDEX" not in key:
-            indexkey = data["_MAP_DATASETS_TO_INDEX_"][key]
+            # indexkey = data["_MAP_DATASETS_TO_INDEX_"][key]
             numkey = data["_MAP_DATASETS_TO_COUNTERS_"][key]
 
-            if len(data[indexkey]) > 0:
-                index = data[indexkey][n]
+            # if len(data[indexkey]) > 0:
+            #     index = data[indexkey][n]
 
             if len(data[numkey]) > 0:
-                nobjs = data[numkey][n]
-                container[key] = data[key][index : index + nobjs]
+                # TODO: Figure out which one would be correct
+                # nobjs = data[numkey][n]
+                # container[key] = data[key][index : index + nobjs]
+                container[key] = data[key][n]
 
 
 def get_ncontainers_in_file(
