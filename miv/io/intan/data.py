@@ -58,7 +58,7 @@ class DataIntan(Data):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def export(self, filename: str | Path, channels=None, progress_bar: bool = False):
+    def export(self, filename, channels=None, progress_bar: bool = False):
         """
         Export data to the specified path.
         TODO: implement "view" time range
@@ -77,19 +77,24 @@ class DataIntan(Data):
         miv_file.create_dataset(data, "Data", group="Ephys", dtype=np.float32)
 
         container = miv_file.create_container(data)
+        data_shape = None
         for signal in tqdm(self.load(), disable=not progress_bar):
             if channels is None:
                 matrix = signal.data
             else:
                 channels = np.asarray(channels)
                 matrix = signal.data[:, channels]
+            if data_shape is None:
+                data_shape = matrix.shape
+            elif data_shape != matrix.shape:
+                break
             container["Ephys/Data"] = matrix
             container["Ephys/Timestamps"] = signal.timestamps
             container["Ephys/Rate"] = signal.rate
             test = miv_file.pack(data, container)
             assert test == 0
 
-            miv_file.write(filename, data)
+        miv_file.write(filename, data)
 
     def load(self):
         """
