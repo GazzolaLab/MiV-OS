@@ -22,7 +22,8 @@ def test_avalanche_plot(mock_plt):
     ops = module.AvalancheDetection()
     ops.receive = MagicMock(return_value=[mock_input])  # Mock "receive" method
     ops.plot_avalanche_on_raster(
-        outputs=[np.array([0, 2]), np.array([1, 3]), mock_signal]
+        outputs=[np.array([0, 2]), np.array([1, 3]), mock_signal],
+        inputs=None,
     )
     ops.receive.assert_called_once_with()
 

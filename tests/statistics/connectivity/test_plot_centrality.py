@@ -23,4 +23,4 @@ class TestPlotEigenvectorCentrality:
 
     def test_plot_run(self, result):
         # Test the plot_centrality function
-        plot_eigenvector_centrality(MockConnectivity(), result)
+        plot_eigenvector_centrality(MockConnectivity(), result, inputs=None)

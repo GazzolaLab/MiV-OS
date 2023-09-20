@@ -19,7 +19,9 @@ def test_plot_branching_ratio_histogram(mock_plt, tmp_path):
     outputs = (None, None, mock_input, None, None)
 
     ops = module.AvalancheAnalysis()
-    ops.plot_branching_ratio_histogram(outputs=outputs, show=True, save_path=tmp_path)
+    ops.plot_branching_ratio_histogram(
+        outputs=outputs, inputs=None, show=True, save_path=tmp_path
+    )
 
     assert mock_plt.close.assert_called  # Make sure figures are closed
     assert mock_plt.show.called

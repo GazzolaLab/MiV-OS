@@ -32,5 +32,7 @@ def test_plot_waveform_filecheck(mock_signal_for_waveform, tmp_path):
     extracted_waveform = extract_waveforms(
         mock_signal_for_waveform, Spikestamps([[50]])
     )
-    extract_waveforms.plot_waveforms(extracted_waveform, save_path=tmp_path)
+    extract_waveforms.plot_waveforms(
+        extracted_waveform, inputs=None, save_path=tmp_path
+    )
     assert os.path.exists(os.path.join(tmp_path, "spike_cutouts_ch000.png"))
