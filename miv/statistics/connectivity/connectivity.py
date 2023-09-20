@@ -252,7 +252,9 @@ class DirectedConnectivity(OperatorMixin):
 
         plt.close(fig)
 
-    def plot_transfer_entropy_histogram(self, result, inputs, save_path=None, show=False):
+    def plot_transfer_entropy_histogram(
+        self, result, inputs, save_path=None, show=False
+    ):
         connectivity_metric_matrix = result["connectivity_matrix"]
 
         # Export values in csv

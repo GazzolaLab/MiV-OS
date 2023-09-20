@@ -273,7 +273,9 @@ class ThresholdCutoff(OperatorMixin):
             plt.close("all")
         return ax
 
-    def plot_firing_rate_histogram(self, spikestamps, inputs, show=False, save_path=None):
+    def plot_firing_rate_histogram(
+        self, spikestamps, inputs, show=False, save_path=None
+    ):
         """Plot firing rate histogram"""
         threshold = 3
 

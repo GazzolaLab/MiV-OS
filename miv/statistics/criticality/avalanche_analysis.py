@@ -320,7 +320,9 @@ class AvalancheAnalysis(OperatorMixin):
             plt.show()
         plt.close(fig)
 
-    def plot_branching_ratio_histogram(self, outputs, inputs, show=False, save_path=None):
+    def plot_branching_ratio_histogram(
+        self, outputs, inputs, show=False, save_path=None
+    ):
         _, _, branching_ratio, _, _ = outputs
 
         nbins = 100
@@ -343,7 +345,9 @@ class AvalancheAnalysis(OperatorMixin):
             plt.show()
         plt.close(fig)
 
-    def plot_avalanche_shape_collapse(self, outputs, inputs, show=False, save_path=None):
+    def plot_avalanche_shape_collapse(
+        self, outputs, inputs, show=False, save_path=None
+    ):
         _, _, _, avalanches, bin_size = outputs
 
         shapes = defaultdict(list)

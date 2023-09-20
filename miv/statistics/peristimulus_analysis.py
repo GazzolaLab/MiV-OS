@@ -93,7 +93,9 @@ class PeristimulusActivity(OperatorMixin):
                     activity[channel].append(shifted_array)
         return activity
 
-    def plot_peristimulus_in_grid_map(self, activity, inputs, show=False, save_path=None):
+    def plot_peristimulus_in_grid_map(
+        self, activity, inputs, show=False, save_path=None
+    ):
         mea_map = self.mea_map
         nrow, ncol = mea_map.shape
         fig, axes = plt.subplots(
