@@ -27,13 +27,14 @@ class ImportSignal(DataLoaderMixin):
     def load(self):
         data, container = miv_file.read(self.data_path)
         num_container = data["_NUMBER_OF_CONTAINERS_"]
+        self.logger.info(f"Loading: {num_container=}")
 
         for i in range(num_container):
-            o = miv_file.unpack(container, data, i)
-            assert o == 0, "Error in unpacking"
+            miv_file.unpack(container, data, i)
             signal = Signal(
                 data=container["Ephys/Data"],
                 timestamps=container["Ephys/Timestamps"],
                 rate=container["Ephys/Rate"],
             )
+            self.logger.info(f"signal shape: {signal.data.shape=}, {signal.timestamps.shape=}, {signal.rate=}")
             yield signal
