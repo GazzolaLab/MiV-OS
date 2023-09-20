@@ -93,7 +93,7 @@ class PeristimulusActivity(OperatorMixin):
                     activity[channel].append(shifted_array)
         return activity
 
-    def plot_peristimulus_in_grid_map(self, activity, show=False, save_path=None):
+    def plot_peristimulus_in_grid_map(self, activity, inputs, show=False, save_path=None):
         mea_map = self.mea_map
         nrow, ncol = mea_map.shape
         fig, axes = plt.subplots(
@@ -164,7 +164,7 @@ class PSTH(OperatorMixin):
         psth /= self.binsize
         return Signal(data=psth.T, timestamps=time_axis, rate=1.0 / self.binsize)
 
-    def plot_psth_in_grid_map(self, psth, show=False, save_path=None):
+    def plot_psth_in_grid_map(self, psth, inputs, show=False, save_path=None):
         mea_map = self.mea_map
         nrow, ncol = mea_map.shape
         fig, axes = plt.subplots(
@@ -221,6 +221,7 @@ class PSTHOverlay(OperatorMixin):
     def plot_psth_in_grid_map(
         self,
         psths,
+        inputs,
         show=False,
         save_path=None,
     ):
@@ -264,6 +265,7 @@ class PSTHOverlay(OperatorMixin):
     def plot_psth_area_trend(
         self,
         psths,
+        inputs,
         show=False,
         save_path=None,
     ):

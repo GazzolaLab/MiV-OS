@@ -8,7 +8,7 @@ import networkx as nx
 import numpy as np
 
 
-def plot_eigenvector_centrality(self, result, show=False, save_path=None):
+def plot_eigenvector_centrality(self, result, inputs, show=False, save_path=None):
     metric_matrix = result["connectivity_matrix"]
     adjacency_matrix = result["adjacency_matrix"]
     n_nodes = metric_matrix.shape[0]

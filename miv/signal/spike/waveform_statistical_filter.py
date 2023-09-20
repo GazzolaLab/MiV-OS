@@ -109,7 +109,7 @@ class WaveformStatisticalFilter(OperatorMixin):
 
         return filtered_spiketrains
 
-    def after_run_save_log(self, output, *args, **kwargs):
+    def after_run_save_log(self, output, inputs, *args, **kwargs):
         log = self._log
         # Save log in csv
         savepath = os.path.join(self.analysis_path, "filtered_statistics.csv")
@@ -125,6 +125,7 @@ class WaveformStatisticalFilter(OperatorMixin):
     def plot_spiketrain(
         self,
         spikestamps,
+        inputs,
         show: bool = False,
         save_path: Optional[pathlib.Path] = None,
     ) -> plt.Axes:

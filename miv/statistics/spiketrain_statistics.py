@@ -92,7 +92,7 @@ class MFRComparison(OperatorMixin):
     def __post_init__(self):
         super().__init__()
 
-    def plot_mfr_comparison(self, output, show=False, save_path=None):
+    def plot_mfr_comparison(self, output, inputs, show=False, save_path=None):
         MFR_pre, MFR_post = output
 
         if self.channels is not None:

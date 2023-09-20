@@ -70,7 +70,7 @@ class BaseCallbackMixin:
         self._callback_names.append(right.__name__)
         return self
 
-    def callback_after_run(self, output):
+    def callback_after_run(self, *args, **kwargs):
         predefined_callbacks = get_methods_from_feature_classes_by_startswith_str(
             self, "after_run"
         )
@@ -80,7 +80,7 @@ class BaseCallbackMixin:
                 callback_after_run.append(func)
 
         for callback in predefined_callbacks + callback_after_run:
-            output = callback(self, output)
+            output = callback(self, *args, **kwargs)
 
     def plot_from_callbacks(self, *args, **kwargs):
         for func, name in zip(self._callback_collection, self._callback_names):

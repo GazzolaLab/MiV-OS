@@ -36,5 +36,5 @@ class ImportSignal(DataLoaderMixin):
                 timestamps=container["Ephys/Timestamps"],
                 rate=container["Ephys/Rate"],
             )
-            self.logger.info(f"signal shape: {signal.data.shape=}, {signal.timestamps.shape=}, {signal.rate=}")
+            self.logger.info(f"{i}-container | {signal.data.shape=}, {signal.timestamps.shape=}, {signal.rate=}")
             yield signal

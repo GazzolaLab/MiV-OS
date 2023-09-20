@@ -234,7 +234,7 @@ class DirectedConnectivity(OperatorMixin):
         t_value, p_value = spst.ttest_1samp(surrogate_te_list, te, nan_policy="omit")
         return p_value, te
 
-    def plot_adjacency_matrix(self, result, save_path=None, show=False):
+    def plot_adjacency_matrix(self, result, inputs, save_path=None, show=False):
         connectivity_metric_matrix = result["connectivity_matrix"]
 
         fig, ax = plt.subplots(figsize=(12, 12))
@@ -252,7 +252,7 @@ class DirectedConnectivity(OperatorMixin):
 
         plt.close(fig)
 
-    def plot_transfer_entropy_histogram(self, result, save_path=None, show=False):
+    def plot_transfer_entropy_histogram(self, result, inputs, save_path=None, show=False):
         connectivity_metric_matrix = result["connectivity_matrix"]
 
         # Export values in csv

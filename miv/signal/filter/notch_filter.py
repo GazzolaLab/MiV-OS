@@ -61,7 +61,7 @@ class Notch(GeneratorOperatorMixin):
         super().__init__()
         self.cacher.policy = "OFF"
 
-    def plot_frequency_response(self, signal, show=False, save_path=None):
+    def plot_frequency_response(self, signal, inputs, show=False, save_path=None):
         """plot_frequency_response"""
         rate = next(signal).rate
         b, a = sps.iirnotch(w0=self.f0, Q=self.Q, fs=rate)

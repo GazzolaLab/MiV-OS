@@ -150,6 +150,7 @@ class ExtractWaveforms(OperatorMixin):
     def plot_waveforms(
         self,
         waveforms: Dict[int, Signal],
+        inputs,
         show: bool = False,
         save_path: Optional[pathlib.Path] = None,
         plot_kwargs: Dict[Any, Any] = None,
@@ -219,7 +220,7 @@ class WaveformAverage(OperatorMixin):
             )
         return mean_waveform, std_waveform
 
-    def plot_averaged_waveform(self, output, show=False, save_path=None):
+    def plot_averaged_waveform(self, output, inputs, show=False, save_path=None):
         waveforms, mea = self.receive()
         mean_waveform, std_waveform = output
         nrow, ncol = mea.nrow, mea.ncol
@@ -254,7 +255,7 @@ class WaveformAverage(OperatorMixin):
         plt.savefig(os.path.join(self.analysis_path, "waveform_average.png"))
         plt.close(fig)
 
-    def plot_waveform_pregression_3d(self, output, show=False, save_path=None):
+    def plot_waveform_pregression_3d(self, output, inputs, show=False, save_path=None):
         waveforms, mea = self.receive()
         mean_waveform, std_waveform = output
         nrow, ncol = mea.nrow, mea.ncol

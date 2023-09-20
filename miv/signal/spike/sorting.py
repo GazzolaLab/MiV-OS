@@ -202,7 +202,7 @@ class PCAClustering(OperatorMixin):
         )
 
     def plot_pca_clustered_spikes_all_channels(
-        self, output, show=False, save_path=None
+        self, output, inputs, show=False, save_path=None
     ):
         labeled_cutout = output["labeled_cutout"]
         features = output["features"]

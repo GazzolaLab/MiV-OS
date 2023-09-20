@@ -142,7 +142,7 @@ class AvalancheDetection(OperatorMixin):
         if self.time_difference is None:
             self.time_difference = self.bin_size
 
-    def plot_avalanche_on_raster(self, outputs, show=False, save_path=None):
+    def plot_avalanche_on_raster(self, outputs, inputs, show=False, save_path=None):
         """Plot firing rate histogram"""
         if show:
             logging.warning(
@@ -236,7 +236,7 @@ class AvalancheAnalysis(OperatorMixin):
     def __post_init__(self):
         super().__init__()
 
-    def plot_power_law_fitting(self, outputs, show=False, save_path=None):
+    def plot_power_law_fitting(self, outputs, inputs, show=False, save_path=None):
         durations, size, branching_ratio, _, _ = outputs
 
         def power(x, a, c):
@@ -320,7 +320,7 @@ class AvalancheAnalysis(OperatorMixin):
             plt.show()
         plt.close(fig)
 
-    def plot_branching_ratio_histogram(self, outputs, show=False, save_path=None):
+    def plot_branching_ratio_histogram(self, outputs, inputs, show=False, save_path=None):
         _, _, branching_ratio, _, _ = outputs
 
         nbins = 100
@@ -343,7 +343,7 @@ class AvalancheAnalysis(OperatorMixin):
             plt.show()
         plt.close(fig)
 
-    def plot_avalanche_shape_collapse(self, outputs, show=False, save_path=None):
+    def plot_avalanche_shape_collapse(self, outputs, inputs, show=False, save_path=None):
         _, _, _, avalanches, bin_size = outputs
 
         shapes = defaultdict(list)
