@@ -94,6 +94,8 @@ class BaseCallbackMixin:
         show: bool = False,
         save_path: Optional[Union[bool, str, pathlib.Path]] = None,
     ):
+        if output is None:
+            return
         if save_path is True:
             os.makedirs(self.analysis_path, exist_ok=True)
             save_path = self.analysis_path

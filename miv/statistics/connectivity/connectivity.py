@@ -285,6 +285,7 @@ class DirectedConnectivity(OperatorMixin):
     def plot_nodewise_connectivity(
         self,
         result: Any,
+        inputs,
         save_path: Union[str, pathlib.Path] = None,
         show: bool = False,
     ):

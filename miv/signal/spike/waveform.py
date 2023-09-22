@@ -57,7 +57,7 @@ class ExtractWaveforms(OperatorMixin):
 
     def __post_init__(self):
         super().__init__()
-        self.cacher.policy = "OFF"
+        self.cacher.policy = "ON"
 
     @cache_call
     def __call__(

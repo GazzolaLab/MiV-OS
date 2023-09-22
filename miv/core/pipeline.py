@@ -74,11 +74,7 @@ class Pipeline:
                 stime = time.time()
                 print("Running: ", node, flush=True)
 
-            # in case of error, add message
-            try:
-                node.run(skip_plot=skip_plot)
-            except Exception as e:
-                raise Exception(f'Error while running the operator "{node.tag}"') from e
+            node.run(skip_plot=skip_plot)
 
             if verbose:
                 print(f"Finished: {time.time() - stime:.03f} sec", flush=True)

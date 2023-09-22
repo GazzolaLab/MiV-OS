@@ -256,13 +256,14 @@ class AvalancheAnalysis(OperatorMixin):
         axes[0].set_xlabel("size (# channels)")
         axes[0].set_ylabel("Event Frequency")
         hist, bins = np.histogram(size, bins=logbins)
-        try:
-            popt, pcov = curve_fit(neg_power, bins[:-1][hist > 1], hist[hist > 1])
-            tau = popt[0]
-            axes[0].plot(logbins, neg_power(logbins, *popt), label=f"fit {tau=:.2f}")
-        except RuntimeError:
-            tau = 0
-            logging.warning("Power-fit failed. No fitted line will be plotted.")
+        if hist[hist > 1].size > 0:
+            try:
+                popt, pcov = curve_fit(neg_power, bins[:-1][hist > 1], hist[hist > 1])
+                tau = popt[0]
+                axes[0].plot(logbins, neg_power(logbins, *popt), label=f"fit {tau=:.2f}")
+            except RuntimeError:
+                tau = 0
+                logging.warning("Power-fit failed. No fitted line will be plotted.")
         axes[0].legend()
         axes[0].set_ylim(bottom=5e-1)
 
@@ -275,9 +276,12 @@ class AvalancheAnalysis(OperatorMixin):
         axes[1].set_ylabel("Event Frequency")
         hist, bins = np.histogram(durations, bins=logbins)
         try:
-            popt, pcov = curve_fit(neg_power, bins[:-1][hist > 1], hist[hist > 1])
-            alpha = popt[0]
-            axes[1].plot(logbins, neg_power(logbins, *popt), label=f"fit {alpha=:.2f}")
+            if (hist > 1).sum() > 0:
+                popt, pcov = curve_fit(neg_power, bins[:-1][hist > 1], hist[hist > 1])
+                alpha = popt[0]
+                axes[1].plot(logbins, neg_power(logbins, *popt), label=f"fit {alpha=:.2f}")
+            else:
+                alpha = 0
         except RuntimeError:
             alpha = 0
             logging.warning("Power-fit failed. No fitted line will be plotted.")

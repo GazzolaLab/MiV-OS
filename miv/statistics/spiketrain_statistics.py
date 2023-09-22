@@ -16,7 +16,6 @@ import datetime
 import os
 from dataclasses import dataclass
 
-import elephant.statistics
 import matplotlib.pyplot as plt
 import neo
 import numpy as np
@@ -42,6 +41,7 @@ def firing_rates(spiketrains: Spikestamps) -> Dict[str, Any]:
     Iterable[Any]
 
     """
+    import elephant.statistics
     rates = []
     if sum(spiketrains.get_count()) == 0:
         return {
