@@ -133,6 +133,7 @@ class NeuralActivity(OperatorMixin):
 
         return
 
+
 @dataclass
 class NeuralActivity512(OperatorMixin):
     bin_size: float = 0.001  # sec
@@ -836,7 +837,7 @@ class NeuralActivity512(OperatorMixin):
             ax.set_aspect("equal")
             ax.set_xlabel("channels x-axis")
             ax.set_ylabel("channels y-axis")
-            ax.set_title(f"Spatial Neural Activity (--)")
+            ax.set_title("Spatial Neural Activity (--)")
             plt.savefig(os.path.join(self.analysis_path, "grid_test.png"))
             plt.close("all")
         # DEBUG

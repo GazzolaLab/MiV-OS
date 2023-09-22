@@ -260,7 +260,9 @@ class AvalancheAnalysis(OperatorMixin):
             try:
                 popt, pcov = curve_fit(neg_power, bins[:-1][hist > 1], hist[hist > 1])
                 tau = popt[0]
-                axes[0].plot(logbins, neg_power(logbins, *popt), label=f"fit {tau=:.2f}")
+                axes[0].plot(
+                    logbins, neg_power(logbins, *popt), label=f"fit {tau=:.2f}"
+                )
             except RuntimeError:
                 tau = 0
                 logging.warning("Power-fit failed. No fitted line will be plotted.")
@@ -279,7 +281,9 @@ class AvalancheAnalysis(OperatorMixin):
             if (hist > 1).sum() > 0:
                 popt, pcov = curve_fit(neg_power, bins[:-1][hist > 1], hist[hist > 1])
                 alpha = popt[0]
-                axes[1].plot(logbins, neg_power(logbins, *popt), label=f"fit {alpha=:.2f}")
+                axes[1].plot(
+                    logbins, neg_power(logbins, *popt), label=f"fit {alpha=:.2f}"
+                )
             else:
                 alpha = 0
         except RuntimeError:

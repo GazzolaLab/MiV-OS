@@ -42,6 +42,7 @@ def firing_rates(spiketrains: Spikestamps) -> Dict[str, Any]:
 
     """
     import elephant.statistics
+
     rates = []
     if sum(spiketrains.get_count()) == 0:
         return {
