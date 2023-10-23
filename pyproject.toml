@@ -81,7 +81,7 @@ opencv-python = "^4.7.0.72"
 [tool.poetry.dev-dependencies]
 black = "^22.8.0"
 isort = {extras = ["colors"], version = "^5.10.1"}
-mypy = "^1.0.1"
+mypy = "^1.6.1"
 mypy-extensions = "^1.0.0"
 pre-commit = "^3.0.4"
 pydocstyle = "^6.1.1"
