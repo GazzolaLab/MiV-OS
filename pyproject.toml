@@ -110,7 +110,6 @@ docs = [
   "sphinxcontrib-mermaid"
 ]
 experiment = [
-  "lyon",
   "pyserial"
 ]
 
