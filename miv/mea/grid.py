@@ -42,7 +42,7 @@ class GridMEA(MEAMixin):
 
     @property
     def channels(self):
-        return sorted(self.grid.tolist())
+        return sorted(self.grid.ravel().tolist())
 
     def to_json(self) -> dict:
         """Return a JSON-serializable dictionary"""
