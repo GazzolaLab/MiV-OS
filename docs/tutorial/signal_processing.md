@@ -104,7 +104,7 @@ If the output result is large, the query might return a `Python generator` for f
 The following example demonstrates how to retrieve the output from the bandpass_filter module:
 
 ```{code-cell} ipython3
-filtered_signal = next(bandpass_filter.output)  # Next is used to retrieve the first fragment of the output
+filtered_signal = next(bandpass_filter.output())  # Next is used to retrieve the first fragment of the output
 print(filtered_signal.shape)
 
 time = filtered_signal.timestamps
@@ -149,13 +149,4 @@ By calling this method, you can quickly confirm the sequence of operations in th
 
 The visualization of an operation in `MiV-OS` is attached to each modules, and it is executed at the end of running each block modules.
 For example, the `spike_detection` module have one plotting method that visualize the detected spikes in a rasterplot.
-The method `.plot()` will call _every_ plotting methods in the module.
-For instance, to plot the results of the spike_detection module, we can use the following code block:
-
-```{code-cell} ipython3
-# Plot
-spike_detection.plot(show=True)
-```
-
-Note that some modules does not have any plotting method associated, in which case the method `.plot()` may not do anything.
-If you would like to visualize the output in your customized plot, continue reading the next section of the tutorial.
+The method `.plot()` will call _every_ plotting methods in the module, and save the result in the working directory.

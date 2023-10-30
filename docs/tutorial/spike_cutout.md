@@ -92,21 +92,13 @@ We can then create a `Pipeline` object and run it to execute the processing step
 pipeline = Pipeline(extract_waveforms)
 print(pipeline.summarize())
 
-pipeline.run()
-```
-
-## Plot Spike Cutouts
-
-Just like the `spike_detection` module, the `extract_waveforms` module also has a `plot` method that can be used to visualize the extracted spike cutouts.
-
-```{code-cell} ipython3
-extract_waveforms.plot(show=True)
+pipeline.run("results")
 ```
 
 This will display a plot of the extracted spike cutouts. We can also access the extracted cutouts using the `output` property of the `extract_waveforms` module:
 
 ```{code-cell} ipython3
-cutouts = extract_waveforms.output
+cutouts = extract_waveforms.output()
 for ch, cutout in cutouts.items():
     print(f"Channel {ch}: {cutout.data.shape}")
 ```

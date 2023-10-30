@@ -88,14 +88,7 @@ Additionally, we can visualize the centrality of the graph by adding built-in ca
 ```{code-cell} ipython3
 from miv.statistics.connectivity import plot_eigenvector_centrality
 connectivity_analysis << plot_eigenvector_centrality
-```
-
-## Plot
-
-Finally, we can use the "plot" method to visualize the results of our connectivity analysis. This method will generate a plot of the connectivity measures for each pair of electrodes in the network.
-
-```{code-cell} ipython3
-connectivity_analysis.plot(show=True)
+pipeline.run(working_directory="results")  # Save outcome into "results" directory
 ```
 
 The result would include four different plot
