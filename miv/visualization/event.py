@@ -8,7 +8,9 @@ from miv.statistics import burst
 from miv.typing import SpikestampsType
 
 
-def plot_spiketrain_raster(spikestamps: Spikestamps, t_start: float, t_stop: float):
+def plot_spiketrain_raster(
+    spikestamps: Spikestamps, t_start: float, t_stop: float
+):  # pragma: no cover
     """
     Plot spike train in raster
 
@@ -31,7 +33,9 @@ def plot_spiketrain_raster(spikestamps: Spikestamps, t_start: float, t_stop: flo
     return fig, ax
 
 
-def plot_burst(spiketrains: SpikestampsType, min_isi: float, min_len: float):
+def plot_burst(
+    spiketrains: SpikestampsType, min_isi: float, min_len: float
+):  # pragma: no cover
     """
     Plots burst events across electrodes  to characterize bursting phenomenon on a singl channel
 
