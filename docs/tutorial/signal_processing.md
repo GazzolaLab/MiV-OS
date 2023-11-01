@@ -45,6 +45,14 @@ path:str = load_data(progbar_disable=True).data_collection_path
 print(path)
 ```
 
+### Loading Data from OpenEphys
+
+In case you would like to use your own data, replace the path to the top-most directory of OpenEphys recorded folder:
+
+```{code-cell}
+path = "2022-01-01_00-00-00"
+```
+
 ## Analysis Pipeline
 
 To commence the analysis, the first step is to create operation modules, which will be used to perform specific tasks on the data.
@@ -58,7 +66,7 @@ data: DataLoader = dataset[0]
 # Create operator modules:
 bandpass_filter: Operator = ButterBandpass(lowcut=300, highcut=3000, order=4)
 lfp_filter: Operator = ButterBandpass(highcut=3000, order=2, btype='lowpass')
-spike_detection: Operator = ThresholdCutoff(cutoff=4.0, dead_time=0.002)
+spike_detection: Operator = ThresholdCutoff(cutoff=4.0, progress_bar=True)
 ```
 
 In this code block, we are creating three different operator modules, namely `bandpass_filter`, `lfp_filter`, and `spike_detection`.
@@ -87,7 +95,7 @@ The results can be saved to a specified directory by passing the path to the `wo
 
 ```{code-cell} ipython3
 pipeline = Pipeline(spike_detection)  # Create a pipeline object to get `spike_detection` output
-pipeline.run(working_directory="results/")  # Save outcome into "results" directory
+pipeline.run(working_directory="results/", verbose=True)  # Save outcome into "results" directory
 ```
 
 ```{note}
