@@ -420,15 +420,26 @@ class DataIntanTriggered(DataIntan):
         for file in tqdm(paths, disable=not self.progress_bar):
             result, _ = rhs.load_file(file)
             time = result["t"]
-            adc_data = result[self.trigger_key][self.trigger_index]
-            diff_adc_data = adc_data[1:] - adc_data[:-1]
+
             # TODO: Something can be done better
-            recording_on = _find_sequence(
-                np.where(diff_adc_data > self.trigger_threshold_voltage)[0]
-            ).tolist()
-            recording_off = _find_sequence(
-                np.where(diff_adc_data < -self.trigger_threshold_voltage)[0]
-            ).tolist()
+            if "adc" in self.trigger_key:
+                adc_data = result[self.trigger_key][self.trigger_index]
+                diff_adc_data = adc_data[1:] - adc_data[:-1]
+                recording_on = _find_sequence(
+                    np.where(diff_adc_data > self.trigger_threshold_voltage)[0]
+                ).tolist()
+                recording_off = _find_sequence(
+                    np.where(diff_adc_data < -self.trigger_threshold_voltage)[0]
+                ).tolist()
+            elif "dig" in self.trigger_key:
+                recording_state = result[self.trigger_key][self.trigger_index]
+                #recording_state = np.logical_xor(digital_data[1:], digital_data[:-1])
+                recording_on = _find_sequence(
+                    np.where(np.logical_and(recording_state[1:], ~recording_state[:-1]))[0]
+                ).tolist()
+                recording_off = _find_sequence(
+                    np.where(np.logical_and(~recording_state[1:], recording_state[:-1]))[0]
+                ).tolist()
 
             sindex = 0
             if status == 1 and len(recording_on) == 0 and len(recording_off) == 0:
@@ -459,7 +470,6 @@ class DataIntanTriggered(DataIntan):
                     raise ValueError(
                         f"Something went wrong with the trigger signal. {len(recording_on)=} {len(recording_off)=}"
                     )
-
         return group_files
 
     def get_recording_files(self):
