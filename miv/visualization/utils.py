@@ -1,4 +1,4 @@
-__all__ = ["interp_2d", "command_run"]
+__all__ = ["interp_2d"]
 
 import subprocess
 
@@ -20,24 +20,3 @@ def interp_2d(data, ratio=10):
     Xn, Yn = np.meshgrid(xnew, ynew)
 
     return Xn[:-ratio, :-ratio], Yn[:-ratio, :-ratio], data1[:-ratio, :-ratio]
-
-
-def command_run(
-    cmd, verbose=False, exception="skip"
-):  # TODO: Probably should be in other file
-    args = cmd
-    output = subprocess.run(args, capture_output=True)
-    if verbose:
-        print(f"Running: {cmd=}")
-        print(f"{output.returncode=}")
-        if output.returncode == 0:
-            print(f"{output.stdout.decode('utf-8')=}")
-        else:
-            print(f"{output.stderr.decode('utf-8')=}")
-        print("Done")
-    if output.returncode != 0:
-        if exception == "raise":
-            raise RuntimeError(
-                f"Error running {cmd=}\n" f"{output.stderr.decode('utf-8')}"
-            )
-    return output.returncode

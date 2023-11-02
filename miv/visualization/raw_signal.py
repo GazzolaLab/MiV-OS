@@ -31,10 +31,12 @@ class MultiChannelSignalVisualization(OperatorMixin):
     fps: int = 25
     dpi: int = 200
 
-    def __post_init__(self):
+    def __post_init__(self):  # pragma: no cover
         super().__init__()
 
-    def __call__(self, signals: Spikestamps, mea: MEAGeometryProtocol):
+    def __call__(
+        self, signals: Spikestamps, mea: MEAGeometryProtocol
+    ):  # pragma: no cover
         if not inspect.isgenerator(signals):
             signals = [signals]
 

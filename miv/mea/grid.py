@@ -40,6 +40,10 @@ class GridMEA(MEAMixin):
         Y = np.linspace(0, -self.spacing[1] * self.nrow, self.nrow)
         self.Xn, self.Yn = np.meshgrid(X, Y)
 
+    @property
+    def channels(self):
+        return sorted(self.grid.ravel().tolist())
+
     def to_json(self) -> dict:
         """Return a JSON-serializable dictionary"""
         return {

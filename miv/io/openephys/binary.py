@@ -17,6 +17,7 @@ __all__ = [
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Set, Tuple, Union
 
 import logging
+import math
 import os
 from ast import literal_eval
 from glob import glob
@@ -313,7 +314,7 @@ def load_recording(
         filesize == itemsize * total_length * num_channels
     ), f"{filesize=} does not match the expected {itemsize*total_length*num_channels=}"
     samples_per_block = sampling_rate * 60
-    num_fragments = int(max((timestamps.shape[0] // samples_per_block) + 1, 1))
+    num_fragments = int(max(math.ceil(timestamps.shape[0] // samples_per_block), 1))
     tasks = None
     if mpi_comm is not None:
         rank = mpi_comm.Get_rank()

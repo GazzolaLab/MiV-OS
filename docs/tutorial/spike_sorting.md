@@ -162,10 +162,10 @@ class PCAClustering(OperatorMixin):
 
         return dict(labeled_cutout=labeled_cutout, features=features, labels=labels_each_channel)
 
-    def plot_pca_clustered_spikes_all_channels(self, output, show=False, save_path=None):
-        labeled_cutout = output["labeled_cutout"]
-        features = output["features"]
-        labels = output["labels"]
+    def plot_pca_clustered_spikes_all_channels(self, outputs, inputs, show=False, save_path=None):
+        labeled_cutout = outputs["labeled_cutout"]
+        features = outputs["features"]
+        labels = outputs["labels"]
 
         for ch, cutout in labeled_cutout.items():
             fig, axes = plt.subplots(1, 2, figsize=(16, 8))
@@ -210,15 +210,10 @@ data.visualize(show=True, seed=150)
 ## Run Pipeline
 
 We can then create a `Pipeline` object and run it to execute the processing steps.
+All the result files will be saved in the `results` directory.
 
 ```{code-cell} ipython3
 pipeline = Pipeline(cluster)
 print(pipeline.summarize())
-pipeline.run()
-```
-
-## Plot
-
-```{code-cell} ipython3
-cluster.plot(show=True)
+pipeline.run("results")
 ```

@@ -5,6 +5,7 @@ from typing import Optional
 
 import inspect
 import os
+import time
 from dataclasses import dataclass
 
 import matplotlib.pyplot as plt
@@ -63,8 +64,22 @@ class ButterBandpass(GeneratorOperatorMixin):
         sos = self._butter_bandpass(rate)
         y = signal.data.copy()
         num_channel = signal.number_of_channels
+
+        durations = []
         for ch in range(num_channel):
+            stime = time.time()
             y[:, ch] = sps.sosfiltfilt(sos, signal.data[:, ch])
+
+            # logging
+            duration = time.time() - stime
+            durations.append(duration)
+            # self.logger.info(f"Filtering channel {ch} took {duration:.3f} sec.")
+        # log statistics - average, min, max duration
+        self.logger.info(
+            f"Filtering took {np.mean(durations):.3f} sec on average. "
+            f"Min: {np.min(durations):.3f} sec, "
+            f"Max: {np.max(durations):.3f} sec."
+        )
         return Signal(data=y, timestamps=signal.timestamps, rate=rate)
 
     def __post_init__(self):

@@ -22,7 +22,7 @@ from miv.core.operator.operator import OperatorMixin
 from miv.core.operator.policy import StrictMPIRunner
 from miv.mea.protocol import MEAGeometryProtocol
 from miv.typing import SignalType
-from miv.visualization.utils import command_run
+from miv.utils.cli import command_run
 
 
 @dataclass
@@ -190,7 +190,7 @@ class ReplayRecording(OperatorMixin):
                         "mpeg4",
                         f"{video_name}",
                     ]
-                    command_run(cmd)
+                    command_run(cmd, logger=self.logger)
 
                 # if os.path.exists(images_path):
                 #    shutil.rmtree(images_path)

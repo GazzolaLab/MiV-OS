@@ -134,8 +134,9 @@ class NeuralActivity(OperatorMixin):
         return
 
 
+# DEBUG: Temporary activity visualization for 512 electrode debugging
 @dataclass
-class NeuralActivity512(OperatorMixin):
+class NeuralActivity512(OperatorMixin):  # pragma: no cover
     bin_size: float = 0.001  # sec
     firing_rate_interval: float = 1.0  # sec
     skip_interval: int = 50  # frames to skip. TODO: refactor
@@ -147,11 +148,13 @@ class NeuralActivity512(OperatorMixin):
     fps: int = 25
     minimum_split_size: int = 60  # sec. Each video is at least 1 min
 
-    def __post_init__(self):
+    def __post_init__(self):  # pragma: no cover
         super().__init__()
         self.runner = StrictMPIRunner()
 
-    def __call__(self, spikestamps: Spikestamps, mea: MEAGeometryProtocol):
+    def __call__(
+        self, spikestamps: Spikestamps, mea: MEAGeometryProtocol
+    ):  # pragma: no cover
         comm = self.runner.comm
         rank = self.runner.get_rank()
         size = self.runner.get_size()
