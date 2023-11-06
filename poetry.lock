@@ -659,21 +659,24 @@ vis = ["matplotlib (>=3.0.0)"]
 
 [[package]]
 name = "elephant"
-version = "0.13.0"
+version = "0.14.0"
 description = "Elephant is a package for analysis of electrophysiology data in Python"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "elephant-0.13.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:f7599eb2b6100f4f0ed5bf3a56f491fc5263eb03646ab514a391566be9475fe9"},
-    {file = "elephant-0.13.0-cp310-cp310-musllinux_1_1_x86_64.whl", hash = "sha256:30accf984c04853b3714e42ba19fd77ebb3dfd784186448c2f101513cd026f55"},
-    {file = "elephant-0.13.0-cp310-cp310-win_amd64.whl", hash = "sha256:e95f06e582c919a93ab920e9ddc28cae25100652899d050e6ea6d16afb9bfec7"},
-    {file = "elephant-0.13.0-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:ed66e083f817b841ce83392d4c95ea6a52389e55a24b32a48e503ed1f4e6e680"},
-    {file = "elephant-0.13.0-cp38-cp38-musllinux_1_1_x86_64.whl", hash = "sha256:e13332c4ee3bfa0b41a95bd278a29884b35730e09205a196d137c87e57a891bf"},
-    {file = "elephant-0.13.0-cp38-cp38-win_amd64.whl", hash = "sha256:88adfdf1d65dae793fbf1985ddabb8a7f1b17dcf969a13ffea0e54fdb509fa7b"},
-    {file = "elephant-0.13.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:83d939a1f92b341dfe5e0e17a8776252567e78ee84c1639df1e0037c4050a236"},
-    {file = "elephant-0.13.0-cp39-cp39-musllinux_1_1_x86_64.whl", hash = "sha256:1bf29b386381d943fab1bd8cd74b8ea77691c77eff388e1a661a77ab59019a96"},
-    {file = "elephant-0.13.0-cp39-cp39-win_amd64.whl", hash = "sha256:6572246f0c1c8ddc2f15fa667ddb189b1c0528aeeafb99f8b83bc8b356ab0a2a"},
-    {file = "elephant-0.13.0.tar.gz", hash = "sha256:2c6463cf9ace41631f2af196c5b80b468bf1c4b264d3a6b1ea0fb587d9e7dd67"},
+    {file = "elephant-0.14.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:c5e5deb19f66dc9ba168f32b04b3f2e47fc72a8c9744b2a85194d865fdfaec40"},
+    {file = "elephant-0.14.0-cp310-cp310-musllinux_1_1_x86_64.whl", hash = "sha256:0d8fe79621c877c6a915b9609d5ec03b1c17a3b7fc95ee0282cc192094c56938"},
+    {file = "elephant-0.14.0-cp310-cp310-win_amd64.whl", hash = "sha256:7b7951380977c01d72014eabcf230e5a14f9f5507e299b80b7fc1196e84ab1ce"},
+    {file = "elephant-0.14.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:1bdba5221b3fbf6bb0e2de4b4e3b6d54816df4fad206e78aa44a93fe8dbe4491"},
+    {file = "elephant-0.14.0-cp311-cp311-musllinux_1_1_x86_64.whl", hash = "sha256:8d07839e547afc0c25aa762763269f65573bc902807a9203441351cae8eaec90"},
+    {file = "elephant-0.14.0-cp311-cp311-win_amd64.whl", hash = "sha256:d9822c5ec7aa29ae8d001c768df018572773391749d736e5b3a2315748e604e4"},
+    {file = "elephant-0.14.0-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:e3475896a6808f94d9dd74cfb481466457645ba39d000b7993172cb6f157aed4"},
+    {file = "elephant-0.14.0-cp38-cp38-musllinux_1_1_x86_64.whl", hash = "sha256:61f0b15a3a8b2a6cb1d7b8c3e047cf720aa046fba09dbc41a4df1087b21dd9fd"},
+    {file = "elephant-0.14.0-cp38-cp38-win_amd64.whl", hash = "sha256:a1d0d95e6e36c386e322dc570d95937f574f6e072ded1f67f03576e1cc2afb43"},
+    {file = "elephant-0.14.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:d753ebed1a744172ccd773d25891c3fcf70dc7db5e4366599f98bbb215ab428a"},
+    {file = "elephant-0.14.0-cp39-cp39-musllinux_1_1_x86_64.whl", hash = "sha256:6ed0235a6b1e9b2f68599a7d3c81f94c2fbee11167918925fe0d3784ffb9ab6d"},
+    {file = "elephant-0.14.0-cp39-cp39-win_amd64.whl", hash = "sha256:54204b559e35328a37dc756e727ead269f731649042b12991f53cfad8dbbec36"},
+    {file = "elephant-0.14.0.tar.gz", hash = "sha256:02ce3b2a8d08dc19828f95384551339ea0946bc405c1db9aace54135417c2b0f"},
 ]
 
 [package.dependencies]
@@ -3935,4 +3938,4 @@ experiment = ["pyserial"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<3.12"
-content-hash = "7a1849ca259bce77a04478f3fa744ce62f068941c696c84b94bb6286963f9f06"
+content-hash = "1e09d4d152ee76d1651cb56c51ceeaf0edfbd6714e639ddb602f74b9f9ceec54"
