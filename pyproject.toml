@@ -45,7 +45,7 @@ miv_zip_results = "miv.machinary.zip_results:zip_results"
 [tool.poetry.dependencies]
 python = ">=3.8,<3.12"
 scipy = "^1.9.1"
-elephant = "^0.13.0"
+elephant = "^0.14.0"
 matplotlib = "^3.5.2"
 neo = ">=0.11.0,<0.12.0"
 pandas = "^2.0.2"
