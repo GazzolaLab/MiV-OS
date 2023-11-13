@@ -629,23 +629,23 @@ files = [
 
 [[package]]
 name = "dtaidistance"
-version = "2.3.10"
+version = "2.3.11"
 description = "Distance measures for time series (Dynamic Time Warping, fast C implementation)"
 optional = false
 python-versions = ">=3.5"
 files = [
-    {file = "dtaidistance-2.3.10-cp310-cp310-macosx_10_15_x86_64.whl", hash = "sha256:85c052dfd13d34c619e3682846b10f7ff247e908fad8a174424d20a362e2a164"},
-    {file = "dtaidistance-2.3.10-cp310-cp310-macosx_12_0_arm64.whl", hash = "sha256:3fb80a4ff415a96a927766a465db0640299a8942e1ca1586ef906cd811a419d7"},
-    {file = "dtaidistance-2.3.10-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:7e3c21b28a71215ca4e794d37bf0535858f7a99fda712716f2dabb597849b7bf"},
-    {file = "dtaidistance-2.3.10-cp310-cp310-win_amd64.whl", hash = "sha256:acc47a6fa6fabf49a1ed3265f41b00c850c8d2971a2273352a0b113fbbaf1e8d"},
-    {file = "dtaidistance-2.3.10-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:addbe46dace5897fd7186a32ec850d39db2ce501e76c2b52bcf5b0d1048bfeaa"},
-    {file = "dtaidistance-2.3.10-cp38-cp38-macosx_10_15_x86_64.whl", hash = "sha256:e1f96f0f4e6e4759447aa64c509a48bb38b5189631a559144869fd0f0262a906"},
-    {file = "dtaidistance-2.3.10-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:4f1e27773d4c534160036a8a08f4009731a6c4e16a95b52403c2d67e1d288bb3"},
-    {file = "dtaidistance-2.3.10-cp38-cp38-win_amd64.whl", hash = "sha256:8bf00ee46ee305db842dfdcdb3ba932f4f4a283ee3f75eaa73fe0ab29b73fdee"},
-    {file = "dtaidistance-2.3.10-cp39-cp39-macosx_10_15_x86_64.whl", hash = "sha256:58b8dbde8acd9b983913df1ff0caac4cd4a8d5fa9d97aa350e97186729db0c0f"},
-    {file = "dtaidistance-2.3.10-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:6205737b0e7d04a1added8ae5a95d88b5e17054a814f30c0ac17c8b917311aef"},
-    {file = "dtaidistance-2.3.10-cp39-cp39-win_amd64.whl", hash = "sha256:f7318a482e0b6f756ded9cbce13f127d1b7104e04eb744a2aafed3c997851368"},
-    {file = "dtaidistance-2.3.10.tar.gz", hash = "sha256:0da309e34a4a8cc47ba3c84cffa072361917bb411a4b61cf7d3ffc2d457cbff2"},
+    {file = "dtaidistance-2.3.11-cp310-cp310-macosx_11_0_x86_64.whl", hash = "sha256:ae49e46a84b8ab5563b13871cdb6fa78fe05991ab11a15dde36939f5463a4ca0"},
+    {file = "dtaidistance-2.3.11-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:f489bcf5776303b52207807eb173bff11b8b5e7a355830c6fd80be36f007fd8b"},
+    {file = "dtaidistance-2.3.11-cp310-cp310-win_amd64.whl", hash = "sha256:32bf75498fec2e89de294309698ab6e4a420a21bb030628b04e5b124648c2a66"},
+    {file = "dtaidistance-2.3.11-cp311-cp311-macosx_14_0_arm64.whl", hash = "sha256:bbb15caee33f175c37346fa303cfb66ad1ae1bfcc6192840ba8b8b7f75c71937"},
+    {file = "dtaidistance-2.3.11-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:d84e738ab3ce12f912554dc5777232547443fbd1005d53a2309726f7525c9ead"},
+    {file = "dtaidistance-2.3.11-cp38-cp38-macosx_11_0_x86_64.whl", hash = "sha256:06fa79fed8430e243859afa13c80b5c6e323d962cf4fd17c7c34da91edb79b71"},
+    {file = "dtaidistance-2.3.11-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:ed866da77b2377c5820350d767fd7d8097a84701d43c23e66b7e255bd6833c90"},
+    {file = "dtaidistance-2.3.11-cp38-cp38-win_amd64.whl", hash = "sha256:e1011080168078e80952c96003629ce8048dc5d451801a1d38012ee09ae90fd8"},
+    {file = "dtaidistance-2.3.11-cp39-cp39-macosx_11_0_x86_64.whl", hash = "sha256:6deec549e9aa14cc222d9eb73811b291ea4501183db6d1ee8476dc2a2234b989"},
+    {file = "dtaidistance-2.3.11-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:44f6934f7458b97411c958238806db853c246f6a0e8e056f0a412ae879921533"},
+    {file = "dtaidistance-2.3.11-cp39-cp39-win_amd64.whl", hash = "sha256:b7b056399c31aa2d27228fc995c2a3b52425e1c5f69a6fcb03a23556cdd0870f"},
+    {file = "dtaidistance-2.3.11.tar.gz", hash = "sha256:a3e471dd1ed5b22eff3f5dd4b285e6df1ba5a28be3322f51eef9e6571ea7090b"},
 ]
 
 [package.dependencies]
@@ -653,7 +653,7 @@ numpy = "*"
 
 [package.extras]
 all = ["matplotlib (>=3.0.0)", "numpy", "scipy"]
-dev = ["matplotlib (>=3.0.0)", "numpy", "pytest", "pytest-benchmark", "scipy"]
+dev = ["matplotlib (>=3.0.0)", "numpy", "pytest", "pytest-benchmark", "scipy", "sphinx", "sphinx-rtd-theme"]
 numpy = ["numpy", "scipy"]
 vis = ["matplotlib (>=3.0.0)"]
 
