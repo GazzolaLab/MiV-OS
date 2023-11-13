@@ -36,9 +36,9 @@ class GridMEA(MEAMixin):
         self.spacing = spacing
 
         self.nrow, self.ncol = grid.shape
-        X = np.linspace(0, self.spacing[0] * self.ncol, self.ncol)
-        Y = np.linspace(0, -self.spacing[1] * self.nrow, self.nrow)
-        self.Xn, self.Yn = np.meshgrid(X, Y)
+        self.X = np.linspace(0, self.spacing[0] * self.ncol, self.ncol)
+        self.Y = np.linspace(0, -self.spacing[1] * self.nrow, self.nrow)
+        self.Xn, self.Yn = np.meshgrid(self.X, self.Y)
 
     @property
     def channels(self):
@@ -91,3 +91,7 @@ class GridMEA(MEAMixin):
         """
 
         return np.vstack([self.Xn.ravel(), self.Yn.ravel()]).T
+
+    def figsize(self, scale=(4, 4)):
+        """Return an ideal figure size for plt.figure"""
+        return (self.ncol * scale[0], self.nrow * scale[1])
