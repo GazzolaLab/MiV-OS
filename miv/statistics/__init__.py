@@ -1,4 +1,3 @@
-from miv.statistics.baks import *
 from miv.statistics.burst import *
 from miv.statistics.info_theory import *
 from miv.statistics.pairwise_causality import *
