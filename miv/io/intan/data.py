@@ -433,12 +433,16 @@ class DataIntanTriggered(DataIntan):
                 ).tolist()
             elif "dig" in self.trigger_key:
                 recording_state = result[self.trigger_key][self.trigger_index]
-                #recording_state = np.logical_xor(digital_data[1:], digital_data[:-1])
+                # recording_state = np.logical_xor(digital_data[1:], digital_data[:-1])
                 recording_on = _find_sequence(
-                    np.where(np.logical_and(recording_state[1:], ~recording_state[:-1]))[0]
+                    np.where(
+                        np.logical_and(recording_state[1:], ~recording_state[:-1])
+                    )[0]
                 ).tolist()
                 recording_off = _find_sequence(
-                    np.where(np.logical_and(~recording_state[1:], recording_state[:-1]))[0]
+                    np.where(
+                        np.logical_and(~recording_state[1:], recording_state[:-1])
+                    )[0]
                 ).tolist()
 
             sindex = 0
