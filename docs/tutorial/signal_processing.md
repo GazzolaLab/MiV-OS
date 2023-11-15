@@ -49,7 +49,7 @@ print(path)
 
 In case you would like to use your own data, replace the path to the top-most directory of OpenEphys recorded folder:
 
-```{code-cell}
+```{raw-cell}
 path = "2022-01-01_00-00-00"
 ```
 
