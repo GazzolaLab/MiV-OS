@@ -1794,6 +1794,22 @@ files = [
 ]
 
 [[package]]
+name = "meautility"
+version = "1.5.1"
+description = "Python package for multi-electrode array (MEA) handling and stimulation."
+optional = false
+python-versions = "*"
+files = [
+    {file = "MEAutility-1.5.1-py3-none-any.whl", hash = "sha256:93d0ed4fcd9f65fb10376b53c846ac0942332e06c6144e12e5c7a5b1f31accf6"},
+    {file = "MEAutility-1.5.1.tar.gz", hash = "sha256:de12cc9c1772d3321e941af78e6bfb36cdcb5702a7b1272a852cc95f413bbfcb"},
+]
+
+[package.dependencies]
+matplotlib = "*"
+numpy = "*"
+pyyaml = "*"
+
+[[package]]
 name = "mpi4py"
 version = "3.1.5"
 description = "Python bindings for MPI"
@@ -4231,4 +4247,4 @@ experiment = ["pyserial"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<3.11"
-content-hash = "8df0060eed77ffa7c00e91ea502569c850c7e58418d6a53546e9211eaee1dc01"
+content-hash = "2b51cc92e939084fd63d53cb5ccb717ce8c81293bdaafbcd9e6df8d6aa44c166"
