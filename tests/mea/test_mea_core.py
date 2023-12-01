@@ -70,3 +70,9 @@ def test_mea_build_from_dictionary(tmp_path):
     # check mea
     mea = MEA.return_mea(name)
     assert mea.info["electrode_name"] == name
+
+
+@pytest.mark.parametrize("mea_name", ["64_intanRHD"])
+def test_miv_mea_exist_for_default(mea_name):
+    mea = MEA.return_mea(mea_name)
+    assert mea.info["electrode_name"] == "64_intanRHD"
