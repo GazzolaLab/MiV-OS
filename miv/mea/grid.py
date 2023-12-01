@@ -3,6 +3,7 @@ __all__ = ["GridMEA"]
 from typing import Tuple
 
 import matplotlib
+import MEAutility
 import numpy as np
 
 from miv.core.datatype import Signal

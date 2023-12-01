@@ -3,6 +3,7 @@ __all__ = ["UnstructuredMEA"]
 from typing import Tuple
 
 import matplotlib
+import MEAutility
 import numpy as np
 from scipy.interpolate import griddata
 

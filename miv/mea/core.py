@@ -2,10 +2,14 @@ __all__ = ["MEA"]
 
 from typing import List
 
+import logging
 import os
 
 import MEAutility
 import yaml
+
+_MEA_MODULE = MEAutility.core.MEA
+_RECTMEA_MODULE = MEAutility.core.RectMEA
 
 
 class _MEA:
@@ -21,12 +25,18 @@ class _MEA:
     # Make it singleton class
     _instance = None
 
+    def __init__(self):
+        """
+        Initialize MEA object.
+        """
+        self.logger = logging.getLogger(__name__)
+
     def __new__(cls, *args, **kwargs):
         """
         Make it singleton class.
         """
         if not cls._instance:
-            cls._instance = super(MEA, cls).__new__(cls)
+            cls._instance = super().__new__(cls)
         return cls._instance
 
     def __call__(self):
@@ -79,25 +89,19 @@ class _MEA:
         counter = 0
 
         # load MEA info
-        for fname in self.get_electrode_paths():
-            with open(fname) as meafile:
-                if MEAutility.core.use_loader:
-                    elinfo = yaml.load(meafile, Loader=yaml.FullLoader)
-                else:
-                    elinfo = yaml.load(meafile)
-
+        for elinfo in self.iter_electrode_info():
             if elinfo["electrode_name"] == electrode_name:
                 if counter > 1:
                     self.logger.warning(
                         f"Found multiple MEA models named {electrode_name}."
                         " Returning the last one."
                     )
-                pos = MEAutility.core.get_positions(elinfo)
+                pos = MEAutility.core.get_positions(elinfo, False)
                 # create MEA object
                 if MEAutility.core.check_if_rect(elinfo):
-                    mea = MEAutility.core.RectMEA(positions=pos, info=elinfo)
+                    mea = _RECTMEA_MODULE(positions=pos, info=elinfo)
                 else:
-                    mea = MEAutility.core.MEA(positions=pos, info=elinfo)
+                    mea = _MEA_MODULE(positions=pos, info=elinfo)
                 counter += 1
 
         if mea is None:
@@ -128,9 +132,9 @@ class _MEA:
         pos = MEAutility.core.get_positions(elinfo, center=center)
         # create MEA object
         if MEAutility.core.check_if_rect(elinfo):
-            mea = MEAutility.core.RectMEA(positions=pos, info=elinfo)
+            mea = _RECTMEA_MODULE(positions=pos, info=elinfo)
         else:
-            mea = MEAutility.core.MEA(positions=pos, info=elinfo)
+            mea = _MEA_MODULE(positions=pos, info=elinfo)
 
         return mea
 
@@ -148,20 +152,10 @@ class _MEA:
         info: dict
             Dictionary with electrode info
         """
-        info = None
-
         # load MEA info
-        for fname in self.get_electrode_paths():
-            with open(fname) as meafile:
-                if MEAutility.core.use_loader:
-                    elinfo = yaml.load(meafile, Loader=yaml.FullLoader)
-                else:
-                    elinfo = yaml.load(meafile)
-
-            if elinfo["electrode_name"] == electrode_name:
-                info = elinfo
-
-        return info
+        for elinfo in self.iter_electrode_info():
+            if elinfo.get("electrode_name") == electrode_name:
+                return elinfo
 
     def return_mea_list(self, verbose=False):
         """
@@ -172,14 +166,9 @@ class _MEA:
         probes: List[str]
             List of available probe_names
         """
-        electrode_names = []
-        for fname in self.get_electrode_paths():
-            with open(fname) as meafile:
-                if MEAutility.core.use_loader:
-                    elinfo = yaml.load(meafile, Loader=yaml.FullLoader)
-                else:
-                    elinfo = yaml.load(meafile)
-                electrode_names.append(elinfo["electrode_name"])
+        electrode_names = [
+            info.get("electrode_name", "") for info in self.iter_electrode_info()
+        ]
 
         if verbose:
             self.logger.info("Available MEA models:")
@@ -187,6 +176,22 @@ class _MEA:
                 self.logger.info(probe)
 
         return sorted(electrode_names)
+
+    def iter_electrode_info(self):
+        """
+        Iterate all electrode info.
+        """
+        for fname in self.get_electrode_paths():
+            with open(fname) as meafile:
+                if MEAutility.core.use_loader:
+                    elinfo = yaml.load(meafile, Loader=yaml.FullLoader)
+                else:
+                    elinfo = yaml.load(meafile)
+            if elinfo is None:
+                # Warn incompatible yaml file
+                self.logger.warning(f"File {fname} is not compatible with yaml.load")
+            else:
+                yield elinfo
 
 
 MEA = _MEA()
