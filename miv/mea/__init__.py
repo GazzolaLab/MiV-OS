@@ -1,5 +1,6 @@
 import numpy as np
 
+from miv.mea.core import *
 from miv.mea.grid import *
 from miv.mea.protocol import *
 from miv.mea.unstructured import *
