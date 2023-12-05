@@ -8,9 +8,10 @@ import numpy as np
 import pandas as pd
 
 from miv.core.operator import BaseChainingMixin
+from miv.core.operator.loggable import DefaultLoggerMixin
 
 
-class MEAMixin(BaseChainingMixin):
+class MEAMixin(BaseChainingMixin, DefaultLoggerMixin):
     """Base mixin for MEA classes.
 
     Functional module.

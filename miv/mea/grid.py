@@ -3,41 +3,53 @@ __all__ = ["GridMEA"]
 from typing import Tuple
 
 import matplotlib
+import MEAutility
 import numpy as np
 
 from miv.core.datatype import Signal
 from miv.mea.base import MEAMixin
 
 
-class GridMEA(MEAMixin):
+class GridMEA(MEAMixin, MEAutility.core.MEA):
     """
     A class representing a grid-based multi-electrode array (MEA).
 
     Example
     -------
+    The best way to create MEA module is through `miv.mea.MEA` object.
     For example, you could create an instance of the GridMEA class like this:
     literal blocks::
 
-        grid = np.arrange(9).reshape(3, 3)
-        mea = GridMEA(grid)
+        mea: GridMEA = miv.mea.MEA.return_mea("64_intanRHD")
     """
 
     def __init__(
         self,
-        grid: np.ndarray,
-        spacing: Tuple[float, float] = (200, 200),
+        positions,  # Exclude all "None" electrodes
         *args,
         **kwargs,
     ):
-        super().__init__(*args, **kwargs)
-        assert grid.ndim == 2, "The grid must be 2-D."
-        assert spacing[0] > 0 and spacing[1] > 0, "The spacing must be positive."
-        self.grid = grid
-        self.spacing = spacing
+        positions = positions.astype(np.float_)
+        info = kwargs["info"]
 
-        self.nrow, self.ncol = grid.shape
-        self.X = np.linspace(0, self.spacing[0] * self.ncol, self.ncol)
-        self.Y = np.linspace(0, -self.spacing[1] * self.nrow, self.nrow)
+        # Remove nan channels - in json, nan channels are open or broken channels
+        MEAMixin.__init__(
+            self, positions=positions[~np.isnan(positions).any(axis=1)], *args, **kwargs
+        )
+
+        self.grid = np.zeros(info["dim"], dtype=int) - 1
+        for channel in range(positions.shape[0]):
+            x, y, _ = positions[channel]
+            if np.isnan(x) or np.isnan(y):
+                continue
+            ix = int(np.round(x / self.pitch[0]))
+            iy = int(np.round(y / self.pitch[1]))
+            self.grid[iy, ix] = channel
+        self.grid = self.grid[::-1, :]
+
+        self.nrow, self.ncol = self.grid.shape
+        self.X = np.linspace(0, self.pitch[0] * self.ncol, self.ncol)
+        self.Y = np.linspace(0, -self.pitch[1] * self.nrow, self.nrow)
         self.Xn, self.Yn = np.meshgrid(self.X, self.Y)
 
     @property
@@ -48,7 +60,7 @@ class GridMEA(MEAMixin):
         """Return a JSON-serializable dictionary"""
         return {
             "grid": self.grid.tolist(),
-            "spacing": self.spacing,
+            "pitch": self.pitch,
         }
 
     def map_data(
@@ -95,3 +107,7 @@ class GridMEA(MEAMixin):
     def figsize(self, scale=(4, 4)):
         """Return an ideal figure size for plt.figure"""
         return (self.ncol * scale[0], self.nrow * scale[1])
+
+    # Override: get_electrode_matrix
+    def get_electrode_matrix(self):
+        return self.grid
