@@ -421,6 +421,9 @@ class DataIntanTriggered(DataIntan):
             result, _ = rhs.load_file(file)
             time = result["t"]
 
+            self.logger.info(f"Recorded result keys: {list(result.keys())}")
+            self.logger.info(f"Number of trigger: {len(result[self.trigger_key])}")
+
             # TODO: Something can be done better
             if "adc" in self.trigger_key:
                 adc_data = result[self.trigger_key][self.trigger_index]

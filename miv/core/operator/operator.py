@@ -184,7 +184,12 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
 
             # Plotting: Only happened when cache is not called
             if not self.skip_plot:
-                self.plot(output, args, show=False, save_path=True)
+                if len(args) == 0:
+                    self.plot(output, None, show=False, save_path=True)
+                elif len(args) == 1:
+                    self.plot(output, args[0], show=False, save_path=True)
+                else:
+                    self.plot(output, args, show=False, save_path=True)
 
         return output
 
