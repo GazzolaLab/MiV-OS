@@ -80,7 +80,7 @@ class BaseCallbackMixin:
                 callback_after_run.append(func)
 
         for callback in predefined_callbacks + callback_after_run:
-            output = callback(self, *args, **kwargs)
+            callback(self, *args, **kwargs)
 
     def plot_from_callbacks(self, *args, **kwargs):
         for func, name in zip(self._callback_collection, self._callback_names):
@@ -94,6 +94,7 @@ class BaseCallbackMixin:
         show: bool = False,
         save_path: Optional[Union[bool, str, pathlib.Path]] = None,
     ):
+        # TODO: Not sure if excluding none-output is a good idea
         if output is None:
             return
         if save_path is True:
