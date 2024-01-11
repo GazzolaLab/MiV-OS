@@ -199,3 +199,12 @@ class Spikestamps(CollapseExtendableMixin, DataNodeMixin, Sequence):
                 bin_spike = (bincount >= minimum_count).astype(np.bool_)
             signal.data[:, idx] = bin_spike
         return signal
+
+    @classmethod
+    def from_pickle(cls, filename):
+        import pickle as pkl
+
+        with open(filename, 'rb') as f:
+            data = pkl.load(f)
+
+        return cls(data)
