@@ -1,4 +1,5 @@
 import os
+import pathlib
 
 import numpy as np
 import pytest
@@ -39,6 +40,8 @@ class MockDataLoader(DataLoaderMixin):
 @pytest.mark.parametrize("cls", [MockDataLoader])
 def test_two_function_caching(cls, tmp_path):
     runner = cls(tmp_path)
+    runner.set_save_path(tmp_path)
+    runner.make_analysis_path()
 
     # Case
     a = 1
@@ -87,12 +90,17 @@ def test_two_function_caching(cls, tmp_path):
     assert ans1 == cached_ans1
     assert ans2 == cached_ans2
 
-    print(os.listdir(tmp_path))
-    print(os.listdir(tmp_path / ".cache"))
-    assert os.path.exists(tmp_path / ".cache" / "cache_function_1_rank000_0000.pkl")
-    assert os.path.exists(tmp_path / ".cache" / "cache_function_2_rank000_0000.pkl")
-    assert os.path.exists(tmp_path / ".cache" / "config_function_2.json")
-    assert os.path.exists(tmp_path / ".cache" / "config_function_1.json")
+    analysis_path = pathlib.Path(runner.analysis_path)
+    print(os.listdir(analysis_path))
+    print(os.listdir(analysis_path / ".cache"))
+    assert os.path.exists(
+        analysis_path / ".cache" / "cache_function_1_rank000_0000.pkl"
+    )
+    assert os.path.exists(
+        analysis_path / ".cache" / "cache_function_2_rank000_0000.pkl"
+    )
+    assert os.path.exists(analysis_path / ".cache" / "config_function_2.json")
+    assert os.path.exists(analysis_path / ".cache" / "config_function_1.json")
 
 
 @pytest.mark.parametrize("cls", [MockDataLoader])

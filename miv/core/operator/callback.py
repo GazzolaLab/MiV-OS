@@ -57,6 +57,12 @@ class _Callback(Protocol):
     def callback_after_run(self):
         ...
 
+    def set_save_path(self, path: str | pathlib.Path) -> None:
+        ...
+
+    def make_analysis_path(self) -> None:
+        ...
+
 
 class BaseCallbackMixin:
     def __init__(self):
@@ -69,6 +75,21 @@ class BaseCallbackMixin:
         self._callback_collection.append(right)
         self._callback_names.append(right.__name__)
         return self
+
+    def set_save_path(
+        self, path: str | pathlib.Path, cache_path: str | pathlib.Path = None
+    ):
+        if cache_path is None:
+            cache_path = path
+
+        # Set analysis path
+        self.analysis_path = os.path.join(path, self.tag.replace(" ", "_"))
+        # Set cache path
+        _cache_path = os.path.join(cache_path, self.tag.replace(" ", "_"), ".cache")
+        self.cacher.cache_dir = _cache_path
+
+    def make_analysis_path(self):
+        os.makedirs(self.analysis_path, exist_ok=True)
 
     def callback_after_run(self, *args, **kwargs):
         predefined_callbacks = get_methods_from_feature_classes_by_startswith_str(
