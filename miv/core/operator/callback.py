@@ -57,7 +57,7 @@ class _Callback(Protocol):
     def callback_after_run(self):
         ...
 
-    def set_save_path(self, path: str | pathlib.Path) -> None:
+    def set_save_path(self, path: Union[str, pathlib.Path]) -> None:
         ...
 
     def make_analysis_path(self) -> None:
@@ -77,7 +77,9 @@ class BaseCallbackMixin:
         return self
 
     def set_save_path(
-        self, path: str | pathlib.Path, cache_path: str | pathlib.Path = None
+        self,
+        path: Union[str, pathlib.Path],
+        cache_path: Union[str, pathlib.Path] = None,
     ):
         if cache_path is None:
             cache_path = path
