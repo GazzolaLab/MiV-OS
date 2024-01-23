@@ -200,11 +200,24 @@ class Spikestamps(CollapseExtendableMixin, DataNodeMixin, Sequence):
             signal.data[:, idx] = bin_spike
         return signal
 
+    def get_portion(self, start_ratio, end_ratio):
+        """
+        (Experimental)
+        Return spiketrain view inbetween (start_ratio, end_ratio)
+        where ratio=0 indicates the first spikestamps, and ratio=1 represent last spikestamp.
+        """
+        t_start = self.get_first_spikestamp()
+        t_end = self.get_last_spikestamp()
+        return self.get_view(
+            t_start + (t_end - t_start) * start_ratio,
+            t_start + (t_end - t_start) * end_ratio,
+        )
+
     @classmethod
     def from_pickle(cls, filename):
         import pickle as pkl
 
-        with open(filename, 'rb') as f:
+        with open(filename, "rb") as f:
             data = pkl.load(f)
 
         return cls(data)
