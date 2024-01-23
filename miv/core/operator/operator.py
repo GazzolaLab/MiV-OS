@@ -50,9 +50,6 @@ class Operator(
     def run(self) -> None:
         ...
 
-    def set_save_path(self, path: str | pathlib.Path) -> None:
-        ...
-
 
 class DataLoader(
     _Callback,
@@ -93,9 +90,12 @@ class DataLoaderMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
 
         self.runner = VanillaRunner()
         self.cacher = FunctionalCacher(self)
-        self.cacher.cache_dir = os.path.join(self.data_path, ".cache")
+
+        self.tag = "data_loader"
+        self.set_save_path(self.data_path)  # Default analysis path
 
         self._load_param = {}
+        self.skip_plot = True
 
     def configure_load(self, **kwargs):
         """
@@ -104,7 +104,16 @@ class DataLoaderMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
         self._load_param = kwargs
 
     def output(self) -> list[DataTypes]:
-        return self.load(**self._load_param)
+        output = self.load(**self._load_param)
+        if not self.skip_plot:
+            # if output is generator, raise error
+            if inspect.isgenerator(output):
+                raise ValueError(
+                    "output() method of DataLoaderMixin cannot support generator type."
+                )
+            self.make_analysis_path()
+            self.plot(output, None, show=False, save_path=True)
+        return output
 
     def run(self, *args, **kwargs):
         return self.output()
@@ -137,21 +146,6 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
 
     def set_caching_policy(self, cacher: _CacherProtocol):
         self.cacher = cacher(self)
-
-    def set_save_path(
-        self, path: str | pathlib.Path, cache_path: str | pathlib.Path = None
-    ):
-        if cache_path is None:
-            cache_path = path
-
-        # Set analysis path
-        self.analysis_path = os.path.join(path, self.tag.replace(" ", "_"))
-        # Set cache path
-        _cache_path = os.path.join(cache_path, self.tag.replace(" ", "_"), ".cache")
-        self.cacher.cache_dir = _cache_path
-
-    def make_analysis_path(self):
-        os.makedirs(self.analysis_path, exist_ok=True)
 
     def receive(self) -> list[DataTypes]:
         """
