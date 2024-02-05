@@ -3250,13 +3250,13 @@ test = ["pytest", "wheel"]
 
 [[package]]
 name = "readthedocs-sphinx-search"
-version = "0.3.1"
+version = "0.3.2"
 description = "Sphinx extension to enable search as you type for docs hosted on Read the Docs."
 optional = true
 python-versions = ">=3.6"
 files = [
-    {file = "readthedocs-sphinx-search-0.3.1.tar.gz", hash = "sha256:32c1ed5b129691adfb7e40effcecf887c5ebd525a06d96b9df11afb9461c9e33"},
-    {file = "readthedocs_sphinx_search-0.3.1-py3-none-any.whl", hash = "sha256:6ee204bf66a78684f370ac8b0f47eeccffbe507586d0826958365463ab2becbf"},
+    {file = "readthedocs-sphinx-search-0.3.2.tar.gz", hash = "sha256:277773bfa28566a86694c08e568d5a648cd80f22826545555a764d6d20c365fb"},
+    {file = "readthedocs_sphinx_search-0.3.2-py3-none-any.whl", hash = "sha256:58716fd21f01581e6e67bf3bc02e79c77e10dc58b5f8e4c7cc1977e013eda173"},
 ]
 
 [[package]]
