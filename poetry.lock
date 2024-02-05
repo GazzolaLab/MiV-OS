@@ -2027,31 +2027,38 @@ test = ["pep440", "pre-commit", "pytest", "testpath"]
 
 [[package]]
 name = "neo"
-version = "0.11.1"
+version = "0.13.0"
 description = "Neo is a package for representing electrophysiology data in Python, together with support for reading a wide range of neurophysiology file formats"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 files = [
-    {file = "neo-0.11.1.tar.gz", hash = "sha256:f4a206044b332ad00b10072b0dc7a70b359fa365ec786f92ab757ef4ae588474"},
+    {file = "neo-0.13.0-py3-none-any.whl", hash = "sha256:3a380de2693306acab3253ee9d69720dfcc0c22ae634c85e34cdfb25bc8d5e5d"},
+    {file = "neo-0.13.0.tar.gz", hash = "sha256:5675d1fa381a53c2c7eeb8b5e929ec0399de20bb0b52453e1b99ec6d66dc91f3"},
 ]
 
 [package.dependencies]
-numpy = ">=1.18.5"
+numpy = ">=1.19.5"
 packaging = "*"
-quantities = ">=0.12.1"
+quantities = ">=0.14.1"
 
 [package.extras]
-all = ["h5py", "igor", "klusta", "nixio (>=1.5.0)", "pillow", "pyedflib", "pynwb", "scipy (>=1.0.0)", "sonpy"]
+all = ["coverage", "coveralls", "dhn-med-py (>=1.0.0)", "h5py", "igor2", "ipython", "joblib (>=1.0.0)", "klusta", "matplotlib", "nixio (>=1.5.0)", "pillow", "probeinterface", "pyedflib", "pynwb", "pytest", "pytest-cov", "scipy (>=1.0.0)", "sonpy", "tqdm", "wenv", "zugbruecke (>=0.2)"]
 biocam = ["h5py"]
 ced = ["sonpy"]
+dev = ["black", "build", "twine"]
+docs = ["docutils", "ipython", "matplotlib", "nixio", "pydata-sphinx-theme", "pynwb", "sphinx", "sphinx-design", "sphinx-gallery", "sphinx-inline-tabs"]
 edf = ["pyedflib"]
-igorproio = ["igor"]
+igorproio = ["igor2"]
+iocache = ["joblib (>=1.0.0)"]
 kwikio = ["klusta"]
 maxwell = ["h5py"]
+med = ["dhn-med-py (>=1.0.0)"]
 neomatlabio = ["scipy (>=1.0.0)"]
 nixio = ["nixio (>=1.5.0)"]
 nwb = ["pynwb"]
+plexon2 = ["wenv", "zugbruecke (>=0.2)"]
 stimfitio = ["stfio"]
+test = ["coverage", "coveralls", "dhn-med-py (>=1.0.0)", "h5py", "igor2", "ipython", "joblib (>=1.0.0)", "klusta", "matplotlib", "nixio", "pillow", "probeinterface", "pyedflib", "pynwb", "pytest", "pytest-cov", "scipy (>=1.0.0)", "sonpy", "tqdm", "wenv", "zugbruecke (>=0.2)"]
 tiffio = ["pillow"]
 
 [[package]]
@@ -4214,4 +4221,4 @@ experiment = ["pyserial"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<3.12"
-content-hash = "8a35a00494fd9637cd60be8946e3cea733fd5255970213417500d04a8642fc4b"
+content-hash = "03127a803f291d97fecaa67791e91bb3e5b2054ae4a20e0e3f1bc8299764a8c1"
