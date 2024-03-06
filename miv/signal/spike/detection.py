@@ -68,6 +68,8 @@ class ThresholdCutoff(OperatorMixin):
         return_neotype : bool
             If true, return spiketrains in neo.Spiketrains (default=True)
             If false, return list of numpy-type spiketrains.
+        plot_interval : float
+            Interval for plotting raster, in sec.(default=10.0)
     """
 
     dead_time: float = 0.003
@@ -81,6 +83,8 @@ class ThresholdCutoff(OperatorMixin):
     exclude_channels = None
 
     num_proc: int = 1
+
+    plot_interval: float = 10.0
 
     @cache_call
     def __call__(self, signal: SignalType) -> SpikestampsType:
@@ -255,7 +259,7 @@ class ThresholdCutoff(OperatorMixin):
         tf = spikestamps.get_last_spikestamp()
 
         # TODO: REFACTOR. Make single plot, and change xlim
-        term = 10
+        term = self.plot_interval
         n_terms = int(np.ceil((tf - t0) / term))
         if n_terms == 0:
             # TODO: Warning message
