@@ -312,7 +312,7 @@ def load_recording(
     itemsize = np.dtype(_recorded_dtype).itemsize
     assert (
         filesize == itemsize * total_length * num_channels
-    ), f"{filesize=} does not match the expected {itemsize*total_length*num_channels=}"
+    ), f"{filesize=} does not match the expected {itemsize*total_length*num_channels=}. Path: {file_path[0]}"
     samples_per_block = sampling_rate * 60
     num_fragments = int(max(math.ceil(timestamps.shape[0] // samples_per_block), 1))
     tasks = None
@@ -416,6 +416,8 @@ def load_continuous_data(
     """
 
     # Read raw data signal
+    if os.path.getsize(data_path) == 0:
+        raise ValueError(f"Data {data_path} has zero-size.")
     raw_data: np.ndarray = np.memmap(
         data_path,
         dtype=_recorded_dtype,
