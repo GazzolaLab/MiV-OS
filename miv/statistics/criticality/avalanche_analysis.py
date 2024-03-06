@@ -266,6 +266,9 @@ class AvalancheAnalysis(OperatorMixin):
             except RuntimeError:
                 tau = 0
                 logging.warning("Power-fit failed. No fitted line will be plotted.")
+            self.tau = tau
+        else:
+            self.tau = 0.0
         axes[0].legend()
         axes[0].set_ylim(bottom=5e-1)
 
@@ -289,6 +292,7 @@ class AvalancheAnalysis(OperatorMixin):
         except RuntimeError:
             alpha = 0
             logging.warning("Power-fit failed. No fitted line will be plotted.")
+        self.alpha = alpha
         axes[1].legend()
         axes[1].set_ylim(bottom=5e-1)
 
@@ -319,8 +323,10 @@ class AvalancheAnalysis(OperatorMixin):
             )
         except RuntimeError:
             logging.warning("Power-fit failed. No fitted line will be plotted.")
+            self.svz = 0
         axes[2].legend()
         axes[2].set_title(f"({(alpha-1)/(tau-1)=:.2f})")
+        self.svz_estim_ratio = (alpha - 1) / (tau - 1)
 
         if save_path is not None:
             plt.savefig(os.path.join(save_path, "avalanche_power_fitting.png"))
@@ -338,6 +344,7 @@ class AvalancheAnalysis(OperatorMixin):
         fig, ax = plt.subplots(1, 1)
         # hist, bins = np.histogram(size, bins=nbins)
         # logbins = np.logspace(np.log10(bins[0]), np.log10(bins[-1]), len(bins))
+        self.mean_branching_ratio = branching_ratio[np.nonzero(branching_ratio)].mean()
         ax.hist(
             branching_ratio[np.nonzero(branching_ratio)],
             bins=nbins,
