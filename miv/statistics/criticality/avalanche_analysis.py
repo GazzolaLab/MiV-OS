@@ -130,7 +130,7 @@ class AvalancheDetection(OperatorMixin):
         # Coalace overlapped intervals
         while True:
             coalace_index = np.where(
-                starts[1:] <= ends[:-1] + self.min_interburst_interval_bound
+                starts[1:] <= ends[:-1] + self.min_interburst_interval_bound / self.bin_size
             )[0]
             if coalace_index.size == 0:
                 break
