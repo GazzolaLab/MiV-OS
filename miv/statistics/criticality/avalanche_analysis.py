@@ -270,6 +270,7 @@ class AvalancheAnalysis(OperatorMixin):
                 logging.warning("Power-fit failed. No fitted line will be plotted.")
             self.tau = tau
         else:
+            tau = 0.0
             self.tau = 0.0
         axes[0].legend()
         axes[0].set_ylim(bottom=5e-1)
