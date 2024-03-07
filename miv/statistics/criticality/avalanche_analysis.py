@@ -107,6 +107,10 @@ class AvalancheDetection(OperatorMixin):
             starts = starts[inds]
             ends = ends[inds]
 
+        # TODO: duplicated lines
+        if len(starts) == 0 or len(ends) == 0:
+            return np.array([]), np.array([]), bincount
+
         if not np.isclose(self.bin_size, self.time_difference):
             starts2 = starts[1:]
             ends2 = ends[:-1]
@@ -177,6 +181,9 @@ class AvalancheDetection(OperatorMixin):
                 plt.savefig(
                     os.path.join(save_path, f"raster_avalanche_overlay_{i}.png")
                 )
+
+            if i > 10:  # For early finish
+                break
         plt.close(fig)
 
 
@@ -266,6 +273,9 @@ class AvalancheAnalysis(OperatorMixin):
             except RuntimeError:
                 tau = 0
                 logging.warning("Power-fit failed. No fitted line will be plotted.")
+            except TypeError:
+                tau = 0
+                logging.warning("Power-fit failed. No fitted line will be plotted.")
             self.tau = tau
         else:
             tau = 0.0
@@ -291,6 +301,9 @@ class AvalancheAnalysis(OperatorMixin):
             else:
                 alpha = 0
         except RuntimeError:
+            alpha = 0
+            logging.warning("Power-fit failed. No fitted line will be plotted.")
+        except TypeError:
             alpha = 0
             logging.warning("Power-fit failed. No fitted line will be plotted.")
         self.alpha = alpha
@@ -323,6 +336,9 @@ class AvalancheAnalysis(OperatorMixin):
                 logbins, power(logbins, *popt), label=f"fit 1/svz={popt[0]:.2f}"
             )
         except RuntimeError:
+            logging.warning("Power-fit failed. No fitted line will be plotted.")
+            self.svz = 0
+        except TypeError:
             logging.warning("Power-fit failed. No fitted line will be plotted.")
             self.svz = 0
         axes[2].legend()
