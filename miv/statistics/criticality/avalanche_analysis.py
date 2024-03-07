@@ -34,8 +34,10 @@ class AvalancheDetection(OperatorMixin):
     ----------
     bin_size : float
         The size of the bins in seconds. Default is 0.004 seconds.
-    threshold : float
-        The threshold for the avalanche size. Default is None.
+    threshold_percentage : float
+        The threshold to detect avalanche.
+        Default is 2.0, which means the threshold is the mean of the population firing rate divided by 2.
+        Higher the value, less avalanches will be detected, and the avalanche size will be smaller.
     time_difference : float
         Minimum time difference between avalanches in seconds.
         Default is equal to the bin_size.
@@ -63,7 +65,7 @@ class AvalancheDetection(OperatorMixin):
     bin_size: float = 0.002  # in seconds
 
     # Miscellaneous configurations
-    threshold: Optional[float] = None
+    threshold_percentage: float = 2.0
     time_difference: Optional[float] = None
     allow_multiple_spike_per_bin: bool = False
     minimum_bins_in_avalanche: int = 10
@@ -82,10 +84,10 @@ class AvalancheDetection(OperatorMixin):
         population_firing = bincount.data.sum(
             axis=bincount._CHANNELAXIS
         )  # Spike count accross channel per bin
-        if self.threshold is None:
-            threshold = population_firing[np.nonzero(population_firing)].mean() / 2.0
-        else:
-            threshold = self.threshold
+        threshold = (
+            population_firing[np.nonzero(population_firing)].mean()
+            / self.threshold_percentage
+        )
         # TODO: try to reuse the code from miv.statistics.burst.burst
         events = (population_firing > threshold).astype(np.bool_)
 
