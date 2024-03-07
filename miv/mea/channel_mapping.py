@@ -146,7 +146,8 @@ class MEA128:
             )
             G.add_node(
                 ("Idel_mea", idl_channel),
-                name=str(idl_channel),
+                # name=str(idl_channel),
+                name=self.intan_channel_int_to_str(idl_intan_channel),
                 pos=(
                     mea_x + oe_arrangement.shape[0] + intan_arrangement.shape[0],
                     mea_y + 0.6,
@@ -184,7 +185,8 @@ class MEA128:
             )
             G.add_node(
                 ("MEA", channel),
-                name=str(channel),
+                # name=str(channel),
+                name=self.intan_channel_int_to_str(intan_channel),
                 pos=(
                     mea_x + oe_arrangement.shape[0] + intan_arrangement.shape[0],
                     mea_y + 0.6,
@@ -201,7 +203,7 @@ class MEA128:
 
         plt.figure(figsize=(8, 16))
         nx.draw(G, pos=pos, node_size=500, node_color=colors, alpha=alphas)
-        nx.draw_networkx_labels(G, pos, labels, font_size=8, font_color="white")
+        nx.draw_networkx_labels(G, pos, labels, font_size=10, font_color="white")
         nx.draw_networkx_edges(G, pos, width=2, edge_color="black", alpha=0.8)
 
         if save_path is not None:

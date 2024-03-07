@@ -18,15 +18,16 @@ from miv.mea.channel_mapping import MEA64, MEA128
 
 @click.command()
 @click.option("--mea-name", "-m", help="Name of the mea.")
-@click.option(
-    "--impedance-path",
-    "-i",
-    type=click.Path(exists=True),
-    help="Path to the impedance file.",
-)
 @click.option("--spacing", "-s", type=int, help="Path to the impedance file.")
 @click.option(
     "--output", "-o", type=click.Path(exists=False), help="Path to the output file."
+)
+@click.option(
+    "--impedance-path",
+    "-i",
+    default=None,
+    type=click.Path(),
+    help="Path to the impedance file.",
 )
 @click.option(
     "--is-intan",
@@ -44,7 +45,7 @@ from miv.mea.channel_mapping import MEA64, MEA128
     help="Total number of channels. Default is 64.",
 )
 def export(
-    mea_name, impedance_path, spacing, output, is_intan: bool, total_nb_channels: int
+    mea_name, spacing, output, impedance_path, is_intan: bool, total_nb_channels: int
 ):
     probes_path = pathlib.Path(os.environ["HOME"]) / "spyking-circus" / "probes"
 
@@ -56,25 +57,27 @@ def export(
     else:
         grid = mea_map[mea_name]
 
-    range_impedance = (1e5, 1.3e6)
-    low_impedance, high_impedance = range_impedance
-    if impedance_path.endswith(".xml"):
-        # Impedances
-        impedances = get_channel_in_impedance_range(impedance_path, range_impedance)
-        channels_with_impedances_in_range = list(impedances.keys())
-    elif impedance_path.endswith(".csv"):
-        # Impedances
-        impedances = get_impedances_from_csv(impedance_path)
-        channels_with_impedances_in_range = np.where(
-            np.logical_and(
-                impedances > low_impedance,
-                impedances < high_impedance,
-            )
-        )[0]
-
-    print("Channels with impedances in range:")
-    for ch in channels_with_impedances_in_range:
-        print(f"Channel {ch} has impedance {impedances[ch]:.2f}")
+    if impedance_path is not None:
+        range_impedance = (1e5, 1.3e6)
+        low_impedance, high_impedance = range_impedance
+        if impedance_path.endswith(".xml"):
+            # Impedances
+            impedances = get_channel_in_impedance_range(impedance_path, range_impedance)
+            channels_with_impedances_in_range = list(impedances.keys())
+        elif impedance_path.endswith(".csv"):
+            # Impedances
+            impedances = get_impedances_from_csv(impedance_path)
+            channels_with_impedances_in_range = np.where(
+                np.logical_and(
+                    impedances > low_impedance,
+                    impedances < high_impedance,
+                )
+            )[0]
+        print("Channels with impedances in range:")
+        for ch in channels_with_impedances_in_range:
+            print(f"Channel {ch} has impedance {impedances[ch]:.2f}")
+    else:
+        channels_with_impedances_in_range = np.arange(total_nb_channels)
 
     # Locations
     locs = {}
