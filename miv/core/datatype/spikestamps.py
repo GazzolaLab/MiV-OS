@@ -105,17 +105,23 @@ class Spikestamps(CollapseExtendableMixin, DataNodeMixin, Sequence):
         rowmin = [min(data) for data in self.data if len(data) > 0]
         return 0 if len(rowmin) == 0 else min(rowmin)
 
-    def get_view(self, t_start: float, t_end: float):
-        """Truncate array and only includes spikestamps between t_start and t_end."""
-        return Spikestamps(
-            [
-                np.array(sorted(list(filter(lambda x: t_start <= x <= t_end, arr))))
-                for arr in self.data
+    def get_view(self, t_start: float, t_end: float, reset_start: bool = False):
+        """
+        Truncate array and only includes spikestamps between t_start and t_end.
+        If reset_start is True, the first spikestamp will be set to zero.
+        """
+        spikestamps_array = [
+            np.array(sorted(list(filter(lambda x: t_start <= x <= t_end, arr))))
+            for arr in self.data
+        ]
+        if reset_start:
+            spikestamps_array = [
+                (arr - t_start) if arr.size > 0 else arr for arr in spikestamps_array
             ]
-        )
+        return Spikestamps(spikestamps_array)
 
     def select(self, indices, keepdims: bool = True):
-        """Select channels by indices."""
+        """Select channels by indices. The order of the channels will be preserved."""
         if keepdims:
             data = [
                 self.data[idx] if idx in indices else []
