@@ -11,6 +11,7 @@ __all__ = ["Signal"]
 
 from typing import Optional, Tuple
 
+import pickle
 from dataclasses import dataclass
 
 import numpy as np
@@ -89,3 +90,14 @@ class Signal(SupportMultiprocessing, DataNodeMixin):
         ), "Signal must have same number of channels"
         self.data = np.append(value, self.data, axis=self._SIGNALAXIS)
         self.timestamps = np.append(self.timestamps, time)
+
+    def save(self, path: str) -> None:
+        """Save signal to file."""
+        with open(path, "wb") as f:
+            pickle.dump(self, f)
+
+    @classmethod
+    def load(cls, path: str) -> "Signal":
+        """Load signal from file."""
+        with open(path, "rb") as f:
+            return pickle.load(f)
