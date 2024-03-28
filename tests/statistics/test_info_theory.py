@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 from miv.core.datatype import Spikestamps
-from miv.statistics import (
+from miv.statistics.info_theory import (
     active_information,
     block_entropy,
     conditional_entropy,
