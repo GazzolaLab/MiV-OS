@@ -371,6 +371,8 @@ def load_recording(
         if start_at_zero and not np.isclose(_timestamps[0], 0.0):
             _timestamps -= _timestamps[0]
 
+        if _timestamps.size / sampling_rate < 0.001:
+            break
         yield _signal, _timestamps, sampling_rate
 
 
