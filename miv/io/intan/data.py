@@ -193,7 +193,15 @@ class DataIntan(Data):
             _data = np.zeros(
                 [signal.shape[0], num_active_channels], dtype=signal.data.dtype
             )
-            _data[:, active_channels] = signal.data
+            if active_channels.size != signal.data.shape[1]:
+                # TODO: figure out why this can happen
+                self.logger.warning(f"Size mismatch in the data: {active_channels.size} enabled channel vs {signal.data.shape=}")
+                if signal.data.shape[1] > active_channels.size:
+                    _data[:, active_channels] = signal.data[:, active_channels.size]
+                elif signal.data.shape[1] < active_channels.size:
+                    _data[:, active_channels[:signal.data.shape[1]]] = signal.data
+            else:
+                _data[:, active_channels] = signal.data
             signal.data = _data
 
     def _read_header(self):
