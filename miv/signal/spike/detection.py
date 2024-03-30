@@ -80,11 +80,16 @@ class ThresholdCutoff(OperatorMixin):
     units: str = "sec"
     return_neotype: bool = False  # TODO: Remove, shift to spikestamps datatype
 
-    exclude_channels = None
+    exclude_channels: Tuple[int] = None
 
     num_proc: int = 1
 
     plot_interval: float = 10.0
+
+    def __post_init__(self):
+        super().__init__()
+        if self.exclude_channels is None:
+            self.exclude_channels = []
 
     @cache_call
     def __call__(self, signal: SignalType) -> SpikestampsType:
@@ -132,7 +137,7 @@ class ThresholdCutoff(OperatorMixin):
         for channel in tqdm(
             range(num_channels), disable=not self.progress_bar, desc=self.tag
         ):
-            if self.exclude_channels is not None and channel in self.exclude_channels:
+            if channel in self.exclude_channels:
                 spiketrain_list.append(np.array([]))
                 continue
             array = signal[channel]  # type: ignore
@@ -157,9 +162,6 @@ class ThresholdCutoff(OperatorMixin):
                 spiketrain_list.append(spikestamp.astype(np.float_))
         spikestamps = Spikestamps(spiketrain_list)
         return spikestamps
-
-    def __post_init__(self):
-        super().__init__()
 
     def _compute_spike_threshold(
         self, signal: SignalType, cutoff: float = 5.0
