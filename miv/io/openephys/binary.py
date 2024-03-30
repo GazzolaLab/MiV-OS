@@ -305,7 +305,7 @@ def load_recording(
     dirname = os.path.dirname(file_path[0])
     timestamps_path = os.path.join(dirname, "timestamps.npy")
     timestamps = load_timestamps(timestamps_path, sampling_rate, _old_oe_version)
-    total_length = timestamps.shape[0]
+    total_length = timestamps.size
 
     # Define task
     filesize = os.path.getsize(file_path[0])
@@ -314,7 +314,7 @@ def load_recording(
         filesize == itemsize * total_length * num_channels
     ), f"{filesize=} does not match the expected {itemsize*total_length*num_channels=}. Path: {file_path[0]}"
     samples_per_block = sampling_rate * 60
-    num_fragments = int(max(math.ceil(timestamps.shape[0] // samples_per_block), 1))
+    num_fragments = int(math.ceil(total_length / samples_per_block))
     tasks = None
     if mpi_comm is not None:
         rank = mpi_comm.Get_rank()
