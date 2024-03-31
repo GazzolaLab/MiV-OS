@@ -5,8 +5,7 @@ from miv.core.datatype.protocol import Extendable
 
 class _Collapsable(Protocol):
     @classmethod
-    def from_collapse(self) -> None:
-        ...
+    def from_collapse(self) -> None: ...
 
 
 class CollapseExtendableMixin:

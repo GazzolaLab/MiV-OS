@@ -24,12 +24,10 @@ from miv.typing import SignalType, TimestampsType
 class DataProtocol(Protocol):
     """Behavior definition for a single experimental data handler."""
 
-    def __init__(self, data_path: str):
-        ...
+    def __init__(self, data_path: str): ...
 
     @property
-    def analysis_path(self) -> None:
-        ...
+    def analysis_path(self) -> None: ...
 
     def load(self, *args) -> Generator[SignalType, TimestampsType, int]:
         """Iterator to load data fragmentally. Use to load large file size data."""

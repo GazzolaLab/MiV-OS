@@ -22,11 +22,9 @@ if TYPE_CHECKING:
 
 
 class _RunnerProtocol(Callable, Protocol):
-    def __init__(self, comm, root: int):
-        ...
+    def __init__(self, comm, root: int): ...
 
-    def __call__(self, func: Callable, inputs: Optional[tuple], **kwargs) -> object:
-        ...
+    def __call__(self, func: Callable, inputs: Optional[tuple], **kwargs) -> object: ...
 
 
 class _Runnable(Protocol):
@@ -35,15 +33,13 @@ class _Runnable(Protocol):
     """
 
     @property
-    def runner(self) -> _RunnerProtocol:
-        ...
+    def runner(self) -> _RunnerProtocol: ...
 
     def run(
         self,
         save_path: Union[str, pathlib.Path],
         cache_dir: Union[str, pathlib.Path],
-    ) -> None:
-        ...
+    ) -> None: ...
 
 
 class VanillaRunner:
@@ -166,5 +162,4 @@ class SupportMultiprocessing:
 
 class InternallyMultiprocessing(Protocol):
     @property
-    def num_proc(self) -> int:
-        ...
+    def num_proc(self) -> int: ...

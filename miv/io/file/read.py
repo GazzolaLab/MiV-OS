@@ -164,9 +164,9 @@ def read(
             if dataset_name not in data["_MAP_DATASETS_TO_GROUPS_"]:
                 data["_MAP_DATASETS_TO_GROUPS_"][dataset_name] = group_name
 
-            container[
-                dataset_name
-            ] = None  # This will be filled for individual container
+            container[dataset_name] = (
+                None  # This will be filled for individual container
+            )
 
     infile.close()
     return data, container

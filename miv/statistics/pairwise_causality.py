@@ -37,14 +37,12 @@ def pairwise_causality(signal: SignalType, start: int, end: int):
 
     for j in range(p):
         for k in range(j + 1, p):
-            C[:, j, k] = pairwise_granger(
+            result = pairwise_granger(
                 np.transpose([signal[start:end, j], signal[start:end, k]]),
-                max_order=1,
+                max_order=2,
             )
-            C[:, k, j] = pairwise_granger(
-                np.transpose([signal[start:end, k], signal[start:end, j]]),
-                max_order=1,
-            )
+            C[:, j, k] = result["directional_causality_x_y"]
+            C[:, k, j] = result["directional_causality_y_x"]
     # for i in range(4):
     #    np.fill_diagonal(C[i], 0.0)
 

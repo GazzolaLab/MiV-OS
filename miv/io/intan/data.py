@@ -195,11 +195,13 @@ class DataIntan(Data):
             )
             if active_channels.size != signal.data.shape[1]:
                 # TODO: figure out why this can happen
-                self.logger.warning(f"Size mismatch in the data: {active_channels.size} enabled channel vs {signal.data.shape=}")
+                self.logger.warning(
+                    f"Size mismatch in the data: {active_channels.size} enabled channel vs {signal.data.shape=}"
+                )
                 if signal.data.shape[1] > active_channels.size:
                     _data[:, active_channels] = signal.data[:, active_channels.size]
                 elif signal.data.shape[1] < active_channels.size:
-                    _data[:, active_channels[:signal.data.shape[1]]] = signal.data
+                    _data[:, active_channels[: signal.data.shape[1]]] = signal.data
             else:
                 _data[:, active_channels] = signal.data
             signal.data = _data

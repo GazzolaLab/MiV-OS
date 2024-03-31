@@ -20,8 +20,7 @@ if TYPE_CHECKING:
 
 class _Loggable(Protocol):
     @property
-    def logger(self):
-        ...
+    def logger(self): ...
 
 
 class DefaultLoggerMixin:
