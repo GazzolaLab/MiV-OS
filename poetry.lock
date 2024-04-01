@@ -1598,13 +1598,13 @@ files = [
 
 [[package]]
 name = "machinable"
-version = "4.10.0"
+version = "4.10.1"
 description = "A modular configuration system for research projects"
 optional = false
 python-versions = "<4.0,>=3.8"
 files = [
-    {file = "machinable-4.10.0-py3-none-any.whl", hash = "sha256:f0d5506f3ce6754054a3bd812a886f2ef96c484567a4c2291d7840ff69f9d919"},
-    {file = "machinable-4.10.0.tar.gz", hash = "sha256:269e7d51c863326be6c45fbaeb96a7be5c334b8986561538f46ca46759b52de3"},
+    {file = "machinable-4.10.1-py3-none-any.whl", hash = "sha256:ecb81b4203e8577cec3f9de548386b4e632e3b3260dbdeb47e711e02ed069458"},
+    {file = "machinable-4.10.1.tar.gz", hash = "sha256:98ff4e61defcf4940ca0bde1e6016a6f4d4624c800eb10c0d37b000000676894"},
 ]
 
 [package.dependencies]
