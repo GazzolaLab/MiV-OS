@@ -721,31 +721,34 @@ vis = ["matplotlib (>=3.0.0)"]
 
 [[package]]
 name = "elephant"
-version = "1.0.0"
+version = "1.1.0"
 description = "Elephant is a package for analysis of electrophysiology data in Python"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "elephant-1.0.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:abad8193582b0c69f3cc292dbf9a320aa017915fcfd62892c8be1c2e6dfab685"},
-    {file = "elephant-1.0.0-cp310-cp310-musllinux_1_1_x86_64.whl", hash = "sha256:eb8f74e136f24432b0698540083a5e25cc64779a5c871e4ea8997b466bed860b"},
-    {file = "elephant-1.0.0-cp310-cp310-win_amd64.whl", hash = "sha256:e1c7c1188a433183bd45d80728ac4a1a94987f79bee0e07114bdf6d558095a15"},
-    {file = "elephant-1.0.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:4c1ac7d43976cffa69325f3c1528de78ca73a9b4d0f77539b67a716a40e1918f"},
-    {file = "elephant-1.0.0-cp311-cp311-musllinux_1_1_x86_64.whl", hash = "sha256:79fcd628da49caaed309cec228cfa64090bb168308f1b35ff42dd5ea5bb22f4e"},
-    {file = "elephant-1.0.0-cp311-cp311-win_amd64.whl", hash = "sha256:b6d25ea8d90030049e1f023559f08c7f44a7eea5e5edd1557978b19d0f30cc49"},
-    {file = "elephant-1.0.0-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:00874edf7ff08e1c3d5f7af589c3f31d108c30f01ed2a781b5a65b56ccd79bd7"},
-    {file = "elephant-1.0.0-cp38-cp38-musllinux_1_1_x86_64.whl", hash = "sha256:bfbd2ece97571bae4dfb1a450f787c62c26221fe9400951e902e243ee4501a96"},
-    {file = "elephant-1.0.0-cp38-cp38-win_amd64.whl", hash = "sha256:0db5bf6df2cb0f6f432681f24d4f764440252e315c47bae9bb15b68c90ab27be"},
-    {file = "elephant-1.0.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:3d27b34af849bf4e67f5b6481906cdc30854d51aee177a01d20bc5add8ea3b46"},
-    {file = "elephant-1.0.0-cp39-cp39-musllinux_1_1_x86_64.whl", hash = "sha256:41990358ad6945574d42c5b340f3c670ffe24a02c49c3fd6e3d84f5784013aee"},
-    {file = "elephant-1.0.0-cp39-cp39-win_amd64.whl", hash = "sha256:800f8dff45585c65864cd3d6593ea9b59d65bc3ad172107087f6ffe67213209d"},
-    {file = "elephant-1.0.0.tar.gz", hash = "sha256:b1471228821a5b8f3a3137f9facc1a7f2dc355b8e3300490bdc05f0466b80b27"},
+    {file = "elephant-1.1.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:14f0af7f0017eebc2f1bb345b6a337d693b8862f5759cfc1581924ad3416ae55"},
+    {file = "elephant-1.1.0-cp310-cp310-musllinux_1_1_x86_64.whl", hash = "sha256:f0ab8bbc3732cb35fe6f4d231215917fe525884ec713898b10f4bb3c1b9064c9"},
+    {file = "elephant-1.1.0-cp310-cp310-win_amd64.whl", hash = "sha256:9a95afe62bb366610ed771fe2370d6a715f1e4db6012a514f693d9a630ea6426"},
+    {file = "elephant-1.1.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:803f68d3c4fd2bf28dde6b9350b0d303f0a4068674c9cb0d06ac5502db2b9f73"},
+    {file = "elephant-1.1.0-cp311-cp311-musllinux_1_1_x86_64.whl", hash = "sha256:d0213a1bb9a7d3d7fd0eee297645289b96e5dc381741b24ea4839a936fd7b110"},
+    {file = "elephant-1.1.0-cp311-cp311-win_amd64.whl", hash = "sha256:9d52239b855c15e14cf009fc5dcf6d0d3ec4917675b773a4da49ee68dfa6c1ac"},
+    {file = "elephant-1.1.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:fad21589e2172c563022e75c017f2ac01367f86e7cfbecc3bd9746ee7eb18ba7"},
+    {file = "elephant-1.1.0-cp312-cp312-musllinux_1_1_x86_64.whl", hash = "sha256:7f644152483633835d5223029d3390d17c37546fbfa4da1242999d3fa4ea4e0a"},
+    {file = "elephant-1.1.0-cp312-cp312-win_amd64.whl", hash = "sha256:d234239d80f6b66908a2bd41ab79a986945649f20e7b417eacbb79a6b6dcf25a"},
+    {file = "elephant-1.1.0-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:3545f9d1102f230f1a328a391b4bca0e56cfbfd18e1c1f28fb2114f2934f3568"},
+    {file = "elephant-1.1.0-cp38-cp38-musllinux_1_1_x86_64.whl", hash = "sha256:17609f49f50658c39a8a0c0d83052005272e4795575e9d72931258d7f9ce6be0"},
+    {file = "elephant-1.1.0-cp38-cp38-win_amd64.whl", hash = "sha256:840d66ed0529351a2dce21fac0b630592effa7adc741586fed1658dd82915648"},
+    {file = "elephant-1.1.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:8da0847a064bbe872effb07abb9695f6fbbf7d74b5237c42d548abc16e84572b"},
+    {file = "elephant-1.1.0-cp39-cp39-musllinux_1_1_x86_64.whl", hash = "sha256:f1ef899178c8afe4eccbb1d08463406e477745b4732bc129607dd2b056b41f6e"},
+    {file = "elephant-1.1.0-cp39-cp39-win_amd64.whl", hash = "sha256:20df87bfa326ccc3966f754d807256f78e55e5cbe75e2387fd6239f5d0d3aaa0"},
+    {file = "elephant-1.1.0.tar.gz", hash = "sha256:4085a8fcac3ab855f2585d017d17a1589c74adfbd930f7a1e012f2f5bd994e71"},
 ]
 
 [package.dependencies]
 neo = ">=0.10.0"
-numpy = ">=1.19.5"
+numpy = ">=1.19.5,<2"
 quantities = ">=0.14.1"
-scipy = ">=1.5.4"
+scipy = ">=1.10.0"
 six = ">=1.10.0"
 tqdm = "*"
 
