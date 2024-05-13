@@ -2044,13 +2044,13 @@ test = ["pep440", "pre-commit", "pytest", "testpath"]
 
 [[package]]
 name = "neo"
-version = "0.13.0"
+version = "0.13.1"
 description = "Neo is a package for representing electrophysiology data in Python, together with support for reading a wide range of neurophysiology file formats"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "neo-0.13.0-py3-none-any.whl", hash = "sha256:3a380de2693306acab3253ee9d69720dfcc0c22ae634c85e34cdfb25bc8d5e5d"},
-    {file = "neo-0.13.0.tar.gz", hash = "sha256:5675d1fa381a53c2c7eeb8b5e929ec0399de20bb0b52453e1b99ec6d66dc91f3"},
+    {file = "neo-0.13.1-py3-none-any.whl", hash = "sha256:fadab04c5a43f5619147da7d074369e0c5388077940f9c4c40364863d9e90653"},
+    {file = "neo-0.13.1.tar.gz", hash = "sha256:81585b28b65a4dc89a92e71ced3942c5dbfdaa71bdd2cc385371b779b5654cad"},
 ]
 
 [package.dependencies]
@@ -2063,7 +2063,7 @@ all = ["coverage", "coveralls", "dhn-med-py (>=1.0.0)", "h5py", "igor2", "ipytho
 biocam = ["h5py"]
 ced = ["sonpy"]
 dev = ["black", "build", "twine"]
-docs = ["docutils", "ipython", "matplotlib", "nixio", "pydata-sphinx-theme", "pynwb", "sphinx", "sphinx-design", "sphinx-gallery", "sphinx-inline-tabs"]
+docs = ["docutils", "igor2", "ipython", "matplotlib", "nixio", "pydata-sphinx-theme", "pynwb", "sphinx", "sphinx-design", "sphinx-gallery", "sphinx-inline-tabs"]
 edf = ["pyedflib"]
 igorproio = ["igor2"]
 iocache = ["joblib (>=1.0.0)"]
