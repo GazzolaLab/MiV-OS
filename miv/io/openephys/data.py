@@ -602,7 +602,10 @@ class DataManager(MutableSequence):
             ):
                 path_list.append(path)
         if sort:
-            pattern = r"(\d+)\/recording(\d+)"  # TODO: probably need better pattern
+            if os.name == 'nt':  # For Windows
+                pattern = r"(\d+)\\recording(\d+)"
+            else:  # For Linux or other POSIX systems
+                pattern = r"(\d+)/recording(\d+)"
             matches = [re.search(pattern, path) for path in path_list]
             tags = [(int(match.group(1)), int(match.group(2))) for match in matches]
             path_list = [path for _, path in sorted(zip(tags, path_list))]
