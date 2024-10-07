@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.8", "3.9", "3.10"]
-        os: [macos-latest] #, ubuntu-latest]
+        os: [macos-13, ubuntu-latest]
         include:
           - os: macos-latest
             path: ~/Library/Caches/pip
