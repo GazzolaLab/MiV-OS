@@ -35,6 +35,36 @@ mg_cdict = {
     ),
 }
 
+mg_cdict_r = {
+    "red": (
+        (0.0    , 0.733898 , 0.733898) ,
+        (0.4    , 1.0      , 1.0)      ,
+        (0.4875 , 1.0      , 1.0)      ,
+        (0.5    , 1.0      , 1.0)      ,
+        (0.5125 , 1.0      , 1.0)      ,
+        (0.6    , 0.535058 , 0.535058) ,
+        (1.0    , 0.231373 , 0.231373) ,
+    ),
+    "green": (
+        (0.0    , 0.0134737, 0.0134737),
+        (0.4    , 0.713756 , 0.713756) ,
+        (0.4875 , 1.0      , 1.0)      ,
+        (0.5    , 1.0      , 1.0)      ,
+        (0.5125 , 1.0      , 1.0)      ,
+        (0.6    , 0.723751 , 0.723751) ,
+        (1.0    , 0.298039 , 0.298039) ,
+        ),
+    "blue":(
+        (0.0    , 0.150759 , 0.150759) ,
+        (0.4    , 0.294972 , 0.294972) ,
+        (0.4875 , 1.0      , 1.0)      ,
+        (0.5    , 1.0      , 1.0)      ,
+        (0.5125 , 1.0      , 1.0)      ,
+        (0.6    , 0.85594  , 0.85594)  ,
+        (1.0    , 0.752941 , 0.752941) ,
+    ),
+}
+
 mg_alpha_cdict = {
     **mg_cdict,
     "alpha": (
@@ -50,6 +80,7 @@ mg_alpha_cdict = {
 # fmt: on
 
 mpl.colormaps.register(LinearSegmentedColormap("MGBlueOrange", mg_cdict))
+mpl.colormaps.register(LinearSegmentedColormap("MGBlueOrange_r", mg_cdict_r))
 mpl.colormaps.register(LinearSegmentedColormap("MGBlueOrangeAlpha", mg_alpha_cdict))
 
 if __name__ == "__main__":
