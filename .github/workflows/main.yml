@@ -14,10 +14,10 @@ jobs:
         python-version: ["3.8", "3.9", "3.10"]
         os: [macos-13, ubuntu-latest]
         include:
-          - os: macos-latest
+          - os: macos-13
             path: ~/Library/Caches/pip
-          #- os: ubuntu-latest
-          #  path: ~/.cache/pip
+          - os: ubuntu-latest
+            path: ~/.cache/pip
           #- os: windows-latest
           #  path: ~\AppData\Local\pip\Cache
     defaults:
