@@ -12,12 +12,12 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.8", "3.9", "3.10"]
-        os: [macos-latest] #, ubuntu-latest]
+        os: [macos-13, ubuntu-latest]
         include:
-          - os: macos-latest
+          - os: macos-13
             path: ~/Library/Caches/pip
-          #- os: ubuntu-latest
-          #  path: ~/.cache/pip
+          - os: ubuntu-latest
+            path: ~/.cache/pip
           #- os: windows-latest
           #  path: ~\AppData\Local\pip\Cache
     defaults:
@@ -31,14 +31,27 @@ jobs:
         with:
           virtualenvs-in-project: true
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5.0.0
+        uses: actions/setup-python@v5.1.0
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'poetry'
       - uses: FedericoCarboni/setup-ffmpeg@v3
         id: setup-ffmpeg
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          # like "6.1.0". At the moment semver specifiers (i.e. >=6.1.0) are supported
+          # only on Windows, on other platforms they are allowed but version is matched
+          # exactly regardless.
+          ffmpeg-version: release
+          # Target architecture of the ffmpeg executable to install. Defaults to the
+          # system architecture. Only x64 and arm64 are supported (arm64 only on Linux).
+          architecture: ''
+          # Linking type of the binaries. Use "shared" to download shared binaries and
+          # "static" for statically linked ones. Shared builds are currently only available
+          # for windows releases. Defaults to "static"
+          linking-type: static
+          # As of version 3 of this action, builds are no longer downloaded from GitHub
+          # except on Windows: https://github.com/GyanD/codexffmpeg/releases.
+          github-token: ${{ github.server_url == 'https://github.com' && github.token || '' }}
       # - name: Set up cache
       #   uses: actions/cache@v3
       #   with:
@@ -55,56 +68,3 @@ jobs:
         run: |
           source $VENV
           make test
-  report-coverage:  # Report coverage from python 3.8 and mac-os. May change later
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        python-version: ["3.10"]
-        os: [macos-latest]
-        include:
-          - os: macos-latest
-            path: ~/Library/Caches/pip
-    steps:
-      - uses: actions/checkout@v4
-      - uses: mpi4py/setup-mpi@v1
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          virtualenvs-in-project: true
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5.0.0
-        with:
-          python-version: ${{ matrix.python-version }}
-          cache: 'poetry'
-      - uses: FedericoCarboni/setup-ffmpeg@v3
-        id: setup-ffmpeg
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-      # - name: Set up cache
-      #   uses: actions/cache@v3
-      #   with:
-      #     path: ${{ matrix.path }}
-      #     key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}-${{ hashFiles('poetry.lock') }}
-      #     restore-keys: |
-      #       ${{ runner.os }}-pip-
-      - name: Install dependencies
-        run: |
-          #poetry lock --no-update
-          poetry install --all-extras --with=algorithmExtension,sortingExtension,mpi
-      # Set environment variables for coverage test. Coverage test is done using python 3.8
-      - name: Run style checks
-        run: |
-          make check-codestyle
-      - name: Test MiV-OS using pytest
-        if: startsWith(runner.os, 'macOS')
-        run: |
-          make test_ci
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          env_vars: OS,PYTHON
-          fail_ci_if_error: true
-          flags: unittests
-          name: codecov-umbrella
-          verbose: true

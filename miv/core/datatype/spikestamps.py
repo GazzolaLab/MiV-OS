@@ -142,6 +142,14 @@ class Spikestamps(CollapseExtendableMixin, DataNodeMixin, Sequence):
             for arr in self.data
         ]
 
+    def flatten(self):
+        """Flatten spikestamps into a single array. One can plot the spikestamps using this array with scatter plot."""
+        x, y = [], []
+        for idx, arr in enumerate(self.data):
+            x.extend(arr)
+            y.extend([idx] * len(arr))
+        return np.array(x), np.array(y)
+
     def binning(
         self,
         bin_size: float = 1 * pq.ms,

@@ -9,8 +9,7 @@ from miv.core.operator.chainable import BaseChainingMixin
 
 class RawValuesProtocol(Protocol):
     @staticmethod
-    def is_valid(value) -> bool:
-        ...
+    def is_valid(value) -> bool: ...
 
 
 class ValuesMixin(BaseChainingMixin):

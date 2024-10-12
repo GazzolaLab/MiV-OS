@@ -5,7 +5,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "MiV-OS"
-version = "0.3.0.post13"
+version = "0.3.1.pre1"
 description = "Python software for analysis and computing framework used in MiV project."
 readme = "README.md"
 authors = ["GazzolaLab <skim449@illinois.edu>"]
@@ -23,9 +23,9 @@ classifiers = [
   "Operating System :: OS Independent",
   "License :: OSI Approved :: MIT License",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
 ]
 
 # ...
@@ -43,7 +43,7 @@ miv_zip_results = "miv.machinary.zip_results:zip_results"
 
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.11"
+python = ">=3.8,<3.12"
 scipy = "^1.9.1"
 elephant = "^0.13.0"
 matplotlib = "^3.5.2"
@@ -68,7 +68,7 @@ sphinxcontrib-mermaid = {version = "^0.9.2", optional = true}
 myst-nb = {version = "^0.17.1", optional = true}
 pyinform = "^0.2.0"
 graphviz = "^0.20.1"
-Pillow = "10.2.0"
+Pillow = "10.3.0"
 h5py = "^3.7.0"
 pyvis = ">=0.2.1,<0.4.0"
 click = "^8.1.3"

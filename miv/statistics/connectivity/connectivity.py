@@ -1,7 +1,7 @@
 __doc__ = """
 Connectivity module
 """
-__all__ = ["DirectedConnectivity"]  # , 'UndirectedConnectivity']
+__all__ = ["DirectedConnectivity", "UndirectedConnectivity"]
 
 from typing import Any, List, Optional, Union
 
@@ -25,6 +25,7 @@ import pyinform
 import pyinform.transferentropy as pyte
 import quantities as pq
 import scipy.stats as spst
+from elephant.causality.granger import pairwise_granger
 from tqdm import tqdm
 
 from miv.core.datatype import Signal, Spikestamps
@@ -130,17 +131,24 @@ class DirectedConnectivity(OperatorMixin):
             seed=self.seed,
             H_threshold=self.H_threshold,
         )
-        with mp.Pool(self.num_proc) as pool:
-            for idx, result in enumerate(
-                tqdm(
-                    pool.imap(func, pairs),
-                    total=len(pairs),
-                    disable=not self.progress_bar,
-                )
-            ):
-                i, j = pairs[idx]
-                adj_matrix[i, j] = result[0] < self.p_threshold
-                connectivity_metric_matrix[i, j] = result[1]
+        # with mp.Pool(self.num_proc) as pool:
+        #    for idx, result in enumerate(
+        #        tqdm(
+        #            pool.imap(func, pairs),
+        #            total=len(pairs),
+        #            disable=not self.progress_bar,
+        #        )
+        #    ):
+        #        i, j = pairs[idx]
+        #        adj_matrix[i, j] = result[0] < self.p_threshold
+        #        connectivity_metric_matrix[i, j] = result[1]
+        pbar = tqdm(total=len(pairs), disable=not self.progress_bar)
+        for idx, pair in enumerate(pairs):
+            pbar.update(1)
+            result = func(pair)
+            i, j = pairs[idx]
+            adj_matrix[i, j] = result[0] < self.p_threshold
+            connectivity_metric_matrix[i, j] = result[1]
 
         connection_ratio = adj_matrix.sum() / adj_matrix.ravel().shape[0]
 
@@ -160,7 +168,7 @@ class DirectedConnectivity(OperatorMixin):
         Surrogate t-test
         """
         # Function configuration. TODO: Make this dependency injection
-        te_history = 21
+        te_history = 4
         sublength = 64
         stride = 8
 
@@ -183,8 +191,10 @@ class DirectedConnectivity(OperatorMixin):
         te = te / normalizer
 
         surrogate_tes = []
+
         if skip_surrogate:
             return te, surrogate_tes
+
         for _ in range(surrogate_N):
             surrogate_source = source.copy()
             rng.shuffle(surrogate_source)
@@ -434,7 +444,231 @@ class DirectedConnectivity(OperatorMixin):
         plt.close()
 
 
-# TODO
-# @dataclass
-# class UndirectedConnectivity(OperatorMixin):
-#    pass
+@dataclass
+class UndirectedConnectivity(OperatorMixin):
+    """
+    Undirected connectivity analysis operator
+    Runs correlation
+
+    Parameters
+    ----------
+    bin_size : pq.Quantity
+        Bin size for spike train
+    tag : str, optional
+        Tag for this operator, by default "directional connectivity analysis"
+    progress_bar : bool, optional
+        Show progress bar, by default True
+    skip_surrogate : bool, optional
+        Skip surrogate analysis, by default False
+    surrogate_N : int, optional
+        Number of surrogate, by default 30
+    p_threshold : float, optional
+        p-value threshold, by default 0.05
+    seed : int, optional
+        Random seed. If None, use random seed, by default None
+    """
+
+    channels: Optional[List[int]] = None
+    exclude_channels: Optional[List[int]] = None
+    bin_size: float = 0.001
+    minimum_count: int = 1
+    tag: str = "directional connectivity analysis"
+    progress_bar: bool = False
+
+    skip_surrogate: bool = False
+
+    # Surrogate parameters
+    surrogate_N: int = 30
+    p_threshold: float = 0.05
+    seed: int = None
+    num_proc: int = 1
+
+    def __post_init__(self):
+        super().__init__()
+        if self.exclude_channels is None:  # FIXME: Use dataclass default value
+            self.exclude_channels = []
+
+    @cache_call
+    def __call__(self, spikestamps: Spikestamps, mea=None) -> np.ndarray:
+        """__call__.
+
+        Parameters
+        ----------
+        spikestamps : Spikestamps
+        """
+
+        binned_spiketrain: Signal = spikestamps.binning(
+            bin_size=self.bin_size, minimum_count=self.minimum_count
+        )
+
+        # Channel Selection
+        if self.channels is None:
+            n_nodes = binned_spiketrain.number_of_channels
+            channels = tuple(range(n_nodes))
+        else:
+            n_nodes = len(self.channels)
+            channels = tuple(self.channels)
+            binned_spiketrain = binned_spiketrain.select(channels)
+
+        # Get adjacency matrix based on transfer entropy
+        adj_matrix = np.zeros([n_nodes, n_nodes], dtype=np.bool_)  # source -> target
+        connectivity_metric_matrix = np.zeros(
+            [n_nodes, n_nodes], dtype=np.float_
+        )  # source -> target
+
+        pairs = [
+            (i, j)
+            for i, j in itertools.product(range(n_nodes), range(n_nodes))
+            if i not in self.exclude_channels
+            and j not in self.exclude_channels
+            and i < j
+            and i != j
+        ]
+        func = functools.partial(
+            self._get_connection_info,
+            binned_spiketrain=binned_spiketrain,
+            channels=channels,
+            mea=mea,
+            skip_surrogate=self.skip_surrogate,
+            surrogate_N=self.surrogate_N,
+            seed=self.seed,
+        )
+        pbar = tqdm(total=len(pairs), disable=not self.progress_bar)
+        for idx, pair in enumerate(pairs):
+            pbar.update(1)
+            result = func(pair)
+            i, j = pairs[idx]
+            adj_matrix[i, j] = result[0] < self.p_threshold
+            connectivity_metric_matrix[i, j] = result[1][0]
+            connectivity_metric_matrix[j, i] = result[1][1]
+
+        connection_ratio = adj_matrix.sum() / adj_matrix.ravel().shape[0]
+
+        info = dict(
+            adjacency_matrix=adj_matrix,
+            connectivity_matrix=connectivity_metric_matrix,
+            connection_ratio=connection_ratio,
+        )
+
+        return info
+
+    @staticmethod
+    def _surrogate_t_test(
+        source, target, skip_surrogate=False, surrogate_N=30, seed=None
+    ):
+        """
+        Surrogate t-test
+        """
+        # Function configuration. TODO: Make this dependency injection
+        order = 2
+        sublength = 64
+        stride = 8
+
+        assert (
+            source.shape[0] == target.shape[0]
+        ), f"source.shape={source.shape}, target.shape={target.shape}"
+        assert (
+            source.shape[0] - sublength > 0
+        ), f"source.shape[0]={source.shape[0]}, sublength={sublength}"
+
+        sig = np.stack([source, target], axis=-1)
+        try:
+            val = pairwise_granger(sig, order)
+        except ValueError as e:
+            val = [0.0, 0.0]
+            # val = [np.nan, np.nan]
+
+        surrogate_vals = []
+        if skip_surrogate:
+            return val, surrogate_vals
+
+        rng = np.random.default_rng(seed)  # TODO take rng instead
+        for _ in range(surrogate_N):
+            surrogate_source = source.copy()
+            rng.shuffle(surrogate_source)
+            for start_index in np.arange(0, source.shape[0] - sublength, stride):
+                end_index = start_index + sublength
+                surr_val = func(
+                    np.stack(
+                        [
+                            surrogate_source[start_index:end_index],
+                            target[start_index:end_index],
+                        ],
+                        axis=-1,
+                    ),
+                    order,
+                )
+                surrogate_vals.append(surr_val)
+
+        return val, surrogate_vals
+
+    @staticmethod
+    def _get_connection_info(
+        pair,
+        binned_spiketrain,
+        channels,
+        mea,
+        skip_surrogate,
+        surrogate_N,
+        seed,
+    ):
+        """
+        Get connection information
+        """
+        sid, tid = pair
+        if sid == tid:
+            return 1, [0, 0]
+        if mea is not None:
+            if channels[sid] not in mea or channels[tid] not in mea:
+                return 1, [0, 0]
+        source = binned_spiketrain[sid]
+        target = binned_spiketrain[tid]
+        te, surrogate_te_list = UndirectedConnectivity._surrogate_t_test(
+            source,
+            target,
+            skip_surrogate=skip_surrogate,
+            surrogate_N=surrogate_N,
+            seed=seed,
+        )
+        if skip_surrogate:
+            return 1, te
+        t_value, p_value = spst.ttest_1samp(surrogate_te_list, te, nan_policy="omit")
+        return p_value, te
+
+    def plot_adjacency_matrix(self, result, inputs, save_path=None, show=False):
+        connectivity_metric_matrix = result["connectivity_matrix"]
+
+        fig, ax = plt.subplots(figsize=(12, 12))
+        im = ax.imshow(connectivity_metric_matrix, cmap="gray_r", vmin=0)
+        ax.set_xlabel("Target")
+        ax.set_ylabel("Source")
+        ax.set_title("Transfer Entropy")
+        plt.colorbar(im, ax=ax)
+
+        if save_path is not None:
+            plt.savefig(os.path.join(save_path, "te.png"))
+
+        if show:
+            plt.show()
+
+        plt.close(fig)
+
+    def plot_transfer_entropy_histogram(
+        self, result, inputs, save_path=None, show=False
+    ):
+        connectivity_metric_matrix = result["connectivity_matrix"]
+
+        # Plot values in heatmap
+        fig, ax = plt.subplots(figsize=(12, 12))
+        ax.hist(connectivity_metric_matrix, bins=30)
+        ax.set_xlabel("transfer entropy")
+        ax.set_ylabel("count")
+        ax.set_title("Transfer Entropy Histogram")
+
+        if save_path is not None:
+            plt.savefig(os.path.join(save_path, "te_histogram.png"))
+
+        if show:
+            plt.show()
+
+        plt.close(fig)

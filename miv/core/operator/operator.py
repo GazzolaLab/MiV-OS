@@ -47,8 +47,7 @@ class Operator(
 ):
     """ """
 
-    def run(self) -> None:
-        ...
+    def run(self) -> None: ...
 
 
 class DataLoader(
@@ -61,12 +60,10 @@ class DataLoader(
 ):
     """ """
 
-    def load(self) -> Generator[DataTypes, None, None]:
-        ...
+    def load(self) -> Generator[DataTypes, None, None]: ...
 
 
-class DataNode(_Chainable, _Runnable, _Loggable, Protocol):
-    ...
+class DataNode(_Chainable, _Runnable, _Loggable, Protocol): ...
 
 
 class DataNodeMixin(BaseChainingMixin, DefaultLoggerMixin):
