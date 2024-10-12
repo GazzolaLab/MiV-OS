@@ -25,7 +25,7 @@ class ValuesMixin(BaseChainingMixin):
     def output(self):
         return self.value
 
-    def run(self, **kwargs):
+    def run(self, *args, **kwargs):
         return self.output()
 
 
