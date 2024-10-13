@@ -11,15 +11,15 @@ build:
     python: "3.10"
   jobs:
     post_create_environment:
+      # Upgrade pip to the latest version
       - pip install --upgrade pip
-
-python:
-  install:
-    - method: pip
-      path: .
-      extra_requirements:
-        - docs
-        - experiment
+      # Install poetry
+      - pip install poetry
+      # - poetry config virtualenvs.create false
+    post_install:
+      # Install dependencies with 'docs' dependency group
+      # https://python-poetry.org/docs/managing-dependencies/#dependency-groups
+      - VIRTUAL_ENV=$READTHEDOCS_VIRTUALENV_PATH poetry install --all-extras --with sortingExtension,algorithmExtension
 
 # Build documentation in the docs/ directory with Sphinx
 sphinx:
