@@ -1868,30 +1868,24 @@ files = [
 
 [[package]]
 name = "mpi4py"
-version = "3.1.6"
+version = "4.0.1"
 description = "Python bindings for MPI"
 optional = false
-python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
+python-versions = ">=3.6"
 files = [
-    {file = "mpi4py-3.1.6-cp27-cp27m-win32.whl", hash = "sha256:95f27e00f3951f9c1533cd99ffeae2f384f7ba53cc3870ee06c3c88f9e5bd6c3"},
-    {file = "mpi4py-3.1.6-cp27-cp27m-win_amd64.whl", hash = "sha256:ea8a65f74707e1be5a0125ae3f4f6c0c475c3d845d623b9f5686a919c1119439"},
-    {file = "mpi4py-3.1.6-cp310-cp310-win32.whl", hash = "sha256:57cb8cc5e4f5730ca2116b4918fddb158bdac3852b57b0fb799278bcd2f9df03"},
-    {file = "mpi4py-3.1.6-cp310-cp310-win_amd64.whl", hash = "sha256:242459fcfd18c50b2ad6cd15f433efbaad1f12f4a343bdff5fa1720f4797317d"},
-    {file = "mpi4py-3.1.6-cp311-cp311-win32.whl", hash = "sha256:33d16f85d827417fd451ae61c304a26f5a1c3e881d9555c58fc8d5c7ac171034"},
-    {file = "mpi4py-3.1.6-cp311-cp311-win_amd64.whl", hash = "sha256:542fa0b3caa69fbb8f5e8ea60fea3414eef1444d93af28b4ee6486a3f8f27640"},
-    {file = "mpi4py-3.1.6-cp312-cp312-win32.whl", hash = "sha256:6662ffa622ee21041dcfd95bffd4b81906349e22d993239cc0abd17ebca6bed0"},
-    {file = "mpi4py-3.1.6-cp312-cp312-win_amd64.whl", hash = "sha256:606264e22c315de6250745fa84267c18a7370a16bd6c51acf226cbb977d0a10b"},
-    {file = "mpi4py-3.1.6-cp35-cp35m-win32.whl", hash = "sha256:1de7f6bd22ea6c9b1d6cb42e9d8092217552ffc8267f81df884b61f46aef557c"},
-    {file = "mpi4py-3.1.6-cp35-cp35m-win_amd64.whl", hash = "sha256:8dfadb2d7b50bda0f5c8538f8b5af5b2f830babc7c43a267102407a29616c38f"},
-    {file = "mpi4py-3.1.6-cp36-cp36m-win32.whl", hash = "sha256:757e324084c41f84b257b6d03850e73803bafea1b5e94dd6f9ebb3a149764299"},
-    {file = "mpi4py-3.1.6-cp36-cp36m-win_amd64.whl", hash = "sha256:76ecc87605193ef906597cadef571cabc8731ed1848a8c92320385c10ed41168"},
-    {file = "mpi4py-3.1.6-cp37-cp37m-win32.whl", hash = "sha256:67d28b5e5102a9d44eac6bc2765c2e28966b6b79cd54e0ea432403e054c70946"},
-    {file = "mpi4py-3.1.6-cp37-cp37m-win_amd64.whl", hash = "sha256:c0dfd9dbbcfa2fe61031eaba714f1f814e59439188b0a5ac063b2edc42daa234"},
-    {file = "mpi4py-3.1.6-cp38-cp38-win32.whl", hash = "sha256:8f9810decd319110b7dcf7a210a76d7db6a39d4c2b33c750ac4dc4638d7ce012"},
-    {file = "mpi4py-3.1.6-cp38-cp38-win_amd64.whl", hash = "sha256:ac671aa8c512fff432e0c1670c94eabd5571f5085c61579fee534b5b9e41bcf4"},
-    {file = "mpi4py-3.1.6-cp39-cp39-win32.whl", hash = "sha256:e8bd3fd0056580b1aaa4966ab9e54566bf6d6b35ff94c0ee7ceba83d55d039ac"},
-    {file = "mpi4py-3.1.6-cp39-cp39-win_amd64.whl", hash = "sha256:f9a35e23deadf7de9063523f19863957f379d0f13afc2b9787eafc9d570ab868"},
-    {file = "mpi4py-3.1.6.tar.gz", hash = "sha256:c8fa625e0f92b082ef955bfb52f19fa6691d29273d7d71135d295aa143dee6cb"},
+    {file = "mpi4py-4.0.1-cp310-cp310-win_amd64.whl", hash = "sha256:600f26cae7f390b4ec525f5c1ccc374686c37a8c07f9c21320866c0a323f6dae"},
+    {file = "mpi4py-4.0.1-cp311-cp311-win_amd64.whl", hash = "sha256:0cb209fcdc7fee0346d12edff1cfd1c1ffca1b807c53631ba0436b9c2bcf8229"},
+    {file = "mpi4py-4.0.1-cp312-cp312-win_amd64.whl", hash = "sha256:b704e7db92b1ac94b96802e17cf28082455daa928e8e51398ad9f5e5eb8c9b7b"},
+    {file = "mpi4py-4.0.1-cp313-cp313-win_amd64.whl", hash = "sha256:52a7b1760b1aeb41a0ea38969314b2b170117a0ded2f689915f1cb89aaaf8a6f"},
+    {file = "mpi4py-4.0.1-cp36-cp36m-win_amd64.whl", hash = "sha256:6fa09d03ec7aa1264fcf650670c52e06ae87110f0bc6f84bf29f0183f6d3d19a"},
+    {file = "mpi4py-4.0.1-cp37-cp37m-win_amd64.whl", hash = "sha256:05999b6e8536a1234456d739ea1e695105613a866cae9a86010f87875229ffc0"},
+    {file = "mpi4py-4.0.1-cp38-cp38-win_amd64.whl", hash = "sha256:f7e863ea266af98d25c3efb9b7d9f56265000001b57cf2fb98a986f4ec7daa3c"},
+    {file = "mpi4py-4.0.1-cp39-cp39-win_amd64.whl", hash = "sha256:bf15be241ed81bad0a0635cb47e0f20faa6ec4228f0fa955bf0128f43462b639"},
+    {file = "mpi4py-4.0.1-pp310-pypy310_pp73-win_amd64.whl", hash = "sha256:93f45dcc2fd5f3396f961b1bc8f0fb9d5db786fdc0d72e4f8611f47718b5dac8"},
+    {file = "mpi4py-4.0.1-pp37-pypy37_pp73-win_amd64.whl", hash = "sha256:2b8bfbb730c47214a6233512eb905b2b12a40a036d92e96e2c7dd9a3405d8b4a"},
+    {file = "mpi4py-4.0.1-pp38-pypy38_pp73-win_amd64.whl", hash = "sha256:72006d9d9cc0e17d2a354648839e0d9743c7b91223586c323090033114324ee4"},
+    {file = "mpi4py-4.0.1-pp39-pypy39_pp73-win_amd64.whl", hash = "sha256:cd29eff4366f5182f3cbdac42ba62d0c5b17c6fc925dfe55cbe469fbe2d56cfb"},
+    {file = "mpi4py-4.0.1.tar.gz", hash = "sha256:f3174b245775d556f4fddb32519a2066ef0592edc810c5b5a59238f9a0a40c89"},
 ]
 
 [[package]]
@@ -4262,4 +4256,4 @@ experiment = ["pyserial"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<3.12"
-content-hash = "417658379ba96070398fbf28cd8719b0855f7f6e65d1ef9cf2f7f683ee2290dd"
+content-hash = "ddc10a8f8f31ae6985843fbfcfd82e71701c960842efccd284e16cba2fe029b0"
