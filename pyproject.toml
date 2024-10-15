@@ -64,7 +64,7 @@ myst-parser = {version = "^0.18.1", optional = true}
 numpydoc = {version = "^1.4.0", optional = true}
 sphinx-togglebutton = {version = "^0.3.2", optional = true}
 sphinx-copybutton = {version = "^0.5.0", optional = true}
-sphinxcontrib-mermaid = {version = "^0.9.2", optional = true}
+sphinxcontrib-mermaid = {version = "^1.0.0", optional = true}
 myst-nb = {version = "^0.17.1", optional = true}
 pyinform = "^0.2.0"
 graphviz = "^0.20.1"
