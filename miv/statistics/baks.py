@@ -13,8 +13,8 @@ __all__ = ["bayesian_adaptive_kernel_smoother"]
 import time
 
 import numpy as np
+import scipy.special as sps
 from numba import njit, prange
-from scipy.special import gamma
 from tqdm import tqdm
 
 from miv.core.datatype import Spikestamps
@@ -29,7 +29,7 @@ def bayesian_adaptive_kernel_smoother(spikestamps, probe_time, alpha=1, beta=1):
     spiketimes : Spikestamps
         spike event times
     probe_time : array_like
-        time at which the firing rate is estimated
+        time at which the firing rate is estimated. Typically, we assume the number of probe_time is much smaller than the number of spikes events.
     alpha : float, optional
         shape parameter, by default 1
     beta : float, optional
@@ -51,32 +51,23 @@ def bayesian_adaptive_kernel_smoother(spikestamps, probe_time, alpha=1, beta=1):
         if n_spikes == 0:
             continue
 
-        # sum_numerator = 0
-        # sum_denominator = 0
-        # for i in tqdm(range(n_spikes), position=1, leave=False, desc="get sum_numerator and sum_denominator"):
-        #    sum_numerator += (((probe_time - spiketimes[i])**2)/2 + 1/beta)**(-alpha)
-        #    sum_denominator += (((probe_time - spiketimes[i])**2)/2 + 1/beta)**(-alpha-0.5)
-        # h = (gamma(alpha)/gamma(alpha+0.5))*(sum_numerator/sum_denominator)
         ratio = _numba_ratio_func(probe_time, spiketimes, alpha, beta)
-        h = (gamma(alpha) / gamma(alpha + 0.5)) * ratio
-        hs[channel] = h
+        hs[channel] = (sps.gamma(alpha) / sps.gamma(alpha + 0.5)) * ratio
 
-        # firing_rate = np.zeros(len(probe_time))
-        # for j in tqdm(range(n_spikes), position=1, leave=False, desc="get firing_rate"):
-        #    firing_rate += (1/(np.sqrt(2*np.pi)*h))*np.exp(-((probe_time - spiketimes[j])**2)/(2*h**2))
-        firing_rate = _numba_firing_rate(spiketimes, probe_time, h)
+        firing_rate = _numba_firing_rate(spiketimes, probe_time, hs[channel])
         firing_rates[channel] = firing_rate
     return hs, firing_rates
 
 
-@njit(parallel=True)
+@njit(parallel=False)
 def _numba_ratio_func(probe_time, spiketimes, alpha, beta):
     n_spikes = spiketimes.shape[0]
     n_time = probe_time.shape[0]
     sum_numerator = np.zeros(n_time)
     sum_denominator = np.zeros(n_time)
     for i in range(n_spikes):
-        for j in prange(n_time):
+        # for j in prange(n_time):
+        for j in range(n_time):
             val = ((probe_time[j] - spiketimes[i]) ** 2) / 2 + 1 / beta
             sum_numerator[j] += val ** (-alpha)
             sum_denominator[j] += val ** (-alpha - 0.5)
@@ -84,14 +75,49 @@ def _numba_ratio_func(probe_time, spiketimes, alpha, beta):
     return ratio
 
 
-@njit(parallel=True)
+@njit(parallel=False)
 def _numba_firing_rate(spiketimes, probe_time, h):
+    std = 5
     n_spikes = spiketimes.shape[0]
     n_time = probe_time.shape[0]
     firing_rate = np.zeros(n_time)
-    for i in range(n_spikes):
-        for j in prange(n_time):
+    # stime = np.searchsorted(spiketimes, probe_time - std * h * 2)
+    # etime = np.searchsorted(spiketimes, probe_time + std * h * 2)
+    # for j in prange(n_time):
+    for j in range(n_time):
+        # for i in range(stime[j], etime[j]):
+        for i in range(n_spikes):
             firing_rate[j] += (1 / (np.sqrt(2 * np.pi) * h[j])) * np.exp(
-                -((probe_time[j] - spiketimes[i]) ** 2) / (2 * h[j] ** 2)
+                -(((probe_time[j] - spiketimes[i]) / (2 * h[j])) ** 2)
             )
     return firing_rate
+
+
+if __name__ == "__main__":
+    import sys
+    import time
+
+    import matplotlib.pyplot as plt
+
+    from miv.core.datatype import Spikestamps
+
+    # from numba import set_num_threads
+    # set_num_threads(4)
+
+    N = 100_000  # Number of spikes
+    total_time = 3600  # seconds
+    n_evaluation_points = 10000
+    evaluation_points = np.linspace(0, total_time, n_evaluation_points)
+
+    spikestamps = [np.random.random(N) * total_time]
+    spikestamps = Spikestamps(spikestamps)
+
+    stime = time.time()
+    hs, firing_rates = bayesian_adaptive_kernel_smoother(spikestamps, evaluation_points)
+    etime = time.time()
+
+    plt.figure()
+    plt.plot(evaluation_points, firing_rates[0])
+    plt.show()
+
+    print(f"Elapsed time: {etime-stime:.4f} seconds")
