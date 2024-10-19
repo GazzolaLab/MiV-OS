@@ -69,14 +69,14 @@ def bayesian_adaptive_kernel_smoother(spikestamps, probe_time, alpha=1, beta=1):
     return hs, firing_rates
 
 
-@njit(parallel=True)
+@njit
 def _numba_ratio_func(probe_time, spiketimes, alpha, beta):
     n_spikes = spiketimes.shape[0]
     n_time = probe_time.shape[0]
     sum_numerator = np.zeros(n_time)
     sum_denominator = np.zeros(n_time)
     for i in range(n_spikes):
-        for j in prange(n_time):
+        for j in range(n_time):
             val = ((probe_time[j] - spiketimes[i]) ** 2) / 2 + 1 / beta
             sum_numerator[j] += val ** (-alpha)
             sum_denominator[j] += val ** (-alpha - 0.5)
@@ -84,13 +84,13 @@ def _numba_ratio_func(probe_time, spiketimes, alpha, beta):
     return ratio
 
 
-@njit(parallel=True)
+@njit
 def _numba_firing_rate(spiketimes, probe_time, h):
     n_spikes = spiketimes.shape[0]
     n_time = probe_time.shape[0]
     firing_rate = np.zeros(n_time)
     for i in range(n_spikes):
-        for j in prange(n_time):
+        for j in range(n_time):
             firing_rate[j] += (1 / (np.sqrt(2 * np.pi) * h[j])) * np.exp(
                 -((probe_time[j] - spiketimes[i]) ** 2) / (2 * h[j] ** 2)
             )
