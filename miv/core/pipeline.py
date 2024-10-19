@@ -72,12 +72,17 @@ class Pipeline:
         for node in self.execution_order:
             if verbose:
                 stime = time.time()
-                print("Running: ", node, flush=True)
+                print("  Running: ", node, flush=True)
 
-            node.run(skip_plot=skip_plot)
+            try:
+                node.run(skip_plot=skip_plot)
+            except Exception as e:
+                print("  Exception raised: ", node, flush=True)
+                raise e
+
 
             if verbose:
-                print(f"Finished: {time.time() - stime:.03f} sec", flush=True)
+                print(f"  Finished: {time.time() - stime:.03f} sec", flush=True)
         if verbose:
             print(f"Pipeline done: computing {self._start_node}")
             print(self.summarize(), flush=True)
