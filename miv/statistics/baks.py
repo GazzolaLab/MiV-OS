@@ -20,7 +20,7 @@ from tqdm import tqdm
 from miv.core.datatype import Spikestamps
 
 
-def bayesian_adaptive_kernel_smoother(spikestamps, probe_time, alpha=1, beta=1):
+def bayesian_adaptive_kernel_smoother(spikestamps, probe_time, alpha=1):
     """
     Bayesian Adaptive Kernel Smoother (BAKS)
 
@@ -32,8 +32,6 @@ def bayesian_adaptive_kernel_smoother(spikestamps, probe_time, alpha=1, beta=1):
         time at which the firing rate is estimated. Typically, we assume the number of probe_time is much smaller than the number of spikes events.
     alpha : float, optional
         shape parameter, by default 1
-    beta : float, optional
-        scale parameter, by default 1
 
     Returns
     -------
@@ -48,6 +46,7 @@ def bayesian_adaptive_kernel_smoother(spikestamps, probe_time, alpha=1, beta=1):
     for channel in range(num_channels):
         spiketimes = np.asarray(spikestamps[channel])
         n_spikes = len(spiketimes)
+        beta = n_spikes ** (4./5.)
         if n_spikes == 0:
             continue
 
