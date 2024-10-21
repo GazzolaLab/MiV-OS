@@ -127,8 +127,7 @@ class Data(DataLoaderMixin):
 
     @analysis_path.setter
     def analysis_path(self, path):
-        if not os.path.isdir(path):
-            os.makedirs(path)
+        os.makedirs(path, exist_ok=True)
         self._analysis_path = path
 
     def save_figure(
@@ -269,6 +268,8 @@ class Data(DataLoaderMixin):
         states, full_words, timestamps, sampling_rate, initial_state = load_ttl_event(
             self.data_path
         )
+        if timestamps.size == 0:
+            self.logger.warning(f"TTL event was loaded but data is empty: {self.data_path}")
         return Signal(data=states[:, None], timestamps=timestamps, rate=sampling_rate)
 
     def set_channel_mask(self, channel_id: Iterable[int]):
