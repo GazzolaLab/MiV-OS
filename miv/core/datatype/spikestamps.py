@@ -186,6 +186,10 @@ class Spikestamps(CollapseExtendableMixin, DataNodeMixin, Sequence):
         if isinstance(bin_size, pq.Quantity):
             bin_size = bin_size.rescale(pq.s).magnitude
         assert bin_size > 0, "bin size should be greater than 0"
+        if isinstance(t_start, pq.Quantity):
+            t_start = t_start.rescale(pq.s).magnitude
+        if isinstance(t_end, pq.Quantity):
+            t_end = t_end.rescale(pq.s).magnitude
 
         t_start = self.get_first_spikestamp() if t_start is None else t_start
         t_end = self.get_last_spikestamp() if t_end is None else t_end
