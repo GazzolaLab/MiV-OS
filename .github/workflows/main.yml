@@ -13,6 +13,7 @@ jobs:
       matrix:
         python-version: ["3.8", "3.9", "3.10"]
         os: [macos-13, ubuntu-latest]
+        mpi: ["openmpi"]  # [ 'mpich', 'openmpi', 'intelmpi']
         include:
           - os: macos-13
             path: ~/Library/Caches/pip
@@ -26,6 +27,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: mpi4py/setup-mpi@v1
+        with:
+          mpi: ${{ matrix.mpi }}
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:
