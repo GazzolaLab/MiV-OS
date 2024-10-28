@@ -26,9 +26,9 @@ jobs:
         shell: bash
     steps:
       - uses: actions/checkout@v4
-      - uses: mpi4py/setup-mpi@v1
-        with:
-          mpi: ${{ matrix.mpi }}
+      # - uses: mpi4py/setup-mpi@v1
+      #   with:
+      #    mpi: ${{ matrix.mpi }}
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:
@@ -65,7 +65,7 @@ jobs:
       - name: Install dependencies
         run: |
           #poetry lock --no-update
-          poetry install --all-extras --with=algorithmExtension,sortingExtension,mpi
+          poetry install --all-extras --with=algorithmExtension,sortingExtension #,mpi
       # Test MiV-OS using pytest
       - name: Run tests
         run: |
