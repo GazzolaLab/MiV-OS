@@ -131,7 +131,7 @@ class Spikestamps(CollapseExtendableMixin, DataNodeMixin, Sequence):
         else:
             return Spikestamps([self.data[idx] for idx in indices])
 
-    def neo(self, t_start: float | None = None, t_stop: float | None = None):
+    def neo(self, t_start: Optional[float] = None, t_stop: Optional[float] = None):
         """Cast to neo.SpikeTrain
 
         Parameters
@@ -252,3 +252,13 @@ class Spikestamps(CollapseExtendableMixin, DataNodeMixin, Sequence):
             data = pkl.load(f)
 
         return cls(data)
+
+    def shift(self, shift: float) -> "Spikestamps":
+        """Shift all spikestamps by a constant value
+
+        Parameters
+        ----------
+        shift : float
+            Value to shift the spikestamps.
+        """
+        return Spikestamps([np.asarray(arr) + shift for arr in self.data])
