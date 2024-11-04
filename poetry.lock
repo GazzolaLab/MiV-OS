@@ -739,27 +739,27 @@ vis = ["matplotlib (>=3.0.0)"]
 
 [[package]]
 name = "elephant"
-version = "1.1.0"
+version = "1.1.1"
 description = "Elephant is a package for analysis of electrophysiology data in Python"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "elephant-1.1.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:14f0af7f0017eebc2f1bb345b6a337d693b8862f5759cfc1581924ad3416ae55"},
-    {file = "elephant-1.1.0-cp310-cp310-musllinux_1_1_x86_64.whl", hash = "sha256:f0ab8bbc3732cb35fe6f4d231215917fe525884ec713898b10f4bb3c1b9064c9"},
-    {file = "elephant-1.1.0-cp310-cp310-win_amd64.whl", hash = "sha256:9a95afe62bb366610ed771fe2370d6a715f1e4db6012a514f693d9a630ea6426"},
-    {file = "elephant-1.1.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:803f68d3c4fd2bf28dde6b9350b0d303f0a4068674c9cb0d06ac5502db2b9f73"},
-    {file = "elephant-1.1.0-cp311-cp311-musllinux_1_1_x86_64.whl", hash = "sha256:d0213a1bb9a7d3d7fd0eee297645289b96e5dc381741b24ea4839a936fd7b110"},
-    {file = "elephant-1.1.0-cp311-cp311-win_amd64.whl", hash = "sha256:9d52239b855c15e14cf009fc5dcf6d0d3ec4917675b773a4da49ee68dfa6c1ac"},
-    {file = "elephant-1.1.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:fad21589e2172c563022e75c017f2ac01367f86e7cfbecc3bd9746ee7eb18ba7"},
-    {file = "elephant-1.1.0-cp312-cp312-musllinux_1_1_x86_64.whl", hash = "sha256:7f644152483633835d5223029d3390d17c37546fbfa4da1242999d3fa4ea4e0a"},
-    {file = "elephant-1.1.0-cp312-cp312-win_amd64.whl", hash = "sha256:d234239d80f6b66908a2bd41ab79a986945649f20e7b417eacbb79a6b6dcf25a"},
-    {file = "elephant-1.1.0-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:3545f9d1102f230f1a328a391b4bca0e56cfbfd18e1c1f28fb2114f2934f3568"},
-    {file = "elephant-1.1.0-cp38-cp38-musllinux_1_1_x86_64.whl", hash = "sha256:17609f49f50658c39a8a0c0d83052005272e4795575e9d72931258d7f9ce6be0"},
-    {file = "elephant-1.1.0-cp38-cp38-win_amd64.whl", hash = "sha256:840d66ed0529351a2dce21fac0b630592effa7adc741586fed1658dd82915648"},
-    {file = "elephant-1.1.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:8da0847a064bbe872effb07abb9695f6fbbf7d74b5237c42d548abc16e84572b"},
-    {file = "elephant-1.1.0-cp39-cp39-musllinux_1_1_x86_64.whl", hash = "sha256:f1ef899178c8afe4eccbb1d08463406e477745b4732bc129607dd2b056b41f6e"},
-    {file = "elephant-1.1.0-cp39-cp39-win_amd64.whl", hash = "sha256:20df87bfa326ccc3966f754d807256f78e55e5cbe75e2387fd6239f5d0d3aaa0"},
-    {file = "elephant-1.1.0.tar.gz", hash = "sha256:4085a8fcac3ab855f2585d017d17a1589c74adfbd930f7a1e012f2f5bd994e71"},
+    {file = "elephant-1.1.1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:5a9cb55ae9c1cf7a37803b2945c69288ea6d521559d319bb861bbd30e7b94550"},
+    {file = "elephant-1.1.1-cp310-cp310-musllinux_1_1_x86_64.whl", hash = "sha256:580ad0b68a79aa978ee6d8fd6440cb49b1839a0efd5b93e0153a06b4a734fe21"},
+    {file = "elephant-1.1.1-cp310-cp310-win_amd64.whl", hash = "sha256:eb29a75797bc492fdd59375142af6a98b93eebf7b049e9c79169b933f02cd9cc"},
+    {file = "elephant-1.1.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:3a5c60632425490a32c36fddd0063be286a6ebc5254f062be33ce50ab8353a2f"},
+    {file = "elephant-1.1.1-cp311-cp311-musllinux_1_1_x86_64.whl", hash = "sha256:7956a8beab2f4b867520faa7db7222afe180d2f1659ebd57e4b7a6316c35e293"},
+    {file = "elephant-1.1.1-cp311-cp311-win_amd64.whl", hash = "sha256:3d54a033dc2c91c79dd6acb8542dc15716207deebd02c432924f1f0a6febd66c"},
+    {file = "elephant-1.1.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:eeb3746b4fe1cbc0281528457dcd871845262812b89a5cd0c451e9aa179a9235"},
+    {file = "elephant-1.1.1-cp312-cp312-musllinux_1_1_x86_64.whl", hash = "sha256:0268d90869bd407625a04481603b0e596dddef6e87cb309731140e85827e2135"},
+    {file = "elephant-1.1.1-cp312-cp312-win_amd64.whl", hash = "sha256:7c0f5ee07ee06e34ba6474cc579d6cd378fb5bd7acf52985e3bea9b6d3ea3910"},
+    {file = "elephant-1.1.1-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:0c7914a207e726e8fe6acd21434a8eadb863de6ea664c86f4030a99a0685bc0a"},
+    {file = "elephant-1.1.1-cp38-cp38-musllinux_1_1_x86_64.whl", hash = "sha256:c4b038a8e305e5684455b35b94a561e7f275fd6ac11fa73d3f5a795d02db8f9e"},
+    {file = "elephant-1.1.1-cp38-cp38-win_amd64.whl", hash = "sha256:7c2202265b9be084b28ebc4a53fa2d1959903f93e3e60c997c473ec4a3eef885"},
+    {file = "elephant-1.1.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:2bbc3a706302214ccae0c6227e7c406c4d370d913893b12e495325f5ba0c4808"},
+    {file = "elephant-1.1.1-cp39-cp39-musllinux_1_1_x86_64.whl", hash = "sha256:a9fdf85136d51db3a76086db4af8b95241cd3695e03fe90365fe18da3988fe7e"},
+    {file = "elephant-1.1.1-cp39-cp39-win_amd64.whl", hash = "sha256:2b48075b3babd0226fec64ccd0425ca54cb8c4a0af0a90468bfa3e7c3d06fec0"},
+    {file = "elephant-1.1.1.tar.gz", hash = "sha256:c08b89358b52e826bd081ee5a530728fe487c45f5d0539ec97ebdaed9c106e89"},
 ]
 
 [package.dependencies]
@@ -772,11 +772,11 @@ tqdm = "*"
 
 [package.extras]
 cuda = ["pycuda (>=2020.1)"]
-docs = ["jupyter (>=1.0.0)", "matplotlib (>=3.3.2)", "nbsphinx (>=0.8.0)", "numpydoc (>=1.1.0)", "sphinx (>=3.3.0)", "sphinx-tabs (>=1.3.0)", "sphinxcontrib-bibtex (>1.0.0)"]
+docs = ["jupyter (>=1.0.0)", "matplotlib (>=3.3.2,<3.9.0)", "nbsphinx (>=0.8.0)", "numpydoc (>=1.1.0)", "sphinx (>=3.3.0)", "sphinx-tabs (>=1.3.0)", "sphinxcontrib-bibtex (>1.0.0)"]
 extras = ["jinja2 (>=2.11.2)", "scikit-learn (>=0.23.2)", "statsmodels (>=0.12.1)"]
 opencl = ["pyopencl (>=2020.2.2)"]
 tests = ["nixio (>=1.5.0)", "pytest"]
-tutorials = ["h5py (>=3.1.0)", "matplotlib (>=3.3.2)", "nixio (>=1.5.0)"]
+tutorials = ["h5py (>=3.1.0)", "matplotlib (>=3.3.2,<3.9.0)", "nixio (>=1.5.0)"]
 
 [[package]]
 name = "exceptiongroup"
