@@ -32,8 +32,9 @@ import os, sys
 import miv
 import scipy.signal as ss
 
+from miv.core.pipeline import Pipeline
 from miv.io import DataManager
-from miv.signal.filter import ButterBandpass, MedianFilter, FilterCollection
+from miv.signal.filter import ButterBandpass
 from miv.signal.spike import ThresholdCutoff
 from miv.statistics import pairwise_causality
 from miv.visualization import plot_spectral, pairwise_causality_plot
@@ -46,22 +47,19 @@ from miv.typing import SignalType
 experiment_query = "experiment0"
 
 # Data call
-signal_filter = (
-    FilterCollection()
-        .append(ButterBandpass(600, 2400, order=4))
-        .append(MedianFilter(threshold=60, k=30))
-)
+signal_filter = ButterBandpass(600, 2400, order=4)
 spike_detection = ThresholdCutoff(cutoff=5)
 
 # Spike Detection
 data_collection = optogenetic.load_data()
-data = data_collection.query_path_name(experiment_query)[0]
+data = data_collection[0]
+
 #false_channels = [12,15,36,41,42,43,45,47,53,57,55,58,61,62]
 #data.set_channel_mask(false_channels)
-with data.load() as (signal, timestamps, sampling_rate):
-    # Preprocess
-    signal = signal_filter(signal, sampling_rate)
-    spiketrains = spike_detection(signal, timestamps, sampling_rate)
+
+data >> signal_filter >> spike_detection
+Pipeline(spike_detection).run()
+spiketrains = spike_detection.output()
 ```
 
 ## 2. Burst Estimations
@@ -69,7 +67,8 @@ Calculates parameters critical to characterize bursting phenomenon on a single c
 
 ```{code-cell} ipython3
 # Estimates the burst parameters for 45th electrode with bursts defined as more than 10 simultaneous spikes with 0.1 s interspike interval
-burst(spiketrains,45,0.1,10)
+channel = 45
+burst(spiketrains, channel, 0.1, 10)
 ```
 
 ## 3. Plotting
@@ -78,6 +77,5 @@ Plots the burst events across the recordings. Documentation is available [here](
 ```{code-cell} ipython3
 #Example
 # plots the burst events with bursts defined as more than 10 simultaneous spikes with 0.1 s interspike interval
-plot_burst(spiketrains,0.1,10)
-
+plot_burst(spiketrains, 0.1, 10)
 ```
