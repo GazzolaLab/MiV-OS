@@ -5,7 +5,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "MiV-OS"
-version = "0.3.1.pre1"
+version = "0.3.1.pre2"
 description = "Python software for analysis and computing framework used in MiV project."
 readme = "README.md"
 authors = ["GazzolaLab <skim449@illinois.edu>"]
@@ -246,4 +246,5 @@ omit = [
     "miv/io/intan/rhs.py",# not part of the dev target
     "miv/io/asdf/asdf.py",# not part of the dev target
     "miv/visualization/colors.py",# not part of the dev target
+    "miv/visualization/format.py",
 ]

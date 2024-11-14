@@ -25,6 +25,9 @@ def plot_spiketrain_raster(
     """
     fig, ax = plt.subplots(figsize=(16, 6))
     spikes = spikestamps.get_view(t_start, t_stop)
+    print(
+        f"Plotting raster plot from {t_start} to {t_stop}: {sum(spikes.get_count())} spikes"
+    )
     ax.eventplot(spikes)
     ax.set_xlabel("Time (s)")
     ax.set_ylabel("Channel")
