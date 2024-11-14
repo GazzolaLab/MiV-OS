@@ -72,15 +72,8 @@ jobs:
           source $VENV
           make test
       # Upload coverage to Codecov (use python 3.10 ubuntu-latest)
-  report-coverage:  # Report coverage from python 3.8 and mac-os. May change later
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        python-version: ["3.10"]
-    needs: build
-    steps:
-      - name: Upload coverage to Codecov
+      - name: Upload coverage to Codecov (only on 3.10 ubuntu-latest)
+        if: ${{ matrix.os == 'ubuntu-latest' && matrix.python-version == '3.10' }}
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
