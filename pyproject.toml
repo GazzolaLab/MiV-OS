@@ -23,7 +23,6 @@ classifiers = [
   "Operating System :: OS Independent",
   "License :: OSI Approved :: MIT License",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
@@ -44,7 +43,7 @@ miv_zip_results = "miv.machinary.zip_results:zip_results"
 
 
 [tool.poetry.dependencies]
-python = ">=3.9,<=3.12"
+python = ">=3.10,<=3.12"
 scipy = "^1.9.1"
 elephant = "^1.0.0"
 matplotlib = "^3.5.2"
