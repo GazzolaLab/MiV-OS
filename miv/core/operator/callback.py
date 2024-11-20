@@ -96,7 +96,7 @@ class BaseCallbackMixin:
             self, "after_run"
         )
         for callback in predefined_callbacks:
-            callback(self, *args, **kwargs)
+            callback(*args, **kwargs)
 
         self._done_flag_after_run = True
 
@@ -122,7 +122,7 @@ class BaseCallbackMixin:
 
         plotters = get_methods_from_feature_classes_by_startswith_str(self, "plot_")
         for plotter in plotters:
-            plotter(self, output, inputs, show=show, save_path=save_path)
+            plotter(output, inputs, show=show, save_path=save_path)
         if not show:
             plt.close("all")
 
