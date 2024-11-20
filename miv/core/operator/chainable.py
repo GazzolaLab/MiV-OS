@@ -52,6 +52,8 @@ class _Chainable(Protocol):
         """Print summary of downstream network structures."""
         ...
 
+    def topological_sort(self) -> Iterator[SelfChain]: ...
+
 
 class BaseChainingMixin:
     """
@@ -140,29 +142,36 @@ class BaseChainingMixin:
         return "\n".join(output)
 
     def _get_upstream_topology(
-        self, lst: list[SelfChain] | None = None
+        self, upstream_nodelist: list[SelfChain] | None = None
     ) -> list[SelfChain]:
-        if lst is None:
-            lst = []
+        if upstream_nodelist is None:
+            upstream_nodelist = []
 
-        cacher = getattr(self, "cacher", None)
-        if (
-            cacher is not None
-            and cacher.cache_dir is not None
-            and cacher.check_cached()
-        ):
-            pass
-        else:
+        # Optional for operator to be 'cachable'
+        try:
+            cached_flag = self.cacher.check_cached()
+        except (AttributeError, FileNotFoundError):
+            """
+            For any reason when cached result could not be retrieved.
+
+            AttributeError: Occurs when cacher is not defined
+            FileNotFoundError: Occurs when cache_dir is not set or cache files doesn't exist
+            """
+            cached_flag = False
+
+        if not cached_flag:  # Run all upstream nodes
             for node in self.iterate_upstream():
-                if node in lst:
+                if node in upstream_nodelist:
                     continue
-                node._get_upstream_topology(lst)
-        lst.append(self)
-        return lst
+                node._get_upstream_topology(upstream_nodelist)
+        upstream_nodelist.append(self)
+        return upstream_nodelist
 
-    def topological_sort(self):
+    def topological_sort(self) -> list[SelfChain]:
         """
         Topological sort of the graph.
+        Returns the list of operations in order to execute "self"
+
         Raise RuntimeError if there is a loop in the graph.
         """
         # TODO: Make it free function
