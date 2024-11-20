@@ -44,14 +44,16 @@ def cache_generator_call(func):
                     if result is not None:
                         # In case the module does not return anything
                         cacher.save_cache(result, idx, tag=tag)
-                    if not self.skip_plot:
-                        self.generator_plot(idx, result, zip_arg, save_path=True)
-                        if idx == 0:
-                            self.firstiter_plot(result, zip_arg, save_path=True)
+                    self._callback_generator_plot(idx, result, zip_arg, save_path=True)
+                    if idx == 0:
+                        self._callback_firstiter_plot(result, zip_arg, save_path=True)
                     yield result
                 else:
                     cacher.save_config(tag=tag)
                     # TODO: add lastiter_plot
+                # FIXME
+                self._done_flag_generator_plot = True
+                self._done_flag_firstiter_plot = True
 
             generator = generator_func(*args, *kwargs.values())
             return generator

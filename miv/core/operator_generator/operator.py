@@ -24,12 +24,9 @@ from miv.core.operator_generator.policy import VanillaGeneratorRunner
 
 class GeneratorOperatorMixin(OperatorMixin, GeneratorCallbackMixin):
     def __init__(self):
-        super().__init__()
         self.runner = VanillaGeneratorRunner()
         self.cacher = DataclassCacher(self)
-
-        assert self.tag != ""
-        self.set_save_path("results")  # Default analysis path
+        super().__init__()
 
     def output(self):
         """
@@ -53,15 +50,8 @@ class GeneratorOperatorMixin(OperatorMixin, GeneratorCallbackMixin):
             output = self.runner(self.__call__, args)
 
             # Callback: After-run
-            self.callback_after_run(output)
+            self._callback_after_run(output)
 
             # Plotting: Only happened when cache is not called
-            if not self.skip_plot:
-                # TODO: Possible refactor in the future with operator/operator.py
-                if len(args) == 0:
-                    self.plot(output, None, show=False, save_path=True)
-                elif len(args) == 1:
-                    self.plot(output, args[0], show=False, save_path=True)
-                else:
-                    self.plot(output, args, show=False, save_path=True)
+            self._callback_plot(output, args, show=False, save_path=True)
         return output

@@ -28,12 +28,15 @@ class GeneratorCallbackMixin:
     def __init__(self):
         super().__init__()
 
-    def generator_plot_from_callbacks(self, *args, **kwargs):
-        for func, name in zip(self._callback_collection, self._callback_names):
-            if name.startswith("generator_plot_"):
-                func(self, *args, **kwargs)
+        self._done_flag_generator_plot = False
+        self._done_flag_firstiter_plot = False
 
-    def generator_plot(
+    def _reset_callbacks(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._done_flag_generator_plot = getattr(kwargs, "plot", False)
+        self._done_flag_firstiter_plot = getattr(kwargs, "plot", False)
+
+    def _callback_generator_plot(
         self,
         iter_index,
         output,
@@ -41,6 +44,9 @@ class GeneratorCallbackMixin:
         show: bool = False,
         save_path: Optional[Union[bool, str, pathlib.Path]] = None,
     ):
+        if self._done_flag_generator_plot:
+            return
+
         if save_path is True:
             os.makedirs(self.analysis_path, exist_ok=True)
             save_path = self.analysis_path
@@ -50,28 +56,24 @@ class GeneratorCallbackMixin:
         )
         for plotter in plotters_for_generator_out:
             plotter(
-                self,
                 output,
                 inputs,
                 show=show,
                 save_path=save_path,
                 index=iter_index,
             )
-        if not show:
-            plt.close("all")
+        plt.close("all")
 
-    def firstiter_plot_from_callbacks(self, *args, **kwargs):
-        for func, name in zip(self._callback_collection, self._callback_names):
-            if name.startswith("firstiter_plot_"):
-                func(self, *args, **kwargs)
-
-    def firstiter_plot(
+    def _callback_firstiter_plot(
         self,
         output,
         inputs=None,
         show: bool = False,
         save_path: Optional[Union[bool, str, pathlib.Path]] = None,
     ):
+        if self._done_flag_firstiter_plot:
+            return
+
         if save_path is True:
             os.makedirs(self.analysis_path, exist_ok=True)
             save_path = self.analysis_path
@@ -82,11 +84,9 @@ class GeneratorCallbackMixin:
 
         for plotter in plotters_for_generator_out:
             plotter(
-                self,
                 output,
                 inputs,
                 show=show,
                 save_path=save_path,
             )
-        if not show:
-            plt.close("all")
+        plt.close("all")
