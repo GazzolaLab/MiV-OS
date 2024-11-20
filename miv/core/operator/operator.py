@@ -19,6 +19,7 @@ import functools
 import inspect
 import itertools
 import os
+import logging
 import pathlib
 from dataclasses import dataclass
 
@@ -28,28 +29,60 @@ if TYPE_CHECKING:
 from miv.core.operator.cachable import (
     DataclassCacher,
     FunctionalCacher,
-    _Cachable,
     _CacherProtocol,
+    CACHE_POLICY,
 )
 from miv.core.operator.callback import BaseCallbackMixin
 from miv.core.operator.chainable import BaseChainingMixin, _Chainable
-from miv.core.operator.loggable import DefaultLoggerMixin, _Loggable
-from miv.core.operator.policy import VanillaRunner, _Runnable, _RunnerProtocol
+from miv.core.operator.loggable import DefaultLoggerMixin
+from miv.core.operator.policy import VanillaRunner, _RunnerProtocol
+
+
+class _Cachable(Protocol):
+    @property
+    def analysis_path(self) -> str | pathlib.Path: ...
+
+    @property
+    def cacher(self) -> _CacherProtocol: ...
+    @cacher.setter
+    def cacher(self, value: _CacherProtocol) -> None: ...
+
+    def set_caching_policy(self, policy: CACHE_POLICY) -> None: ...
 
 
 class _Callback(Protocol):
-    def __lshift__(self, right: Callable) -> SelfCallaback: ...
     def set_save_path(
         self,
-        path: Union[str, pathlib.Path],
-        cache_path: Union[str, pathlib.Path] = None,
+        path: str | pathlib.Path,
+        cache_path: str | pathlib.Path | None = None,
     ) -> None: ...
 
+    def __lshift__(self, right: Callable) -> SelfCallaback: ...
     def _reset_callbacks(
         self, *, after_run: bool = False, plot: bool = False
     ) -> None: ...
-    def _callback_after_run(self) -> None: ...
-    def _plot(self) -> None: ...
+    def _callback_after_run(self, *args, **kwargs) -> None: ...
+    def _callback_plot(
+        self,
+        output: tuple | None,
+        inputs: list | None = None,
+        show: bool = False,
+        save_path: str | pathlib.Path | None = None,
+    ) -> None: ...
+
+
+class _Loggable(Protocol):
+    @property
+    def logger(self) -> logging.Logger: ...
+
+
+class _Runnable(Protocol):
+    """
+    A protocol for a runner policy.
+    """
+
+    @property
+    def runner(self) -> _RunnerProtocol: ...
 
 
 class Operator(
@@ -106,7 +139,6 @@ class DataLoaderMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
         self.runner = VanillaRunner()
         super().__init__()
 
-
         self.set_save_path(self.data_path)  # Default analysis path
 
         self._load_param = {}
@@ -153,12 +185,25 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
 
     def __init__(self):
         self.runner = VanillaRunner()
-        self.cacher = DataclassCacher(self)
+        self._cacher = DataclassCacher(self)
 
         super().__init__()
 
-    def set_caching_policy(self, cacher: _CacherProtocol):
-        self.cacher = cacher(self)
+    @property
+    def cacher(self) -> _CacherProtocol:
+        return self._cacher
+
+    @cacher.setter
+    def cacher(self, value: _CacherProtocol) -> None:
+        # FIXME:
+        policy = self._cacher.policy
+        cache_dir = self._cacher.cache_dir
+        self._cacher = value(self)
+        self._cacher.policy = policy
+        self._cacher.cache_dir = cache_dir
+
+    def set_caching_policy(self, policy: CACHE_POLICY) -> None:
+        self.cacher.policy = policy
 
     def receive(self) -> list[DataTypes]:
         """

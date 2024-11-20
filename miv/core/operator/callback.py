@@ -71,9 +71,9 @@ class BaseCallbackMixin:
 
     def set_save_path(
         self,
-        path: Union[str, pathlib.Path],
-        cache_path: Union[str, pathlib.Path] = None,
-    ):
+        path: str | pathlib.Path,
+        cache_path: str | pathlib.Path | None = None,
+    ) -> None:
         if cache_path is None:
             cache_path = path
 
@@ -88,7 +88,7 @@ class BaseCallbackMixin:
         # Make directory
         os.makedirs(self.analysis_path, exist_ok=True)
 
-    def _callback_after_run(self, *args, **kwargs):
+    def _callback_after_run(self, *args, **kwargs) -> None:
         if self._done_flag_after_run:
             return
 

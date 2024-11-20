@@ -60,7 +60,7 @@ def main(path, tools, nproc, num_fragments, use_mpi, chunksize):
             for data in DataManager(p):
                 data >> signal_filter
                 pipeline = Pipeline(spike_detection)
-                pipeline.run(save_path=data.analysis_path, no_cache=True)
+                pipeline.run(data.analysis_path)
                 spike_detection.plot(save_path=data.analysis_path)
                 logging.info(f"Pre-processing {p}-{data.data_path} done.")
                 data.clear_connections()
@@ -70,7 +70,7 @@ def main(path, tools, nproc, num_fragments, use_mpi, chunksize):
         for p in path:
             data = DataIntan(p)
             pipeline = Pipeline(spike_detection)
-            pipeline.run(save_path=data.analysis_path, no_cache=True)
+            pipeline.run(data.analysis_path)
             spike_detection.plot(save_path=data.analysis_path)
             logging.info(f"Pre-processing {p}-{data.data_path} done.")
             data.clear_connections()

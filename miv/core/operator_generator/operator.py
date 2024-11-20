@@ -25,8 +25,24 @@ from miv.core.operator_generator.policy import VanillaGeneratorRunner
 class GeneratorOperatorMixin(OperatorMixin, GeneratorCallbackMixin):
     def __init__(self):
         self.runner = VanillaGeneratorRunner()
-        self.cacher = DataclassCacher(self)
+        self._cacher = DataclassCacher(self)
         super().__init__()
+
+    @property
+    def cacher(self) -> _CacherProtocol:
+        return self._cacher
+
+    @cacher.setter
+    def cacher(self, value: _CacherProtocol) -> None:
+        # FIXME:
+        policy = self._cacher.policy
+        cache_dir = self._cacher.cache_dir
+        self._cacher = value(self)
+        self._cacher.policy = policy
+        self._cacher.cache_dir = cache_dir
+
+    def set_caching_policy(self, policy: CACHE_POLICY) -> None:
+        self.cacher.policy = policy
 
     def output(self):
         """

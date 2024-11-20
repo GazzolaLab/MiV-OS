@@ -1,5 +1,4 @@
 __all__ = [
-    "_Runnable",
     "_RunnerProtocol",
     "VanillaRunner",
     "SupportMultiprocessing",
@@ -25,22 +24,6 @@ class _RunnerProtocol(Callable, Protocol):
     def __init__(self, comm, root: int): ...
 
     def __call__(self, func: Callable, inputs: Optional[tuple], **kwargs) -> object: ...
-
-
-class _Runnable(Protocol):
-    """
-    A protocol for a runner policy.
-    """
-
-    @property
-    def runner(self) -> _RunnerProtocol: ...
-
-    def run(
-        self,
-        save_path: Union[str, pathlib.Path],
-        cache_dir: Union[str, pathlib.Path],
-    ) -> None: ...
-
 
 class VanillaRunner:
     """Default runner without any high-level parallelism.

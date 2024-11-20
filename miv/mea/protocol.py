@@ -8,10 +8,9 @@ import numpy as np
 
 from miv.core.operator.cachable import _Jsonable
 from miv.core.operator.chainable import _Chainable
-from miv.core.operator.policy import _Runnable
 
 
-class MEAGeometryProtocol(_Jsonable, _Chainable, _Runnable, Protocol):
+class MEAGeometryProtocol(_Jsonable, _Chainable, Protocol):
     @property
     def coordinates(self) -> np.ndarray:
         """Return coordinates of MEA electrodes location"""

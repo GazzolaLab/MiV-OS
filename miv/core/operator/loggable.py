@@ -3,7 +3,6 @@ from __future__ import annotations
 __doc__ = """
 """
 __all__ = [
-    "_Loggable",
     "DefaultLoggerMixin",
 ]
 
@@ -18,11 +17,6 @@ if TYPE_CHECKING:
     from miv.core.datatype import DataTypes
 
 
-class _Loggable(Protocol):
-    @property
-    def logger(self): ...
-
-
 class DefaultLoggerMixin:
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -34,3 +28,5 @@ class DefaultLoggerMixin:
         except ImportError:
             tag = self.__class__.__name__
         self.logger = logging.getLogger(tag)
+
+    # TODO: Redirect I/O stream to txt

@@ -11,7 +11,7 @@ from typing import List, Optional, Union
 import pathlib
 import time
 
-from miv.core.operator.chainable import _Chainable
+from miv.core.operator.operator import Operator
 
 
 class Pipeline:
@@ -32,7 +32,7 @@ class Pipeline:
     For example, if E is already cached, then the execution order of `Pipeline(F)` is A->B->D->F. (C is skipped, E is loaded from cache)
     """
 
-    def __init__(self, node: _Chainable | list[_Chainable]):
+    def __init__(self, node: Operator | list[Operator]):
         if not isinstance(node, list):
             # FIXME: check if the node is standalone operator
             self.nodes_to_run = [node]
@@ -41,8 +41,8 @@ class Pipeline:
 
     def run(
         self,
-        working_directory: Union[str, pathlib.Path] = "./results",
-        cache_directory: Optional[Union[str, pathlib.Path]] = None,
+        working_directory: str | pathlib.Path = "./results",
+        cache_directory: str | pathlib.Path | None = None,
         skip_plot: bool = False,
         verbose: bool = False,  # Use logging
     ):
