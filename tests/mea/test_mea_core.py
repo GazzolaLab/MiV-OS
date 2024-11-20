@@ -30,7 +30,7 @@ def test_mea_register_and_get_electrode_path(tmp_path):
 
     # Get electrode paths and check if tmp_file is in
     electrode_paths = MEA.get_electrode_paths()
-    assert tmp_file.as_posix() in electrode_paths
+    assert str(tmp_file) in electrode_paths
 
 
 def test_mea_build_from_dictionary(tmp_path):

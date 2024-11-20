@@ -41,7 +41,6 @@ class MockDataLoader(DataLoaderMixin):
 def test_two_function_caching(cls, tmp_path):
     runner = cls(tmp_path)
     runner.set_save_path(tmp_path)
-    runner.make_analysis_path()
 
     # Case
     a = 1

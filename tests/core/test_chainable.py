@@ -1,6 +1,6 @@
 import pytest
 
-from tests.core.mock_chain import MockChain
+from tests.core.mock_chain import MockChain, MockChainWithCache, MockChainWithoutCacher
 
 
 def test_chaining_topological_sort():
@@ -55,6 +55,42 @@ def test_topological_sort_simple_topology():
     a.clear_connections()
     c.cacher.value = True
     assert e.topological_sort() == [c, d, e]
+
+
+def test_topological_sort_without_cacher():
+    a = MockChain(1)
+    b = MockChainWithoutCacher(2)
+    c = MockChainWithoutCacher(3)
+
+    # Check connectivity
+    a >> b >> c
+    assert c.topological_sort() == [a, b, c]
+
+
+def test_topological_sort_broken_cacher():
+    a = MockChain(1)
+    b = MockChain(2)
+    c = MockChain(3)
+
+    # topological sort should not be effective if cacher is broken
+    a.cacher.check_cached = None
+    del a.cacher.check_cached
+    del b.cacher
+
+    # Check connectivity
+    a >> b >> c
+    assert c.topological_sort() == [a, b, c]
+
+
+def test_topological_sort_cache_skip():
+    a = MockChain(1)
+    b = MockChainWithCache(2)
+    c = MockChain(3)
+
+    # Check connectivity
+    a >> b >> c
+    assert a.topological_sort() == [a]
+    assert c.topological_sort() == [b, c]
 
 
 def test_topological_sort_loops():

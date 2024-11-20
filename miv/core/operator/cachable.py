@@ -11,7 +11,7 @@ __all__ = [
     "FunctionalCacher",
 ]
 
-from typing import TYPE_CHECKING, Any, Generator, Literal, Protocol, Union
+from typing import TYPE_CHECKING, Any, Generator, Literal, Protocol, Union, Callable
 
 import collections
 import dataclasses
@@ -110,9 +110,9 @@ class SkipCacher:
 
 
 def when_policy_is(*allowed_policy):
-    def decorator(func):
+    def decorator(func: Callable):
         # @functools.wraps(func) # TODO: fix this
-        def wrapper(self, *args, **kwargs):
+        def wrapper(self: _CacherProtocol, *args, **kwargs):
             if self.policy in allowed_policy:
                 return func(self, *args, **kwargs)
             else:

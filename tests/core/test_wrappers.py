@@ -6,10 +6,10 @@ from miv.core.operator_generator.wrapper import cache_generator_call
 
 class GeneratorPlotMixin:
     # TODO: This is a temporary solution to avoid issue. calling generator_plot in wrapper should be reconsidered
-    def generator_plot(self, *args, **kwargs):
+    def _callback_generator_plot(self, *args, **kwargs):
         pass
 
-    def fistiter_plot(self, *args, **kwargs):
+    def _callback_firstiter_plot(self, *args, **kwargs):
         pass
 
 
@@ -69,7 +69,6 @@ class MockObjectWithCache(GeneratorPlotMixin):
 
     def __init__(self):
         self.cacher = self.MockCacher()
-        self.skip_plot = True
 
 
 @pytest.fixture

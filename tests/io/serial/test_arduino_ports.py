@@ -1,21 +1,23 @@
-from unittest.mock import patch
-
-import numpy as np
+# from unittest.mock import patch
 import pytest
+import numpy as np
 
-from miv.io.serial import ArduinoSerial, list_serial_ports
 
-""" # This test is disabled: pyserial list_serial_ports takes the external run-arguments
 def test_list_serial_ports():
     # Test that the list_serial_ports function calls the main function of the
     # serial.tools.list_ports module
+    pytest.importorskip("serial")
+    from miv.io.serial import list_serial_ports
+
     list_serial_ports()
     assert 1
-"""
 
 
 def test_arduino_module_init():
     # Test that the __init__ method correctly initializes the object's attributes
+    pytest.importorskip("serial")
+    from miv.io.serial import ArduinoSerial
+
     port = "/dev/ttyACM0"
     baudrate = 112500
     arduino_serial = ArduinoSerial(port=port, baudrate=baudrate)

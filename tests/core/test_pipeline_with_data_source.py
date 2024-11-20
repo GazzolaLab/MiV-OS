@@ -84,7 +84,7 @@ def pipeline(tmp_path):
 
 @pytest.mark.mpi_xfail
 def test_pipeline_run1(pipeline, tmp_path):
-    execution_order = pipeline._start_node.topological_sort()
+    execution_order = pipeline.nodes_to_run[0].topological_sort()
     pipeline.run(tmp_path, verbose=True)
 
     assert len(execution_order) == 5
