@@ -31,7 +31,7 @@ from miv.core.operator.cachable import (
     _Cachable,
     _CacherProtocol,
 )
-from miv.core.operator.callback import BaseCallbackMixin, _Callback
+from miv.core.operator.callback import BaseCallbackMixin
 from miv.core.operator.chainable import BaseChainingMixin, _Chainable
 from miv.core.operator.loggable import DefaultLoggerMixin, _Loggable
 from miv.core.operator.policy import VanillaRunner, _Runnable, _RunnerProtocol

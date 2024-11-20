@@ -32,9 +32,12 @@ class Pipeline:
     For example, if E is already cached, then the execution order of `Pipeline(F)` is A->B->D->F. (C is skipped, E is loaded from cache)
     """
 
-    def __init__(self, node: _Chainable):
-        self._start_node = node
-        self.execution_order = None
+    def __init__(self, node: _Chainable | list[_Chainable]):
+        if not isinstance(node, list):
+            # FIXME: check if the node is standalone operator
+            self.nodes_to_run = [node]
+        else:
+            self.nodes_to_run = node
 
     def run(
         self,
@@ -59,40 +62,37 @@ class Pipeline:
         # Set working directory
         if cache_directory is None:
             cache_directory = working_directory
-        for node in self._start_node.topological_sort():
-            if hasattr(node, "set_save_path"):
-                node.set_save_path(working_directory, cache_directory)
 
-        self.execution_order = [
-            self._start_node
-        ]  # TODO: allow running multiple operation
-        if verbose:
-            stime = time.time()
-            print("Execution order = ", self.execution_order, flush=True)
-        for node in self.execution_order:
+        # Reset all callbacks
+        for last_node in self.nodes_to_run:
+            for node in last_node.topological_sort():
+                if hasattr(node, "set_save_path"):
+                    node.set_save_path(working_directory, cache_directory)
+                    node._reset_callbacks(plot=skip_plot)
+
+        # Execute
+        for node in self.nodes_to_run:
             if verbose:
                 stime = time.time()
-                print("  Running: ", node, flush=True)
+                print("Running: ", node, flush=True)
 
             try:
-                node.run(skip_plot=skip_plot)
+                node.run()
             except Exception as e:
                 print("  Exception raised: ", node, flush=True)
                 raise e
 
-
             if verbose:
-                print(f"  Finished: {time.time() - stime:.03f} sec", flush=True)
-        if verbose:
-            print(f"Pipeline done: computing {self._start_node}")
-            print(self.summarize(), flush=True)
+                etime = time.time()
+                print(f"  Finished: {etime - stime:.03f} sec", flush=True)
+                print(f"Pipeline done.")
 
     def summarize(self):
-        if self.execution_order is None:
-            self.execution_order = self._start_node.topological_sort()
+        for node in self.nodes_to_run:
+            execution_order = node.topological_sort()
 
-        strs = []
-        strs.append("Execution order:")
-        for i, op in enumerate(self.execution_order):
-            strs.append(f"{i}: {op}")
-        return "\n".join(strs)
+            strs = []
+            strs.append(f"Execution order for {node}:")
+            for i, op in enumerate(execution_order):
+                strs.append(f"{i}: {op}")
+            return "\n".join(strs)
