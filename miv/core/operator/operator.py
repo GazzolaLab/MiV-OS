@@ -37,6 +37,21 @@ from miv.core.operator.loggable import DefaultLoggerMixin, _Loggable
 from miv.core.operator.policy import VanillaRunner, _Runnable, _RunnerProtocol
 
 
+class _Callback(Protocol):
+    def __lshift__(self, right: Callable) -> SelfCallaback: ...
+    def set_save_path(
+        self,
+        path: Union[str, pathlib.Path],
+        cache_path: Union[str, pathlib.Path] = None,
+    ) -> None: ...
+
+    def _reset_callbacks(
+        self, *, after_run: bool = False, plot: bool = False
+    ) -> None: ...
+    def _callback_after_run(self) -> None: ...
+    def _plot(self) -> None: ...
+
+
 class Operator(
     _Callback,
     _Chainable,
@@ -46,6 +61,9 @@ class Operator(
     Protocol,
 ):
     """ """
+
+    @property
+    def tag(self) -> str: ...
 
     def run(self) -> None: ...
 
@@ -83,12 +101,12 @@ class DataLoaderMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
     """ """
 
     def __init__(self):
+        self.tag = "data_loader"
+        self.cacher = FunctionalCacher(self)
+        self.runner = VanillaRunner()
         super().__init__()
 
-        self.runner = VanillaRunner()
-        self.cacher = FunctionalCacher(self)
 
-        self.tag = "data_loader"
         self.set_save_path(self.data_path)  # Default analysis path
 
         self._load_param = {}
@@ -134,12 +152,10 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
     """
 
     def __init__(self):
-        super().__init__()
         self.runner = VanillaRunner()
         self.cacher = DataclassCacher(self)
 
-        assert self.tag != ""
-        self.set_save_path("results")  # Default analysis path
+        super().__init__()
 
     def set_caching_policy(self, cacher: _CacherProtocol):
         self.cacher = cacher(self)
@@ -149,7 +165,7 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
         Receive input data from each upstream operator.
         Essentially, this method recursively call upstream operators' run() method.
         """
-        return [node.run(skip_plot=self.skip_plot) for node in self.iterate_upstream()]
+        return [node.run() for node in self.iterate_upstream()]
 
     def output(self):
         """
@@ -171,30 +187,40 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
                 output = self.runner(self.__call__, args)
 
             # Callback: After-run
-            self.callback_after_run(output)
+            self._callback_after_run(output)
 
             # Plotting: Only happened when cache is not called
-            if not self.skip_plot:
-                if len(args) == 0:
-                    self.plot(output, None, show=False, save_path=True)
-                elif len(args) == 1:
-                    self.plot(output, args[0], show=False, save_path=True)
-                else:
-                    self.plot(output, args, show=False, save_path=True)
+            self._callback_plot(output, args, show=False)
 
         return output
 
-    def run(
-        self,
-        skip_plot: bool = False,
+    def plot(
+        self, show: bool = False, save_path: str | pathlib.Path | None = None
     ) -> None:
+        """
+        Standalone plotting operation.
+        """
+        cache_called = self.cacher.check_cached()
+        if not cache_called:
+            raise NotImplementedError(
+                "Standalone plotting is only possible if this operator has"
+                "results stored in cache. Please use Pipeline(op).run() first."
+            )
+        loader = self.cacher.load_cached()
+        output = next(loader, None)
+
+        # Plotting: Only happened when cache is not called
+        args = self.receive()  # Receive data from upstream
+        self._done_flag_plot = False  # FIXME
+        self._callback_plot(output, args, show=show, save_path=save_path)
+
+        return output
+
+    def run(self) -> None:
         """
         Execute the module. This is the function called by the pipeline.
         Input to the parameters are received from upstream operators.
         """
-        self.make_analysis_path()
-        self.skip_plot = skip_plot
-
         output = self.output()
 
         return output
