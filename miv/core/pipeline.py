@@ -92,8 +92,7 @@ class Pipeline:
             if verbose:
                 print(f"  Finished: {time.time() - stime:.03f} sec", flush=True)
         if verbose:
-            print(f"Pipeline done: computing {self._start_node}")
-            print(self.summarize(), flush=True)
+            print(f"Pipeline done: computing {self._start_node}", flush=True)
 
         if temporary_directory is not None:
             os.system(f"cp -rf {temporary_directory}/* {working_directory}/")
