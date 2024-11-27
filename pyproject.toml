@@ -5,7 +5,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "MiV-OS"
-version = "0.3.1.pre1"
+version = "0.3.1.pre2"
 description = "Python software for analysis and computing framework used in MiV project."
 readme = "README.md"
 authors = ["GazzolaLab <skim449@illinois.edu>"]
@@ -26,6 +26,7 @@ classifiers = [
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
 ]
 
 # ...
@@ -43,7 +44,7 @@ miv_zip_results = "miv.machinary.zip_results:zip_results"
 
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.12"
+python = ">=3.9,<=3.12"
 scipy = "^1.9.1"
 elephant = "^1.0.0"
 matplotlib = "^3.5.2"
@@ -220,12 +221,13 @@ exclude_lines = [
 
     # Don't complain if non-runnable code isn't run:
     "if 0:",
-    "if __name__ == __main__:",
+    "if __name__ == .__main__.:",
     "def __repr__",
-    '''def plot_'.*\b':''',
+    "def plot_*",
     "if self.debug:",
     "if settings.DEBUG",
     "if TYPE_CHECKING:",
+    "if show:",
     "raise AssertionError",
     "raise NotImplementedError",
     '''class '.*\bProtocol\)':''',
@@ -240,9 +242,10 @@ show_missing = true
 branch = true
 omit = [
     "*/.local/*",
-	"setup.py",
+	  "setup.py",
     "*/__init__.py",
     "miv/io/intan/rhs.py",# not part of the dev target
     "miv/io/asdf/asdf.py",# not part of the dev target
     "miv/visualization/colors.py",# not part of the dev target
+    "miv/visualization/format.py",
 ]

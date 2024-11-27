@@ -34,10 +34,6 @@ formatting: codestyle
 #* Linting
 .PHONY: test
 test:
-	poetry run pytest -c pyproject.toml --cov=miv
-
-.PHONY: test_ci
-test_ci:
 	poetry run pytest -c pyproject.toml --cov=miv --cov-report=xml
 
 .PHONY: check-codestyle

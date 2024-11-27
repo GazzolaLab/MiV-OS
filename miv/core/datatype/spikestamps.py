@@ -131,12 +131,25 @@ class Spikestamps(CollapseExtendableMixin, DataNodeMixin, Sequence):
         else:
             return Spikestamps([self.data[idx] for idx in indices])
 
-    def neo(self):
-        """Cast to neo.SpikeTrain"""
+    def neo(self, t_start: Optional[float] = None, t_stop: Optional[float] = None):
+        """Cast to neo.SpikeTrain
+
+        Parameters
+        ----------
+        t_start : float
+            Start time (in second) of the spike train. (default=None)
+            If None, the first spikestamp will be used.
+        t_stop : float
+            End time (in second) of the spike train. (default=None)
+            If None, the last spikestamp will be used.
+
+        """
         import neo
 
-        t_start = self.get_first_spikestamp()
-        t_stop = self.get_last_spikestamp()
+        if t_start is None:
+            t_start = self.get_first_spikestamp()
+        if t_stop is None:
+            t_stop = self.get_last_spikestamp()
         return [
             neo.SpikeTrain(arr, t_start=t_start, t_stop=t_stop, units=pq.s)
             for arr in self.data
@@ -186,6 +199,10 @@ class Spikestamps(CollapseExtendableMixin, DataNodeMixin, Sequence):
         if isinstance(bin_size, pq.Quantity):
             bin_size = bin_size.rescale(pq.s).magnitude
         assert bin_size > 0, "bin size should be greater than 0"
+        if isinstance(t_start, pq.Quantity):
+            t_start = t_start.rescale(pq.s).magnitude
+        if isinstance(t_end, pq.Quantity):
+            t_end = t_end.rescale(pq.s).magnitude
 
         t_start = self.get_first_spikestamp() if t_start is None else t_start
         t_end = self.get_last_spikestamp() if t_end is None else t_end
@@ -235,3 +252,13 @@ class Spikestamps(CollapseExtendableMixin, DataNodeMixin, Sequence):
             data = pkl.load(f)
 
         return cls(data)
+
+    def shift(self, shift: float) -> "Spikestamps":
+        """Shift all spikestamps by a constant value
+
+        Parameters
+        ----------
+        shift : float
+            Value to shift the spikestamps.
+        """
+        return Spikestamps([np.asarray(arr) + shift for arr in self.data])

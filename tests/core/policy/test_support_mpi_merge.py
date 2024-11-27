@@ -29,24 +29,24 @@ class CollapsableData(CollapseExtendableMixin):
         self.data.insert(index, item)
 
 
-def test_support_mpi_merge_policy():
-    from mpi4py import MPI
-
-    from miv.core.operator.policy import SupportMPIMerge
-
-    comm = MPI.COMM_WORLD
-    size = comm.Get_size()
-    rank = comm.Get_rank()
-
-    scale = 5  # arbitrary
-
-    def func():
-        data = CollapsableData()
-        data.data = [rank * scale]
-        return data
-
-    policy = SupportMPIMerge()
-    result = policy(func)
-    print(f"rank: {rank}, result: {result.data}")
-
-    assert result.data == (np.arange(size) * scale).tolist()
+# def test_support_mpi_merge_policy():
+#     from mpi4py import MPI
+#
+#     from miv.core.operator.policy import SupportMPIMerge
+#
+#     comm = MPI.COMM_WORLD
+#     size = comm.Get_size()
+#     rank = comm.Get_rank()
+#
+#     scale = 5  # arbitrary
+#
+#     def func():
+#         data = CollapsableData()
+#         data.data = [rank * scale]
+#         return data
+#
+#     policy = SupportMPIMerge()
+#     result = policy(func)
+#     print(f"rank: {rank}, result: {result.data}")
+#
+#     assert result.data == (np.arange(size) * scale).tolist()

@@ -42,6 +42,7 @@ def bayesian_adaptive_kernel_smoother(spikestamps, probe_time, alpha=1):
     """
     num_channels = spikestamps.number_of_channels
     firing_rates = np.zeros((num_channels, len(probe_time)))
+    firing_rate_for_spike_list = []
     hs = np.zeros((num_channels, len(probe_time)))
     for channel in range(num_channels):
         spiketimes = np.asarray(spikestamps[channel])
@@ -53,9 +54,12 @@ def bayesian_adaptive_kernel_smoother(spikestamps, probe_time, alpha=1):
         ratio = _numba_ratio_func(probe_time, spiketimes, alpha, beta)
         hs[channel] = (sps.gamma(alpha) / sps.gamma(alpha + 0.5)) * ratio
 
-        firing_rate = _numba_firing_rate(spiketimes, probe_time, hs[channel])
+        firing_rate, firing_rate_for_spike = _numba_firing_rate(
+            spiketimes, probe_time, hs[channel]
+        )
         firing_rates[channel] = firing_rate
-    return hs, firing_rates
+        firing_rate_for_spike_list.append(firing_rate_for_spike)
+    return hs, firing_rates, firing_rate_for_spike_list
 
 
 @njit(parallel=False)
@@ -79,17 +83,18 @@ def _numba_firing_rate(spiketimes, probe_time, h):
     std = 5
     n_spikes = spiketimes.shape[0]
     n_time = probe_time.shape[0]
-    firing_rate = np.zeros(n_time)
+    firing_rate = np.zeros((n_time, n_spikes))
     # stime = np.searchsorted(spiketimes, probe_time - std * h * 2)
     # etime = np.searchsorted(spiketimes, probe_time + std * h * 2)
     # for j in prange(n_time):
+
     for j in range(n_time):
         # for i in range(stime[j], etime[j]):
         for i in range(n_spikes):
-            firing_rate[j] += (1 / (np.sqrt(2 * np.pi) * h[j])) * np.exp(
+            firing_rate[j, i] = (1 / (np.sqrt(2 * np.pi) * h[j])) * np.exp(
                 -(((probe_time[j] - spiketimes[i]) / (2 * h[j])) ** 2)
             )
-    return firing_rate
+    return firing_rate.sum(axis=1), firing_rate
 
 
 if __name__ == "__main__":
@@ -103,20 +108,51 @@ if __name__ == "__main__":
     # from numba import set_num_threads
     # set_num_threads(4)
 
-    N = 100_000  # Number of spikes
-    total_time = 3600  # seconds
-    n_evaluation_points = 10000
+    seed = 0
+    np.random.seed(seed)
+
+    t = 30
+    num_channels = 8
+    total_time = 600  # seconds
+    N = 80 * total_time  # Number of spikes
+    n_evaluation_points = int(total_time)
     evaluation_points = np.linspace(0, total_time, n_evaluation_points)
 
-    spikestamps = [np.random.random(N) * total_time]
+    spikestamps = [
+        np.sort(np.random.random(N)) * total_time for _ in range(num_channels)
+    ]
     spikestamps = Spikestamps(spikestamps)
 
     stime = time.time()
-    hs, firing_rates = bayesian_adaptive_kernel_smoother(spikestamps, evaluation_points)
+    alpha = 4.0
+    hs, firing_rates, firing_rate_for_spike = bayesian_adaptive_kernel_smoother(
+        spikestamps, evaluation_points, alpha=alpha
+    )
     etime = time.time()
+    # print(alpha, beta)
 
-    plt.figure()
-    plt.plot(evaluation_points, firing_rates[0])
-    plt.show()
+    std = hs[0][0] * 3
+
+    # print(hs)
+    # print(firing_rates)
+
+    # fig, (ax1, ax2, ax3) = plt.subplots(3, 1, sharex=True)
+    # # plt.plot(evaluation_points, firing_rates[0])
+    # ax1.eventplot(spikestamps[0], color="k")
+    # ax1.axvline(t, color="r", linestyle="--")
+    # ax1.axvspan(t - std, t + std, color="r", alpha=0.5)
+
+    # ax2.plot(spikestamps[0], firing_rate_for_spike[0][0])
+    # ax2.axvline(t, color="r", linestyle="--")
+    # ax2.axvspan(t - std, t + std, color="r", alpha=0.5)
+
+    # ax3.plot(spikestamps[0], np.cumsum(firing_rate_for_spike[0][0]))
+    # ax3.axvline(t, color="r", linestyle="--")
+    # ax3.axvspan(t - std, t + std, color="r", alpha=0.5)
+
+    # plt.figure()
+    # plt.plot(evaluation_points, firing_rates[0])
+
+    # plt.show()
 
     print(f"Elapsed time: {etime-stime:.4f} seconds")
