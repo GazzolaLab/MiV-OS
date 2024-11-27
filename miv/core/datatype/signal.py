@@ -72,24 +72,24 @@ class Signal(SupportMultiprocessing, DataNodeMixin, CollapseExtendableMixin):
         assert value.shape[self._SIGNALAXIS] == self.data.shape[self._SIGNALAXIS]
         self.data = np.append(self.data, value, axis=self._CHANNELAXIS)
 
-    def extend_signal(self, value: SignalType, time: TimestampsType) -> None:
+    def extend_signal(self, data: np.ndarray, time: TimestampsType) -> None:
         """Append a signal to the end of the existing signal."""
-        assert value.shape[self._SIGNALAXIS] == time.shape[0]
+        assert data.shape[self._SIGNALAXIS] == time.shape[0]
         assert (
-            value.shape[self._CHANNELAXIS] == self.data.shape[self._CHANNELAXIS]
+            data.shape[self._CHANNELAXIS] == self.data.shape[self._CHANNELAXIS]
         ), "Signal must have same number of channels"
-        self.data = np.append(self.data, value, axis=self._SIGNALAXIS)
+        self.data = np.append(self.data, data, axis=self._SIGNALAXIS)
         self.timestamps = np.append(self.timestamps, time)
 
-    def prepend_signal(self, value: SignalType, time: TimestampsType) -> None:
+    def prepend_signal(self, data: np.ndarray, time: TimestampsType) -> None:
         """Prepend a signal to the end of the existing signal."""
         assert (
-            value.shape[self._SIGNALAXIS] == time.shape[0]
+            data.shape[self._SIGNALAXIS] == time.shape[0]
         ), "Time and signal must have same length"
         assert (
-            value.shape[self._CHANNELAXIS] == self.data.shape[self._CHANNELAXIS]
+            data.shape[self._CHANNELAXIS] == self.data.shape[self._CHANNELAXIS]
         ), "Signal must have same number of channels"
-        self.data = np.append(value, self.data, axis=self._SIGNALAXIS)
+        self.data = np.append(data, self.data, axis=self._SIGNALAXIS)
         self.timestamps = np.append(self.timestamps, time)
 
     def save(self, path: str) -> None:
@@ -110,5 +110,5 @@ class Signal(SupportMultiprocessing, DataNodeMixin, CollapseExtendableMixin):
             if idx == 0:
                 obj = value
             else:
-                obj.extend_signal(value)
+                obj.extend_signal(value.data, value.timestamps)
         return obj
