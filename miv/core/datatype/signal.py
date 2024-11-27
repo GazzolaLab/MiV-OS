@@ -16,13 +16,14 @@ from dataclasses import dataclass
 
 import numpy as np
 
+from miv.core.datatype.collapsable import CollapseExtendableMixin
 from miv.core.operator.operator import DataNodeMixin
 from miv.core.operator.policy import SupportMultiprocessing
 from miv.typing import SignalType, TimestampsType
 
 
 @dataclass
-class Signal(SupportMultiprocessing, DataNodeMixin):
+class Signal(SupportMultiprocessing, DataNodeMixin, CollapseExtendableMixin):
     """
     Contiguous array of raw signal type.
 
@@ -101,3 +102,13 @@ class Signal(SupportMultiprocessing, DataNodeMixin):
         """Load signal from file."""
         with open(path, "rb") as f:
             return pickle.load(f)
+
+    @classmethod
+    def from_collapse(cls, values):
+        obj = None
+        for idx, value in enumerate(values):
+            if idx == 0:
+                obj = value
+            else:
+                obj.extend_signal(value)
+        return obj

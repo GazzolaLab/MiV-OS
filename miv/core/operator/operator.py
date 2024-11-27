@@ -141,6 +141,9 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
         assert self.tag != ""
         self.set_save_path("results")  # Default analysis path
 
+    def __repr__(self):
+        return self.tag
+
     def set_caching_policy(self, cacher: _CacherProtocol):
         self.cacher = cacher(self)
 
