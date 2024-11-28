@@ -100,10 +100,12 @@ class MultiprocessingRunner:
 
 
 class StrictMPIRunner:
-    def __init__(self):
-        from mpi4py import MPI
-
-        self.comm = MPI.COMM_WORLD
+    def __init__(self, comm=None, root=0):
+        if comm is not None:
+            self.comm = comm
+        else:
+            from mpi4py import MPI
+            self.comm = MPI.COMM_WORLD
         self.root = 0
 
     def set_comm(self, comm):
