@@ -317,10 +317,9 @@ def load_recording(
     num_fragments = int(math.ceil(total_length / samples_per_block))
     tasks = None
     if mpi_comm is not None:
-        rank = mpi_comm.Get_rank()
-        size = mpi_comm.Get_size()
-
-        tasks = np.array_split(np.arange(num_fragments), size)[rank].tolist()
+        # ex) split [1,2,3,4] --> [1,2], [3,4] 
+        from miv.utils.mpi import task_index_split
+        tasks = task_index_split(mpi_comm, num_fragments)
     else:
         # None-mpi case: Load all data and parse
         tasks = list(range(num_fragments))
