@@ -12,7 +12,7 @@ from typing import (
     Union,
 )
 from collections.abc import Callable, Iterator
-from typing import Self
+from typing_extensions import Self
 
 import functools
 import itertools

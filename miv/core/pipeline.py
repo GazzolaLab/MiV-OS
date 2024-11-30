@@ -44,7 +44,7 @@ class Pipeline:
         self,
         working_directory: str | pathlib.Path = "./results",
         cache_directory: str | pathlib.Path | None = None,
-        temporary_directory: str | pathlib.Path + None = None,
+        temporary_directory: str | pathlib.Path | None = None,
         skip_plot: bool = False,
         verbose: bool = False,  # Use logging
     ):
@@ -67,19 +67,16 @@ class Pipeline:
         # Set working directory
         if cache_directory is None:
             cache_directory = working_directory
-        for node in self._start_node.topological_sort():
-            if hasattr(node, "set_save_path"):
-                if temporary_directory is not None:
-                    node.set_save_path(temporary_directory, cache_directory)
-                else:
-                    node.set_save_path(working_directory, cache_directory)
 
         # Reset all callbacks
         for last_node in self.nodes_to_run:
             for node in last_node.topological_sort():
                 if hasattr(node, "set_save_path"):
-                    node.set_save_path(working_directory, cache_directory)
                     node._reset_callbacks(plot=skip_plot)
+                    if temporary_directory is not None:
+                        node.set_save_path(temporary_directory, cache_directory)
+                    else:
+                        node.set_save_path(working_directory, cache_directory)
 
         # Execute
         for node in self.nodes_to_run:

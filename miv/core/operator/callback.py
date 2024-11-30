@@ -6,7 +6,7 @@ __all__ = ["BaseCallbackMixin"]
 from typing import TypeVar  # TODO: For python 3.11, we can use typing.Self
 from typing import Optional, Protocol, Union
 from collections.abc import Callable
-from typing import Self
+from typing_extensions import Self
 
 import types
 import inspect

@@ -17,7 +17,8 @@ __all__ = [
 ]
 
 import types
-from typing import Any, Callable, Protocol, Type, TypeVar, Union
+from typing import Any, Protocol, Type, TypeVar, Union
+from collections.abc import Callable
 
 import functools
 import inspect
@@ -26,8 +27,8 @@ from dataclasses import dataclass, make_dataclass
 
 from miv.core.datatype import DataTypes, Extendable
 
-from .cachable import DataclassCacher, FunctionalCacher, _Cachable, _CacherProtocol
-from .operator import Operator, OperatorMixin
+from .cachable import DataclassCacher, FunctionalCacher, _CacherProtocol
+from .operator import Operator, OperatorMixin, _Cachable
 
 F = TypeVar("F", bound=Callable[..., Any])
 

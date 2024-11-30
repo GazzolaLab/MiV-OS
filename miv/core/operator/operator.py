@@ -15,7 +15,7 @@ __all__ = [
 
 from typing import TYPE_CHECKING, List, Optional, Protocol, Union
 from collections.abc import Callable, Generator
-from typing import Self
+from typing_extensions import Self
 
 import functools
 import inspect

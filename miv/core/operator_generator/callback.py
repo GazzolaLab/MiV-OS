@@ -1,7 +1,8 @@
 __doc__ = """"""
 
 from typing import TypeVar  # TODO: For python 3.11, we can use typing.Self
-from typing import Callable, Optional, Protocol, Union
+from typing import Optional, Protocol, Union
+from collections.abc import Callable
 
 import inspect
 import itertools
@@ -12,7 +13,6 @@ import matplotlib.pyplot as plt
 
 from miv.core.operator.callback import (
     BaseCallbackMixin,
-    SelfCallback,
     get_methods_from_feature_classes_by_startswith_str,
 )
 
@@ -42,7 +42,7 @@ class GeneratorCallbackMixin:
         output,
         inputs=None,
         show: bool = False,
-        save_path: Optional[Union[bool, str, pathlib.Path]] = None,
+        save_path: bool | str | pathlib.Path | None = None,
     ):
         if self._done_flag_generator_plot:
             return
@@ -69,7 +69,7 @@ class GeneratorCallbackMixin:
         output,
         inputs=None,
         show: bool = False,
-        save_path: Optional[Union[bool, str, pathlib.Path]] = None,
+        save_path: bool | str | pathlib.Path | None = None,
     ):
         if self._done_flag_firstiter_plot:
             return
