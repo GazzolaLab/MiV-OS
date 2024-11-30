@@ -14,13 +14,12 @@ __all__ = [
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
-    Generator,
     Literal,
     Protocol,
     TypeVar,
     Union,
 )
+from collections.abc import Callable, Generator
 
 import collections
 import dataclasses
@@ -36,6 +35,7 @@ import shutil
 import numpy as np
 
 from miv.utils.formatter import TColors
+from miv.core.operator.policy import _Runnable
 
 if TYPE_CHECKING:
     from miv.core.datatype import DataTypes
@@ -53,7 +53,7 @@ class _CacherProtocol(Protocol):
     @property
     def cache_dir(self) -> str | pathlib.Path: ...
 
-    def load_cached(self, tag: str) -> Generator[Any, None, None]:
+    def load_cached(self, tag: str) -> Generator[Any]:
         """Load the cached values."""
         ...
 
@@ -146,7 +146,7 @@ class BaseCacher:
     Base class for cacher.
     """
 
-    def __init__(self, parent):
+    def __init__(self, parent: _Runnable):
         super().__init__()
         self.policy: CACHE_POLICY = "AUTO"  # TODO: make this a property
         self.parent = parent
@@ -235,7 +235,7 @@ class DataclassCacher(BaseCacher):
         return True
 
     @when_initialized
-    def load_cached(self, tag="data") -> Generator[DataTypes, None, None]:
+    def load_cached(self, tag="data") -> Generator[DataTypes]:
         paths = glob.glob(self.cache_filename("*", tag=tag))
         paths.sort()
         for path in paths:
@@ -292,7 +292,7 @@ class FunctionalCacher(BaseCacher):
         return True
 
     @when_initialized
-    def load_cached(self, tag="data") -> Generator[DataTypes, None, None]:
+    def load_cached(self, tag="data") -> Generator[DataTypes]:
         path = glob.glob(self.cache_filename(0, tag=tag))[0]
         with open(path, "rb") as f:
             self.parent.logger.info(f"Loading cache from: {path}")

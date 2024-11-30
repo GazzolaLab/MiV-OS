@@ -13,7 +13,8 @@ __all__ = [
     "DataNode",
 ]
 
-from typing import TYPE_CHECKING, Callable, Generator, List, Optional, Protocol, Union
+from typing import TYPE_CHECKING, List, Optional, Protocol, Union
+from collections.abc import Callable, Generator
 
 import functools
 import inspect
@@ -61,7 +62,7 @@ class DataLoader(
 ):
     """ """
 
-    def load(self) -> Generator[DataTypes, None, None]: ...
+    def load(self) -> Generator[DataTypes]: ...
 
 
 class DataNode(_Chainable, _Runnable, _Loggable, Protocol): ...
@@ -86,7 +87,7 @@ class DataLoaderMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
     def __init__(self):
         super().__init__()
 
-        # self.runner = VanillaRunner()
+        self.runner = VanillaRunner()
         self.cacher = FunctionalCacher(self)
 
         self.tag = "data_loader"
