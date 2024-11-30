@@ -11,7 +11,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.10", "3.11", "3.12"]
         os: [macos-13, ubuntu-latest]
         mpi: ["openmpi"]  # [ 'mpich', 'openmpi', 'intelmpi']
         include:
@@ -48,7 +48,7 @@ jobs:
           key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install --no-interaction --no-root --all-extras --with=algorithmExtension,sortingExtension #,mpi
+        run: poetry install --no-interaction --no-root --all-extras --with=dev,algorithmExtension,sortingExtension #,mpi
       - uses: FedericoCarboni/setup-ffmpeg@v3
         id: setup-ffmpeg
         with:
