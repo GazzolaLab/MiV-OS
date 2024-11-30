@@ -14,13 +14,13 @@ __all__ = [
     "load_ttl_event",
 ]
 
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Set, Tuple, Union
-
 import logging
 import math
 import os
 from ast import literal_eval
 from glob import glob
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union
+from collections.abc import Sequence
 
 import neo
 import numpy as np
@@ -41,7 +41,7 @@ except ImportError:
     logger = logging.getLogger(__name__)
 
 
-def apply_channel_mask(signal: np.ndarray, channel_mask: Set[int]):
+def apply_channel_mask(signal: np.ndarray, channel_mask: set[int]):
     """Apply channel mask on the given signal.
 
     Parameters
@@ -70,7 +70,7 @@ def apply_channel_mask(signal: np.ndarray, channel_mask: Set[int]):
     return signal
 
 
-def bits_to_voltage(signal: SignalType, channel_info: Sequence[Dict[str, Any]]):
+def bits_to_voltage(signal: SignalType, channel_info: Sequence[dict[str, Any]]):
     """
     Convert binary bit data to voltage (microVolts)
 
@@ -169,7 +169,7 @@ def load_ttl_event(
 
     # Check TTL event recorded
     info_file: str = os.path.join(folder, "structure.oebin")
-    info: Dict[str, Any] = oebin_read(info_file)
+    info: dict[str, Any] = oebin_read(info_file)
     version = info["GUI version"]
     assert "events" in info.keys(), "No events recorded (TTL)."
     ttl_info = [
@@ -228,7 +228,7 @@ def load_ttl_event(
 
 def load_recording(
     folder: str,
-    channel_mask: Optional[Set[int]] = None,
+    channel_mask: set[int] | None = None,
     start_at_zero: bool = True,
     dtype: np.dtype = np.float32,
     progress_bar: bool = False,
@@ -281,7 +281,7 @@ def load_recording(
 
     """
 
-    file_path: List[str] = glob(
+    file_path: list[str] = glob(
         os.path.join(folder, "**", "continuous.dat"), recursive=True
     )
     assert (
@@ -290,7 +290,7 @@ def load_recording(
 
     # load structure information dictionary
     info_file: str = os.path.join(folder, "structure.oebin")
-    info: Dict[str, Any] = oebin_read(info_file)
+    info: dict[str, Any] = oebin_read(info_file)
     num_channels: int = info["continuous"][0]["num_channels"]
     sampling_rate: int = int(info["continuous"][0]["sample_rate"])
     # channel_info: Dict[str, Any] = info["continuous"][0]["channels"]
@@ -317,8 +317,9 @@ def load_recording(
     num_fragments = int(math.ceil(total_length / samples_per_block))
     tasks = None
     if mpi_comm is not None:
-        # ex) split [1,2,3,4] --> [1,2], [3,4] 
+        # ex) split [1,2,3,4] --> [1,2], [3,4]
         from miv.utils.mpi import task_index_split
+
         tasks = task_index_split(mpi_comm, num_fragments)
     else:
         # None-mpi case: Load all data and parse
@@ -378,9 +379,9 @@ def load_recording(
 def load_continuous_data(
     data_path: str,
     num_channels: int,
-    _recorded_dtype: Union[np.dtype, str] = "int16",
+    _recorded_dtype: np.dtype | str = "int16",
     offset: int = 0,
-    shape: Tuple[int, int] = None,
+    shape: tuple[int, int] = None,
 ):
     """
     Load single continous data file and return timestamps and raw data in numpy array.
