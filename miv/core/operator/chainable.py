@@ -3,7 +3,6 @@ from __future__ import annotations
 __doc__ = """"""
 __all__ = ["_Chainable", "BaseChainingMixin"]
 
-from typing import TypeVar  # TODO: For python 3.11, we can use typing.Self
 from typing import (
     TYPE_CHECKING,
     Callable,
@@ -11,10 +10,10 @@ from typing import (
     List,
     Optional,
     Protocol,
-    Self,
     Set,
     Union,
 )
+from typing_extensions import Self
 
 import functools
 import itertools

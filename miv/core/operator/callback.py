@@ -2,7 +2,8 @@ __doc__ = """"""
 __all__ = ["_Callback"]
 
 from typing import TypeVar  # TODO: For python 3.11, we can use typing.Self
-from typing import Callable, Optional, Protocol, Self, Union
+from typing import Callable, Optional, Protocol, Union
+from typing_extensions import Self
 
 import inspect
 import itertools
