@@ -26,6 +26,7 @@ if TYPE_CHECKING:
     from miv.core.datatype import DataTypes
 
 from miv.core.operator.cachable import (
+    CACHE_POLICY,
     DataclassCacher,
     FunctionalCacher,
     _Cachable,
@@ -85,7 +86,7 @@ class DataLoaderMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
     def __init__(self):
         super().__init__()
 
-        self.runner = VanillaRunner()
+        # self.runner = VanillaRunner()
         self.cacher = FunctionalCacher(self)
 
         self.tag = "data_loader"
@@ -133,7 +134,7 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
             - All results from callback
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.runner = VanillaRunner()
         self.cacher = DataclassCacher(self)
@@ -147,8 +148,8 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
     def __str__(self):
         return self.tag
 
-    def set_caching_policy(self, cacher: _CacherProtocol):
-        self.cacher = cacher(self)
+    def set_caching_policy(self, policy: CACHE_POLICY) -> None:
+        self.cacher.policy = policy
 
     def receive(self) -> list[DataTypes]:
         """

@@ -11,6 +11,7 @@ from typing import (
     List,
     Optional,
     Protocol,
+    Self,
     Set,
     Union,
 )
@@ -22,8 +23,6 @@ import matplotlib.pyplot as plt
 
 if TYPE_CHECKING:
     from miv.core.datatype import DataTypes
-
-SelfChain = TypeVar("SelfChain", bound="_Chainable")
 
 
 class _Chainable(Protocol):
@@ -40,11 +39,11 @@ class _Chainable(Protocol):
     @property
     def output(self) -> list[DataTypes]: ...
 
-    def __rshift__(self, right: SelfChain) -> SelfChain: ...
+    def __rshift__(self, right: _Chainable) -> Self: ...
 
-    def iterate_upstream(self) -> Iterator[SelfChain]: ...
+    def iterate_upstream(self) -> Iterator[_Chainable]: ...
 
-    def iterate_downstream(self) -> Iterator[SelfChain]: ...
+    def iterate_downstream(self) -> Iterator[_Chainable]: ...
 
     def clear_connections(self) -> None: ...
 
@@ -65,7 +64,7 @@ class BaseChainingMixin:
         self._downstream_list: list[_Chainable] = []
         self._upstream_list: list[_Chainable] = []
 
-    def __rshift__(self, right: _Chainable) -> _Chainable:
+    def __rshift__(self, right: _Chainable) -> Self:
         self._downstream_list.append(right)
         right._upstream_list.append(self)
         return right
@@ -140,8 +139,8 @@ class BaseChainingMixin:
         return "\n".join(output)
 
     def _get_upstream_topology(
-        self, lst: list[SelfChain] | None = None
-    ) -> list[SelfChain]:
+        self, lst: list[_Chainable] | None = None
+    ) -> list[_Chainable]:
         if lst is None:
             lst = []
 

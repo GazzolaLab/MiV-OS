@@ -12,7 +12,7 @@ import os
 import pathlib
 import time
 
-from miv.core.operator.chainable import _Chainable
+from miv.core.operator.operator import Operator
 
 
 class Pipeline:
@@ -33,7 +33,7 @@ class Pipeline:
     For example, if E is already cached, then the execution order of `Pipeline(F)` is A->B->D->F. (C is skipped, E is loaded from cache)
     """
 
-    def __init__(self, node: _Chainable):
+    def __init__(self, node: Operator):
         self._start_node = node
         self.execution_order = None
 
@@ -88,7 +88,6 @@ class Pipeline:
                 print("  Exception raised: ", node, flush=True)
                 raise e
 
-
             if verbose:
                 print(f"  Finished: {time.time() - stime:.03f} sec", flush=True)
         if verbose:
@@ -96,8 +95,8 @@ class Pipeline:
 
         if temporary_directory is not None:
             os.system(f"cp -rf {temporary_directory}/* {working_directory}/")
-            #import shutil
-            #shutil.move(temporary_directory, working_directory)
+            # import shutil
+            # shutil.move(temporary_directory, working_directory)
 
     def summarize(self):
         if self.execution_order is None:

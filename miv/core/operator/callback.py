@@ -2,7 +2,7 @@ __doc__ = """"""
 __all__ = ["_Callback"]
 
 from typing import TypeVar  # TODO: For python 3.11, we can use typing.Self
-from typing import Callable, Optional, Protocol, Union
+from typing import Callable, Optional, Protocol, Self, Union
 
 import inspect
 import itertools
@@ -45,7 +45,7 @@ def get_methods_from_feature_classes_by_endswith_str(self, method_name: str):
 
 
 class _Callback(Protocol):
-    def __lshift__(self, right: SelfCallback) -> SelfCallback: ...
+    def __lshift__(self, right: Callable) -> Self: ...
 
     def receive(self): ...
 
@@ -65,7 +65,7 @@ class BaseCallbackMixin:
         self._callback_names = []
         self.skip_plot = False
 
-    def __lshift__(self, right: Callable) -> SelfCallback:
+    def __lshift__(self, right: Callable) -> Self:
         self._callback_collection.append(right)
         self._callback_names.append(right.__name__)
         return self

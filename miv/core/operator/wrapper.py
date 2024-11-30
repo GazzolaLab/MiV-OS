@@ -17,7 +17,7 @@ __all__ = [
 ]
 
 import types
-from typing import Protocol, Union
+from typing import Any, Callable, Protocol, Type, TypeVar, Union
 
 import functools
 import inspect
@@ -25,21 +25,20 @@ from collections import UserList
 from dataclasses import dataclass, make_dataclass
 
 from miv.core.datatype import DataTypes, Extendable
-from miv.core.operator.cachable import (
-    DataclassCacher,
-    FunctionalCacher,
-    _CacherProtocol,
-)
-from miv.core.operator.operator import Operator, OperatorMixin
+
+from .cachable import DataclassCacher, FunctionalCacher, _Cachable, _CacherProtocol
+from .operator import Operator, OperatorMixin
+
+F = TypeVar("F", bound=Callable[..., Any])
 
 
-def cache_call(func):
+def cache_call(func: F) -> F:
     """
     Cache the methods of the operator.
     Save the cache in the cacher object.
     """
 
-    def wrapper(self: Operator, *args, **kwargs):
+    def wrapper(self: _Cachable, *args, **kwargs):
         tag = "data"
         cacher: DataclassCacher = self.cacher
 
