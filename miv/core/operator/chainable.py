@@ -3,17 +3,16 @@ from __future__ import annotations
 __doc__ = """"""
 __all__ = ["_Chainable", "BaseChainingMixin"]
 
-from typing import TypeVar  # TODO: For python 3.11, we can use typing.Self
 from typing import (
     TYPE_CHECKING,
-    Callable,
-    Iterator,
     List,
     Optional,
     Protocol,
     Set,
     Union,
 )
+from collections.abc import Callable, Iterator
+from typing import Self
 
 import functools
 import itertools
@@ -22,8 +21,6 @@ import matplotlib.pyplot as plt
 
 if TYPE_CHECKING:
     from miv.core.datatype import DataTypes
-
-SelfChain = TypeVar("SelfChain", bound="_Chainable")
 
 
 class _Chainable(Protocol):
@@ -49,7 +46,7 @@ class _Chainable(Protocol):
         """Print summary of downstream network structures."""
         ...
 
-    def topological_sort(self) -> list[SelfChain]: ...
+    def topological_sort(self) -> list[_Chainable]: ...
 
 
 class BaseChainingMixin:
@@ -64,7 +61,7 @@ class BaseChainingMixin:
         self._downstream_list: list[_Chainable] = []
         self._upstream_list: list[_Chainable] = []
 
-    def __rshift__(self, right: _Chainable) -> _Chainable:
+    def __rshift__(self, right: _Chainable) -> Self:
         self._downstream_list.append(right)
         right._upstream_list.append(self)
         return right
@@ -139,8 +136,8 @@ class BaseChainingMixin:
         return "\n".join(output)
 
     def _get_upstream_topology(
-        self, upstream_nodelist: list[SelfChain] | None = None
-    ) -> list[SelfChain]:
+        self, upstream_nodelist: list[_Chainable] | None = None
+    ) -> list[_Chainable]:
         if upstream_nodelist is None:
             upstream_nodelist = []
 
@@ -164,7 +161,7 @@ class BaseChainingMixin:
         upstream_nodelist.append(self)
         return upstream_nodelist
 
-    def topological_sort(self) -> list[SelfChain]:
+    def topological_sort(self) -> list[_Chainable]:
         """
         Topological sort of the graph.
         Returns the list of operations in order to execute "self"

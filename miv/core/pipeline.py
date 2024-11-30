@@ -8,6 +8,7 @@ __all__ = ["Pipeline"]
 
 from typing import List, Optional, Union
 
+import os
 import pathlib
 import time
 
@@ -43,6 +44,7 @@ class Pipeline:
         self,
         working_directory: str | pathlib.Path = "./results",
         cache_directory: str | pathlib.Path | None = None,
+        temporary_directory: str | pathlib.Path + None = None,
         skip_plot: bool = False,
         verbose: bool = False,  # Use logging
     ):
@@ -56,12 +58,21 @@ class Pipeline:
         cache_directory : Optional[Union[str, pathlib.Path]], optional
             The cache directory where the pipeline will be executed. By default None
             If None, the cache directory will be the same as the working directory.
+        temporary_directory : Optional[Union[str, pathlib.Path]], optional
+            If given, files will be saved in temporary directory, and will be moved to
+            working directory after. Cache directory is not altered.
         verbose : bool, optional
             If True, the pipeline will log debugging informations. By default False
         """
         # Set working directory
         if cache_directory is None:
             cache_directory = working_directory
+        for node in self._start_node.topological_sort():
+            if hasattr(node, "set_save_path"):
+                if temporary_directory is not None:
+                    node.set_save_path(temporary_directory, cache_directory)
+                else:
+                    node.set_save_path(working_directory, cache_directory)
 
         # Reset all callbacks
         for last_node in self.nodes_to_run:
@@ -85,7 +96,12 @@ class Pipeline:
             if verbose:
                 etime = time.time()
                 print(f"  Finished: {etime - stime:.03f} sec", flush=True)
-                print(f"Pipeline done.")
+                print("Pipeline done.")
+
+        if temporary_directory is not None:
+            os.system(f"cp -rf {temporary_directory}/* {working_directory}/")
+            # import shutil
+            # shutil.move(temporary_directory, working_directory)
 
     def summarize(self):
         for node in self.nodes_to_run:

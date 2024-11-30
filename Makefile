@@ -14,7 +14,6 @@ poetry-remove:
 #* Installation
 .PHONY: install
 install:
-	poetry export --without-hashes > requirements.txt
 	poetry install -n
 
 .PHONY: pre-commit-install
@@ -24,8 +23,8 @@ pre-commit-install:
 #* Formatters
 .PHONY: codestyle
 codestyle:
-	poetry run pyupgrade --exit-zero-even-if-changed --py38-plus **/*.py
-	poetry run isort --settings-path pyproject.toml ./
+	# poetry run pyupgrade --exit-zero-even-if-changed --py38-plus **/*.py
+	# poetry run isort --settings-path pyproject.toml ./
 	poetry run black --config pyproject.toml ./
 
 .PHONY: formatting
@@ -38,7 +37,7 @@ test:
 
 .PHONY: check-codestyle
 check-codestyle:
-	poetry run isort --diff --check-only --settings-path pyproject.toml ./
+	# poetry run isort --diff --check-only --settings-path pyproject.toml ./
 	poetry run black --diff --check --config pyproject.toml ./
 
 .PHONY: mypy

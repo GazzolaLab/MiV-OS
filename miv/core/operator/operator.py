@@ -13,7 +13,9 @@ __all__ = [
     "DataNode",
 ]
 
-from typing import TYPE_CHECKING, Callable, Generator, List, Optional, Protocol, Union
+from typing import TYPE_CHECKING, List, Optional, Protocol, Union
+from collections.abc import Callable, Generator
+from typing import Self
 
 import functools
 import inspect
@@ -57,11 +59,14 @@ class _Callback(Protocol):
         cache_path: str | pathlib.Path | None = None,
     ) -> None: ...
 
-    def __lshift__(self, right: Callable) -> SelfCallaback: ...
+    def __lshift__(self, right: Callable) -> Self: ...
+
     def _reset_callbacks(
         self, *, after_run: bool = False, plot: bool = False
     ) -> None: ...
+
     def _callback_after_run(self, *args, **kwargs) -> None: ...
+
     def _callback_plot(
         self,
         output: tuple | None,
@@ -111,7 +116,7 @@ class DataLoader(
 ):
     """ """
 
-    def load(self) -> Generator[DataTypes, None, None]: ...
+    def load(self) -> Generator[DataTypes]: ...
 
 
 class DataNode(_Chainable, _Runnable, _Loggable, Protocol): ...
@@ -204,6 +209,12 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
 
     def set_caching_policy(self, policy: CACHE_POLICY) -> None:
         self.cacher.policy = policy
+
+    def __repr__(self):
+        return self.tag
+
+    def __str__(self):
+        return self.tag
 
     def receive(self) -> list[DataTypes]:
         """

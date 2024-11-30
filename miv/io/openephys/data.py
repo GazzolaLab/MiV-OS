@@ -26,25 +26,23 @@ Module (OpenEphys)
 __all__ = ["Data", "DataManager"]
 
 
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Dict,
-    Iterable,
-    List,
-    Optional,
-    Set,
-    Tuple,
-    Union,
-)
-
 import logging
 import os
 import pickle
 import re
 from collections.abc import MutableSequence
 from glob import glob
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Union,
+)
+from collections.abc import Callable, Iterable
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -269,7 +267,9 @@ class Data(DataLoaderMixin):
             self.data_path
         )
         if timestamps.size == 0:
-            self.logger.warning(f"TTL event was loaded but data is empty: {self.data_path}")
+            self.logger.warning(
+                f"TTL event was loaded but data is empty: {self.data_path}"
+            )
         return Signal(data=states[:, None], timestamps=timestamps, rate=sampling_rate)
 
     def set_channel_mask(self, channel_id: Iterable[int]):
@@ -603,7 +603,7 @@ class DataManager(MutableSequence):
             ):
                 path_list.append(path)
         if sort:
-            if os.name == 'nt':  # For Windows
+            if os.name == "nt":  # For Windows
                 pattern = r"(\d+)\\recording(\d+)"
             else:  # For Linux or other POSIX systems
                 pattern = r"(\d+)/recording(\d+)"

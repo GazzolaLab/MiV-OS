@@ -4,7 +4,9 @@ Implementation for callback features that will be mixed in operator class.
 __all__ = ["BaseCallbackMixin"]
 
 from typing import TypeVar  # TODO: For python 3.11, we can use typing.Self
-from typing import Callable, Optional, Protocol, Union
+from typing import Optional, Protocol, Union
+from collections.abc import Callable
+from typing import Self
 
 import types
 import inspect
@@ -13,8 +15,6 @@ import os
 import pathlib
 
 import matplotlib.pyplot as plt
-
-SelfCallback = TypeVar("SelfCallback", bound="_Callback")
 
 
 def MixinOperators(func):
@@ -41,6 +41,26 @@ def get_methods_from_feature_classes_by_endswith_str(self, method_name: str):
     return methods
 
 
+class _Callback(Protocol):
+    def __lshift__(self, right: Callable) -> Self: ...
+
+    def receive(self): ...
+
+    def output(self): ...
+
+    def _callback_after_run(self): ...
+
+    def _callback_plot(
+        self,
+        output: tuple | None,
+        inputs: list,
+        show: bool,
+        save_path: str | pathlib.Path | None,
+    ): ...
+
+    def set_save_path(self, path: str | pathlib.Path) -> None: ...
+
+
 class BaseCallbackMixin:
     def __init__(self, cache_path: str = ".cache"):
         super().__init__()
@@ -60,7 +80,7 @@ class BaseCallbackMixin:
         self._done_flag_after_run = after_run
         self._done_flag_plot = plot
 
-    def __lshift__(self, right: Callable) -> SelfCallback:
+    def __lshift__(self, right: Callable) -> Self:
         # Dynamically add new function into an operator instance
         if inspect.getfullargspec(right)[0][0] == "self":
             setattr(self, right.__name__, types.MethodType(right, self))

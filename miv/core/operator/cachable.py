@@ -5,13 +5,13 @@ __doc__ = """
 __all__ = [
     "_CacherProtocol",
     "_Jsonable",
-    "_Cachable",
     "SkipCacher",
     "DataclassCacher",
     "FunctionalCacher",
 ]
 
-from typing import TYPE_CHECKING, Any, Generator, Literal, Protocol, Union, Callable
+from typing import TYPE_CHECKING, Any, Literal, Protocol, TypeVar, Union
+from collections.abc import Callable, Generator
 
 import collections
 import dataclasses
@@ -27,6 +27,7 @@ import shutil
 import numpy as np
 
 from miv.utils.formatter import TColors
+from miv.core.operator.policy import _Runnable
 
 if TYPE_CHECKING:
     from miv.core.datatype import DataTypes
@@ -39,17 +40,20 @@ CACHE_POLICY = Literal["AUTO", "ON", "OFF", "MUST", "RUN", "OVERWRITE"]
 
 
 class _CacherProtocol(Protocol):
+    policy: CACHE_POLICY
+
     @property
     def cache_dir(self) -> str | pathlib.Path: ...
 
-    @property
-    def config_filename(self) -> str | pathlib.Path: ...
-    def save_config(self, tag: str) -> None: ...
+    def load_cached(self, tag: str) -> Generator[Any]:
+        """Load the cached values."""
+        ...
 
-    def cache_filename(self) -> str | pathlib.Path: ...
-    def load_cached(self, tag: str) -> Generator[Any, None, None]: ...
     def save_cache(self, values: Any, idx: int, tag: str) -> bool: ...
-    def check_cached(self, tag: str) -> bool: ...
+
+    def check_cached(self, tag: str) -> bool:
+        """Check if the current configuration is the same as the cached one."""
+        ...
 
 
 class _Jsonable(Protocol):
@@ -89,8 +93,11 @@ class SkipCacher:
         raise NotImplementedError(self.MSG)
 
 
-def when_policy_is(*allowed_policy):
-    def decorator(func: Callable):
+F = TypeVar("F", bound=Callable[..., Any])
+
+
+def when_policy_is(*allowed_policy: CACHE_POLICY) -> Callable[[F], F]:
+    def decorator(func: F) -> F:
         # @functools.wraps(func) # TODO: fix this
         def wrapper(self: _CacherProtocol, *args, **kwargs):
             if self.policy in allowed_policy:
@@ -103,7 +110,7 @@ def when_policy_is(*allowed_policy):
     return decorator
 
 
-def when_initialized(func):  # TODO: refactor
+def when_initialized(func: F) -> F:  # TODO: refactor
     # @functools.wraps(func) # TODO: fix this
     def wrapper(self, *args, **kwargs):
         if self.cache_dir is None:
@@ -119,7 +126,7 @@ class BaseCacher:
     Base class for cacher.
     """
 
-    def __init__(self, parent):
+    def __init__(self, parent: _Runnable):
         super().__init__()
         self.policy: CACHE_POLICY = "AUTO"  # TODO: make this a property
         self.parent = parent
@@ -208,7 +215,7 @@ class DataclassCacher(BaseCacher):
         return True
 
     @when_initialized
-    def load_cached(self, tag="data") -> Generator[DataTypes, None, None]:
+    def load_cached(self, tag="data") -> Generator[DataTypes]:
         paths = glob.glob(self.cache_filename("*", tag=tag))
         paths.sort()
         for path in paths:
@@ -265,7 +272,7 @@ class FunctionalCacher(BaseCacher):
         return True
 
     @when_initialized
-    def load_cached(self, tag="data") -> Generator[DataTypes, None, None]:
+    def load_cached(self, tag="data") -> Generator[DataTypes]:
         path = glob.glob(self.cache_filename(0, tag=tag))[0]
         with open(path, "rb") as f:
             self.parent.logger.info(f"Loading cache from: {path}")

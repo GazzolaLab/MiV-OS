@@ -8,12 +8,12 @@ __all__ = [
     "SupportMPIMerge",
 ]
 
-from typing import TYPE_CHECKING, Any, Callable, Generator, Optional, Protocol, Union
-
 import inspect
 import multiprocessing
 import pathlib
 from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any, Optional, Protocol, Union
+from collections.abc import Callable, Generator
 
 if TYPE_CHECKING:
     # This will likely cause circular import error
@@ -23,7 +23,23 @@ if TYPE_CHECKING:
 class _RunnerProtocol(Callable, Protocol):
     def __init__(self, comm, root: int): ...
 
-    def __call__(self, func: Callable, inputs: Optional[tuple], **kwargs) -> object: ...
+    def __call__(self, func: Callable, inputs: tuple | None, **kwargs) -> object: ...
+
+
+class _Runnable(Protocol):
+    """
+    A protocol for a runner policy.
+    """
+
+    @property
+    def runner(self) -> _RunnerProtocol: ...
+
+    def run(
+        self,
+        save_path: str | pathlib.Path,
+        cache_dir: str | pathlib.Path,
+    ) -> None: ...
+
 
 class VanillaRunner:
     """Default runner without any high-level parallelism.
@@ -62,7 +78,7 @@ class VanillaRunner:
 
 
 class MultiprocessingRunner:
-    def __init__(self, np: Optional[int] = None):
+    def __init__(self, np: int | None = None):
         if np is None:
             self._np = multiprocessing.cpu_count()
         else:
@@ -83,10 +99,13 @@ class MultiprocessingRunner:
 
 
 class StrictMPIRunner:
-    def __init__(self):
-        from mpi4py import MPI
+    def __init__(self, comm=None, root=0):
+        if comm is not None:
+            self.comm = comm
+        else:
+            from mpi4py import MPI
 
-        self.comm = MPI.COMM_WORLD
+            self.comm = MPI.COMM_WORLD
         self.root = 0
 
     def set_comm(self, comm):
