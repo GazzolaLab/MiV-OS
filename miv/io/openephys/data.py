@@ -26,6 +26,12 @@ Module (OpenEphys)
 __all__ = ["Data", "DataManager"]
 
 
+import logging
+import os
+import pickle
+import re
+from collections.abc import MutableSequence
+from glob import glob
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -33,13 +39,7 @@ from typing import (
     Iterable,
     Optional,
 )
-
-import logging
-import os
-import pickle
-import re
-from collections.abc import MutableSequence
-from glob import glob
+from collections.abc import Callable, Iterable
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -128,10 +128,10 @@ class Data(DataLoaderMixin):
 
         # load structure information dictionary
         info_file: str = os.path.join(self.data_path, "structure.oebin")
-        info: Dict[str, Any] = oebin_read(info_file)
+        info: dict[str, Any] = oebin_read(info_file)
         num_channels: int = info["continuous"][0]["num_channels"]
         sampling_rate: int = int(info["continuous"][0]["sample_rate"])
-        # channel_info: Dict[str, Any] = info["continuous"][0]["channels"]
+        # channel_info: dict[str, Any] = info["continuous"][0]["channels"]
 
         _old_oe_version = False
 
@@ -300,7 +300,9 @@ class Data(DataLoaderMixin):
             self.data_path
         )
         if timestamps.size == 0:
-            self.logger.warning(f"TTL event was loaded but data is empty: {self.data_path}")
+            self.logger.warning(
+                f"TTL event was loaded but data is empty: {self.data_path}"
+            )
         return Signal(data=states[:, None], timestamps=timestamps, rate=sampling_rate)
 
     def set_channel_mask(self, channel_id: Iterable[int]):
@@ -634,7 +636,7 @@ class DataManager(MutableSequence):
             ):
                 path_list.append(path)
         if sort:
-            if os.name == 'nt':  # For Windows
+            if os.name == "nt":  # For Windows
                 pattern = r"(\d+)\\recording(\d+)"
             else:  # For Linux or other POSIX systems
                 pattern = r"(\d+)/recording(\d+)"

@@ -1,10 +1,9 @@
 __doc__ = "Downsample Operator for Signals"
 __all__ = ["Downsample"]
 
-from typing import Optional
-
 import os
 from dataclasses import dataclass
+from typing import Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -42,18 +41,26 @@ class Downsample(GeneratorOperatorMixin):
         # Calculate downsampling factor
         downsample_factor = int(signal.rate / self.target_rate)
         if downsample_factor < 1:
-            raise ValueError("Invalid downsample factor. Check target and original rates.")
+            raise ValueError(
+                "Invalid downsample factor. Check target and original rates."
+            )
 
         # Downsample each channel
         data = signal.data
-        downsampled_data = sps.resample(data, num=data.shape[0] // downsample_factor, axis=0)
+        downsampled_data = sps.resample(
+            data, num=data.shape[0] // downsample_factor, axis=0
+        )
 
         # Adjust timestamps for the new sampling rate
         downsampled_timestamps = np.linspace(
             signal.timestamps[0], signal.timestamps[-1], downsampled_data.shape[0]
         )
 
-        return Signal(data=downsampled_data, timestamps=downsampled_timestamps, rate=self.target_rate)
+        return Signal(
+            data=downsampled_data,
+            timestamps=downsampled_timestamps,
+            rate=self.target_rate,
+        )
 
     def __post_init__(self):
         super().__init__()

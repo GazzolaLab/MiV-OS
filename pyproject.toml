@@ -5,7 +5,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "MiV-OS"
-version = "0.3.1.pre2"
+version = "0.3.1.pre3"
 description = "Python software for analysis and computing framework used in MiV project."
 readme = "README.md"
 authors = ["GazzolaLab <skim449@illinois.edu>"]
@@ -23,7 +23,6 @@ classifiers = [
   "Operating System :: OS Independent",
   "License :: OSI Approved :: MIT License",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
@@ -65,7 +64,7 @@ myst-parser = {version = "^0.18.1", optional = true}
 numpydoc = {version = "^1.4.0", optional = true}
 sphinx-togglebutton = {version = "^0.3.2", optional = true}
 sphinx-copybutton = {version = "^0.5.0", optional = true}
-sphinxcontrib-mermaid = {version = "^0.9.2", optional = true}
+sphinxcontrib-mermaid = {version = "^1.0.0", optional = true}
 myst-nb = {version = "^0.17.1", optional = true}
 pyinform = "^0.2.0"
 graphviz = "^0.20.1"
@@ -82,8 +81,7 @@ meautility = "^1.5.1"
 
 [tool.poetry.dev-dependencies]
 black = "^24.4.2"
-isort = {extras = ["colors"], version = "^5.10.1"}
-mypy = "^1.9.0"
+mypy = "^1.12.1"
 mypy-extensions = "^1.0.0"
 pre-commit = "^3.0.4"
 pydocstyle = "^6.1.1"
@@ -138,7 +136,7 @@ mpi4py = "^4.0.1"
 
 [tool.black]
 # https://github.com/psf/black
-target-version = ["py38"]
+target-version = ["py310"]
 line-length = 88
 color = true
 
@@ -158,34 +156,21 @@ exclude = '''
 )/
 '''
 
-[tool.isort]
-# https://github.com/timothycrosley/isort/
-py_version = 38
-line_length = 88
-
-known_typing = ["typing", "types", "typing_extensions", "mypy", "mypy_extensions"]
-sections = ["FUTURE", "TYPING", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
-include_trailing_comma = true
-profile = "black"
-multi_line_output = 3
-indent = 4
-color_output = true
-
 [tool.mypy]
 # https://mypy.readthedocs.io/en/latest/config_file.html#using-a-pyproject-toml-file
-python_version = 3.8
+python_version = "3.10"
 pretty = true
 show_traceback = true
 color_output = true
 strict = true
 
-# allow_redefinition = false
-# check_untyped_defs = false  # TODO: Disabled cuz it might be to harsh condition, but open to discussion.
-# disallow_any_generics = false
-# disallow_incomplete_defs = true
+allow_redefinition = false
+check_untyped_defs = false  # TODO: Disabled cuz it might be to harsh condition, but open to discussion.
+disallow_any_generics = false
+disallow_incomplete_defs = true
 ignore_missing_imports = true
 implicit_reexport = true
-# no_implicit_optional = true
+no_implicit_optional = true
 show_column_numbers = true
 show_error_codes = true
 show_error_context = true
@@ -234,7 +219,7 @@ exclude_lines = [
     ''''@(abc\.)?'abstractmethod''',
     '\.\.\.'
 ]
-fail_under = 40
+fail_under = 80
 show_missing = true
 
 
