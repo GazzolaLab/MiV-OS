@@ -115,6 +115,42 @@ class Data(DataLoaderMixin):
 
         os.makedirs(self._analysis_path, exist_ok=True)
 
+    def num_fragments(self):
+        import math
+        from .binary import load_timestamps, oebin_read
+        # Refactor
+        file_path: list[str] = glob(
+            os.path.join(self.data_path, "**", "continuous.dat"), recursive=True
+        )
+        assert (
+            len(file_path) == 1
+        ), f"There should be only one 'continuous.dat' file. (There exists {file_path})"
+
+        # load structure information dictionary
+        info_file: str = os.path.join(self.data_path, "structure.oebin")
+        info: Dict[str, Any] = oebin_read(info_file)
+        num_channels: int = info["continuous"][0]["num_channels"]
+        sampling_rate: int = int(info["continuous"][0]["sample_rate"])
+        # channel_info: Dict[str, Any] = info["continuous"][0]["channels"]
+
+        _old_oe_version = False
+
+        # Read timestamps first
+        dirname = os.path.dirname(file_path[0])
+        timestamps_path = os.path.join(dirname, "timestamps.npy")
+        timestamps = load_timestamps(timestamps_path, sampling_rate, _old_oe_version)
+        total_length = timestamps.size
+
+        # Define task
+        filesize = os.path.getsize(file_path[0])
+        itemsize = np.dtype("int16").itemsize
+        assert (
+            filesize == itemsize * total_length * num_channels
+        ), f"{filesize=} does not match the expected {itemsize*total_length*num_channels=}. Path: {file_path[0]}"
+        samples_per_block = sampling_rate * 60
+        num_fragments = int(math.ceil(total_length / samples_per_block))
+        return num_fragments
+
     @property
     def analysis_path(self):
         """Default sub-directory path to save analysis results"""
