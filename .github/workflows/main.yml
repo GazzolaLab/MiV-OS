@@ -48,7 +48,7 @@ jobs:
           key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install --no-interaction --no-root --all-extras --with=dev,algorithmExtension,sortingExtension #,mpi
+        run: poetry install --no-interaction --all-extras --with=dev,algorithmExtension,sortingExtension #,mpi
       - uses: FedericoCarboni/setup-ffmpeg@v3
         id: setup-ffmpeg
         with:
@@ -67,17 +67,17 @@ jobs:
       - name: Run pytests
         if: always()
         run: |
-          source $POETRY_VIRTUALENVS_PATH/bin/activate
+          source .venv/bin/activate
           make test
       - name: Run mypy
         if: always()
         run: |
-          source $POETRY_VIRTUALENVS_PATH/bin/activate
+          source .venv/bin/activate
           make mypy
       - name: Run formatting check
         if: always()
         run: |
-          source $POETRY_VIRTUALENVS_PATH/bin/activate
+          source .venv/bin/activate
           make check-codestyle
       # Upload coverage to Codecov (use python 3.10 ubuntu-latest)
       - name: Upload coverage to Codecov (only on 3.10 ubuntu-latest)
