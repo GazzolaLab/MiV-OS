@@ -16,7 +16,6 @@ import numpy as np
 import serial
 
 from miv.io.serial import ArduinoSerial
-from miv.typing import SpiketrainType
 
 
 class StimjimSerial(ArduinoSerial):
@@ -42,7 +41,7 @@ class StimjimSerial(ArduinoSerial):
     def send_spiketrain(
         self,
         pulsetrain: int,
-        spiketrain: SpiketrainType,
+        spiketrain: np.ndarray,
         t_max: int,
         total_duration: int,
         delay: float = 0.0,
@@ -69,11 +68,11 @@ class StimjimSerial(ArduinoSerial):
 
     def _spiketrain_to_str(
         self,
-        spiketrain: SpiketrainType,
+        spiketrain: np.ndarray,
         t_max: int,
         pulse_length: int = 10_000,
         reverse: bool = False,
-    ) -> List[str]:
+    ) -> list[str]:
         """
         Convert a spiketrain into a series of strings that can be sent to the Stimjim device.
         """

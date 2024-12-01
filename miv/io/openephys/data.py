@@ -35,8 +35,6 @@ from glob import glob
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
-    Iterable,
     Optional,
 )
 from collections.abc import Callable, Iterable
@@ -118,6 +116,7 @@ class Data(DataLoaderMixin):
     def num_fragments(self):
         import math
         from .binary import load_timestamps, oebin_read
+
         # Refactor
         file_path: list[str] = glob(
             os.path.join(self.data_path, "**", "continuous.dat"), recursive=True
@@ -271,7 +270,7 @@ class Data(DataLoaderMixin):
         signal : SignalType, neo.core.AnalogSignal
             The length of the first axis `signal.shape[0]` correspond to the length of the
             signal, while second axis `signal.shape[1]` correspond to the number of channels.
-        timestamps : TimestampsType, numpy array
+        timestamps : numpy array
         sampling_rate : float
 
         Raises

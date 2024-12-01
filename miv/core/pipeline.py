@@ -7,6 +7,7 @@ __doc__ = """
 __all__ = ["Pipeline"]
 
 from typing import List, Optional, Union
+from collections.abc import Sequence
 
 import os
 import pathlib
@@ -33,7 +34,7 @@ class Pipeline:
     For example, if E is already cached, then the execution order of `Pipeline(F)` is A->B->D->F. (C is skipped, E is loaded from cache)
     """
 
-    def __init__(self, node: Operator | list[Operator]):
+    def __init__(self, node: Operator | Sequence[Operator]):
         if not isinstance(node, list):
             # FIXME: check if the node is standalone operator
             self.nodes_to_run = [node]

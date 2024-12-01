@@ -103,25 +103,31 @@ def test_two_function_caching(cls, tmp_path):
 
 
 @pytest.mark.parametrize("cls", [MockDataLoader])
-def test_two_function_caching_cacher_called_flag_test(cls, tmp_path):
+def test_two_function_caching_cacher_called_flag_test(cls, tmp_path, mocker):
     runner = cls(tmp_path)
 
     # Case
     a = 1
     b = 2
 
+    spy_load = mocker.spy(runner.cacher, "load_cached")
+    spy_save = mocker.spy(runner.cacher, "save_cache")
+
     assert not runner.run_check_flag
     ans1 = runner.func1(a, b)
     assert runner.run_check_flag
-    assert not runner.cacher.cache_called
+    assert spy_load.call_count == 0
+    assert spy_save.call_count == 1
     runner.reset_flag()
     ans2 = runner.func2(a, b)
     assert runner.run_check_flag
-    assert not runner.cacher.cache_called
+    assert spy_load.call_count == 0
+    assert spy_save.call_count == 2
     runner.reset_flag()
     ans3 = runner.func3(a, b)
     assert runner.run_check_flag
-    assert not runner.cacher.cache_called
+    assert spy_load.call_count == 1  # This is because func1 is called inside func3
+    assert spy_save.call_count == 3
 
     assert ans1 == a + b
     assert ans2 == a - b
@@ -133,13 +139,16 @@ def test_two_function_caching_cacher_called_flag_test(cls, tmp_path):
     runner.reset_flag()
     cached_ans1 = runner.func1(a, b)
     assert cached_ans1 == ans1
-    assert runner.cacher.cache_called
+    assert spy_load.call_count == 2
+    assert spy_save.call_count == 3
     cached_ans2 = runner.func2(a, b)
     assert cached_ans2 == ans2
-    assert runner.cacher.cache_called
+    assert spy_load.call_count == 3
+    assert spy_save.call_count == 3
     cached_ans3 = runner.func3(a, b)
     assert cached_ans3 == ans3
-    assert runner.cacher.cache_called
+    assert spy_load.call_count == 4
+    assert spy_save.call_count == 3
     assert not runner.run_check_flag
 
     assert ans1 == cached_ans1

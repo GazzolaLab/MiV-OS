@@ -46,7 +46,9 @@ from miv.signal.spike import ThresholdCutoff
     help="Set True if mpi is ready. Else, it will use multiprocessing. (mpi4py must be installed)",
 )
 @click.option("--chunksize", default=1, help="Number of chunks for multiprocessing")
-def main(path, tools, nproc, num_fragments, use_mpi, chunksize):
+def main(
+    path: str, tools: str, nproc: int, num_fragments: int, use_mpi: bool, chunksize: int
+):
     signal_filter = ButterBandpass(400, 1500, order=4)
     spike_detection = ThresholdCutoff(cutoff=5.0, progress_bar=True)
     signal_filter >> spike_detection

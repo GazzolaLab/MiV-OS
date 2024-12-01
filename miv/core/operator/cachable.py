@@ -5,7 +5,6 @@ __doc__ = """
 __all__ = [
     "_CacherProtocol",
     "_Jsonable",
-    "SkipCacher",
     "DataclassCacher",
     "FunctionalCacher",
 ]
@@ -45,52 +44,21 @@ class _CacherProtocol(Protocol):
     @property
     def cache_dir(self) -> str | pathlib.Path: ...
 
-    def load_cached(self, tag: str) -> Generator[Any]:
+    def load_cached(self, tag: str = "data") -> Generator[Any]:
         """Load the cached values."""
         ...
 
-    def save_cache(self, values: Any, idx: int, tag: str) -> bool: ...
+    def save_cache(self, values: Any, idx: int = 0, tag: str = "data") -> bool: ...
 
-    def check_cached(self, tag: str) -> bool:
+    def check_cached(self, tag: str, *args, **kwargs) -> bool:
         """Check if the current configuration is the same as the cached one."""
         ...
+
+    def save_config(self, tag: str, *args, **kwargs) -> bool: ...
 
 
 class _Jsonable(Protocol):
     def to_json(self) -> dict[str, Any]: ...
-
-
-class SkipCacher:
-    """
-    Always run without saving.
-    """
-
-    MSG = "If you are using SkipCache, you should not be calling this method."
-
-    def __init__(self, parent=None, cache_dir=None):
-        pass
-
-    def check_cached(self, *args, **kwargs) -> bool:
-        return False
-
-    def config_filename(self, *args, **kwargs) -> str:
-        raise NotImplementedError(self.MSG)
-
-    def cache_filename(self, *args, **kwargs) -> str:
-        raise NotImplementedError(self.MSG)
-
-    def save_config(self, *args, **kwargs):
-        raise NotImplementedError(self.MSG)
-
-    def load_cached(self, *args, **kwargs):
-        raise NotImplementedError(self.MSG)
-
-    def save_cache(self, *args, kwargs):
-        raise NotImplementedError(self.MSG)
-
-    @property
-    def cache_dir(self) -> str | pathlib.Path:
-        raise NotImplementedError(self.MSG)
 
 
 F = TypeVar("F", bound=Callable[..., Any])
@@ -259,7 +227,7 @@ class FunctionalCacher(BaseCacher):
 
     @when_policy_is("ON", "AUTO", "MUST", "OVERWRITE")
     @when_initialized
-    def save_config(self, params=None, tag="data"):
+    def save_config(self, params=None, tag="data") -> bool:
         config = self._compile_parameters_as_dict(params)
         os.makedirs(self.cache_dir, exist_ok=True)
         try:
@@ -280,7 +248,7 @@ class FunctionalCacher(BaseCacher):
 
     @when_policy_is("ON", "AUTO", "MUST", "OVERWRITE")
     @when_initialized
-    def save_cache(self, values, tag="data") -> bool:
+    def save_cache(self, values, idx=0, tag="data") -> bool:
         os.makedirs(self.cache_dir, exist_ok=True)
         with open(self.cache_filename(0, tag=tag), "wb") as f:
             pkl.dump(values, f)

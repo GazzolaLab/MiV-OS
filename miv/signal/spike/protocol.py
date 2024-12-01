@@ -4,20 +4,17 @@ __all__ = [
     "UnsupervisedFeatureClusteringProtocol",
 ]
 
-from typing import Any, Iterable, Protocol, Union
+from typing import Any, Protocol, Union
+from collections.abc import Iterable
 
 import neo.core
 import numpy as np
 
-from miv.typing import SignalType, SpikestampsType, TimestampsType
+from miv.typing import SignalType, SpikestampsType
 
 
 class SpikeDetectionProtocol(Protocol):
-    def __call__(
-        self, signal: SignalType, timestamps: TimestampsType, sampling_rate: float
-    ) -> SpikestampsType: ...
-
-    def __repr__(self) -> str: ...
+    def __call__(self, *args: Any, **kwargs: Any) -> SpikestampsType: ...
 
 
 # TODO: Behavior is clear, but not sure what the name should be

@@ -19,7 +19,7 @@ import numpy as np
 from miv.core.datatype.collapsable import CollapseExtendableMixin
 from miv.core.operator.operator import DataNodeMixin
 from miv.core.operator.policy import SupportMultiprocessing
-from miv.typing import SignalType, TimestampsType
+from miv.typing import SignalType, SpikestampsType
 
 
 @dataclass
@@ -34,7 +34,7 @@ class Signal(SupportMultiprocessing, DataNodeMixin, CollapseExtendableMixin):
     _SIGNALAXIS = 0
 
     data: SignalType
-    timestamps: TimestampsType
+    timestamps: SpikestampsType
     rate: int = 30_000
 
     def __post_init__(self):
@@ -50,7 +50,7 @@ class Signal(SupportMultiprocessing, DataNodeMixin, CollapseExtendableMixin):
     def __getitem__(self, i: int) -> SignalType:
         return self.data[:, i]  # TODO: Fix to row-major
 
-    def select(self, indices: Tuple[int, ...]) -> "Signal":
+    def select(self, indices: tuple[int, ...]) -> "Signal":
         """Select channels by indices."""
         return Signal(self.data[:, indices], self.timestamps, self.rate)
 
@@ -63,7 +63,7 @@ class Signal(SupportMultiprocessing, DataNodeMixin, CollapseExtendableMixin):
         return self.timestamps.max()
 
     @property
-    def shape(self) -> Tuple[int, int]:
+    def shape(self) -> tuple[int, int]:
         """Shape of the signal."""
         return self.data.shape
 
@@ -72,7 +72,7 @@ class Signal(SupportMultiprocessing, DataNodeMixin, CollapseExtendableMixin):
         assert value.shape[self._SIGNALAXIS] == self.data.shape[self._SIGNALAXIS]
         self.data = np.append(self.data, value, axis=self._CHANNELAXIS)
 
-    def extend_signal(self, data: np.ndarray, time: TimestampsType) -> None:
+    def extend_signal(self, data: np.ndarray, time: SpikestampsType) -> None:
         """Append a signal to the end of the existing signal."""
         assert data.shape[self._SIGNALAXIS] == time.shape[0]
         assert (
@@ -81,7 +81,7 @@ class Signal(SupportMultiprocessing, DataNodeMixin, CollapseExtendableMixin):
         self.data = np.append(self.data, data, axis=self._SIGNALAXIS)
         self.timestamps = np.append(self.timestamps, time)
 
-    def prepend_signal(self, data: np.ndarray, time: TimestampsType) -> None:
+    def prepend_signal(self, data: np.ndarray, time: SpikestampsType) -> None:
         """Prepend a signal to the end of the existing signal."""
         assert (
             data.shape[self._SIGNALAXIS] == time.shape[0]

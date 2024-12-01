@@ -34,6 +34,9 @@ def test_pipeline_execution_count(tmp_path):
     b = MockChainRunnable(2)
     c = MockChainRunnable(3)
 
+    a >> b >> c
+
+    # Note, Pipeline-run itself should not invoke chain
     Pipeline(c).run(tmp_path / "results")
     assert c.run_counter == 1
 

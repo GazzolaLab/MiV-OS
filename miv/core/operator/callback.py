@@ -4,7 +4,7 @@ Implementation for callback features that will be mixed in operator class.
 __all__ = ["BaseCallbackMixin"]
 
 from typing import TypeVar  # TODO: For python 3.11, we can use typing.Self
-from typing import Optional, Protocol, Union
+from typing import Optional, Protocol, Union, Any
 from collections.abc import Callable
 from typing_extensions import Self
 
@@ -122,7 +122,7 @@ class BaseCallbackMixin:
 
     def _callback_plot(
         self,
-        output: tuple | None,
+        output: Any | None,
         inputs: list | None = None,
         show: bool = False,
         save_path: str | pathlib.Path | None = None,

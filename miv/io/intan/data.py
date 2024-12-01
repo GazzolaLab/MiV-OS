@@ -12,7 +12,8 @@ Module (Intan)
 """
 __all__ = ["DataIntan", "DataIntanTriggered"]
 
-from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from collections.abc import Callable, Iterable
 
 import logging
 import os
@@ -112,7 +113,7 @@ class DataIntan(Data):
         signal : SignalType, neo.core.AnalogSignal
             The length of the first axis `signal.shape[0]` correspond to the length of the
             signal, while second axis `signal.shape[1]` correspond to the number of channels.
-        timestamps : TimestampsType, numpy array
+        timestamps : numpy array
         sampling_rate : float
 
         Raises

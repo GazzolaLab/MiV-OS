@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 class _RunnerProtocol(Callable, Protocol):
     def __init__(self, comm, root: int): ...
 
-    def __call__(self, func: Callable, inputs: tuple | None, **kwargs) -> object: ...
+    def __call__(self, func: Callable, inputs: Any | None) -> object: ...
 
 
 class _Runnable(Protocol):
@@ -67,7 +67,7 @@ class VanillaRunner:
             output = func(*inputs)
         return output
 
-    def __call__(self, func, inputs=None, **kwargs):
+    def __call__(self, func, inputs=None):
         output = None
         if self.is_root:
             output = self._execute(func, inputs)
@@ -88,7 +88,7 @@ class MultiprocessingRunner:
     def num_proc(self):
         return self._np
 
-    def __call__(self, func, inputs: Generator[Any, None, None] = None, **kwargs):
+    def __call__(self, func, inputs: Generator[Any, None, None] = None):
         if inputs is None:
             raise NotImplementedError(
                 "Multiprocessing for operator with no generator input is not supported yet. Please use VanillaRunner for this operator."
@@ -126,7 +126,7 @@ class StrictMPIRunner:
     def is_root(self):
         return self.get_rank() == self.root
 
-    def __call__(self, func, inputs=None, **kwargs):
+    def __call__(self, func, inputs=None):
         if inputs is None:
             output = func()
         else:
@@ -139,7 +139,7 @@ class SupportMPIMerge(StrictMPIRunner):
     This runner policy is used for operators that can be merged by MPI.
     """
 
-    def __call__(self, func, inputs=None, **kwargs):
+    def __call__(self, func, inputs=None):
         if inputs is None:
             output: _Collapsable = func()
         else:
@@ -153,12 +153,13 @@ class SupportMPIMerge(StrictMPIRunner):
         result = self.comm.bcast(result, root=self.root)
         return result
 
+
 class SupportMPIWithoutBroadcast(StrictMPIRunner):
     """
     This runner policy is used for operators that can be merged by MPI.
     """
 
-    def __call__(self, func, inputs=None, **kwargs):
+    def __call__(self, func, inputs=None):
         if inputs is None:
             output: _Collapsable = func()
         else:

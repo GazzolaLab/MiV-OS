@@ -13,7 +13,7 @@ __all__ = [
     "DataNode",
 ]
 
-from typing import TYPE_CHECKING, List, Optional, Protocol, Union
+from typing import TYPE_CHECKING, List, Optional, Protocol, Union, Any
 from collections.abc import Callable, Generator
 from typing_extensions import Self
 
@@ -88,6 +88,8 @@ class _Runnable(Protocol):
 
     @property
     def runner(self) -> _RunnerProtocol: ...
+
+    def __call__(self, *args: Any, **kwargs: Any) -> Any: ...
 
 
 class Operator(
@@ -188,11 +190,14 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
             - All results from callback
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.runner = VanillaRunner()
         self._cacher = DataclassCacher(self)
 
         super().__init__()
+
+    def __call__(self):
+        raise NotImplementedError("Please implement __call__ method.")
 
     @property
     def cacher(self) -> _CacherProtocol:

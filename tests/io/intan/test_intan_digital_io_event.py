@@ -13,10 +13,7 @@ class TestYourClass:
     @patch.object(intan_module.DataIntan, "__init__", lambda x: None)
     def test_load_digital_in_event(self):
         # Create an instance of your class
-        instance = (
-            intan_module.DataIntan()
-        )  # Replace with the actual name of your class
-        instance.cacher = cacher_module.SkipCacher()
+        instance = intan_module.DataIntan()
 
         with patch.object(instance, "_generator_by_channel_name") as mock_generator:
             # Mock the _generator_by_channel_name function

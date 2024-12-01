@@ -30,18 +30,18 @@ from miv.core.datatype import DataTypes, Extendable
 from .cachable import DataclassCacher, FunctionalCacher, _CacherProtocol
 from .operator import Operator, OperatorMixin, _Cachable
 
-F = TypeVar("F", bound=Callable[..., Any])
+F = TypeVar("F")
 
 
-def cache_call(func: F) -> F:
+def cache_call(func: Callable[..., F]) -> Callable[..., F]:
     """
     Cache the methods of the operator.
     Save the cache in the cacher object.
     """
 
-    def wrapper(self: _Cachable, *args, **kwargs):
+    def wrapper(self: _Cachable, *args: Any, **kwargs: Any) -> F:
         tag = "data"
-        cacher: DataclassCacher = self.cacher
+        cacher = self.cacher
 
         result = func(self, *args, **kwargs)
         if result is None:
@@ -54,29 +54,29 @@ def cache_call(func: F) -> F:
     return wrapper
 
 
-def cache_functional(cache_tag=None):
+def cache_functional(
+    cache_tag: str | None = None,
+) -> Callable[[Callable[..., F]], Callable[..., F]]:
     """
     Cache the functionals.
     """
 
-    def decorator(func):
-        def wrapper(self, *args, **kwargs):
-            cacher: FunctionalCacher = self.cacher
+    def decorator(func: Callable[..., F]) -> Callable[..., F]:
+        def wrapper(self: _Cachable, *args: Any, **kwargs: Any) -> F:
+            cacher = self.cacher
             tag = "data" if cache_tag is None else cache_tag
 
             # TODO: check cache by parameters should be improved
             if cacher.check_cached(params=(args, kwargs), tag=tag):
-                cacher.cache_called = True
                 loader = cacher.load_cached(tag=tag)
                 value = next(loader)
-                return value
+                return value  # type: ignore[no-any-return]
             else:
                 result = func(self, *args, **kwargs)
                 if result is None:
                     return None
                 cacher.save_cache(result, tag=tag)
                 cacher.save_config(params=(args, kwargs), tag=tag)
-                cacher.cache_called = False
                 return result
 
         return wrapper
