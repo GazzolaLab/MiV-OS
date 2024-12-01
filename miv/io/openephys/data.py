@@ -30,13 +30,8 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Dict,
     Iterable,
-    List,
     Optional,
-    Set,
-    Tuple,
-    Union,
 )
 
 import logging
@@ -49,13 +44,13 @@ from glob import glob
 import matplotlib.pyplot as plt
 import numpy as np
 
-from miv.core.datatype import Signal
-from miv.core.operator import DataLoaderMixin
+from miv.core.datatype.signal import Signal
+from miv.core.operator.operator import DataLoaderMixin
 from miv.io.openephys.binary import load_continuous_data, load_recording, load_ttl_event
 from miv.io.protocol import DataProtocol
 from miv.signal.filter.protocol import FilterProtocol
 from miv.signal.spike.protocol import SpikeDetectionProtocol
-from miv.statistics import firing_rates
+from miv.statistics.spiketrain_statistics import firing_rates
 from miv.typing import SignalType
 
 if TYPE_CHECKING:
@@ -144,7 +139,7 @@ class Data(DataLoaderMixin):
         figure : plt.Figure
         group : str
         filename : str
-        savefig_kwargs : Optional[Dict[Any, Any]]
+        savefig_kwargs : Optional[dict[Any, Any]]
             Additional parameters to pass to `plt.savefig`.
         """
         if savefig_kwargs is None:
@@ -180,7 +175,7 @@ class Data(DataLoaderMixin):
         ----------
         data :
         filename : str
-        pkl_kwargs : Optional[Dict[Any, Any]]
+        pkl_kwargs : Optional[dict[Any, Any]]
             Additional parameters to pass to `plt.savefig`.
         """
         pkl_kwargs = pkl_kwargs or {}
@@ -198,7 +193,7 @@ class Data(DataLoaderMixin):
         Parameters
         ----------
         filename : str
-        pkl_kwargs : Optional[Dict[Any, Any]]
+        pkl_kwargs : Optional[dict[Any, Any]]
             Additional parameters to pass to `plt.savefig`.
         """
         pkl_kwargs = pkl_kwargs or {}
@@ -313,7 +308,7 @@ class Data(DataLoaderMixin):
 
         Parameters
         ----------
-        spontaneous_binned : Union[Iterable[Iterable[int]], int]
+        spontaneous_binned : Iterable[Iterable[int]] | int
             [0]: 2D matrix with each column being the binned number of spikes from each channel.
             [1]: number of bins from spontaneous recording binned matrix
             [2]: array of indices of empty channels
@@ -410,7 +405,7 @@ class Data(DataLoaderMixin):
             2D list with columns as channels.
         num_bins : int
             The number of bins.
-        empty_channels : List[int]
+        empty_channels : list[int]
             List of indices of empty channels
         """
 

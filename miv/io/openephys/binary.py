@@ -310,9 +310,14 @@ def load_recording(
     # Define task
     filesize = os.path.getsize(file_path[0])
     itemsize = np.dtype(_recorded_dtype).itemsize
-    assert (
-        filesize == itemsize * total_length * num_channels
-    ), f"{filesize=} does not match the expected {itemsize*total_length*num_channels=}. Path: {file_path[0]}"
+    if filesize != itemsize * total_length * num_channels:
+        logger.warning(
+            f"{filesize=} does not match the expected {itemsize*total_length*num_channels=}.\n"
+            f"Possibly a file is corrupted or recording crashed."
+            f"Path: {file_path[0]}"
+        )
+        total_length = int(np.floor(filesize / itemsize * num_channels))
+        timestamps = timestamps[:total_length]
     samples_per_block = sampling_rate * 60
     num_fragments = int(math.ceil(total_length / samples_per_block))
     tasks = None

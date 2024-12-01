@@ -153,6 +153,24 @@ class SupportMPIMerge(StrictMPIRunner):
         result = self.comm.bcast(result, root=self.root)
         return result
 
+class SupportMPIWithoutBroadcast(StrictMPIRunner):
+    """
+    This runner policy is used for operators that can be merged by MPI.
+    """
+
+    def __call__(self, func, inputs=None, **kwargs):
+        if inputs is None:
+            output: _Collapsable = func()
+        else:
+            output: _Collapsable = func(*inputs)
+
+        outputs = self.comm.gather(output, root=self.root)
+        if self.is_root():
+            result = output.from_collapse(outputs)  # Class method
+        else:
+            result = None
+        return result
+
 
 class SupportMPI(StrictMPIRunner):
     pass
