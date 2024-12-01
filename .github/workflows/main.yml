@@ -56,9 +56,6 @@ jobs:
           # only on Windows, on other platforms they are allowed but version is matched
           # exactly regardless.
           ffmpeg-version: release
-          # Target architecture of the ffmpeg executable to install. Defaults to the
-          # system architecture. Only x64 and arm64 are supported (arm64 only on Linux).
-          architecture: ""
           # Linking type of the binaries. Use "shared" to download shared binaries and
           # "static" for statically linked ones. Shared builds are currently only available
           # for windows releases. Defaults to "static"
@@ -70,17 +67,17 @@ jobs:
       - name: Run pytests
         if: always()
         run: |
-          source $VENV
+          source $POETRY_VIRTUALENVS_PATH/bin/activate
           make test
       - name: Run mypy
         if: always()
         run: |
-          source $VENV
+          source $POETRY_VIRTUALENVS_PATH/bin/activate
           make mypy
       - name: Run formatting check
         if: always()
         run: |
-          source $VENV
+          source $POETRY_VIRTUALENVS_PATH/bin/activate
           make check-codestyle
       # Upload coverage to Codecov (use python 3.10 ubuntu-latest)
       - name: Upload coverage to Codecov (only on 3.10 ubuntu-latest)
