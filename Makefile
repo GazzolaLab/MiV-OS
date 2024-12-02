@@ -43,7 +43,7 @@ check-codestyle:
 
 .PHONY: mypy
 mypy:
-	poetry run mypy --config-file pyproject.toml miv
+	poetry run mypy --config-file pyproject.toml miv/core miv/io
 
 .PHONY: lint
 lint: test check-codestyle mypy check-safety

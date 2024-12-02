@@ -103,7 +103,7 @@ class Data(DataLoaderMixin):
         self,
         data_path: str,
         tag: str = "data",
-    ):
+    ) -> None:
         self.data_path: str = data_path
         super().__init__()
         self._analysis_path: str = os.path.join(data_path, "analysis")
@@ -113,7 +113,7 @@ class Data(DataLoaderMixin):
 
         os.makedirs(self._analysis_path, exist_ok=True)
 
-    def num_fragments(self):
+    def num_fragments(self) -> int:
         import math
         from .binary import load_timestamps, oebin_read
 
@@ -151,12 +151,12 @@ class Data(DataLoaderMixin):
         return num_fragments
 
     @property
-    def analysis_path(self):
+    def analysis_path(self) -> str:
         """Default sub-directory path to save analysis results"""
         return self._analysis_path
 
     @analysis_path.setter
-    def analysis_path(self, path):
+    def analysis_path(self, path: str) -> None:
         os.makedirs(path, exist_ok=True)
         self._analysis_path = path
 

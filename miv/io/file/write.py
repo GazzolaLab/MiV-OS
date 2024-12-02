@@ -1,4 +1,5 @@
-from typing import Any, Dict, List, Optional, Sequence, Type, Union
+from typing import Any, Dict, List, Optional, Type, Union
+from collections.abc import Sequence
 
 import datetime
 import sys
@@ -8,9 +9,10 @@ import h5py
 import numpy as np
 from h5py._hl.files import File
 from numpy import bytes_
+import numpy.typing as npt
 
 
-def initialize() -> Dict[str, Any]:
+def initialize() -> dict[str, Any]:
     """Creates an empty data dictionary
 
     Returns:
@@ -19,7 +21,7 @@ def initialize() -> Dict[str, Any]:
 
     """
 
-    data: Dict[str, Any] = {}
+    data: dict[str, Any] = {}
 
     data["_GROUPS_"] = {}
     data["_MAP_DATASETS_TO_COUNTERS_"] = {}
@@ -39,7 +41,7 @@ def initialize() -> Dict[str, Any]:
     return data
 
 
-def clear_container(container: Dict[str, Any]) -> None:
+def clear_container(container: dict[str, Any]) -> None:
     """Clears the data from the container dictionary.
 
     Args:
@@ -67,8 +69,8 @@ def clear_container(container: Dict[str, Any]) -> None:
 
 
 def create_container(
-    data: Dict[str, Any],
-) -> Dict[str, Any]:
+    data: dict[str, Any],
+) -> dict[str, Any]:
     """Creates a container dictionary that will be used to collect data and then
     packed into the the master data dictionary.
 
@@ -80,7 +82,7 @@ def create_container(
 
     """
 
-    container: Dict[str, Any] = {}
+    container: dict[str, Any] = {}
 
     for k in data.keys():
         if k in data["_LIST_OF_COUNTERS_"]:
@@ -92,11 +94,11 @@ def create_container(
 
 
 def create_group(
-    data: Dict[str, Any],
+    data: dict[str, Any],
     group_name: str,
-    metadata: Dict[str, Union[str, int, float]] = {},
-    counter: Optional[str] = None,
-    logger: Optional[Logger] = None,
+    metadata: dict[str, str | int | float] = {},
+    counter: str | None = None,
+    logger: Logger | None = None,
 ) -> str:
     """Adds a group in the dictionary
 
@@ -166,11 +168,11 @@ def create_group(
 
 
 def create_dataset(
-    data: Dict[str, Any],
-    datasets: Union[str, List[str]],
+    data: dict[str, Any],
+    datasets: str | list[str],
     group: str,
-    dtype: Union[Type[int], Type[float], Type[str]] = float,
-    logger: Optional[Logger] = None,
+    dtype: type[int] | type[float] | type[str] | type[npt.DTypeLike] = float,
+    logger: Logger | None = None,
 ) -> int:
     """Adds a dataset to a group in a dictionary. If the group does not exist, it will be created.
 
@@ -190,7 +192,7 @@ def create_dataset(
     """
 
     if isinstance(datasets, str):
-        datasets_: List[str] = [datasets]
+        datasets_: list[str] = [datasets]
     else:
         datasets_ = datasets
 
@@ -257,12 +259,12 @@ def create_dataset(
 
 
 def pack(
-    data: Dict[str, Any],
-    container: Dict[str, Any],
+    data: dict[str, Any],
+    container: dict[str, Any],
     AUTO_SET_COUNTER: bool = True,
     EMPTY_OUT_CONTAINER: bool = True,
     STRICT_CHECKING: bool = False,
-    logger: Optional[Logger] = None,
+    logger: Logger | None = None,
 ) -> int:
     """Takes the data from an container and packs it into the data dictionary,
     intelligently, so that it can be stored and extracted efficiently.
@@ -378,7 +380,7 @@ def convert_list_and_key_to_string_data(datalist, key):
     return mydataset
 
 
-def convert_dict_to_string_data(dictionary: Dict[str, str]) -> List[List[bytes_]]:
+def convert_dict_to_string_data(dictionary: dict[str, str]) -> list[list[bytes_]]:
     """Converts data dictionary to a string
 
     Args:
@@ -402,7 +404,7 @@ def convert_dict_to_string_data(dictionary: Dict[str, str]) -> List[List[bytes_]
 
 def write_metadata(
     filename: str,
-    metadata: Dict[str, str] = {},
+    metadata: dict[str, str] = {},
     write_default_values: bool = True,
     append: bool = True,
 ) -> File:
@@ -449,10 +451,10 @@ def write_metadata(
 
 def write(
     filename: str,
-    data: Dict[str, Any],
-    comp_type: Optional[str] = None,
-    comp_opts: Optional[int] = None,
-    logger: Optional[Logger] = None,
+    data: dict[str, Any],
+    comp_type: str | None = None,
+    comp_opts: int | None = None,
+    logger: Logger | None = None,
 ) -> File:
     """Writes the selected data to an HDF5 file
 

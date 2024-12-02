@@ -35,7 +35,7 @@ class Signal(SupportMultiprocessing, DataNodeMixin, CollapseExtendableMixin):
 
     data: SignalType
     timestamps: SpikestampsType
-    rate: int = 30_000
+    rate: float = 30_000
 
     def __post_init__(self):
         super().__init__()
