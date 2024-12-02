@@ -17,18 +17,21 @@ from collections.abc import Callable, Generator, Iterable
 import os
 
 import numpy as np
-from miv.typing import SignalType
+from miv.core.datatype.signal import Signal
 
 
 class DataProtocol(Protocol):
     """Behavior definition for a single experimental data handler."""
 
-    def __init__(self, data_path: str): ...
+    def __init__(self, data_path: str, tag: str = "data"): ...
 
     @property
-    def analysis_path(self) -> None: ...
+    def data_path(self) -> str: ...
 
-    def load(self, *args) -> Generator[SignalType, np.ndarray, int]:
+    @property
+    def tag(self) -> str: ...
+
+    def load(self, *args) -> Generator[Signal]:
         """Iterator to load data fragmentally. Use to load large file size data."""
         ...
 

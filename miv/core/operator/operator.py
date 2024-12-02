@@ -140,7 +140,7 @@ class DataNodeMixin(BaseChainingMixin, DefaultLoggerMixin):
 class DataLoaderMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
     """ """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.tag = "data_loader"
         self.cacher = FunctionalCacher(self)
         self.runner = VanillaRunner()
@@ -151,7 +151,7 @@ class DataLoaderMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
         self._load_param = {}
         self.skip_plot = True
 
-    def configure_load(self, **kwargs):
+    def configure_load(self, **kwargs: Any) -> None:
         """
         (Experimental Feature)
         """
@@ -172,7 +172,7 @@ class DataLoaderMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
     def run(self, *args, **kwargs):
         return self.output()
 
-    def load(self):
+    def load(self) -> Generator[DataTypes]:
         raise NotImplementedError("load() method must be implemented to be DataLoader.")
 
 
