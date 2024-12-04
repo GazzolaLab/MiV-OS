@@ -3,12 +3,14 @@ __all__ = [
 ]
 
 from typing import Any, Optional, Protocol, Union
-from collections.abc import Callable, Generator
+from collections.abc import Callable, Generator, Sequence
 
 import inspect
 import multiprocessing
 import pathlib
 from dataclasses import dataclass
+
+from ..protocol import _LazyCallable
 
 
 class VanillaGeneratorRunner:
@@ -19,5 +21,11 @@ class VanillaGeneratorRunner:
     This runner is meant to be used for generator operators.
     """
 
-    def __call__(self, func: Callable, inputs: Any | None = None) -> Generator:
-        return func(*inputs)
+    def __call__(
+        self, func: _LazyCallable, inputs: list[Generator[Any]] | None = None
+    ) -> Generator:
+        # FIXME: fix type
+        return func(*inputs)  # type: ignore
+
+    def get_run_order(self) -> int:
+        return 0

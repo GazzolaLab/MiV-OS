@@ -4,7 +4,6 @@ __doc__ = """
 """
 __all__ = [
     "_CacherProtocol",
-    "_Jsonable",
     "DataclassCacher",
     "FunctionalCacher",
 ]
@@ -12,7 +11,7 @@ __all__ = [
 from typing import TYPE_CHECKING, Any, Literal, Protocol, TypeVar, Union
 from collections.abc import Callable, Generator
 
-import collections
+from collections import OrderedDict
 import dataclasses
 import functools
 import glob
@@ -25,12 +24,12 @@ import shutil
 
 import numpy as np
 
-from .operator import _Cachable
+from .operator import _Cachable, LoaderNode
+from .protocol import OperatorNode
 from miv.utils.formatter import TColors
 
 if TYPE_CHECKING:
     from miv.core.datatype import DataTypes
-    from miv.core.operator.operator import Operator
 
 # ON: always use cache
 # OFF: never use cache functions (always run) (no cache save)
@@ -56,10 +55,6 @@ class _CacherProtocol(Protocol):
         ...
 
     def save_config(self, tag: str = "data", *args: Any, **kwargs: Any) -> bool: ...
-
-
-class _Jsonable(Protocol):
-    def to_json(self) -> dict[str, Any]: ...
 
 
 def when_policy_is(*allowed_policy: CACHE_POLICY) -> Callable:
@@ -99,7 +94,7 @@ class BaseCacher:
         if getattr(self.parent.runner, "comm", None) is None:
             mpi_tag = f"{0:03d}"
         else:
-            mpi_tag = f"{self.parent.runner.comm.Get_rank():03d}"
+            mpi_tag = f"{self.parent.runner.get_run_order():03d}"
         return os.path.join(self.cache_dir, f"cache_{tag}_rank{mpi_tag}_{index}.pkl")
 
     @when_policy_is("ON", "AUTO", "MUST", "OVERWRITE")
@@ -117,7 +112,7 @@ class BaseCacher:
         path = self.config_filename(tag)
         if os.path.exists(path):
             with open(path) as f:
-                return json.load(f)
+                return json.load(f)  # type: ignore[no-any-return]
         return None
 
     def log_cache_status(self, flag: bool) -> None:
@@ -148,7 +143,7 @@ class DataclassCacher(BaseCacher):
         return flag
 
     def _compile_configuration_as_dict(self) -> dict[Any, Any]:
-        config = dataclasses.asdict(self.parent, dict_factory=collections.OrderedDict)
+        config: OrderedDict = dataclasses.asdict(self.parent, dict_factory=OrderedDict)  # type: ignore
         for key in config.keys():
             if isinstance(config[key], np.ndarray):
                 config[key] = config[key].tostring()
@@ -181,7 +176,7 @@ class DataclassCacher(BaseCacher):
 class FunctionalCacher(BaseCacher):
     def _compile_parameters_as_dict(self, params: dict | None = None) -> dict:
         # Safe to assume params is a tuple, and all elements are hashable
-        config: dict[str, Any] = collections.OrderedDict()
+        config: dict[str, Any] = OrderedDict()
         if params is None:
             return config
         for idx, arg in enumerate(params[0]):

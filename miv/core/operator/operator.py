@@ -5,15 +5,14 @@ Here, we define the behavior of basic operator class, and useful mixin classes t
 be used to create new operators that conform to required behaviors.
 """
 __all__ = [
-    "Operator",
     "DataLoader",
     "DataLoaderMixin",
     "OperatorMixin",
     "DataNodeMixin",
-    "DataNode",
+    "LoaderNode",
 ]
 
-from typing import TYPE_CHECKING, List, Optional, Protocol, Union, Any
+from typing import TYPE_CHECKING, List, Optional, Protocol, Union, Any, cast
 from collections.abc import Iterator
 from collections.abc import Callable, Generator
 from typing_extensions import Self
@@ -42,113 +41,13 @@ from miv.core.operator.chainable import BaseChainingMixin
 from miv.core.operator.loggable import DefaultLoggerMixin
 from miv.core.operator.policy import VanillaRunner, _RunnerProtocol
 
-
-class _Loggable(Protocol):
-    @property
-    def logger(self) -> logging.Logger: ...
-
-
-class _Chainable(Protocol):
-    """
-    Behavior includes:
-        - Chaining modules in forward/backward linked lists
-            - Forward direction defines execution order
-            - Backward direction defines dependency order
-    """
-
-    _downstream_list: list[Operator]
-    _upstream_list: list[Operator]
-
-    def __rshift__(self, right: Operator) -> Operator: ...
-
-    def clear_connections(self) -> None: ...
-
-    def summarize(self) -> str:
-        """Print summary of downstream network structures."""
-        ...
-
-    def _get_upstream_topology(
-        self, upstream_nodelist: list[_Chainable] | None = None
-    ) -> list[_Chainable]: ...
-
-    def iterate_upstream(self) -> Iterator[Operator]: ...
-
-    def iterate_downstream(self) -> Iterator[Operator]: ...
-
-    def topological_sort(self) -> list[Operator]: ...
-
-
-class _Cachable(_Loggable, Protocol):
-
-    @property
-    def cacher(self) -> _CacherProtocol: ...
-    @cacher.setter
-    def cacher(self, value: _CacherProtocol) -> None: ...
-
-    def set_caching_policy(self, policy: CACHE_POLICY) -> None: ...
-
-
-class _Callback(Protocol):
-    def set_save_path(
-        self,
-        path: str | pathlib.Path,
-        cache_path: str | pathlib.Path | None = None,
-    ) -> None: ...
-
-    def __lshift__(self, right: Callable) -> Self: ...
-
-    def reset_callbacks(
-        self, *, after_run: bool = False, plot: bool = False
-    ) -> None: ...
-
-    def _callback_after_run(self, *args: Any, **kwargs: Any) -> None: ...
-
-    def _callback_plot(
-        self,
-        output: tuple | None,
-        inputs: list | None = None,
-        show: bool = False,
-        save_path: str | pathlib.Path | None = None,
-    ) -> None: ...
-
-
-class _Runnable(Protocol):
-    """
-    A protocol for a runner policy.
-    """
-
-    @property
-    def runner(self) -> _RunnerProtocol: ...
-
-    def __call__(self, *args: Any, **kwargs: Any) -> Any: ...
-
-
-class Operator(
-    _Callback,
-    _Chainable,
-    _Cachable,
-    _Runnable,
-    _Loggable,
-    Protocol,
-):
-    """ """
-
-    analysis_path: str
-    tag: str
-
-    def receive(self) -> list[DataTypes]: ...
-
-    def output(self) -> DataTypes: ...
-
-    def run(self) -> DataTypes: ...
+from ..protocol import _Loggable
+from .protocol import _Runnable, _Chainable, _Cachable, _Callback, OperatorNode
 
 
 class DataLoader(
     _Callback,
     _Chainable,
-    _Cachable,
-    _Runnable,
-    _Loggable,
     Protocol,
 ):
     """ """
@@ -158,7 +57,7 @@ class DataLoader(
     ) -> Generator[DataTypes] | Spikestamps | Generator[Signal]: ...
 
 
-class DataNode(_Chainable, _Runnable, _Loggable, Protocol): ...
+class LoaderNode(_Chainable, _Runnable, Protocol): ...
 
 
 class DataNodeMixin(BaseChainingMixin, DefaultLoggerMixin):
@@ -178,11 +77,30 @@ class DataLoaderMixin(BaseChainingMixin, DefaultLoggerMixin):
 
     def __init__(self) -> None:
         self.tag = "data_loader"
-        self.cacher = FunctionalCacher(self)
+        self._cacher: _CacherProtocol = FunctionalCacher(self)
         self.runner = VanillaRunner()
         super().__init__()
 
         self._load_param: dict = {}
+
+    def __call__(self) -> DataTypes:
+        raise NotImplementedError("Please implement __call__ method.")
+
+    @property
+    def cacher(self) -> _CacherProtocol:
+        return self._cacher
+
+    @cacher.setter
+    def cacher(self, value: _CacherProtocol) -> None:
+        # FIXME:
+        policy = self._cacher.policy
+        cache_dir = self._cacher.cache_dir
+        self._cacher = value
+        self._cacher.policy = policy
+        self._cacher.cache_dir = cache_dir
+
+    def set_caching_policy(self, policy: CACHE_POLICY) -> None:
+        self.cacher.policy = policy
 
     def configure_load(self, **kwargs: Any) -> None:
         """
@@ -245,10 +163,10 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
     def set_caching_policy(self, policy: CACHE_POLICY) -> None:
         self.cacher.policy = policy
 
-    def __repr__(self: Operator) -> str:
+    def __repr__(self) -> str:
         return self.tag
 
-    def __str__(self: Operator) -> str:
+    def __str__(self) -> str:
         return self.tag
 
     def receive(self) -> list[DataTypes]:
@@ -256,7 +174,7 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
         Receive input data from each upstream operator.
         Essentially, this method recursively call upstream operators' run() method.
         """
-        return [node.run() for node in self.iterate_upstream()]
+        return [cast(OperatorNode, node).run() for node in self.iterate_upstream()]
 
     def output(self) -> DataTypes:
         """

@@ -16,7 +16,8 @@ import pathlib
 
 import matplotlib.pyplot as plt
 
-from .operator import _Cachable
+from .protocol import _Cachable, OperatorNode
+from ..protocol import _Tagged
 
 
 def MixinOperators(func: Callable) -> Callable:
@@ -47,7 +48,7 @@ def get_methods_from_feature_classes_by_endswith_str(
     return methods
 
 
-class BaseCallbackMixin:
+class BaseCallbackMixin(_Cachable):
     def __init__(self, cache_path: str = ".cache") -> None:
         super().__init__()
         self.__cache_directory_name: str = cache_path

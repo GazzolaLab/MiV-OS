@@ -18,10 +18,8 @@ if TYPE_CHECKING:
     from miv.core.datatype import DataTypes
 
 from miv.core.operator.cachable import CACHE_POLICY
-from miv.core.operator.operator import (
-    OperatorMixin,
-    Operator,
-)
+from miv.core.operator.operator import OperatorMixin
+from miv.core.operator.protocol import OperatorNode
 from miv.core.operator_generator.callback import (
     GeneratorCallbackMixin,
     _GeneratorCallback,
@@ -30,7 +28,7 @@ from miv.core.operator_generator.policy import VanillaGeneratorRunner
 
 
 class GeneratorOperator(
-    Operator,
+    OperatorNode,
     _GeneratorCallback,
     Protocol,
 ):

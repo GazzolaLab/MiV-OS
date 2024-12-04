@@ -26,7 +26,7 @@ from collections import UserList
 from dataclasses import dataclass, make_dataclass
 
 from .cachable import DataclassCacher, FunctionalCacher, _CacherProtocol
-from .operator import Operator, OperatorMixin, _Cachable
+from .protocol import _Cachable
 
 F = TypeVar("F")
 

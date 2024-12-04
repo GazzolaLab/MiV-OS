@@ -25,22 +25,24 @@ if TYPE_CHECKING:
 
 
 class _RunnerProtocol(Protocol):
-    def __init__(self, comm: mpi4py.MPI.Comm | None = None, root: int = 0) -> None: ...
+    def __init__(
+        self,
+        *,
+        comm: mpi4py.MPI.Comm | None = None,
+        root: int = 0,
+        **kwargs: Any,
+    ) -> None: ...
 
     def __call__(
         self, func: Callable, inputs: Any | None = None
     ) -> Generator[Any] | Any: ...
 
-
-class _Runnable(Protocol):
-    """
-    A protocol for a runner policy.
-    """
-
-    @property
-    def runner(self) -> _RunnerProtocol: ...
-
-    def run(self) -> None: ...
+    def get_run_order(self) -> int:
+        """
+        The method determines the order of execution, useful for
+        multiprocessing or MPI.
+        """
+        ...
 
 
 class VanillaRunner:
@@ -49,7 +51,7 @@ class VanillaRunner:
     If MPI is not available, the operator will be executed in root-rank only.
     """
 
-    def __init__(self, comm: mpi4py.MPI.Comm | None = None, root: int = 0) -> None:
+    def __init__(self, *, comm: mpi4py.MPI.Comm | None = None, root: int = 0) -> None:
         self.comm: mpi4py.MPI.Comm | None
         self.is_root: bool
 
@@ -68,6 +70,9 @@ class VanillaRunner:
             except ImportError:
                 self.comm = None
                 self.is_root = True
+
+    def get_run_order(self) -> int:
+        return 0
 
     def _execute(self, func: Callable, inputs: DataTypes) -> DataTypes:
         if inputs is None:
@@ -88,11 +93,14 @@ class VanillaRunner:
 
 
 class MultiprocessingRunner:
-    def __init__(self, np: int | None = None) -> None:
+    def __init__(self, *, np: int | None = None) -> None:
         if np is None:
             self._np = multiprocessing.cpu_count()
         else:
             self._np = np
+
+    def get_run_order(self) -> int:
+        return 0  # FIXME
 
     @property
     def num_proc(self) -> int:
@@ -111,9 +119,12 @@ class MultiprocessingRunner:
 
 
 class StrictMPIRunner:
-    def __init__(self, comm: mpi4py.MPI.Comm, root: int = 0) -> None:
+    def __init__(self, *, comm: mpi4py.MPI.Comm, root: int = 0) -> None:
         self.comm = comm
         self.root = root
+
+    def get_run_order(self) -> int:
+        return self.get_rank()
 
     def get_rank(self) -> int:
         return self.comm.Get_rank()

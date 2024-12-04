@@ -179,9 +179,9 @@ show_error_context = true
 # warn_no_return = true
 # warn_redundant_casts = true
 # warn_return_any = true
-# warn_unreachable = false  # TODO: open to discussion
+warn_unreachable = false
 # warn_unused_configs = true
-# warn_unused_ignores = true
+warn_unused_ignores = false
 
 exclude = [
     "miv/io/openephys/binary.py", # not part of the dev target
