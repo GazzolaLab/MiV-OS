@@ -3,11 +3,11 @@ from __future__ import annotations
 __doc__ = """
 """
 __all__ = [
-    "_Loggable",
     "DefaultLoggerMixin",
 ]
 
-from typing import TYPE_CHECKING, Any, Generator, Literal, Protocol, Union
+from typing import TYPE_CHECKING, Any, Literal, Protocol, Union
+from collections.abc import Generator
 
 import logging
 import os
@@ -18,13 +18,8 @@ if TYPE_CHECKING:
     from miv.core.datatype import DataTypes
 
 
-class _Loggable(Protocol):
-    @property
-    def logger(self): ...
-
-
 class DefaultLoggerMixin:
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         try:
             from mpi4py import MPI
@@ -34,3 +29,5 @@ class DefaultLoggerMixin:
         except ImportError:
             tag = self.__class__.__name__
         self.logger = logging.getLogger(tag)
+
+    # TODO: Redirect I/O stream to txt

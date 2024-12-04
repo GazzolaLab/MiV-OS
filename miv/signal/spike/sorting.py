@@ -77,7 +77,7 @@ from miv.signal.spike.protocol import (
     SpikeFeatureExtractionProtocol,
     UnsupervisedFeatureClusteringProtocol,
 )
-from miv.typing import SignalType, SpikestampsType, TimestampsType
+from miv.typing import SignalType, SpikestampsType
 
 
 class SpikeSorting:

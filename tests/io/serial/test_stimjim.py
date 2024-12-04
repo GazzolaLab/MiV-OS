@@ -1,10 +1,11 @@
 import numpy as np
 import pytest
 
-from miv.io.serial import ArduinoSerial, StimjimSerial
-
 
 def test_stimjim_init():
+    pytest.importorskip("serial")
+    from miv.io.serial import StimjimSerial
+
     # Test default values
     s = StimjimSerial(port=0)
     assert s.output0_mode == 1
@@ -26,6 +27,9 @@ def test_stimjim_init():
 
 @pytest.fixture
 def s():
+    pytest.importorskip("serial")
+    from miv.io.serial import StimjimSerial
+
     return StimjimSerial(port=0)
 
 

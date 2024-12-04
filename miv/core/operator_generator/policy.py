@@ -2,7 +2,8 @@ __all__ = [
     "VanillaGeneratorRunner",
 ]
 
-from typing import Any, Callable, Generator, Optional, Protocol, Union
+from typing import Any, Optional, Protocol, Union
+from collections.abc import Callable, Generator
 
 import inspect
 import multiprocessing
@@ -18,8 +19,5 @@ class VanillaGeneratorRunner:
     This runner is meant to be used for generator operators.
     """
 
-    def __init__(self):
-        pass
-
-    def __call__(self, func, inputs, **kwargs):
+    def __call__(self, func: Callable, inputs: Any | None = None) -> Generator:
         return func(*inputs)
