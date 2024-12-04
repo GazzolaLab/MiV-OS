@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 __all__ = [
     "_RunnerProtocol",
     "VanillaRunner",
@@ -12,18 +14,22 @@ import inspect
 import multiprocessing
 import pathlib
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Optional, Protocol, Union
+from typing import TYPE_CHECKING, Any, Optional, Protocol, Union, cast
 from collections.abc import Callable, Generator
 
 if TYPE_CHECKING:
     # This will likely cause circular import error
+    from miv.core.datatype import DataTypes
     from miv.core.datatype.collapsable import _Collapsable
+    import mpi4py
 
 
-class _RunnerProtocol(Callable, Protocol):
-    def __init__(self, comm, root: int): ...
+class _RunnerProtocol(Protocol):
+    def __init__(self, comm: mpi4py.MPI.Comm | None = None, root: int = 0) -> None: ...
 
-    def __call__(self, func: Callable, inputs: Any | None) -> object: ...
+    def __call__(
+        self, func: Callable, inputs: Any | None = None
+    ) -> Generator[Any] | Any: ...
 
 
 class _Runnable(Protocol):
@@ -34,11 +40,7 @@ class _Runnable(Protocol):
     @property
     def runner(self) -> _RunnerProtocol: ...
 
-    def run(
-        self,
-        save_path: str | pathlib.Path,
-        cache_dir: str | pathlib.Path,
-    ) -> None: ...
+    def run(self) -> None: ...
 
 
 class VanillaRunner:
@@ -47,27 +49,35 @@ class VanillaRunner:
     If MPI is not available, the operator will be executed in root-rank only.
     """
 
-    def __init__(self):
-        try:
-            from mpi4py import MPI
+    def __init__(self, comm: mpi4py.MPI.Comm | None = None, root: int = 0) -> None:
+        self.comm: mpi4py.MPI.Comm | None
+        self.is_root: bool
 
-            self.comm = MPI.COMM_WORLD
-            self.is_root = self.comm.Get_rank() == 0
-            if self.comm.Get_size() == 1:
+        if comm is not None:
+            self.comm = comm
+            self.is_root = self.comm.Get_rank() == root
+        else:
+            try:
+                from mpi4py import MPI
+
+                self.comm = MPI.COMM_WORLD
+                self.is_root = self.comm.Get_rank() == 0
+                if self.comm.Get_size() == 1:
+                    self.comm = None
+                    self.is_root = True
+            except ImportError:
                 self.comm = None
                 self.is_root = True
-        except ImportError:
-            self.comm = None
-            self.is_root = True
 
-    def _execute(self, func, inputs):
+    def _execute(self, func: Callable, inputs: DataTypes) -> DataTypes:
         if inputs is None:
             output = func()
         else:
+            inputs = cast("DataTypes", inputs)
             output = func(*inputs)
         return output
 
-    def __call__(self, func, inputs=None):
+    def __call__(self, func: Callable, inputs: DataTypes | None = None) -> DataTypes:
         output = None
         if self.is_root:
             output = self._execute(func, inputs)
@@ -78,17 +88,19 @@ class VanillaRunner:
 
 
 class MultiprocessingRunner:
-    def __init__(self, np: int | None = None):
+    def __init__(self, np: int | None = None) -> None:
         if np is None:
             self._np = multiprocessing.cpu_count()
         else:
             self._np = np
 
     @property
-    def num_proc(self):
+    def num_proc(self) -> int:
         return self._np
 
-    def __call__(self, func, inputs: Generator[Any, None, None] = None):
+    def __call__(
+        self, func: Callable, inputs: Generator[DataTypes] | None = None
+    ) -> Generator[DataTypes]:
         if inputs is None:
             raise NotImplementedError(
                 "Multiprocessing for operator with no generator input is not supported yet. Please use VanillaRunner for this operator."
@@ -99,37 +111,27 @@ class MultiprocessingRunner:
 
 
 class StrictMPIRunner:
-    def __init__(self, comm=None, root=0):
-        if comm is not None:
-            self.comm = comm
-        else:
-            from mpi4py import MPI
-
-            self.comm = MPI.COMM_WORLD
-        self.root = 0
-
-    def set_comm(self, comm):
+    def __init__(self, comm: mpi4py.MPI.Comm, root: int = 0) -> None:
         self.comm = comm
-
-    def set_root(self, root: int):
         self.root = root
 
-    def get_rank(self):
+    def get_rank(self) -> int:
         return self.comm.Get_rank()
 
-    def get_size(self):
+    def get_size(self) -> int:
         return self.comm.Get_size()
 
-    def get_root(self):
+    def get_root(self) -> int:
         return self.root
 
-    def is_root(self):
+    def is_root(self) -> bool:
         return self.get_rank() == self.root
 
-    def __call__(self, func, inputs=None):
+    def __call__(self, func: Callable, inputs: DataTypes | None = None) -> DataTypes:
         if inputs is None:
             output = func()
         else:
+            inputs = cast(tuple["DataTypes"], inputs)
             output = func(*inputs)
         return output
 
@@ -139,11 +141,12 @@ class SupportMPIMerge(StrictMPIRunner):
     This runner policy is used for operators that can be merged by MPI.
     """
 
-    def __call__(self, func, inputs=None):
+    def __call__(self, func: Callable, inputs: DataTypes | None = None) -> DataTypes:
         if inputs is None:
-            output: _Collapsable = func()
+            output = func()
         else:
-            output: _Collapsable = func(*inputs)
+            inputs = cast(tuple["DataTypes"], inputs)
+            output = func(*inputs)
 
         outputs = self.comm.gather(output, root=self.root)
         if self.is_root():
@@ -159,11 +162,13 @@ class SupportMPIWithoutBroadcast(StrictMPIRunner):
     This runner policy is used for operators that can be merged by MPI.
     """
 
-    def __call__(self, func, inputs=None):
+    def __call__(
+        self, func: Callable, inputs: tuple[DataTypes] | None = None
+    ) -> DataTypes | None:
         if inputs is None:
-            output: _Collapsable = func()
+            output = func()
         else:
-            output: _Collapsable = func(*inputs)
+            output = func(*inputs)
 
         outputs = self.comm.gather(output, root=self.root)
         if self.is_root():
@@ -171,10 +176,6 @@ class SupportMPIWithoutBroadcast(StrictMPIRunner):
         else:
             result = None
         return result
-
-
-class SupportMPI(StrictMPIRunner):
-    pass
 
 
 class SupportMultiprocessing:

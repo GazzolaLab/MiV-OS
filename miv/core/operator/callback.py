@@ -3,7 +3,7 @@ Implementation for callback features that will be mixed in operator class.
 """
 __all__ = ["BaseCallbackMixin"]
 
-from typing import TypeVar  # TODO: For python 3.11, we can use typing.Self
+from typing import Type, TypeVar  # TODO: For python 3.11, we can use typing.Self
 from typing import Optional, Protocol, Union, Any
 from collections.abc import Callable
 from typing_extensions import Self
@@ -16,53 +16,39 @@ import pathlib
 
 import matplotlib.pyplot as plt
 
+from .operator import _Cachable
 
-def MixinOperators(func):
+
+def MixinOperators(func: Callable) -> Callable:
     return func
 
 
 @MixinOperators
-def get_methods_from_feature_classes_by_startswith_str(self, method_name: str):
+def get_methods_from_feature_classes_by_startswith_str(
+    cls: type, method_name: str
+) -> list[Callable]:
     methods = [
-        getattr(self, k)
-        for k in dir(self)
-        if k.startswith(method_name) and callable(getattr(self, k))
+        getattr(cls, k)
+        for k in dir(cls)
+        if k.startswith(method_name) and callable(getattr(cls, k))
     ]
     return methods
 
 
 @MixinOperators
-def get_methods_from_feature_classes_by_endswith_str(self, method_name: str):
+def get_methods_from_feature_classes_by_endswith_str(
+    cls: type, method_name: str
+) -> list[Callable]:
     methods = [
-        getattr(self, k)
-        for k in dir(self)
-        if k.endswith(method_name) and callable(getattr(self, k))
+        getattr(cls, k)
+        for k in dir(cls)
+        if k.endswith(method_name) and callable(getattr(cls, k))
     ]
     return methods
 
 
-class _Callback(Protocol):
-    def __lshift__(self, right: Callable) -> Self: ...
-
-    def receive(self): ...
-
-    def output(self): ...
-
-    def _callback_after_run(self): ...
-
-    def _callback_plot(
-        self,
-        output: tuple | None,
-        inputs: list,
-        show: bool,
-        save_path: str | pathlib.Path | None,
-    ): ...
-
-    def set_save_path(self, path: str | pathlib.Path) -> None: ...
-
-
 class BaseCallbackMixin:
-    def __init__(self, cache_path: str = ".cache"):
+    def __init__(self, cache_path: str = ".cache") -> None:
         super().__init__()
         self.__cache_directory_name: str = cache_path
 
@@ -76,7 +62,7 @@ class BaseCallbackMixin:
         self._done_flag_after_run = False
         self._done_flag_plot = False
 
-    def _reset_callbacks(self, *, after_run: bool = False, plot: bool = False) -> None:
+    def reset_callbacks(self, *, after_run: bool = False, plot: bool = False) -> None:
         self._done_flag_after_run = after_run
         self._done_flag_plot = plot
 
@@ -108,7 +94,7 @@ class BaseCallbackMixin:
         # Make directory
         os.makedirs(self.analysis_path, exist_ok=True)
 
-    def _callback_after_run(self, *args, **kwargs) -> None:
+    def _callback_after_run(self, *args: Any, **kwargs: Any) -> None:
         if self._done_flag_after_run:
             return
 

@@ -1,20 +1,21 @@
-from typing import Generator, Protocol
-
-from miv.core.datatype.protocol import Extendable
+from typing import Any, Protocol
+from collections.abc import Iterable
 
 
 class _Collapsable(Protocol):
     @classmethod
-    def from_collapse(self) -> None: ...
+    def from_collapse(self, values: Iterable["_Collapsable"]) -> "_Collapsable": ...
+
+    def extend(self, *args: Any, **kwargs: Any) -> None: ...
 
 
 class CollapseExtendableMixin:
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
     @classmethod
-    def from_collapse(cls, values: Generator[Extendable, None, None]):
-        obj = cls()
-        for value in values:
-            obj.extend(value)
+    def from_collapse(cls, values: Iterable[_Collapsable]) -> _Collapsable:
+        obj: _Collapsable
+        for idx, value in enumerate(values):
+            if idx == 0:
+                obj = value
+            else:
+                obj.extend(value)
         return obj

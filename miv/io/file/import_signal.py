@@ -1,5 +1,7 @@
 __all__ = ["ImportSignal"]
 
+from collections.abc import Generator
+
 import logging
 import os
 import pickle
@@ -19,12 +21,12 @@ class ImportSignal(DataLoaderMixin):
         self,
         data_path: str,
         tag: str = "import signal",
-    ):
+    ) -> None:
         self.data_path: str = data_path
         super().__init__()
         self.tag: str = f"{tag}"
 
-    def load(self):
+    def load(self) -> Generator[Signal]:
         data, container = miv_file.read(self.data_path)
         num_container = data["_NUMBER_OF_CONTAINERS_"]
         self.logger.info(f"Loading: {num_container=}")

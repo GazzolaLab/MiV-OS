@@ -232,7 +232,7 @@ def load_recording(
     start_at_zero: bool = True,
     dtype: np.dtype = np.float32,
     progress_bar: bool = False,
-    mpi_comm=None,
+    mpi_comm: "mpi4py.MPI.Comm" | None = None,
     _recorded_dtype="int16",
 ):
     """

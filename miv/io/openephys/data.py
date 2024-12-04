@@ -151,7 +151,7 @@ class Data(DataLoaderMixin):
         self,
         start_at_zero: bool = False,
         progress_bar: bool = False,
-        mpi_comm: mpi4py.MPI.Intercomm | None = None,
+        mpi_comm: mpi4py.MPI.Comm | None = None,
     ) -> Generator[Signal]:
         """
         Iterator to load data fragmentally.

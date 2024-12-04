@@ -1,52 +1,21 @@
 from __future__ import annotations
 
 __doc__ = """"""
-__all__ = ["_Chainable", "BaseChainingMixin"]
+__all__ = ["BaseChainingMixin"]
 
-from typing import (
-    TYPE_CHECKING,
-    List,
-    Optional,
-    Protocol,
-    Set,
-    Union,
-)
+from typing import TYPE_CHECKING, Any, List, Optional, Protocol, Set, Union, cast
 from collections.abc import Callable, Iterator
 from typing_extensions import Self
 
 import functools
 import itertools
 
+import networkx as nx
 import matplotlib.pyplot as plt
 
 if TYPE_CHECKING:
     from miv.core.datatype import DataTypes
-
-
-class _Chainable(Protocol):
-    """
-    Behavior includes:
-        - Chaining modules in forward/backward linked lists
-            - Forward direction defines execution order
-            - Backward direction defines dependency order
-    """
-
-    @property
-    def tag(self) -> str: ...
-
-    def __rshift__(self, right: _Chainable) -> _Chainable: ...
-
-    def iterate_upstream(self) -> Iterator[_Chainable]: ...
-
-    def iterate_downstream(self) -> Iterator[_Chainable]: ...
-
-    def clear_connections(self) -> None: ...
-
-    def summarize(self) -> str:
-        """Print summary of downstream network structures."""
-        ...
-
-    def topological_sort(self) -> list[_Chainable]: ...
+    from .operator import Operator, _Chainable
 
 
 class BaseChainingMixin:
@@ -56,17 +25,17 @@ class BaseChainingMixin:
     Need further implementation of: output, tag
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
-        self._downstream_list: list[_Chainable] = []
-        self._upstream_list: list[_Chainable] = []
+        self._downstream_list: list[Operator] = []
+        self._upstream_list: list[Operator] = []
 
-    def __rshift__(self, right: _Chainable) -> Self:
+    def __rshift__(self: Operator, right: Operator) -> Operator:
         self._downstream_list.append(right)
         right._upstream_list.append(self)
         return right
 
-    def clear_connections(self) -> None:
+    def clear_connections(self: Operator) -> None:
         """Clear all the connections to other nodes, and remove dependencies."""
         for node in self.iterate_downstream():
             node._upstream_list.remove(self)
@@ -75,31 +44,32 @@ class BaseChainingMixin:
         self._downstream_list.clear()
         self._upstream_list.clear()
 
-    def iterate_downstream(self) -> Iterator[_Chainable]:
+    def iterate_downstream(self) -> Iterator[Operator]:
         return iter(self._downstream_list)
 
-    def iterate_upstream(self) -> Iterator[_Chainable]:
+    def iterate_upstream(self) -> Iterator[Operator]:
         return iter(self._upstream_list)
 
     def summarize(self) -> str:  # TODO: create DFS and BFS traverser
-        q = [(0, self)]
-        order = []  # DFS
+        q: list[tuple[int, _Chainable]] = [(0, self)]
+        order: list[tuple[int, _Chainable]] = []  # DFS
         while len(q) > 0:
-            depth, current = q.pop(0)
-            if current in order:  # Avoid loop
+            if q[0] in order:  # Avoid loop
                 continue
+            depth, current = q.pop(0)
             q += [(depth + 1, node) for node in current.iterate_downstream()]
             order.append((depth, current))
         return self._text_visualize_hierarchy(order)
 
-    def visualize(self, show: bool = False, seed: int = 200) -> None:
-        import networkx as nx
-
+    def visualize(self: Operator, show: bool = False, seed: int = 200) -> nx.DiGraph:
+        """
+        Visualize the network structure of the "Operator".
+        """
         G = nx.DiGraph()
 
         # BFS
-        visited = []
-        next_list = [self]
+        visited: list[Operator] = []
+        next_list: list[Operator] = [self]
         while next_list:
             v = next_list.pop()
             visited.append(v)
@@ -125,7 +95,9 @@ class BaseChainingMixin:
             plt.show()
         return G
 
-    def _text_visualize_hierarchy(self, string_list, prefix="|__ "):
+    def _text_visualize_hierarchy(
+        self, string_list: list[tuple[int, _Chainable]], prefix: str = "|__ "
+    ) -> str:
         output = []
         for i, item in enumerate(string_list):
             depth, label = item
@@ -136,12 +108,12 @@ class BaseChainingMixin:
         return "\n".join(output)
 
     def _get_upstream_topology(
-        self, upstream_nodelist: list[_Chainable] | None = None
+        self: Operator, upstream_nodelist: list[_Chainable] | None = None
     ) -> list[_Chainable]:
         if upstream_nodelist is None:
             upstream_nodelist = []
 
-        # Optional for operator to be 'cachable'
+        # Optional for "Operator" to be 'cachable'
         try:
             cached_flag = self.cacher.check_cached()
         except (AttributeError, FileNotFoundError):
@@ -161,7 +133,7 @@ class BaseChainingMixin:
         upstream_nodelist.append(self)
         return upstream_nodelist
 
-    def topological_sort(self) -> list[_Chainable]:
+    def topological_sort(self: Operator) -> list[Operator]:
         """
         Topological sort of the graph.
         Returns the list of operations in order to execute "self"
@@ -175,13 +147,13 @@ class BaseChainingMixin:
         key = []
         pos = []
         ind = 0
-        tsort = []
+        tsort: list[Operator] = []
 
         while len(upstream) > 0:
             key.append(upstream[-1])
             pos.append(ind)
             # pos[upstream[-1]] = ind
-            tsort.append(upstream[-1])
+            tsort.append(cast("Operator", upstream[-1]))
             ind += 1
             upstream.pop()
         for source in tsort:

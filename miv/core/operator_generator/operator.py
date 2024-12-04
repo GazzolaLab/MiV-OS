@@ -17,17 +17,33 @@ from dataclasses import dataclass
 if TYPE_CHECKING:
     from miv.core.datatype import DataTypes
 
-from miv.core.operator.cachable import DataclassCacher, CACHE_POLICY
-from miv.core.operator.operator import OperatorMixin
-from miv.core.operator_generator.callback import GeneratorCallbackMixin
+from miv.core.operator.cachable import CACHE_POLICY
+from miv.core.operator.operator import (
+    OperatorMixin,
+    Operator,
+)
+from miv.core.operator_generator.callback import (
+    GeneratorCallbackMixin,
+    _GeneratorCallback,
+)
 from miv.core.operator_generator.policy import VanillaGeneratorRunner
 
 
+class GeneratorOperator(
+    Operator,
+    _GeneratorCallback,
+    Protocol,
+):
+    """ """
+
+    pass
+
+
 class GeneratorOperatorMixin(OperatorMixin, GeneratorCallbackMixin):
-    def __init__(self):
-        self.runner = VanillaGeneratorRunner()
-        self._cacher = DataclassCacher(self)
+    def __init__(self) -> None:
         super().__init__()
+
+        self.runner = VanillaGeneratorRunner()
 
     def set_caching_policy(self, policy: CACHE_POLICY) -> None:
         self.cacher.policy = policy

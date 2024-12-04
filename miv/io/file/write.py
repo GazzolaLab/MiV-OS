@@ -354,7 +354,7 @@ def pack(
     return 0
 
 
-def convert_list_and_key_to_string_data(datalist, key):
+def convert_list_and_key_to_string_data(datalist: list, key: str) -> list[list[str]]:
     """Converts data dictionary to a string
 
     Args:

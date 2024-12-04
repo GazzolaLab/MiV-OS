@@ -5,7 +5,7 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 
-from miv.core.datatype import Spikestamps
+from miv.core.datatype.spikestamps import Spikestamps
 from miv.statistics.spiketrain_statistics import interspike_intervals
 from miv.typing import SpikestampsType
 

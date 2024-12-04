@@ -6,7 +6,7 @@ author: <Seung Hyun Kim skim0119@gmail.com>
 """
 __all__ = ["StimjimSerial"]
 
-from typing import List, Optional
+from typing import List, Optional, Any
 
 import os
 import sys
@@ -28,8 +28,14 @@ class StimjimSerial(ArduinoSerial):
     """
 
     def __init__(
-        self, port, output0_mode=1, output1_mode=3, high_v=4500, low_v=0, **kwargs
-    ):
+        self,
+        port: str,
+        output0_mode: int = 1,
+        output1_mode: int = 3,
+        high_v: int = 4500,
+        low_v: int = 0,
+        **kwargs: Any,
+    ) -> None:
         super().__init__(port, **kwargs)
         self.output0_mode = output0_mode
         self.output1_mode = output1_mode
@@ -47,7 +53,7 @@ class StimjimSerial(ArduinoSerial):
         delay: float = 0.0,
         channel: int = 0,
         reverse: bool = False,
-    ) -> bool:
+    ) -> str:
         total_string, total_period = self._spiketrain_to_str(
             spiketrain, t_max, reverse=reverse
         )
@@ -63,7 +69,14 @@ class StimjimSerial(ArduinoSerial):
         )
         return "; ".join(total_string)
 
-    def _start_str(self, pulsetrain, output0_mode, output1_mode, period, duration):
+    def _start_str(
+        self,
+        pulsetrain: int,
+        output0_mode: int,
+        output1_mode: int,
+        period: int,
+        duration: int,
+    ) -> str:
         return f"S{pulsetrain},{output0_mode},{output1_mode},{period},{duration}"
 
     def _spiketrain_to_str(
@@ -72,7 +85,7 @@ class StimjimSerial(ArduinoSerial):
         t_max: int,
         pulse_length: int = 10_000,
         reverse: bool = False,
-    ) -> list[str]:
+    ) -> tuple[list[str], int]:
         """
         Convert a spiketrain into a series of strings that can be sent to the Stimjim device.
         """
@@ -87,7 +100,7 @@ class StimjimSerial(ArduinoSerial):
             )
 
         # String functions
-        def gap_to_str(x, A1, A2):
+        def gap_to_str(x: int, A1: int, A2: int) -> str:
             return f"{A1},{A2},{x:d}"
 
         pulse_to_str = gap_to_str(pulse_length, self.high_v_1, 0)

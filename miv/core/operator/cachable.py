@@ -25,11 +25,12 @@ import shutil
 
 import numpy as np
 
+from .operator import _Cachable
 from miv.utils.formatter import TColors
-from miv.core.operator.policy import _Runnable
 
 if TYPE_CHECKING:
     from miv.core.datatype import DataTypes
+    from miv.core.operator.operator import Operator
 
 # ON: always use cache
 # OFF: never use cache functions (always run) (no cache save)
@@ -40,9 +41,9 @@ CACHE_POLICY = Literal["AUTO", "ON", "OFF", "MUST", "RUN", "OVERWRITE"]
 
 class _CacherProtocol(Protocol):
     policy: CACHE_POLICY
+    cache_dir: str | pathlib.Path
 
-    @property
-    def cache_dir(self) -> str | pathlib.Path: ...
+    def __init__(self, parent: _Cachable) -> None: ...
 
     def load_cached(self, tag: str = "data") -> Generator[Any]:
         """Load the cached values."""
@@ -50,24 +51,25 @@ class _CacherProtocol(Protocol):
 
     def save_cache(self, values: Any, idx: int = 0, tag: str = "data") -> bool: ...
 
-    def check_cached(self, tag: str, *args, **kwargs) -> bool:
+    def check_cached(self, tag: str = "data", *args: Any, **kwargs: Any) -> bool:
         """Check if the current configuration is the same as the cached one."""
         ...
 
-    def save_config(self, tag: str, *args, **kwargs) -> bool: ...
+    def save_config(self, tag: str = "data", *args: Any, **kwargs: Any) -> bool: ...
 
 
 class _Jsonable(Protocol):
     def to_json(self) -> dict[str, Any]: ...
 
 
-F = TypeVar("F", bound=Callable[..., Any])
-
-
-def when_policy_is(*allowed_policy: CACHE_POLICY) -> Callable[[F], F]:
-    def decorator(func: F) -> F:
+def when_policy_is(*allowed_policy: CACHE_POLICY) -> Callable:
+    def decorator(
+        func: Callable[[_CacherProtocol, Any, Any], bool | DataTypes]
+    ) -> Callable:
         # @functools.wraps(func) # TODO: fix this
-        def wrapper(self: _CacherProtocol, *args, **kwargs):
+        def wrapper(
+            self: _CacherProtocol, *args: Any, **kwargs: Any
+        ) -> bool | DataTypes:
             if self.policy in allowed_policy:
                 return func(self, *args, **kwargs)
             else:
@@ -78,32 +80,21 @@ def when_policy_is(*allowed_policy: CACHE_POLICY) -> Callable[[F], F]:
     return decorator
 
 
-def when_initialized(func: F) -> F:  # TODO: refactor
-    # @functools.wraps(func) # TODO: fix this
-    def wrapper(self, *args, **kwargs):
-        if self.cache_dir is None:
-            return False
-        else:
-            return func(self, *args, **kwargs)
-
-    return wrapper
-
-
 class BaseCacher:
     """
     Base class for cacher.
     """
 
-    def __init__(self, parent: _Runnable):
+    def __init__(self, parent: _Cachable) -> None:
         super().__init__()
         self.policy: CACHE_POLICY = "AUTO"  # TODO: make this a property
         self.parent = parent
-        self.cache_dir = None  # TODO: Public. Make proper setter
+        self.cache_dir: str | pathlib.Path = "results"
 
-    def config_filename(self, tag="data") -> str:
+    def config_filename(self, tag: str = "data") -> str:
         return os.path.join(self.cache_dir, f"config_{tag}.json")
 
-    def cache_filename(self, idx, tag="data") -> str:
+    def cache_filename(self, idx: int | str, tag: str = "data") -> str:
         index = idx if isinstance(idx, str) else f"{idx:04}"
         if getattr(self.parent.runner, "comm", None) is None:
             mpi_tag = f"{0:03d}"
@@ -112,38 +103,35 @@ class BaseCacher:
         return os.path.join(self.cache_dir, f"cache_{tag}_rank{mpi_tag}_{index}.pkl")
 
     @when_policy_is("ON", "AUTO", "MUST", "OVERWRITE")
-    @when_initialized
-    def save_cache(self, values, idx=0, tag="data") -> bool:
+    def save_cache(self, values: Any, idx: int = 0, tag: str = "data") -> bool:
         os.makedirs(self.cache_dir, exist_ok=True)
         with open(self.cache_filename(idx, tag), "wb") as f:
             pkl.dump(values, f)
         return True
 
-    def remove_cache(self):
+    def remove_cache(self) -> None:
         if os.path.exists(self.cache_dir):
             shutil.rmtree(self.cache_dir)
 
-    def _load_configuration_from_cache(self, tag="data") -> dict:
+    def _load_configuration_from_cache(self, tag: str = "data") -> dict | str | None:
         path = self.config_filename(tag)
         if os.path.exists(path):
             with open(path) as f:
                 return json.load(f)
         return None
 
-    def log_cache_status(self, flag):
+    def log_cache_status(self, flag: bool) -> None:
         msg = f"Caching policy: {self.policy} - "
         if flag:
             msg += "Cache exist"
         else:
             msg += TColors.red + "No cache" + TColors.reset
         self.parent.logger.info(msg)
-        self.parent.logger.info(f"Using runner: {self.parent.runner.__class__} type.")
 
 
 class DataclassCacher(BaseCacher):
     @when_policy_is("ON", "AUTO", "MUST", "OVERWRITE")
-    @when_initialized
-    def check_cached(self, tag="data", *args, **kwargs) -> bool:
+    def check_cached(self, tag: str = "data", *args: Any, **kwargs: Any) -> bool:
         if self.policy == "MUST":
             flag = True
         elif self.policy == "OVERWRITE":
@@ -159,7 +147,7 @@ class DataclassCacher(BaseCacher):
         self.log_cache_status(flag)
         return flag
 
-    def _compile_configuration_as_dict(self) -> dict:
+    def _compile_configuration_as_dict(self) -> dict[Any, Any]:
         config = dataclasses.asdict(self.parent, dict_factory=collections.OrderedDict)
         for key in config.keys():
             if isinstance(config[key], np.ndarray):
@@ -169,8 +157,7 @@ class DataclassCacher(BaseCacher):
         return config
 
     @when_policy_is("ON", "AUTO", "MUST", "OVERWRITE")
-    @when_initialized
-    def save_config(self, tag="data", *args, **kwargs) -> bool:
+    def save_config(self, tag: str = "data", *args: Any, **kwargs: Any) -> bool:
         config = self._compile_configuration_as_dict()
         os.makedirs(self.cache_dir, exist_ok=True)
         try:
@@ -182,8 +169,7 @@ class DataclassCacher(BaseCacher):
             )
         return True
 
-    @when_initialized
-    def load_cached(self, tag="data") -> Generator[DataTypes]:
+    def load_cached(self, tag: str = "data") -> Generator[DataTypes]:
         paths = glob.glob(self.cache_filename("*", tag=tag))
         paths.sort()
         for path in paths:
@@ -193,9 +179,9 @@ class DataclassCacher(BaseCacher):
 
 
 class FunctionalCacher(BaseCacher):
-    def _compile_parameters_as_dict(self, params=None) -> dict:
+    def _compile_parameters_as_dict(self, params: dict | None = None) -> dict:
         # Safe to assume params is a tuple, and all elements are hashable
-        config = collections.OrderedDict()
+        config: dict[str, Any] = collections.OrderedDict()
         if params is None:
             return config
         for idx, arg in enumerate(params[0]):
@@ -204,8 +190,7 @@ class FunctionalCacher(BaseCacher):
         return config
 
     @when_policy_is("ON", "AUTO", "MUST", "OVERWRITE")
-    @when_initialized
-    def check_cached(self, params=None, tag="data") -> bool:
+    def check_cached(self, params: dict | None = None, tag: str = "data") -> bool:
         if self.policy == "MUST":
             flag = True
         elif self.policy == "OVERWRITE":
@@ -226,8 +211,7 @@ class FunctionalCacher(BaseCacher):
         return flag
 
     @when_policy_is("ON", "AUTO", "MUST", "OVERWRITE")
-    @when_initialized
-    def save_config(self, params=None, tag="data") -> bool:
+    def save_config(self, params: dict | None = None, tag: str = "data") -> bool:
         config = self._compile_parameters_as_dict(params)
         os.makedirs(self.cache_dir, exist_ok=True)
         try:
@@ -239,16 +223,14 @@ class FunctionalCacher(BaseCacher):
             )
         return True
 
-    @when_initialized
-    def load_cached(self, tag="data") -> Generator[DataTypes]:
+    def load_cached(self, tag: str = "data") -> Generator[DataTypes]:
         path = glob.glob(self.cache_filename(0, tag=tag))[0]
         with open(path, "rb") as f:
             self.parent.logger.info(f"Loading cache from: {path}")
             yield pkl.load(f)
 
     @when_policy_is("ON", "AUTO", "MUST", "OVERWRITE")
-    @when_initialized
-    def save_cache(self, values, idx=0, tag="data") -> bool:
+    def save_cache(self, values: Any, idx: int = 0, tag: str = "data") -> bool:
         os.makedirs(self.cache_dir, exist_ok=True)
         with open(self.cache_filename(0, tag=tag), "wb") as f:
             pkl.dump(values, f)

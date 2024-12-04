@@ -18,6 +18,7 @@ import os
 
 import numpy as np
 from miv.core.datatype.signal import Signal
+from miv.core.datatype.spikestamps import Spikestamps
 
 
 class DataProtocol(Protocol):
@@ -31,7 +32,7 @@ class DataProtocol(Protocol):
     @property
     def tag(self) -> str: ...
 
-    def load(self, *args) -> Generator[Signal]:
+    def load(self, *args: Any) -> Generator[Signal] | Spikestamps | Signal:
         """Iterator to load data fragmentally. Use to load large file size data."""
         ...
 

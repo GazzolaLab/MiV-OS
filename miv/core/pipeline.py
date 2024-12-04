@@ -6,7 +6,7 @@ __doc__ = """
 """
 __all__ = ["Pipeline"]
 
-from typing import List, Optional, Union
+from typing import Optional, Union, cast
 from collections.abc import Sequence
 
 import os
@@ -34,12 +34,15 @@ class Pipeline:
     For example, if E is already cached, then the execution order of `Pipeline(F)` is A->B->D->F. (C is skipped, E is loaded from cache)
     """
 
-    def __init__(self, node: Operator | Sequence[Operator]):
+    def __init__(self, node: Operator | Sequence[Operator]) -> None:
+        self.nodes_to_run: list[Operator]
         if not isinstance(node, list):
             # FIXME: check if the node is standalone operator
+            node = cast(Operator, node)
             self.nodes_to_run = [node]
         else:
-            self.nodes_to_run = node
+            node = cast(Sequence[Operator], node)
+            self.nodes_to_run = list(node)
 
     def run(
         self,
@@ -48,7 +51,7 @@ class Pipeline:
         temporary_directory: str | pathlib.Path | None = None,
         skip_plot: bool = False,
         verbose: bool = False,  # Use logging
-    ):
+    ) -> None:
         """
         Run the pipeline.
 
@@ -72,8 +75,9 @@ class Pipeline:
         # Reset all callbacks
         for last_node in self.nodes_to_run:
             for node in last_node.topological_sort():
+                if hasattr(node, "reset_callbacks"):
+                    node.reset_callbacks(plot=skip_plot)
                 if hasattr(node, "set_save_path"):
-                    node._reset_callbacks(plot=skip_plot)
                     if temporary_directory is not None:
                         node.set_save_path(temporary_directory, cache_directory)
                     else:
@@ -101,12 +105,12 @@ class Pipeline:
             # import shutil
             # shutil.move(temporary_directory, working_directory)
 
-    def summarize(self):
+    def summarize(self) -> str:
+        strs = []
         for node in self.nodes_to_run:
             execution_order = node.topological_sort()
 
-            strs = []
             strs.append(f"Execution order for {node}:")
             for i, op in enumerate(execution_order):
                 strs.append(f"{i}: {op}")
-            return "\n".join(strs)
+        return "\n".join(strs)

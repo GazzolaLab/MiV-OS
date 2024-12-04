@@ -25,8 +25,6 @@ import inspect
 from collections import UserList
 from dataclasses import dataclass, make_dataclass
 
-from miv.core.datatype import DataTypes, Extendable
-
 from .cachable import DataclassCacher, FunctionalCacher, _CacherProtocol
 from .operator import Operator, OperatorMixin, _Cachable
 

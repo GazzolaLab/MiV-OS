@@ -6,7 +6,8 @@ __all__ = [
     "DefaultLoggerMixin",
 ]
 
-from typing import TYPE_CHECKING, Any, Generator, Literal, Protocol, Union
+from typing import TYPE_CHECKING, Any, Literal, Protocol, Union
+from collections.abc import Generator
 
 import logging
 import os
@@ -18,7 +19,7 @@ if TYPE_CHECKING:
 
 
 class DefaultLoggerMixin:
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         try:
             from mpi4py import MPI

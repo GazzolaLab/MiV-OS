@@ -183,6 +183,11 @@ show_error_context = true
 # warn_unused_configs = true
 # warn_unused_ignores = true
 
+exclude = [
+    "miv/io/openephys/binary.py", # not part of the dev target
+    "miv/io/intan/rhs.py", # not part of the dev target
+]
+
 [tool.pytest.ini_options]
 # https://docs.pytest.org/en/6.2.x/customize.html#pyproject-toml
 # Directories that are not visited by pytest collector:
