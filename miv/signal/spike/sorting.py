@@ -72,7 +72,7 @@ from sklearn.decomposition import PCA
 from sklearn.mixture import GaussianMixture
 from sklearn.preprocessing import StandardScaler
 
-from miv.core.operator import Operator, OperatorMixin
+from miv.core.operator.operator import OperatorMixin
 from miv.signal.spike.protocol import (
     SpikeFeatureExtractionProtocol,
     UnsupervisedFeatureClusteringProtocol,

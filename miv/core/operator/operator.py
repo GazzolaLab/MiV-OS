@@ -5,11 +5,10 @@ Here, we define the behavior of basic operator class, and useful mixin classes t
 be used to create new operators that conform to required behaviors.
 """
 __all__ = [
-    "DataLoader",
+    "DataLoaderNode",
     "DataLoaderMixin",
-    "OperatorMixin",
     "DataNodeMixin",
-    "LoaderNode",
+    "OperatorMixin",
 ]
 
 from typing import TYPE_CHECKING, List, Optional, Protocol, Union, Any, cast
@@ -25,10 +24,6 @@ import logging
 import pathlib
 from dataclasses import dataclass
 
-if TYPE_CHECKING:
-    from miv.core.datatype import DataTypes
-    from miv.core.datatype.signal import Signal
-    from miv.core.datatype.spikestamps import Spikestamps
 
 from miv.core.operator.cachable import (
     DataclassCacher,
@@ -41,23 +36,26 @@ from miv.core.operator.chainable import BaseChainingMixin
 from miv.core.operator.loggable import DefaultLoggerMixin
 from miv.core.operator.policy import VanillaRunner, _RunnerProtocol
 
-from ..protocol import _Loggable
-from .protocol import _Runnable, _Chainable, _Cachable, _Callback, OperatorNode
+if TYPE_CHECKING:
+    from miv.core.datatype import DataTypes
+    from miv.core.datatype.signal import Signal
+    from miv.core.datatype.spikestamps import Spikestamps
+    from .protocol import _Chainable, _Callback, OperatorNode
 
+    class DataLoaderNode(
+        _Callback,
+        _Chainable,
+        Protocol,
+    ):
+        """ """
 
-class DataLoader(
-    _Callback,
-    _Chainable,
-    Protocol,
-):
-    """ """
+        def load(
+            self, *args: Any, **kwargs: Any
+        ) -> Generator[DataTypes] | Spikestamps | Generator[Signal]: ...
 
-    def load(
-        self, *args: Any, **kwargs: Any
-    ) -> Generator[DataTypes] | Spikestamps | Generator[Signal]: ...
-
-
-class LoaderNode(_Chainable, _Runnable, Protocol): ...
+else:
+    # FIXME
+    class DataLoaderNode: ...
 
 
 class DataNodeMixin(BaseChainingMixin, DefaultLoggerMixin):
@@ -174,7 +172,7 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
         Receive input data from each upstream operator.
         Essentially, this method recursively call upstream operators' run() method.
         """
-        return [cast(OperatorNode, node).run() for node in self.iterate_upstream()]
+        return [cast("OperatorNode", node).run() for node in self.iterate_upstream()]
 
     def output(self) -> DataTypes:
         """

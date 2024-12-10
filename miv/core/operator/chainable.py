@@ -12,10 +12,10 @@ import itertools
 
 import networkx as nx
 import matplotlib.pyplot as plt
-from .protocol import _Chainable, OperatorNode
 
 if TYPE_CHECKING:
     from miv.core.datatype import DataTypes
+    from .protocol import _Chainable, OperatorNode
 
 
 class BaseChainingMixin:
@@ -32,15 +32,15 @@ class BaseChainingMixin:
 
     def __rshift__(self, right: _Chainable) -> _Chainable:
         self._downstream_list.append(right)
-        right._upstream_list.append(cast(_Chainable, self))
+        right._upstream_list.append(cast("_Chainable", self))
         return right
 
     def clear_connections(self) -> None:
         """Clear all the connections to other nodes, and remove dependencies."""
         for node in self.iterate_downstream():
-            node._upstream_list.remove(cast(_Chainable, self))
+            node._upstream_list.remove(cast("_Chainable", self))
         for node in self.iterate_upstream():
-            node._downstream_list.remove(cast(_Chainable, self))
+            node._downstream_list.remove(cast("_Chainable", self))
         self._downstream_list.clear()
         self._upstream_list.clear()
 
@@ -51,7 +51,7 @@ class BaseChainingMixin:
         return iter(self._upstream_list)
 
     def summarize(self) -> str:  # TODO: create DFS and BFS traverser
-        q: list[tuple[int, _Chainable]] = [(0, cast(_Chainable, self))]
+        q: list[tuple[int, _Chainable]] = [(0, cast("_Chainable", self))]
         order: list[tuple[int, _Chainable]] = []  # DFS
         while len(q) > 0:
             if q[0] in order:  # Avoid loop
@@ -117,7 +117,7 @@ class BaseChainingMixin:
 
         # Optional for Operator to be 'cachable'
         try:
-            _self = cast(_Chainable, self)
+            _self = cast("_Chainable", self)
             cached_flag = _self.cacher.check_cached()
         except (AttributeError, FileNotFoundError):
             """
@@ -133,7 +133,7 @@ class BaseChainingMixin:
                 if node in upstream_nodelist:
                     continue
                 node._get_upstream_topology(upstream_nodelist)
-        upstream_nodelist.append(cast(_Chainable, self))
+        upstream_nodelist.append(cast("_Chainable", self))
         return upstream_nodelist
 
     def topological_sort(self) -> list[_Chainable]:

@@ -4,7 +4,7 @@ import pathlib
 import numpy as np
 import pytest
 
-from miv.core.operator import DataLoaderMixin
+from miv.core.operator.operator import DataLoaderMixin
 from miv.core.operator.wrapper import cache_functional
 
 

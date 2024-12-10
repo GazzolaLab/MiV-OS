@@ -7,7 +7,7 @@ __all__ = [
     "OperatorNode",
 ]
 
-from typing import Protocol, Any
+from typing import Protocol, Any, TYPE_CHECKING
 from collections.abc import Callable, Iterator
 from typing_extensions import Self
 

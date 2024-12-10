@@ -7,8 +7,8 @@ from collections.abc import Iterable
 import matplotlib
 import numpy as np
 
-from miv.core.operator.cachable import _Jsonable
-from miv.core.operator.operator import _Chainable
+from miv.core.protocol import _Jsonable
+from miv.core.operator.protocol import _Chainable
 
 
 class MEAGeometryProtocol(_Jsonable, _Chainable, Protocol):

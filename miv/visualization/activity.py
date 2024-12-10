@@ -9,8 +9,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
 
-from miv.core.datatype import Spikestamps
-from miv.core.operator import OperatorMixin
+from miv.core.datatype.spikestamps import Spikestamps
+from miv.core.operator.operator import OperatorMixin
 from miv.core.operator.policy import StrictMPIRunner
 from miv.mea import MEAGeometryProtocol
 from miv.statistics.spiketrain_statistics import spike_counts_with_kernel

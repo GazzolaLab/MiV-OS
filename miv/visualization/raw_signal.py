@@ -14,7 +14,7 @@ from matplotlib import pyplot as plt
 from tqdm import tqdm
 
 from miv.core.datatype import Spikestamps
-from miv.core.operator import OperatorMixin
+from miv.core.operator.operator import OperatorMixin
 from miv.mea.protocol import MEAGeometryProtocol
 from miv.typing import SignalType
 from miv.visualization.utils import interp_2d

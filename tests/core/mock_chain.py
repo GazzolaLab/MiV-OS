@@ -1,4 +1,4 @@
-from miv.core.operator import BaseChainingMixin
+from miv.core.operator.operator import BaseChainingMixin
 from tests.core.mock_runner import MockRunner
 
 

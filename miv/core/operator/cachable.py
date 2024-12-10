@@ -4,6 +4,7 @@ __doc__ = """
 """
 __all__ = [
     "_CacherProtocol",
+    "BaseCacher",
     "DataclassCacher",
     "FunctionalCacher",
 ]
@@ -24,11 +25,10 @@ import shutil
 
 import numpy as np
 
-from .operator import _Cachable, LoaderNode
-from .protocol import OperatorNode
 from miv.utils.formatter import TColors
 
 if TYPE_CHECKING:
+    from .operator import _Cachable
     from miv.core.datatype import DataTypes
 
 # ON: always use cache
