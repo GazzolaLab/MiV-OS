@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 __doc__ = """
 
 -------------------------------------
@@ -27,7 +29,7 @@ import numpy as np
 import quantities as pq
 from tqdm import tqdm
 
-from miv.typing import SignalType, TimestampsType
+from miv.typing import SignalType
 
 if TYPE_CHECKING:
     import mpi4py
@@ -149,7 +151,7 @@ def load_ttl_event(
         Numpy integer array, indicating ON/OFF state. (+- channel number)
     full_words : np.ndarray
         Numpy integer array, consisting current state of all lines.
-    timestamps : TimestampsType
+    timestamps : np.ndarray
         Numpy float array. Global timestamps in seconds. Relative to start
         of the Record Node's main data stream.
     sampling_rate: float
@@ -232,7 +234,7 @@ def load_recording(
     start_at_zero: bool = True,
     dtype: np.dtype = np.float32,
     progress_bar: bool = False,
-    mpi_comm=None,
+    mpi_comm: mpi4py.MPI.Comm | None = None,
     _recorded_dtype="int16",
 ):
     """
@@ -271,7 +273,7 @@ def load_recording(
     Returns
     -------
     signal : SignalType, neo.core.AnalogSignal
-    timestamps : TimestampsType
+    timestamps : np.ndarray
     sampling_rate : float
 
     Raises
@@ -410,7 +412,7 @@ def load_continuous_data(
     Returns
     -------
     raw_data: SignalType, numpy array
-    timestamps: TimestampsType, numpy array
+    timestamps: np.ndarray
 
     Raises
     ------
@@ -464,7 +466,7 @@ def load_timestamps(
     Returns
     -------
     raw_data: SignalType, numpy array
-    timestamps: TimestampsType, numpy array
+    timestamps: np.ndarray
 
     Raises
     ------

@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from miv.core.datatype import Signal, Spikestamps
-from miv.core.operator import OperatorMixin
+from miv.core.operator.operator import OperatorMixin
 from miv.visualization.event import plot_spiketrain_raster
 
 
@@ -58,7 +58,7 @@ class WaveformStatisticalFilter(OperatorMixin):
         super().__init__()
 
     def __call__(
-        self, waveforms: Dict[int, Signal], spiketrains: Spikestamps
+        self, waveforms: dict[int, Signal], spiketrains: Spikestamps
     ) -> Spikestamps:
         """
         Parameters
@@ -127,7 +127,7 @@ class WaveformStatisticalFilter(OperatorMixin):
         spikestamps,
         inputs,
         show: bool = False,
-        save_path: Optional[pathlib.Path] = None,
+        save_path: pathlib.Path | None = None,
     ) -> plt.Axes:
         """
         Plot spike train in raster

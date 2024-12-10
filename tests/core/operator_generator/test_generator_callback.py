@@ -9,6 +9,8 @@ from tests.core.operator_generator.mock_generator_operator import (
     MockGeneratorOperatorModule,
     firstiter_plot_test_callback,
     generator_plot_test_callback,
+    generator_plot_test_callback_as_method,
+    firstiter_plot_test_callback_as_method,
 )
 
 
@@ -18,6 +20,8 @@ def test_callback_firstiter_plot_from_callbacks(tmp_path):
     mock_operator.set_save_path(tmp_path / "results")
     mock_operator << generator_plot_test_callback
     mock_operator << firstiter_plot_test_callback
+    mock_operator << generator_plot_test_callback_as_method
+    mock_operator << firstiter_plot_test_callback_as_method
 
     gen >> mock_operator
     results = list(mock_operator.output())
@@ -34,12 +38,20 @@ def test_callback_firstiter_plot_from_callbacks(tmp_path):
             f"gen_test_{i}.npy",
         )
         assert os.path.exists(expected_file)
-        # Callback defined
+        # Callback defined (attribute)
         expected_file = os.path.join(
             tmp_path.as_posix(),
             "results",
             mock_operator.analysis_path,
             f"gen_callback_{i}.npy",
+        )
+        assert os.path.exists(expected_file)
+        # Callback defined (instance method)
+        expected_file = os.path.join(
+            tmp_path.as_posix(),
+            "results",
+            mock_operator.analysis_path,
+            f"gen_callback2_{i}.npy",
         )
         assert os.path.exists(expected_file)
 
@@ -52,11 +64,19 @@ def test_callback_firstiter_plot_from_callbacks(tmp_path):
         "firstiter_test_9.npy",
     )
     assert os.path.exists(expected_file)
-    # Callback defined
+    # Callback defined (attribute)
     expected_file = os.path.join(
         tmp_path.as_posix(),
         "results",
         mock_operator.analysis_path,
         "firstiter_callback_13.npy",
+    )
+    assert os.path.exists(expected_file)
+    # Callback defined (instance method)
+    expected_file = os.path.join(
+        tmp_path.as_posix(),
+        "results",
+        mock_operator.analysis_path,
+        "firstiter_callback2_15.npy",
     )
     assert os.path.exists(expected_file)

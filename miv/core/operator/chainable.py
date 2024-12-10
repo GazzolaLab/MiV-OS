@@ -1,54 +1,21 @@
 from __future__ import annotations
 
 __doc__ = """"""
-__all__ = ["_Chainable", "BaseChainingMixin"]
+__all__ = ["BaseChainingMixin"]
 
-from typing import (
-    TYPE_CHECKING,
-    Callable,
-    Iterator,
-    List,
-    Optional,
-    Protocol,
-    Set,
-    Union,
-)
+from typing import TYPE_CHECKING, Any, List, Optional, Protocol, Set, Union, cast
+from collections.abc import Callable, Iterator
 from typing_extensions import Self
 
 import functools
 import itertools
 
+import networkx as nx
 import matplotlib.pyplot as plt
 
 if TYPE_CHECKING:
     from miv.core.datatype import DataTypes
-
-
-class _Chainable(Protocol):
-    """
-    Behavior includes:
-        - Chaining modules in forward/backward linked lists
-            - Forward direction defines execution order
-            - Backward direction defines dependency order
-    """
-
-    @property
-    def tag(self) -> str: ...
-
-    @property
-    def output(self) -> list[DataTypes]: ...
-
-    def __rshift__(self, right: _Chainable) -> Self: ...
-
-    def iterate_upstream(self) -> Iterator[_Chainable]: ...
-
-    def iterate_downstream(self) -> Iterator[_Chainable]: ...
-
-    def clear_connections(self) -> None: ...
-
-    def summarize(self) -> str:
-        """Print summary of downstream network structures."""
-        ...
+    from .protocol import _Chainable, OperatorNode
 
 
 class BaseChainingMixin:
@@ -58,22 +25,22 @@ class BaseChainingMixin:
     Need further implementation of: output, tag
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self._downstream_list: list[_Chainable] = []
         self._upstream_list: list[_Chainable] = []
 
-    def __rshift__(self, right: _Chainable) -> Self:
+    def __rshift__(self, right: _Chainable) -> _Chainable:
         self._downstream_list.append(right)
-        right._upstream_list.append(self)
+        right._upstream_list.append(cast("_Chainable", self))
         return right
 
     def clear_connections(self) -> None:
         """Clear all the connections to other nodes, and remove dependencies."""
         for node in self.iterate_downstream():
-            node._upstream_list.remove(self)
+            node._upstream_list.remove(cast("_Chainable", self))
         for node in self.iterate_upstream():
-            node._downstream_list.remove(self)
+            node._downstream_list.remove(cast("_Chainable", self))
         self._downstream_list.clear()
         self._upstream_list.clear()
 
@@ -84,24 +51,25 @@ class BaseChainingMixin:
         return iter(self._upstream_list)
 
     def summarize(self) -> str:  # TODO: create DFS and BFS traverser
-        q = [(0, self)]
-        order = []  # DFS
+        q: list[tuple[int, _Chainable]] = [(0, cast("_Chainable", self))]
+        order: list[tuple[int, _Chainable]] = []  # DFS
         while len(q) > 0:
-            depth, current = q.pop(0)
-            if current in order:  # Avoid loop
+            if q[0] in order:  # Avoid loop
                 continue
+            depth, current = q.pop(0)
             q += [(depth + 1, node) for node in current.iterate_downstream()]
             order.append((depth, current))
         return self._text_visualize_hierarchy(order)
 
-    def visualize(self, show: bool = False, seed: int = 200) -> None:
-        import networkx as nx
-
+    def visualize(self: _Chainable, show: bool = False, seed: int = 200) -> nx.DiGraph:
+        """
+        Visualize the network structure of the "Operator".
+        """
         G = nx.DiGraph()
 
         # BFS
-        visited = []
-        next_list = [self]
+        visited: list[_Chainable] = []
+        next_list: list[_Chainable] = [self]
         while next_list:
             v = next_list.pop()
             visited.append(v)
@@ -127,7 +95,11 @@ class BaseChainingMixin:
             plt.show()
         return G
 
-    def _text_visualize_hierarchy(self, string_list, prefix="|__ "):
+    def _text_visualize_hierarchy(
+        self,
+        string_list: list[tuple[int, _Chainable]],
+        prefix: str = "|__ ",
+    ) -> str:
         output = []
         for i, item in enumerate(string_list):
             depth, label = item
@@ -138,29 +110,37 @@ class BaseChainingMixin:
         return "\n".join(output)
 
     def _get_upstream_topology(
-        self, lst: list[_Chainable] | None = None
+        self, upstream_nodelist: list[_Chainable] | None = None
     ) -> list[_Chainable]:
-        if lst is None:
-            lst = []
+        if upstream_nodelist is None:
+            upstream_nodelist = []
 
-        cacher = getattr(self, "cacher", None)
-        if (
-            cacher is not None
-            and cacher.cache_dir is not None
-            and cacher.check_cached()
-        ):
-            pass
-        else:
+        # Optional for Operator to be 'cachable'
+        try:
+            _self = cast("_Chainable", self)
+            cached_flag = _self.cacher.check_cached()
+        except (AttributeError, FileNotFoundError):
+            """
+            For any reason when cached result could not be retrieved.
+
+            AttributeError: Occurs when cacher is not defined
+            FileNotFoundError: Occurs when cache_dir is not set or cache files doesn't exist
+            """
+            cached_flag = False
+
+        if not cached_flag:  # Run all upstream nodes
             for node in self.iterate_upstream():
-                if node in lst:
+                if node in upstream_nodelist:
                     continue
-                node._get_upstream_topology(lst)
-        lst.append(self)
-        return lst
+                node._get_upstream_topology(upstream_nodelist)
+        upstream_nodelist.append(cast("_Chainable", self))
+        return upstream_nodelist
 
-    def topological_sort(self):
+    def topological_sort(self) -> list[_Chainable]:
         """
         Topological sort of the graph.
+        Returns the list of operations in order to execute "self"
+
         Raise RuntimeError if there is a loop in the graph.
         """
         # TODO: Make it free function
@@ -170,7 +150,7 @@ class BaseChainingMixin:
         key = []
         pos = []
         ind = 0
-        tsort = []
+        tsort: list[_Chainable] = []
 
         while len(upstream) > 0:
             key.append(upstream[-1])

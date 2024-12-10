@@ -23,7 +23,7 @@ pre-commit-install:
 #* Formatters
 .PHONY: codestyle
 codestyle:
-	# poetry run pyupgrade --exit-zero-even-if-changed --py38-plus **/*.py
+	poetry run pyupgrade --exit-zero-even-if-changed --py310-plus **/*.py
 	# poetry run isort --settings-path pyproject.toml ./
 	poetry run black --config pyproject.toml ./
 
@@ -33,7 +33,8 @@ formatting: codestyle
 #* Linting
 .PHONY: test
 test:
-	poetry run pytest -c pyproject.toml --cov=miv --cov-report=xml
+	poetry run pytest -c pyproject.toml --cov=miv/core
+	# poetry run pytest -c pyproject.toml --cov=miv/core --cov-report=xml
 
 .PHONY: check-codestyle
 check-codestyle:
@@ -42,7 +43,7 @@ check-codestyle:
 
 .PHONY: mypy
 mypy:
-	poetry run mypy --config-file pyproject.toml miv
+	poetry run mypy --config-file pyproject.toml miv/core
 
 .PHONY: lint
 lint: test check-codestyle mypy check-safety

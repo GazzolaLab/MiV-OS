@@ -1,10 +1,11 @@
 import numpy as np
 import pytest
 
-from miv.signal.similarity.simple import domain_distance_matrix
-
 
 def test_domain_distance_matrix():
+    pytest.importorskip("dtaidistance")
+    from miv.signal.similarity.simple import domain_distance_matrix
+
     # create a sample temporal sequence with shape (3, 4)
     temporal_sequence = np.array([[1, 2, 3, 4], [4, 3, 2, 1], [2, 3, 4, 5]])
 

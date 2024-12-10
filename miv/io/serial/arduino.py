@@ -14,7 +14,7 @@ import time
 import serial
 
 
-def list_serial_ports():  # pragma: no cover
+def list_serial_ports() -> None:  # pragma: no cover
     """list serial communication ports available"""
     from serial.tools.list_ports import main
 
@@ -27,20 +27,21 @@ class ArduinoSerial:
       - Baudrate: 112500
     """
 
-    def __init__(self, port: str, baudrate: int = 112500):
+    def __init__(self, port: str, baudrate: int = 112500) -> None:
         self._data_started = False
         self._data_buf = ""
         self._message_complete = False
         self.baudrate = baudrate
         self.port = port
-        self.serial_port = None
 
-    def connect(self):
+        self.serial_port: serial.Serial
+
+    def connect(self) -> None:
         self.serial_port = self._setup_serial(self.baudrate, self.port)
 
     def _setup_serial(
         self, baudrate: int, serial_port_name: str, verbose: bool = False
-    ):
+    ) -> serial.Serial:
         """Setup serial connection.
 
         Parameters
@@ -62,13 +63,13 @@ class ArduinoSerial:
         return serial_port
 
     @property
-    def is_open(self):
-        return self.serial_port.is_open
+    def is_open(self) -> bool:
+        return self.serial_port.is_open  # type: ignore[no-any-return]
 
-    def open(self):
+    def open(self) -> None:
         self.serial_port.open()
 
-    def close(self):
+    def close(self) -> None:
         self.serial_port.close()
 
     def send(
@@ -77,14 +78,14 @@ class ArduinoSerial:
         start_character: str = "",
         eol_character: str = "\n",
         verbose: bool = False,
-    ):
+    ) -> None:
         # adds the start- and end-markers before sending
         full_msg = start_character + msg + eol_character
         self.serial_port.write(full_msg.encode("utf-8"))
         if verbose:
             print(f"Msg send: {full_msg}")
 
-    def receive(self, start_character="", eol_character="\n"):
+    def receive(self, start_character: str = "", eol_character: str = "\n") -> str:
         """receive.
 
         Parameters
@@ -113,7 +114,7 @@ class ArduinoSerial:
         else:
             return "ready"
 
-    def wait(self, verbose: bool = False):
+    def wait(self, verbose: bool = False) -> str:
         """
         Allows time for Arduino launch. It also ensures that any bytes left
         over from a previous message are discarded

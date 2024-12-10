@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
 from logging import Logger
 
@@ -10,10 +10,10 @@ from numpy import int64, ndarray
 
 def read(
     filename: str,
-    groups: Optional[Union[str, List[str]]] = None,
-    subset: Optional[Union[int, List[int], Tuple[int, int]]] = None,
-    logger: Optional[Logger] = None,
-) -> Tuple[Dict[str, Any], Dict[str, None]]:
+    groups: str | list[str] | None = None,
+    subset: int | list[int] | tuple[int, int] | None = None,
+    logger: Logger | None = None,
+) -> tuple[dict[str, Any], dict[str, Any]]:
     """
     Reads all, or a subset of the data, from the HDF5 file to fill a data dictionary.
     Returns an empty dictionary to be filled later with data from individual containers.
@@ -39,8 +39,8 @@ def read(
     infile = h5py.File(filename, "r")
 
     # Create the initial data and container dictionary to hold the data
-    data: Dict[str, Any] = {}
-    container: Dict[str, Any] = {}
+    data: dict[str, Any] = {}
+    container: dict[str, Any] = {}
 
     data["_MAP_DATASETS_TO_COUNTERS_"] = {}
     data["_MAP_DATASETS_TO_INDEX_"] = {}
@@ -55,7 +55,7 @@ def read(
     ncontainers = data["_NUMBER_OF_CONTAINERS_"]
 
     # Determine if only a subset of the data should be read
-    subset_: Union[None, List[int]] = None
+    subset_: None | list[int] = None
     if subset is not None:
         try:
             subset_ = validate_subset(subset, ncontainers)
@@ -132,7 +132,7 @@ def read(
         # If this is a counter, we're going to have to grab the indices
         # differently than for a "normal" dataset
         IS_COUNTER = True
-        index_name_: Union[None, str] = None
+        index_name_: None | str = None
         if name not in data["_LIST_OF_COUNTERS_"]:
             index_name_ = data["_MAP_DATASETS_TO_INDEX_"][name]
             IS_COUNTER = False  # We will use different indices for the counters
@@ -173,10 +173,10 @@ def read(
 
 
 def select_datasets(
-    datasets: List[str],
-    groups: Optional[Union[str, List[str]]] = None,
-    logger: Optional[Logger] = None,
-) -> List[str]:
+    datasets: list[str],
+    groups: str | list[str] | None = None,
+    logger: Logger | None = None,
+) -> list[str]:
     # Only keep select data from file, if we have specified datasets
     if groups is not None:
         if isinstance(groups, str):
@@ -211,10 +211,10 @@ def select_datasets(
 
 
 def validate_subset(
-    subset: Union[int, List[int], Tuple[int, int]],
+    subset: int | list[int] | tuple[int, int],
     ncontainers: int,
-    logger: Optional[Logger] = None,
-) -> List[int]:
+    logger: Logger | None = None,
+) -> list[int]:
     if isinstance(subset, tuple):
         subset_ = list(subset)
 
@@ -275,13 +275,14 @@ def validate_subset(
 
 
 def calculate_index_from_counters(counters: Dataset) -> ndarray:
-    index = np.add.accumulate(counters) - counters
+    index = np.add.accumulate(counters[:]) - counters[:]
+    index = cast(ndarray, index)
     return index
 
 
 def unpack(
-    container: Dict[str, Any],
-    data: Dict[str, Any],
+    container: dict[str, Any],
+    data: dict[str, Any],
     n: int = 0,
 ) -> None:
     """Fills the container dictionary with selected rows from the data dictionary.
@@ -319,8 +320,8 @@ def unpack(
 
 
 def get_ncontainers_in_file(
-    filename: str, logger: Optional[Logger] = None
-) -> Union[None, int64]:
+    filename: str, logger: Logger | None = None
+) -> None | int64:
     """Get the number of containers in the file."""
 
     with h5py.File(filename, "r+") as f:
@@ -328,18 +329,16 @@ def get_ncontainers_in_file(
 
         if a.__contains__("_NUMBER_OF_CONTAINERS_"):
             _NUMBER_OF_CONTAINERS_ = a.get("_NUMBER_OF_CONTAINERS_")
-            f.close()
-            return _NUMBER_OF_CONTAINERS_
+            return cast(int64, _NUMBER_OF_CONTAINERS_)
         else:
             if logger is not None:
                 logger.warning(
                     '\nFile does not contain the attribute, "_NUMBER_OF_CONTAINERS_"\n'
                 )
-            f.close()
             return None
 
 
-def get_ncontainers_in_data(data, logger=None) -> Union[None, int64]:
+def get_ncontainers_in_data(data, logger=None) -> None | int64:
     """Get the number of containers in the data dictionary.
 
     This is useful in case you've only pulled out subsets of the data
@@ -362,7 +361,7 @@ def get_ncontainers_in_data(data, logger=None) -> Union[None, int64]:
         return None
 
 
-def get_file_metadata(filename: str) -> Union[None, Dict[str, Any]]:
+def get_file_metadata(filename: str) -> None | dict[str, Any]:
     """Get the file metadata and return it as a dictionary"""
 
     f = h5py.File(filename, "r+")
@@ -383,7 +382,7 @@ def get_file_metadata(filename: str) -> Union[None, Dict[str, Any]]:
     return metadata
 
 
-def print_file_metadata(filename: str):
+def print_file_metadata(filename: str) -> str:
     """Pretty print the file metadata"""
 
     metadata = get_file_metadata(filename)

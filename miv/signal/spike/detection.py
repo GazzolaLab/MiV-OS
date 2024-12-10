@@ -20,7 +20,8 @@ Code Example::
 """
 __all__ = ["ThresholdCutoff", "query_firing_rate_between"]
 
-from typing import Any, Dict, Generator, Iterable, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
+from collections.abc import Generator, Iterable
 
 import csv
 import functools
@@ -43,7 +44,7 @@ from miv.core.operator.operator import OperatorMixin
 from miv.core.operator.policy import InternallyMultiprocessing
 from miv.core.operator.wrapper import cache_call
 from miv.statistics.spiketrain_statistics import firing_rates
-from miv.typing import SignalType, SpikestampsType, TimestampsType
+from miv.typing import SignalType, SpikestampsType
 from miv.visualization.event import plot_spiketrain_raster
 
 
@@ -80,7 +81,7 @@ class ThresholdCutoff(OperatorMixin):
     units: str = "sec"
     return_neotype: bool = False  # TODO: Remove, shift to spikestamps datatype
 
-    exclude_channels: Tuple[int] = None
+    exclude_channels: tuple[int] = None
 
     num_proc: int = 1
 
@@ -252,7 +253,7 @@ class ThresholdCutoff(OperatorMixin):
         spikestamps,
         inputs,
         show: bool = False,
-        save_path: Optional[pathlib.Path] = None,
+        save_path: pathlib.Path | None = None,
     ) -> plt.Axes:
         """
         Plot spike train in raster
