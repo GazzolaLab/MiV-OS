@@ -85,7 +85,7 @@ autosectionlabel_prefix_document = True
 autosummary_generate = True
 autosummary_generate_overwrite = False
 
-source_parsers: Dict[str, str] = {}
+source_parsers: dict[str, str] = {}
 source_suffix = {
     ".rst": "restructuredtext",
     ".md": "myst-nb",

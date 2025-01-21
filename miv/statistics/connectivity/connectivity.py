@@ -29,7 +29,7 @@ from elephant.causality.granger import pairwise_granger
 from tqdm import tqdm
 
 from miv.core.datatype import Signal, Spikestamps
-from miv.core.operator import OperatorMixin
+from miv.core.operator.operator import OperatorMixin
 from miv.core.operator.policy import InternallyMultiprocessing
 from miv.core.operator.wrapper import cache_call
 from miv.mea import mea_map
@@ -62,8 +62,8 @@ class DirectedConnectivity(OperatorMixin):
     """
 
     mea: str = None
-    channels: Optional[List[int]] = None
-    exclude_channels: Optional[List[int]] = None
+    channels: list[int] | None = None
+    exclude_channels: list[int] | None = None
     bin_size: float = 0.001
     minimum_count: int = 1
     tag: str = "directional connectivity analysis"
@@ -296,7 +296,7 @@ class DirectedConnectivity(OperatorMixin):
         self,
         result: Any,
         inputs,
-        save_path: Union[str, pathlib.Path] = None,
+        save_path: str | pathlib.Path = None,
         show: bool = False,
     ):
         """
@@ -468,8 +468,8 @@ class UndirectedConnectivity(OperatorMixin):
         Random seed. If None, use random seed, by default None
     """
 
-    channels: Optional[List[int]] = None
-    exclude_channels: Optional[List[int]] = None
+    channels: list[int] | None = None
+    exclude_channels: list[int] | None = None
     bin_size: float = 0.001
     minimum_count: int = 1
     tag: str = "directional connectivity analysis"

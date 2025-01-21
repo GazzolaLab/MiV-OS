@@ -6,10 +6,10 @@ from miv.core.operator_generator.wrapper import cache_generator_call
 
 class GeneratorPlotMixin:
     # TODO: This is a temporary solution to avoid issue. calling generator_plot in wrapper should be reconsidered
-    def generator_plot(self, *args, **kwargs):
+    def _callback_generator_plot(self, *args, **kwargs):
         pass
 
-    def fistiter_plot(self, *args, **kwargs):
+    def _callback_firstiter_plot(self, *args, **kwargs):
         pass
 
 
@@ -35,9 +35,10 @@ class MockObjectWithoutCache(GeneratorPlotMixin):
         def check_cached(self, tag=None, *args, **kwargs):
             return False
 
-    def __init__(self):
+    def __init__(self, tmp_path):
         self.cacher = self.MockCacher()
         self.skip_plot = True
+        self.analysis_path = tmp_path
 
 
 class MockObjectWithCache(GeneratorPlotMixin):
@@ -67,22 +68,22 @@ class MockObjectWithCache(GeneratorPlotMixin):
         def check_cached(self, tag=None, *args, **kwargs):
             return self.flag
 
-    def __init__(self):
+    def __init__(self, tmp_path):
         self.cacher = self.MockCacher()
-        self.skip_plot = True
+        self.analysis_path = tmp_path
 
 
 @pytest.fixture
-def mock_object_without_cache():
-    return MockObjectWithoutCache()
+def mock_object_without_cache(tmp_path):
+    return MockObjectWithoutCache(tmp_path)
 
 
 @pytest.fixture
-def mock_object_with_cache():
-    return MockObjectWithCache()
+def mock_object_with_cache(tmp_path):
+    return MockObjectWithCache(tmp_path)
 
 
-def test_wrap_generator_no_cache(mock_object_without_cache):
+def test_wrap_generator_no_cache(mock_object_without_cache, tmp_path):
     @cache_call
     def foo(self, x, y):
         return x + y
@@ -108,12 +109,12 @@ def test_wrap_generator_no_cache(mock_object_without_cache):
         def other(self, x, y):
             return x + y
 
-    a = FooClass()
+    a = FooClass(tmp_path)
     assert a(1, 2) == 3
     assert tuple(a.other(bar(), bar())) == (2, 4, 6)
 
 
-def test_wrap_generator_cache(mock_object_with_cache):
+def test_wrap_generator_cache(mock_object_with_cache, tmp_path):
     @cache_generator_call
     def foo(self, x, y):
         return x + y
@@ -128,8 +129,8 @@ def test_wrap_generator_cache(mock_object_with_cache):
         assert v == 0  # mock cache only saves zero. (above)
 
     class FooClass(MockObjectWithCache):
-        def __init__(self):
-            super().__init__()
+        def __init__(self, tmp_path):
+            super().__init__(tmp_path=tmp_path)
             self.called = False
 
         @cache_generator_call
@@ -146,13 +147,13 @@ def test_wrap_generator_cache(mock_object_with_cache):
             return x + y
 
     # Test cache_generator_call
-    a = FooClass()
+    a = FooClass(tmp_path)
     assert tuple(a(bar(), bar())) == (2, 4, 6)
     for v in a.cacher.load_cached():
         assert v == 0  # mock cache only saves zero. (above)
 
     # Test cache_functional
-    a = FooClass()
+    a = FooClass(tmp_path)
     assert a.other(1, 5) == 6
     assert a.other(1, 5) != -100
     assert a.other(1, 5) == 0

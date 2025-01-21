@@ -43,7 +43,7 @@ miv_zip_results = "miv.machinary.zip_results:zip_results"
 
 
 [tool.poetry.dependencies]
-python = ">=3.9,<=3.12"
+python = ">=3.10,<=3.12"
 scipy = "^1.9.1"
 elephant = "^1.0.0"
 matplotlib = "^3.5.2"
@@ -87,7 +87,6 @@ pre-commit = "^3.0.4"
 pydocstyle = "^6.1.1"
 pylint = "^3.2.3"
 pytest = "^8.3.3"
-pyupgrade = "^3.2.2"
 coverage = {extras = ["toml"], version = "^7.5.3"}
 pytest-html = "^4.1.0"
 pytest-cov = "^5.0.0"
@@ -179,9 +178,14 @@ show_error_context = true
 # warn_no_return = true
 # warn_redundant_casts = true
 # warn_return_any = true
-# warn_unreachable = false  # TODO: open to discussion
+warn_unreachable = false
 # warn_unused_configs = true
-# warn_unused_ignores = true
+warn_unused_ignores = false
+
+exclude = [
+    "miv/io/openephys/binary.py", # not part of the dev target
+    "miv/io/intan/rhs.py", # not part of the dev target
+]
 
 [tool.pytest.ini_options]
 # https://docs.pytest.org/en/6.2.x/customize.html#pyproject-toml

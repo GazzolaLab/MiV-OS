@@ -10,7 +10,8 @@ __all__ = [
     "instantaneous_spike_rate",
 ]
 
-from typing import Any, Callable, Dict, Iterable, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
+from collections.abc import Callable, Iterable
 
 import datetime
 import os
@@ -24,11 +25,11 @@ import scipy
 import scipy.signal
 
 from miv.core.datatype import Spikestamps
-from miv.core.operator import OperatorMixin
+from miv.core.operator.operator import OperatorMixin
 from miv.typing import SpikestampsType
 
 
-def firing_rates(spiketrains: Spikestamps) -> Dict[str, Any]:
+def firing_rates(spiketrains: Spikestamps) -> dict[str, Any]:
     """
     Process basic spiketrains statistics: rates, mean, variance.
 
@@ -72,7 +73,7 @@ def firing_rates(spiketrains: Spikestamps) -> Dict[str, Any]:
 class MFRComparison(OperatorMixin):
     recording_duration: float = None
     tag: str = "Mean Firing Rate Comparison"
-    channels: List[int] = None
+    channels: list[int] = None
 
     def __call__(self, pre_spiketrains: Spikestamps, post_spiketrains: Spikestamps):
         assert (
@@ -187,8 +188,8 @@ def coefficient_variation(self, spikes: SpikestampsType):
 def fano_factor(
     spiketrains: SpikestampsType,
     bin_size: float = 0.002,
-    t_start: Optional[float] = None,
-    t_end: Optional[float] = None,
+    t_start: float | None = None,
+    t_end: float | None = None,
 ):
     """
     Calculates the Fano factor for given signal by dividing it into the specified number of bins
