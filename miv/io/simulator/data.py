@@ -44,6 +44,8 @@ class Data(DataLoaderMixin):
 
     """
 
+    tag = "Simulation data loader"
+
     def __init__(self, data_path: str, *args: Any, **kwargs: Any) -> None:
         self.data_path = data_path
         super().__init__(*args, **kwargs)

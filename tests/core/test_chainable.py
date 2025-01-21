@@ -148,4 +148,3 @@ def test_chain_debugging_tools():
     c >> f
 
     a.visualize()
-    a.summarize()

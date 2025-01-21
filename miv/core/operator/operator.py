@@ -70,11 +70,11 @@ class DataNodeMixin(BaseChainingMixin, DefaultLoggerMixin):
         return self.output()
 
 
-class DataLoaderMixin(BaseChainingMixin, DefaultLoggerMixin):
+class DataLoaderMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
     """ """
 
     def __init__(self) -> None:
-        self.tag = "data_loader"
+        self.tag: str
         self._cacher: _CacherProtocol = FunctionalCacher(self)
         self.runner = VanillaRunner()
         super().__init__()
@@ -138,7 +138,7 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
         self._cacher: _CacherProtocol = DataclassCacher(self)
 
         self.analysis_path = "analysis"
-        self.tag = "operator"
+        self.tag: str
 
         super().__init__()
 

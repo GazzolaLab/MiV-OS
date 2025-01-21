@@ -17,6 +17,8 @@ from miv.core.pipeline import Pipeline
 
 
 class MockDataLoaderNode(DataLoaderMixin):
+    tag: str = "test data loader"
+
     def __init__(self, path):
         self.data_path = path
         super().__init__()

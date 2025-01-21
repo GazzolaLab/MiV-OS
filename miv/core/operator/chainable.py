@@ -50,17 +50,6 @@ class BaseChainingMixin:
     def iterate_upstream(self) -> Iterator[_Chainable]:
         return iter(self._upstream_list)
 
-    def summarize(self) -> str:  # TODO: create DFS and BFS traverser
-        q: list[tuple[int, _Chainable]] = [(0, cast("_Chainable", self))]
-        order: list[tuple[int, _Chainable]] = []  # DFS
-        while len(q) > 0:
-            if q[0] in order:  # Avoid loop
-                continue
-            depth, current = q.pop(0)
-            q += [(depth + 1, node) for node in current.iterate_downstream()]
-            order.append((depth, current))
-        return self._text_visualize_hierarchy(order)
-
     def visualize(self: _Chainable, show: bool = False, seed: int = 200) -> nx.DiGraph:
         """
         Visualize the network structure of the "Operator".

@@ -105,10 +105,9 @@ class Data(DataLoaderMixin):
         tag: str = "data",
     ) -> None:
         self.data_path: str = data_path
+        self.tag: str = f"{tag}"
         super().__init__()
         self.masking_channel_set: set[int] = set()
-
-        self.tag: str = f"{tag}"
 
     def num_fragments(self) -> int:
         import math
@@ -298,6 +297,7 @@ class DataManager(MutableSequence):
     """
 
     def __init__(self, data_collection_path: str) -> None:
+        self.tag = "data_collection"
         super().__init__()
         self.data_collection_path: str = data_collection_path
 

@@ -58,7 +58,7 @@ class BaseCallbackMixin:
         assert (
             self.tag != ""
         ), "All operator must have self.tag attribute for identification."
-        self.set_save_path("results")
+        self.set_save_path("results")  # FIXME
 
         # Callback Flags (to avoid duplicated run)
         self._done_flag_after_run = False
@@ -93,8 +93,8 @@ class BaseCallbackMixin:
         )
         self.cacher.cache_dir = _cache_path
 
-        # Make directory
-        os.makedirs(self.analysis_path, exist_ok=True)
+        # Make directory  # Not sure if this needs to be done here
+        # os.makedirs(self.analysis_path, exist_ok=True)
 
     def _callback_after_run(self, *args: Any, **kwargs: Any) -> None:
         if self._done_flag_after_run:

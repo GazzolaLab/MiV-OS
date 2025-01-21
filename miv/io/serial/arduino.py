@@ -34,7 +34,7 @@ class ArduinoSerial:
         self.baudrate = baudrate
         self.port = port
 
-        self.serial_port: serial.Serial
+        self.serial_port: serial.Serial = None
 
     def connect(self) -> None:
         self.serial_port = self._setup_serial(self.baudrate, self.port)

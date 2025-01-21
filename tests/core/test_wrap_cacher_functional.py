@@ -11,9 +11,10 @@ from miv.core.operator.wrapper import cache_functional
 class MockDataLoader(DataLoaderMixin):
     def __init__(self, path):
         self.data_path = path
+        self.analysis_path = path
+        self.tag = "mock module"
         super().__init__()
         self.run_check_flag = False
-        self.tag = "mock module"
 
     @cache_functional(cache_tag="function_1")
     def func1(self, a, b):
