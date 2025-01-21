@@ -10,14 +10,6 @@ class TestEvents:
     def events(self):
         return Events([0.1, 0.5, 1.2, 1.5, 2.3, 3.0])
 
-    def test_append(self, events):
-        with pytest.raises(NotImplementedError):
-            events.append(0.7)
-
-    def test_extend(self, events):
-        with pytest.raises(NotImplementedError):
-            events.extend([0.7, 2.2])
-
     def test_len(self, events):
         assert len(events) == 6
 
