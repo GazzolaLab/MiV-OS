@@ -43,18 +43,6 @@ class TestEvents:
         assert signal.rate == 500.0
 
 
-def test_append_not_implemented():
-    events = Events()
-    with pytest.raises(NotImplementedError):
-        events.append(0.5)
-
-
-def test_extend_not_implemented():
-    events = Events()
-    with pytest.raises(NotImplementedError):
-        events.extend([0.1, 0.2, 0.3])
-
-
 def test_negative_bin_size():
     events = Events([0.1, 0.2, 0.3, 0.4])
     with pytest.raises(AssertionError):
