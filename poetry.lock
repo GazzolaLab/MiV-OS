@@ -1864,24 +1864,24 @@ files = [
 
 [[package]]
 name = "mpi4py"
-version = "4.0.1"
+version = "4.0.2"
 description = "Python bindings for MPI"
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "mpi4py-4.0.1-cp310-cp310-win_amd64.whl", hash = "sha256:600f26cae7f390b4ec525f5c1ccc374686c37a8c07f9c21320866c0a323f6dae"},
-    {file = "mpi4py-4.0.1-cp311-cp311-win_amd64.whl", hash = "sha256:0cb209fcdc7fee0346d12edff1cfd1c1ffca1b807c53631ba0436b9c2bcf8229"},
-    {file = "mpi4py-4.0.1-cp312-cp312-win_amd64.whl", hash = "sha256:b704e7db92b1ac94b96802e17cf28082455daa928e8e51398ad9f5e5eb8c9b7b"},
-    {file = "mpi4py-4.0.1-cp313-cp313-win_amd64.whl", hash = "sha256:52a7b1760b1aeb41a0ea38969314b2b170117a0ded2f689915f1cb89aaaf8a6f"},
-    {file = "mpi4py-4.0.1-cp36-cp36m-win_amd64.whl", hash = "sha256:6fa09d03ec7aa1264fcf650670c52e06ae87110f0bc6f84bf29f0183f6d3d19a"},
-    {file = "mpi4py-4.0.1-cp37-cp37m-win_amd64.whl", hash = "sha256:05999b6e8536a1234456d739ea1e695105613a866cae9a86010f87875229ffc0"},
-    {file = "mpi4py-4.0.1-cp38-cp38-win_amd64.whl", hash = "sha256:f7e863ea266af98d25c3efb9b7d9f56265000001b57cf2fb98a986f4ec7daa3c"},
-    {file = "mpi4py-4.0.1-cp39-cp39-win_amd64.whl", hash = "sha256:bf15be241ed81bad0a0635cb47e0f20faa6ec4228f0fa955bf0128f43462b639"},
-    {file = "mpi4py-4.0.1-pp310-pypy310_pp73-win_amd64.whl", hash = "sha256:93f45dcc2fd5f3396f961b1bc8f0fb9d5db786fdc0d72e4f8611f47718b5dac8"},
-    {file = "mpi4py-4.0.1-pp37-pypy37_pp73-win_amd64.whl", hash = "sha256:2b8bfbb730c47214a6233512eb905b2b12a40a036d92e96e2c7dd9a3405d8b4a"},
-    {file = "mpi4py-4.0.1-pp38-pypy38_pp73-win_amd64.whl", hash = "sha256:72006d9d9cc0e17d2a354648839e0d9743c7b91223586c323090033114324ee4"},
-    {file = "mpi4py-4.0.1-pp39-pypy39_pp73-win_amd64.whl", hash = "sha256:cd29eff4366f5182f3cbdac42ba62d0c5b17c6fc925dfe55cbe469fbe2d56cfb"},
-    {file = "mpi4py-4.0.1.tar.gz", hash = "sha256:f3174b245775d556f4fddb32519a2066ef0592edc810c5b5a59238f9a0a40c89"},
+    {file = "mpi4py-4.0.2-cp310-cp310-win_amd64.whl", hash = "sha256:1a5c91c99b3c0c86144581624f73d31d8b87e8854f2116d8b7fd3fb65072802a"},
+    {file = "mpi4py-4.0.2-cp311-cp311-win_amd64.whl", hash = "sha256:57060d0bb4246fecf53e10fca6ebaa540992b7eb7c1b901ddbc57114b10aa499"},
+    {file = "mpi4py-4.0.2-cp312-cp312-win_amd64.whl", hash = "sha256:becf60f5be46fb488ed1b7730233ca4ec012060010706e466c598182133d5a77"},
+    {file = "mpi4py-4.0.2-cp313-cp313-win_amd64.whl", hash = "sha256:d2da17a7a0c0ae72ef9e3fde9e20f2cdbf671db39718df4730777604fa236422"},
+    {file = "mpi4py-4.0.2-cp36-cp36m-win_amd64.whl", hash = "sha256:9da5eebc05e01318a263ac2113711d6f49c72c239cf7a7bec8cbd90467eb2742"},
+    {file = "mpi4py-4.0.2-cp37-cp37m-win_amd64.whl", hash = "sha256:5167eaf5cba2bbbab1f17035bf7bac95b0d436162d7feccae56c94222accf1c5"},
+    {file = "mpi4py-4.0.2-cp38-cp38-win_amd64.whl", hash = "sha256:6189d7a70623ac04dd6bea991b8d4020eea7670ee00d3aa91a4c1b5ea53d97c5"},
+    {file = "mpi4py-4.0.2-cp39-cp39-win_amd64.whl", hash = "sha256:c982f2f020112507afd73338ed4774f801228d40846d303e2e82ae8625a8665c"},
+    {file = "mpi4py-4.0.2-pp310-pypy310_pp73-win_amd64.whl", hash = "sha256:9ce7fa9fe2a986ae4730722b87529d9cc06afb909b3a86f489317bcee8831f44"},
+    {file = "mpi4py-4.0.2-pp37-pypy37_pp73-win_amd64.whl", hash = "sha256:0296d4e810a6fb33b49e6d0b8afd1d2bd03b565ab4115658848a8547ce19af44"},
+    {file = "mpi4py-4.0.2-pp38-pypy38_pp73-win_amd64.whl", hash = "sha256:354ae854100dbcaeed51be80922a356bb5d682f9033aa7e887b3fd87f275bf50"},
+    {file = "mpi4py-4.0.2-pp39-pypy39_pp73-win_amd64.whl", hash = "sha256:c4f3a46028d846d43bc3e7db2e319ca9ef1ecdf1934893e19b7f02ee99011bce"},
+    {file = "mpi4py-4.0.2.tar.gz", hash = "sha256:86085436d3ea3587323321b9e661e4df60eabbcf11c2c9cf63d0873ca111cc8b"},
 ]
 
 [[package]]
@@ -2247,11 +2247,11 @@ files = [
 [package.dependencies]
 numpy = [
     {version = ">=1.21.0", markers = "python_version <= \"3.9\" and platform_system == \"Darwin\" and platform_machine == \"arm64\" and python_version >= \"3.8\""},
-    {version = ">=1.23.5", markers = "python_version >= \"3.11\""},
-    {version = ">=1.21.4", markers = "python_version >= \"3.10\" and platform_system == \"Darwin\" and python_version < \"3.11\""},
-    {version = ">=1.21.2", markers = "platform_system != \"Darwin\" and python_version >= \"3.10\" and python_version < \"3.11\""},
     {version = ">=1.19.3", markers = "platform_system == \"Linux\" and platform_machine == \"aarch64\" and python_version >= \"3.8\" and python_version < \"3.10\" or python_version > \"3.9\" and python_version < \"3.10\" or python_version >= \"3.9\" and platform_system != \"Darwin\" and python_version < \"3.10\" or python_version >= \"3.9\" and platform_machine != \"arm64\" and python_version < \"3.10\""},
     {version = ">=1.17.3", markers = "(platform_system != \"Darwin\" and platform_system != \"Linux\") and python_version >= \"3.8\" and python_version < \"3.9\" or platform_system != \"Darwin\" and python_version >= \"3.8\" and python_version < \"3.9\" and platform_machine != \"aarch64\" or platform_machine != \"arm64\" and python_version >= \"3.8\" and python_version < \"3.9\" and platform_system != \"Linux\" or (platform_machine != \"arm64\" and platform_machine != \"aarch64\") and python_version >= \"3.8\" and python_version < \"3.9\""},
+    {version = ">=1.21.4", markers = "python_version >= \"3.10\" and platform_system == \"Darwin\" and python_version < \"3.11\""},
+    {version = ">=1.21.2", markers = "platform_system != \"Darwin\" and python_version >= \"3.10\" and python_version < \"3.11\""},
+    {version = ">=1.23.5", markers = "python_version >= \"3.11\""},
 ]
 
 [[package]]
@@ -2302,8 +2302,8 @@ files = [
 [package.dependencies]
 numpy = [
     {version = ">=1.20.3", markers = "python_version < \"3.10\""},
-    {version = ">=1.23.2", markers = "python_version >= \"3.11\""},
     {version = ">=1.21.0", markers = "python_version >= \"3.10\" and python_version < \"3.11\""},
+    {version = ">=1.23.2", markers = "python_version >= \"3.11\""},
 ]
 python-dateutil = ">=2.8.2"
 pytz = ">=2020.1"
