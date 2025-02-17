@@ -561,15 +561,10 @@ class UndirectedConnectivity(OperatorMixin):
         """
         # Function configuration. TODO: Make this dependency injection
         order = 2
-        sublength = 64
-        stride = 8
 
         assert (
             source.shape[0] == target.shape[0]
         ), f"source.shape={source.shape}, target.shape={target.shape}"
-        assert (
-            source.shape[0] - sublength > 0
-        ), f"source.shape[0]={source.shape[0]}, sublength={sublength}"
 
         sig = np.stack([source, target], axis=-1)
         try:
@@ -581,6 +576,12 @@ class UndirectedConnectivity(OperatorMixin):
         surrogate_vals = []
         if skip_surrogate:
             return val, surrogate_vals
+
+        sublength = 64
+        stride = 8
+        assert (
+            source.shape[0] - sublength > 0
+        ), f"During surrogate test: source.shape[0]={source.shape[0]}, sublength={sublength}"
 
         rng = np.random.default_rng(seed)  # TODO take rng instead
         for _ in range(surrogate_N):
