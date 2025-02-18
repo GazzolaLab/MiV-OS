@@ -32,6 +32,7 @@ from miv.core.datatype import Signal, Spikestamps
 from miv.core.operator import OperatorMixin
 from miv.core.operator.policy import InternallyMultiprocessing
 from miv.core.operator.wrapper import cache_call
+from miv.statistics.spiketrain_statistics import firing_rates
 from miv.mea import mea_map
 
 
@@ -468,10 +469,10 @@ class UndirectedConnectivity(OperatorMixin):
         Random seed. If None, use random seed, by default None
     """
 
-    channels: Optional[List[int]] = None
     exclude_channels: Optional[List[int]] = None
     bin_size: float = 0.001
     minimum_count: int = 1
+    firing_rate_limit: float = 5e-1
     tag: str = "directional connectivity analysis"
     progress_bar: bool = False
 
@@ -500,15 +501,11 @@ class UndirectedConnectivity(OperatorMixin):
         binned_spiketrain: Signal = spikestamps.binning(
             bin_size=self.bin_size, minimum_count=self.minimum_count
         )
+        rates = firing_rates(spikestamps)['rates']
 
         # Channel Selection
-        if self.channels is None:
-            n_nodes = binned_spiketrain.number_of_channels
-            channels = tuple(range(n_nodes))
-        else:
-            n_nodes = len(self.channels)
-            channels = tuple(self.channels)
-            binned_spiketrain = binned_spiketrain.select(channels)
+        n_nodes = binned_spiketrain.number_of_channels
+        channels = list(range(n_nodes))
 
         # Get adjacency matrix based on transfer entropy
         adj_matrix = np.zeros([n_nodes, n_nodes], dtype=np.bool_)  # source -> target
@@ -523,6 +520,8 @@ class UndirectedConnectivity(OperatorMixin):
             and j not in self.exclude_channels
             and i < j
             and i != j
+            and rates[i] > self.firing_rate_limit
+            and rates[j] > self.firing_rate_limit
         ]
         func = functools.partial(
             self._get_connection_info,
