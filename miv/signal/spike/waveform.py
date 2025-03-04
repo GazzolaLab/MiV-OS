@@ -136,7 +136,7 @@ class ExtractWaveforms(OperatorMixin):
                     waveforms[ch] = Signal(
                         data=cutout,
                         timestamps=(
-                            np.arange(pre_idx + post_idx).astype(np.float_) - pre
+                            np.arange(pre_idx + post_idx).astype(np.float64) - pre
                         )
                         / sampling_rate,
                         rate=sampling_rate,

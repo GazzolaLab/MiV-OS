@@ -79,7 +79,7 @@ def probability_distribution(
         bin_spike.data.sum(axis=bin_spike._SIGNALAXIS, keepdims=True)
         / bin_spike.shape[bin_spike._SIGNALAXIS]
     )
-    probability_distribution = np.empty_like(bin_spike.data, dtype=np.float_)
+    probability_distribution = np.empty_like(bin_spike.data, dtype=np.float64)
     _prob_spike = np.repeat(
         prob_spike, bin_spike.shape[bin_spike._SIGNALAXIS], axis=bin_spike._SIGNALAXIS
     )
@@ -119,7 +119,7 @@ def shannon_entropy(
     prob_spike = (
         bin_spike.data.sum(axis=bin_spike._SIGNALAXIS, keepdims=True)
         / bin_spike.shape[bin_spike._SIGNALAXIS]
-    ).astype(np.float_)
+    ).astype(np.float64)
     prob_no_spike = 1 - prob_spike
     shannon_entropy = -(
         prob_spike * np.log2(prob_spike) + prob_no_spike * np.log2(prob_no_spike)

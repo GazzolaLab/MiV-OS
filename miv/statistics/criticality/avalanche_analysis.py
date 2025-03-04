@@ -207,7 +207,7 @@ class AvalancheAnalysis(OperatorMixin):
     Parameters
     ----------
     tag: str
-        The tag for the operator. Default is "Avalanche and Criticality Analysis".
+        The tag for the operator.
     """
 
     tag: str = "avalanche criticality analysis"
@@ -222,7 +222,7 @@ class AvalancheAnalysis(OperatorMixin):
 
         # Compute size and branching ratio
         size = np.zeros(starts.size, dtype=np.int_)
-        branching_ratio = np.zeros(starts.size, dtype=np.float_)
+        branching_ratio = np.zeros(starts.size, dtype=np.float64)
         avalanches = []
         for idx, (s, e) in tqdm(
             enumerate(zip(starts, ends)),
@@ -236,10 +236,13 @@ class AvalancheAnalysis(OperatorMixin):
             avalanches.append(avalanche)
             size[idx] = np.count_nonzero(avalanche.sum(axis=0))
             shape = avalanche.sum(axis=1)
-            if np.any(np.isclose(shape[:-1], 0)) or np.isclose(size[idx], 0):
+            if np.isclose(size[idx], 0):
                 branching_ratio[idx] = 0.0
             else:
-                branching_ratio[idx] = np.sum(shape[1:] / shape[:-1]) / size[idx]
+                mask = shape[:-1] > 1e-5
+                branching_ratio[idx] = (
+                    np.sum(shape[1:][mask] / shape[:-1][mask]) / size[idx]
+                )
 
         return durations, size, branching_ratio, avalanches, bin_size
 

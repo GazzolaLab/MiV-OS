@@ -160,7 +160,7 @@ class ThresholdCutoff(OperatorMixin):
                 )
                 spiketrain_list.append(spiketrain)
             else:
-                spiketrain_list.append(spikestamp.astype(np.float_))
+                spiketrain_list.append(spikestamp.astype(np.float64))
         spikestamps = Spikestamps(spiketrain_list)
         return spikestamps
 

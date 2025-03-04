@@ -78,7 +78,7 @@ class NeuralActivity(OperatorMixin):
                 spikestamps[i],
                 probe_times,
                 lambda x: np.logical_and(x > 0, x < self.firing_rate_interval).astype(
-                    np.float_
+                    np.float64
                 ),
             )
             xs.append(x)

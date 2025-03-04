@@ -50,7 +50,7 @@ def domain_distance_matrix(temporal_sequence: SignalType, domain: DOMAIN_MOD = "
     ), f"Sequence must have at least two axes. Provide sequence has a shape {temporal_sequence.shape}."
 
     n_time, n_features = temporal_sequence.shape
-    distance_matrix = np.empty([n_features, n_features], dtype=np.float_)
+    distance_matrix = np.empty([n_features, n_features], dtype=np.float64)
 
     if domain == "time":
         func = nb_time_domain_similarity

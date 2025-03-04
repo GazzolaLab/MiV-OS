@@ -29,7 +29,7 @@ class GridMEA(MEAMixin, MEAutility.core.MEA):
         *args,
         **kwargs,
     ):
-        positions = positions.astype(np.float_)
+        positions = positions.astype(np.float64)
         info = kwargs["info"]
 
         # Remove nan channels - in json, nan channels are open or broken channels
@@ -67,7 +67,7 @@ class GridMEA(MEAMixin, MEAutility.core.MEA):
         self, vector: np.ndarray, missing_value: float = 0.0
     ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Map data (1-D array) to MEA (2-D array or N-D array)"""
-        value_grid = np.full_like(self.grid, missing_value, dtype=np.float_)
+        value_grid = np.full_like(self.grid, missing_value, dtype=np.float64)
         for idx, value in enumerate(vector):
             if idx not in self.grid:
                 continue
@@ -79,7 +79,7 @@ class GridMEA(MEAMixin, MEAutility.core.MEA):
         """Map signal data to MEA"""
         n_time = signal.shape[signal._SIGNALAXIS]
         value_grid = np.full(
-            [n_time, self.nrow, self.ncol], missing_value, dtype=np.float_
+            [n_time, self.nrow, self.ncol], missing_value, dtype=np.float64
         )
         for idx in range(signal.number_of_channels):
             if idx not in self.grid:

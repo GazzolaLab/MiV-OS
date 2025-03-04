@@ -113,7 +113,7 @@ class DirectedConnectivity(OperatorMixin):
         # Get adjacency matrix based on transfer entropy
         adj_matrix = np.zeros([n_nodes, n_nodes], dtype=np.bool_)  # source -> target
         connectivity_metric_matrix = np.zeros(
-            [n_nodes, n_nodes], dtype=np.float_
+            [n_nodes, n_nodes], dtype=np.float64
         )  # source -> target
 
         pairs = [
@@ -513,7 +513,7 @@ class UndirectedConnectivity(OperatorMixin):
         # Get adjacency matrix based on transfer entropy
         adj_matrix = np.zeros([n_nodes, n_nodes], dtype=np.bool_)  # source -> target
         connectivity_metric_matrix = np.zeros(
-            [n_nodes, n_nodes], dtype=np.float_
+            [n_nodes, n_nodes], dtype=np.float64
         )  # source -> target
 
         pairs = [
