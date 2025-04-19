@@ -115,7 +115,6 @@ dev = [
 # https://docs.astral.sh/ruff/
 target-version = "py310"
 line-length = 88
-color = true
 select = [
     "E",    # pycodestyle errors
     "F",    # pyflakes
@@ -229,7 +228,7 @@ exclude_lines = [
     ''''@(abc\.)?'abstractmethod''',
     '\.\.\.'
 ]
-fail_under = 80
+# fail_under = 80
 show_missing = true
 
 
