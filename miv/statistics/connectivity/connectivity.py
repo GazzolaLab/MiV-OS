@@ -32,6 +32,7 @@ from miv.core.datatype import Signal, Spikestamps
 from miv.core.operator.operator import OperatorMixin
 from miv.core.operator.policy import InternallyMultiprocessing
 from miv.core.operator.wrapper import cache_call
+from miv.statistics.spiketrain_statistics import firing_rates
 from miv.mea import mea_map
 
 
@@ -472,6 +473,7 @@ class UndirectedConnectivity(OperatorMixin):
     exclude_channels: list[int] | None = None
     bin_size: float = 0.001
     minimum_count: int = 1
+    firing_rate_limit: float = 5e-1
     tag: str = "directional connectivity analysis"
     progress_bar: bool = False
 
@@ -500,15 +502,11 @@ class UndirectedConnectivity(OperatorMixin):
         binned_spiketrain: Signal = spikestamps.binning(
             bin_size=self.bin_size, minimum_count=self.minimum_count
         )
+        rates = firing_rates(spikestamps)["rates"]
 
         # Channel Selection
-        if self.channels is None:
-            n_nodes = binned_spiketrain.number_of_channels
-            channels = tuple(range(n_nodes))
-        else:
-            n_nodes = len(self.channels)
-            channels = tuple(self.channels)
-            binned_spiketrain = binned_spiketrain.select(channels)
+        n_nodes = binned_spiketrain.number_of_channels
+        channels = list(range(n_nodes))
 
         # Get adjacency matrix based on transfer entropy
         adj_matrix = np.zeros([n_nodes, n_nodes], dtype=np.bool_)  # source -> target
@@ -523,6 +521,8 @@ class UndirectedConnectivity(OperatorMixin):
             and j not in self.exclude_channels
             and i < j
             and i != j
+            and rates[i] > self.firing_rate_limit
+            and rates[j] > self.firing_rate_limit
         ]
         func = functools.partial(
             self._get_connection_info,
@@ -561,15 +561,10 @@ class UndirectedConnectivity(OperatorMixin):
         """
         # Function configuration. TODO: Make this dependency injection
         order = 2
-        sublength = 64
-        stride = 8
 
         assert (
             source.shape[0] == target.shape[0]
         ), f"source.shape={source.shape}, target.shape={target.shape}"
-        assert (
-            source.shape[0] - sublength > 0
-        ), f"source.shape[0]={source.shape[0]}, sublength={sublength}"
 
         sig = np.stack([source, target], axis=-1)
         try:
@@ -581,6 +576,12 @@ class UndirectedConnectivity(OperatorMixin):
         surrogate_vals = []
         if skip_surrogate:
             return val, surrogate_vals
+
+        sublength = 64
+        stride = 8
+        assert (
+            source.shape[0] - sublength > 0
+        ), f"During surrogate test: source.shape[0]={source.shape[0]}, sublength={sublength}"
 
         rng = np.random.default_rng(seed)  # TODO take rng instead
         for _ in range(surrogate_N):

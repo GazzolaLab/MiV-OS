@@ -37,6 +37,10 @@ class Spikestamps(CollapseExtendableMixin, DataNodeMixin, Sequence):
             iterable = []
         self.data: list[MutableSequence[float]] = iterable
 
+    @classmethod
+    def empty(clf, number_of_channels: int):
+        return clf([[] for _ in range(number_of_channels)])
+
     @property
     def number_of_channels(self) -> int:
         """Number of channels"""
