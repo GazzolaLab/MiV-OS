@@ -71,12 +71,11 @@ def plot_burst(
 
     times = np.concatenate([train for train in spiketrains])
     channel = np.concatenate([
-        np.full_like(train, i, dtype=float)
+        np.full_like(train, i, dtype=np.float_)
         for i, train in enumerate(spiketrains)
     ])
     ax.scatter(times, channel, s=2, marker='o', color="blue")
     ax.set_xlabel("Time (s)")
     ax.set_ylabel("Electrode")
-    plt.show()
 
     return fig, ax
