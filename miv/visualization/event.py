@@ -67,9 +67,16 @@ def plot_burst(
             spiketrains, i, min_isi, min_len
         )
         a = np.column_stack((start_time, burst_duration))
-        ax.broken_barh(a, (i + 1, 0.5), facecolors="tab:orange")
+        ax.broken_barh(a, (i, 0.5), facecolors="tab:orange")
 
+    times = np.concatenate([train for train in spiketrains])
+    channel = np.concatenate([
+        np.full_like(train, i, dtype=float)
+        for i, train in enumerate(spiketrains)
+    ])
+    ax.scatter(times, channel, s=2, marker='o', color="blue")
     ax.set_xlabel("Time (s)")
     ax.set_ylabel("Electrode")
+    plt.show()
 
     return fig, ax
