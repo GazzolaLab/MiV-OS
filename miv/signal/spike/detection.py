@@ -85,6 +85,7 @@ class ThresholdCutoff(OperatorMixin):
     num_proc: int = 1
 
     plot_interval: float = 10.0
+    num_save: int | None = None
 
     def __post_init__(self):
         super().__init__()
@@ -267,11 +268,13 @@ class ThresholdCutoff(OperatorMixin):
             # TODO: Warning message
             return None
         for idx in range(n_terms):
+            if self.num_save is not None and idx > self.num_save:
+                break
             fig, ax = plot_spiketrain_raster(
                 spikestamps, idx * term + t0, min((idx + 1) * term + t0, tf)
             )
             if save_path is not None:
-                plt.savefig(os.path.join(save_path, f"spiketrain_raster_{idx:03d}.png"))
+                plt.savefig(os.path.join(save_path, f"spiketrain_raster_{idx:03d}.png"), format="png", dpi=300)
             if not show:
                 plt.close("all")
         if show:
@@ -329,6 +332,61 @@ class ThresholdCutoff(OperatorMixin):
 
         return ax
 
+    def plot_firing_rate_instantaneous(
+        self, spikestamps, inputs, show=False, save_path=None
+    ):
+        """Plot firing rate throughout time"""
+
+        binsize = 0.10
+        binned_spiketrain = spikestamps.binning(binsize, return_count=True)
+        time_minute = binned_spiketrain.timestamps / 60  # minute
+        time_minute -= time_minute[0]  # Reset the time to zero
+        mean_firing_rate = binned_spiketrain.data.mean(axis=binned_spiketrain._CHANNELAXIS) / binsize
+
+        fig = plt.figure()
+        plt.plot(time_minute, mean_firing_rate)
+        plt.ylabel("Average (channel-wise) Firing rate (Hz)")
+        plt.xlabel("Time (minute)")
+        if save_path is not None:
+            fig.savefig(os.path.join(f"{save_path}", "instantaneous_firing_rate.png"))
+        if show:
+            plt.show()
+
+@dataclass
+class ThresholdCutoffNonSparse(ThresholdCutoff):
+    bin_size: float = 0.002
+
+    def __call__(self, signal: SignalType) -> SpikestampsType:
+        for idx, sig in enumerate(signal):  # TODO: mp
+            spikestamps = self._detection(sig)
+            binned = self._binning(sig, spikestamps)
+            yield spikestamps
+
+    def _binning(
+        self,
+        signal,
+        spikestamps,
+        t_start: Optional[float] = None,
+        t_end: Optional[float] = None,
+    ) -> Signal:
+        t_start = signal.timestamps[0]
+        t_end = signal.timestamps[0]
+
+        n_bins = int(np.ceil((t_end - t_start) / self.bin_size))
+        time = t_start + (np.arange(n_bins + 1) * self.bin_size)
+
+        num_channels = spikestamps.number_of_channels
+        signal = Signal(
+            data=np.zeros([n_bins, num_channels], dtype=np.int_,),
+            timestamps=time[:-1],
+            rate=1.0 / self.bin_size,
+        )
+        for idx, spiketrain in enumerate(self.data):
+            bins = np.digitize(spiketrain, time)
+            bincount = np.bincount(bins, minlength=n_bins + 2)[1:-1]
+            bin_spike = bincount
+            signal.data[:, idx] = bin_spike
+        return signal
 
 def query_firing_rate_between(
     spikestamps: Spikestamps,
