@@ -13,7 +13,7 @@ install-dev:
 
 .PHONY: install-all
 install-all:
-	uv sync --all-extras --dev
+	uv sync --all-extras --no-extra mpi --dev
 
 .PHONY: pre-commit-install
 pre-commit-install:

@@ -34,9 +34,9 @@ jobs:
         with:
           uv-version: latest
 
-      - uses: mpi4py/setup-mpi@v1
-        with:
-         mpi: ${{ matrix.mpi }}
+      # - uses: mpi4py/setup-mpi@v1
+      #   with:
+      #    mpi: ${{ matrix.mpi }}
 
       - name: Install python
         uses: actions/setup-python@v5
@@ -53,10 +53,11 @@ jobs:
             uv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('uv.lock') }}
             uv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}
 
-      - name: Install the project
+      - name: Install and activate the project
         run: |
           make install-all
           uv cache prune --ci
+          source .venv/bin/activate
 
       - uses: FedericoCarboni/setup-ffmpeg@v3
         id: setup-ffmpeg

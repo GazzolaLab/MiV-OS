@@ -16,7 +16,7 @@ build:
       - asdf global uv latest
       - uv venv
     install:
-      - uv sync --all-extras
+      - uv sync --all-extras --no-extra mpi
 
 # Build documentation in the docs/ directory with Sphinx
 sphinx:
