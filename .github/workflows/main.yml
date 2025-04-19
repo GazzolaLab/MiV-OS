@@ -34,9 +34,9 @@ jobs:
         with:
           uv-version: latest
 
-      # - uses: mpi4py/setup-mpi@v1
-      #   with:
-      #    mpi: ${{ matrix.mpi }}
+      - uses: mpi4py/setup-mpi@v1
+        with:
+         mpi: ${{ matrix.mpi }}
 
       - name: Install python
         uses: actions/setup-python@v5
