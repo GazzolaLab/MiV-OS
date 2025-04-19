@@ -2,54 +2,41 @@
 PYTHON := python3
 PYTHONPATH := `pwd`
 
-#* Poetry
-.PHONY: poetry-download
-poetry-download:
-	curl -sSL https://install.python-poetry.org/ | $(PYTHON) -
-
-.PHONY: poetry-remove
-poetry-remove:
-	curl -sSL https://install.python-poetry.org/ | $(PYTHON) - --uninstall
-
 #* Installation
 .PHONY: install
 install:
-	poetry install -n
+	uv sync
+
+.PHONY: install-dev
+install-dev:
+	uv sync --dev
+
+.PHONY: install-all
+install-all:
+	uv sync --all-extras --no-extra mpi --dev
 
 .PHONY: pre-commit-install
 pre-commit-install:
-	poetry run pre-commit install
+	uv run pre-commit install
 
 #* Formatters
-.PHONY: codestyle
-codestyle:
-	# poetry run pyupgrade --exit-zero-even-if-changed --py38-plus **/*.py
-	# poetry run isort --settings-path pyproject.toml ./
-	poetry run black --config pyproject.toml ./
-
 .PHONY: formatting
-formatting: codestyle
+formatting:
+	uv run ruff format --config pyproject.toml ./
 
 #* Linting
 .PHONY: test
 test:
-	poetry run pytest -c pyproject.toml --cov=miv --cov-report=xml
+	uv run pytest -c pyproject.toml --cov=miv --cov-report=xml
 
 .PHONY: check-codestyle
 check-codestyle:
-	# poetry run isort --diff --check-only --settings-path pyproject.toml ./
-	poetry run black --diff --check --config pyproject.toml ./
+	uv run ruff check --config pyproject.toml ./
+	uv run ruff format --check --config pyproject.toml ./
 
 .PHONY: mypy
 mypy:
-	poetry run mypy --config-file pyproject.toml miv
-
-.PHONY: lint
-lint: test check-codestyle mypy check-safety
-
-.PHONY: update-dev-deps
-update-dev-deps:
-	poetry add -D "isort[colors]@latest" mypy@latest pre-commit@latest pydocstyle@latest pylint@latest pytest@latest pyupgrade@latest coverage@latest pytest-html@latest pytest-cov@latest black@latest
+	uv run mypy --config-file pyproject.toml miv
 
 #* Cleaning
 .PHONY: pycache-remove
