@@ -87,7 +87,6 @@ experiment = [
 ]
 sortingExtension = [
   "dtaidistance>=2.3.10",
-  "scikit-learn-extra>=0.3.0"
 ]
 algorithmExtension = [
   "rupture>=1.4.5"
