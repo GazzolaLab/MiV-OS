@@ -102,7 +102,7 @@ def cached_method(
                     func, ignore=["self"]
                 )  # ignore is used to bypass un-hashable self
                 cached_methods[tag] = _func
-                self._cached_methods = cached_methods
+                setattr(self, "_cached_methods", cached_methods)  # noqa
             if policy == "MUST":
                 if not cached_methods[tag].check_call_in_cache(*args, **kwargs):  # type: ignore
                     raise RuntimeError(
