@@ -112,7 +112,7 @@ dev = [
 # https://docs.astral.sh/ruff/
 target-version = "py310"
 line-length = 88
-select = [
+lint.select = [
     "E",    # pycodestyle errors
     "F",    # pyflakes
     "W",    # pycodestyle warnings
@@ -123,7 +123,7 @@ select = [
     "N",    # pep8-naming
     "PL",   # pylint
 ]
-ignore = [
+lint.ignore = [
     "E203",  # whitespace before ':'
     "E266",  # too many leading '#' for block comment
     "E501",  # line too long (handled by formatter)
@@ -132,6 +132,8 @@ ignore = [
     "PLR0913", # too many arguments
     "I",     # ignore all import sorting rules
 ]
+lint.pydocstyle.convention = "numpy"
+lint.isort.known-first-party = ["miv"]
 
 # Exclude a variety of commonly ignored directories.
 exclude = [
@@ -157,11 +159,6 @@ indent-style = "space"
 skip-magic-trailing-comma = false
 line-ending = "auto"
 
-[tool.ruff.isort]
-known-first-party = ["miv"]
-
-[tool.ruff.pydocstyle]
-convention = "numpy"
 [tool.mypy]
 # https://mypy.readthedocs.io/en/latest/config_file.html#using-a-pyproject-toml-file
 python_version = "3.10"
