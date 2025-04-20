@@ -26,7 +26,7 @@ import numpy as np
 from miv.utils.formatter import TColors
 
 if TYPE_CHECKING:
-    from .operator import _Cachable
+    from .protocol import _Cachable
     from miv.core.datatype import DataTypes
 
 # ON: Always use cache if cache exist. Otherwise, run and save cache.

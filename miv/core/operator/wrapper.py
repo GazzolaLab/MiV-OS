@@ -83,7 +83,7 @@ def cached_method(
         func: Callable[Concatenate[SELF, P], R],
     ) -> Callable[Concatenate[SELF, P], R]:
         @functools.wraps(func)
-        def wrapper(self: _Cachable, *args: P.args, **kwargs: P.kwargs) -> R:
+        def wrapper(self: SELF, *args: P.args, **kwargs: P.kwargs) -> R:
             # Check if caching is allowed based on policy
             policy = self.cacher.policy
             if policy == "OFF":
@@ -91,7 +91,7 @@ def cached_method(
                 return func(self, *args, **kwargs)
 
             # For other policies, we'll use the caching mechanism
-            cached_methods: dict[str, Callable] = getattr(self, "_cached_methods", {})
+            cached_methods = getattr(self, "_cached_methods", {})
             cache_dir = self.cacher.cache_dir
             tag = cache_tag if cache_tag is not None else func.__name__
 

@@ -21,8 +21,6 @@ import pathlib
 from miv.core.operator.cachable import (
     DataclassCacher,
     FunctionalCacher,
-    _CacherProtocol,
-    CACHE_POLICY,
 )
 from miv.core.operator.callback import BaseCallbackMixin
 from miv.core.operator.chainable import BaseChainingMixin
@@ -66,32 +64,16 @@ class DataNodeMixin(BaseChainingMixin, DefaultLoggerMixin):
 class DataLoaderMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
     """ """
 
-    def __init__(self) -> None:
-        self.tag: str
-        self._cacher: _CacherProtocol = FunctionalCacher(self)
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         self.runner = VanillaRunner()
-        super().__init__()
-
+        super().__init__(*args, cacher=FunctionalCacher(self), **kwargs)
         self._load_param: dict = {}
+
+        # Attribute from upstream
+        self.tag: str
 
     def __call__(self) -> DataTypes:
         raise NotImplementedError("Please implement __call__ method.")
-
-    @property
-    def cacher(self) -> _CacherProtocol:
-        return self._cacher
-
-    @cacher.setter
-    def cacher(self, value: _CacherProtocol) -> None:
-        # FIXME:
-        policy = self._cacher.policy
-        cache_dir = self._cacher.cache_dir
-        self._cacher = value
-        self._cacher.policy = policy
-        self._cacher.cache_dir = cache_dir
-
-    def set_caching_policy(self, policy: CACHE_POLICY) -> None:
-        self.cacher.policy = policy
 
     def configure_load(self, **kwargs: Any) -> None:
         """
@@ -126,33 +108,17 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
             - All results from callback
     """
 
-    def __init__(self) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         self.runner: _RunnerProtocol = VanillaRunner()
-        self._cacher: _CacherProtocol = DataclassCacher(self)
-
         self.analysis_path = "analysis"
-        self.tag: str
 
-        super().__init__()
+        super().__init__(*args, cacher=DataclassCacher(self), **kwargs)
+
+        # Attribute from upstream
+        self.tag: str
 
     def __call__(self) -> DataTypes:
         raise NotImplementedError("Please implement __call__ method.")
-
-    @property
-    def cacher(self) -> _CacherProtocol:
-        return self._cacher
-
-    @cacher.setter
-    def cacher(self, value: _CacherProtocol) -> None:
-        # FIXME:
-        policy = self._cacher.policy
-        cache_dir = self._cacher.cache_dir
-        self._cacher = value
-        self._cacher.policy = policy
-        self._cacher.cache_dir = cache_dir
-
-    def set_caching_policy(self, policy: CACHE_POLICY) -> None:
-        self.cacher.policy = policy
 
     def __repr__(self) -> str:
         return self.tag

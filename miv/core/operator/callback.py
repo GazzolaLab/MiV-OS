@@ -14,10 +14,15 @@ import pathlib
 
 import matplotlib.pyplot as plt
 
+from miv.core.operator.cachable import (
+    _CacherProtocol,
+    CACHE_POLICY,
+)
+
 
 # MixinOperators
 def get_methods_from_feature_classes_by_startswith_str(
-    cls: type, method_name: str
+    cls: Any, method_name: str
 ) -> list[Callable]:
     methods = [
         getattr(cls, k)
@@ -29,7 +34,7 @@ def get_methods_from_feature_classes_by_startswith_str(
 
 # MixinOperators
 def get_methods_from_feature_classes_by_endswith_str(
-    cls: type, method_name: str
+    cls: Any, method_name: str
 ) -> list[Callable]:
     methods = [
         getattr(cls, k)
@@ -40,9 +45,16 @@ def get_methods_from_feature_classes_by_endswith_str(
 
 
 class BaseCallbackMixin:
-    def __init__(self, cache_path: str = ".cache") -> None:
-        super().__init__()
+    def __init__(
+        self,
+        *args: Any,
+        cacher: _CacherProtocol,
+        cache_path: str = ".cache",
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(*args, **kwargs)
         self.__cache_directory_name: str = cache_path
+        self._cacher: _CacherProtocol = cacher
 
         # Default analysis path
         assert self.tag != "", (
@@ -53,6 +65,25 @@ class BaseCallbackMixin:
         # Callback Flags (to avoid duplicated run)
         self._done_flag_after_run = False
         self._done_flag_plot = False
+
+        # Attribute from upstream
+        self.tag: str
+
+    @property
+    def cacher(self) -> _CacherProtocol:
+        return self._cacher
+
+    @cacher.setter
+    def cacher(self, value: _CacherProtocol) -> None:
+        # FIXME:
+        policy = self._cacher.policy
+        cache_dir = self._cacher.cache_dir
+        self._cacher = value
+        self._cacher.policy = policy
+        self._cacher.cache_dir = cache_dir
+
+    def set_caching_policy(self, policy: CACHE_POLICY) -> None:
+        self.cacher.policy = policy
 
     def reset_callbacks(self, *, after_run: bool = False, plot: bool = False) -> None:
         self._done_flag_after_run = after_run

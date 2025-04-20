@@ -19,6 +19,7 @@ class MockObjectWithoutCache(GeneratorPlotMixin):
             self.cache_dir = ""
             self.cache_tag = "mock_cache"
             self.config_filename = "mock_config"
+            self.policy = "ON"
 
         def cache_filename(self):
             return "mock_cache_file"
@@ -114,3 +115,50 @@ def test_wrap_generator_no_cache(mock_object_without_cache, tmp_path):
     a = FooClass(tmp_path)
     assert a(1, 2) == 3
     assert tuple(a.other(bar(), bar())) == (2, 4, 6)
+
+
+class FooClassV2(MockObjectWithCache):
+    def __init__(self, tmp_path):
+        super().__init__(tmp_path=tmp_path)
+        self.called = False
+
+    @cache_generator_call
+    def __call__(self, x, y):
+        return x + y
+
+    @cached_method("test1")
+    def other(self, x, y):
+        if self.called:
+            return -100  # This should not be returned, since cached value is 0 (above)
+        self.called = True
+        return x + y
+
+
+def test_wrap_generator_cache(mock_object_with_cache, tmp_path):
+    @cache_generator_call
+    def foo(self, x, y):
+        return x + y
+
+    def bar():
+        yield 1
+        yield 2
+        yield 3
+
+    assert tuple(foo(mock_object_with_cache, bar(), bar())) == (2, 4, 6)
+    for v in mock_object_with_cache.cacher.load_cached():
+        assert v == 0  # mock cache only saves zero. (above)
+
+    # Test cache_generator_call
+    a = FooClassV2(tmp_path)
+    assert tuple(a(bar(), bar())) == (2, 4, 6)
+    for v in a.cacher.load_cached():
+        assert v == 0  # mock cache only saves zero. (above)
+
+    # Test cached_method
+    a = FooClassV2(tmp_path)
+    assert a.other(1, 5) == 6
+    assert a.other(1, 5) != -100
+    assert a.other(1, 5) == 6
+    assert (
+        a.other(1, 6) == -100
+    )  # This is to check if interval variable is updated properly

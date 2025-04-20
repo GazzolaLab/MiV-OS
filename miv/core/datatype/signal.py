@@ -46,7 +46,7 @@ class Signal(SupportMultiprocessing, DataNodeMixin, ConcatenateMixin):
     @property
     def number_of_channels(self) -> int:
         """Number of channels in the signal."""
-        return self.data.shape[self._CHANNELAXIS]
+        return int(self.data.shape[self._CHANNELAXIS])
 
     def __getitem__(self, i: int) -> SignalType:
         return self.data[:, i]
