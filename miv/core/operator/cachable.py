@@ -9,14 +9,12 @@ __all__ = [
     "FunctionalCacher",
 ]
 
-from typing import TYPE_CHECKING, Any, Literal, Protocol, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Literal, Protocol
 from collections.abc import Callable, Generator
 
 from collections import OrderedDict
 import dataclasses
-import functools
 import glob
-import itertools
 import json
 import os
 import pathlib
@@ -59,7 +57,7 @@ class _CacherProtocol(Protocol):
 
 def when_policy_is(*allowed_policy: CACHE_POLICY) -> Callable:
     def decorator(
-        func: Callable[[_CacherProtocol, Any, Any], bool | DataTypes]
+        func: Callable[[_CacherProtocol, Any, Any], bool | DataTypes],
     ) -> Callable:
         # @functools.wraps(func) # TODO: fix this
         def wrapper(

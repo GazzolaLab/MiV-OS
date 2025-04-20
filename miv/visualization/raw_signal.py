@@ -1,13 +1,11 @@
 __doc__ = """Multi-channel signal plotting for MEA channels"""
 __all__ = ["MultiChannelSignalVisualization"]
 
-from typing import Any, List, Optional
 
 import inspect
 import os
 from dataclasses import dataclass
 
-import matplotlib
 import matplotlib.animation as manimation
 import numpy as np
 from matplotlib import pyplot as plt
@@ -16,8 +14,6 @@ from tqdm import tqdm
 from miv.core.datatype import Spikestamps
 from miv.core.operator.operator import OperatorMixin
 from miv.mea.protocol import MEAGeometryProtocol
-from miv.typing import SignalType
-from miv.visualization.utils import interp_2d
 
 
 @dataclass
@@ -89,7 +85,7 @@ class MultiChannelSignalVisualization(OperatorMixin):
                     )
                     cbar = fig.colorbar(pcm, ax=ax)
                     cbar.ax.set_ylabel(
-                        f"signal averaged over {self.average_interval/signal.rate:.02f} sec",
+                        f"signal averaged over {self.average_interval / signal.rate:.02f} sec",
                         rotation=270,
                     )
 
@@ -101,5 +97,3 @@ class MultiChannelSignalVisualization(OperatorMixin):
 
                     writer.grab_frame()
             plt.close(plt.gcf())
-
-        return

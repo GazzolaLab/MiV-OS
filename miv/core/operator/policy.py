@@ -9,12 +9,9 @@ __all__ = [
     "StrictMPIRunner",
     "SupportMPIMerge",
 ]
-
-import inspect
+from typing import TYPE_CHECKING, Any, Protocol, cast
 import multiprocessing
-import pathlib
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Optional, Protocol, Union, cast
 from collections.abc import Callable, Generator
 
 if TYPE_CHECKING:

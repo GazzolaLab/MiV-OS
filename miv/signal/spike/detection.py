@@ -20,14 +20,10 @@ Code Example::
 """
 __all__ = ["ThresholdCutoff", "query_firing_rate_between"]
 
-from typing import Any, Dict, List, Optional, Tuple, Union
-from collections.abc import Generator, Iterable
+from typing import Any
 
 import csv
-import functools
 import inspect
-import logging
-import multiprocessing
 import os
 import pathlib
 import time
@@ -36,12 +32,10 @@ from dataclasses import dataclass
 import matplotlib.pyplot as plt
 import neo
 import numpy as np
-import quantities as pq
 from tqdm import tqdm
 
 from miv.core.datatype import Signal, Spikestamps
 from miv.core.operator.operator import OperatorMixin
-from miv.core.operator.policy import InternallyMultiprocessing
 from miv.core.operator.wrapper import cache_call
 from miv.statistics.spiketrain_statistics import firing_rates
 from miv.typing import SignalType, SpikestampsType
@@ -53,16 +47,16 @@ class ThresholdCutoff(OperatorMixin):
     """ThresholdCutoff
     Spike sorting step by step guide is well documented `here <http://www.scholarpedia.org/article/Spike_sorting>`_.
 
-        Attributes
-        ----------
+    Attributes
+    ----------
         dead_time : float
             (default=0.003)
         search_range : float
             (default=0.002)
-        cutoff : Union[float, np.ndarray]
+        cutoff : float | np.ndarray
             (default=5.0)
         tag : str
-        units : Union[str, pq.UnitTime]
+        units : str | pq.UnitTime
             (default='sec')
         progress_bar : bool
             Toggle progress bar (default=True)
@@ -105,7 +99,7 @@ class ThresholdCutoff(OperatorMixin):
 
         Returns
         -------
-        spiketrain_list : List[SpikestampsType]
+        spiketrain_list : list[SpikestampsType]
 
         """
         if not inspect.isgenerator(
@@ -125,7 +119,7 @@ class ThresholdCutoff(OperatorMixin):
                 stime = time.time()
                 collapsed_result.extend(self._detection(sig))
                 self.logger.info(
-                    f"Processing segment {idx}: {time.time()-stime:.02f} sec"
+                    f"Processing segment {idx}: {time.time() - stime:.02f} sec"
                 )
             return collapsed_result
 
@@ -341,7 +335,6 @@ class ThresholdCutoff(OperatorMixin):
         self, spikestamps, inputs, show=False, save_path=None
     ):
         """Plot firing rate throughout time"""
-
         binsize = 0.10
         binned_spiketrain = spikestamps.binning(binsize, return_count=True)
         time_minute = binned_spiketrain.timestamps / 60  # minute
@@ -374,8 +367,8 @@ class ThresholdCutoffNonSparse(ThresholdCutoff):
         self,
         signal,
         spikestamps,
-        t_start: Optional[float] = None,
-        t_end: Optional[float] = None,
+        t_start: float | None = None,
+        t_end: float | None = None,
     ) -> Signal:
         t_start = signal.timestamps[0]
         t_end = signal.timestamps[0]

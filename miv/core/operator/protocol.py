@@ -7,7 +7,7 @@ __all__ = [
     "OperatorNode",
 ]
 
-from typing import Protocol, Any, TYPE_CHECKING
+from typing import Protocol, Any
 from collections.abc import Callable, Iterator
 from typing_extensions import Self
 
@@ -35,7 +35,6 @@ class _Runnable(Protocol):
 
 
 class _Cachable(_Tagged, _Loggable, _Runnable, Protocol):
-
     @property
     def cacher(self) -> _CacherProtocol: ...
     @cacher.setter

@@ -1,13 +1,9 @@
 __all__ = ["plot_connectivity", "plot_connectivity_interactive"]
 
-import os
 
 import graphviz
-import matplotlib.pyplot as plt
 import numpy as np
 from pyvis.network import Network
-
-from miv.typing import SpikestampsType
 
 
 def plot_connectivity(
@@ -30,15 +26,14 @@ def plot_connectivity(
     g
         graphviz graph object
     """
-
     connec_x, connec_y = np.shape(connectivity_matrix)
     assert connec_x == connec_y, "Connectivity matrix should be a square matrix"
     num_elec = np.count_nonzero(mea_map)
     assert num_elec > 0, "Number of electrodes should be greater than 0"
     elec_mat = np.linspace(1, num_elec, num_elec).astype(int)
-    assert (
-        connec_x == num_elec
-    ), "Connectivity matrix should have same dimensions as the number of electrodes"
+    assert connec_x == num_elec, (
+        "Connectivity matrix should have same dimensions as the number of electrodes"
+    )
 
     if directionality:
         g = graphviz.Digraph("G", filename="connectivity", engine="neato")
@@ -121,9 +116,9 @@ def plot_connectivity_interactive(
     num_elec = np.count_nonzero(mea_map)
     assert num_elec > 0, "Number of electrodes should be greater than 0"
     elec_mat = np.linspace(1, num_elec, num_elec).astype(int)
-    assert (
-        connec_x == num_elec
-    ), "Connectivity matrix should have same dimensions as the number of electrodes"
+    assert connec_x == num_elec, (
+        "Connectivity matrix should have same dimensions as the number of electrodes"
+    )
 
     net = Network(
         height="500px",

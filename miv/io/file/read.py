@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
 from logging import Logger
+from typing import Any
 
 import h5py
 import numpy as np
@@ -27,13 +28,13 @@ def read(
 
         **logger** (logging.Logger): optional logger object
 
-    Returns:
+    Returns
+    -------
         **data** (dict): Selected data from HDF5 file
 
         **container** (dict): An empty container dictionary to be filled by data from select containers
 
     """
-
     # Open the HDF5 file
     infile = None
     infile = h5py.File(filename, "r")
@@ -69,7 +70,7 @@ def read(
         if logger is not None:
             logger.info(
                 "Will read in a subset of the file!"
-                f"From container {subset_[0]} (inclusive) through container {subset_[1]-1} (inclusive)"
+                f"From container {subset_[0]} (inclusive) through container {subset_[1] - 1} (inclusive)"
                 f"Container {subset_[1]} is not read in"
                 f"Reading in {ncontainers} containers\n"
             )
@@ -150,12 +151,11 @@ def read(
                     # map on to the same locations for any counters
                     lo = subset_[0]
                     hi = subset_[1]
+                elif index_name_ is not None:
+                    lo = full_file_indices[index_name_][0]
+                    hi = full_file_indices[index_name_][-1]
                 else:
-                    if index_name_ is not None:
-                        lo = full_file_indices[index_name_][0]
-                        hi = full_file_indices[index_name_][-1]
-                    else:
-                        raise RuntimeError("Unknown index")
+                    raise RuntimeError("Unknown index")
                 data[dataset_name] = dataset[lo:hi]
             else:
                 data[dataset_name] = dataset[:]
@@ -204,7 +204,7 @@ def select_datasets(
 
         if logger is not None:
             logger.debug(
-                f"After only selecting certain datasets ----- " f"datasets: {datasets}"
+                f"After only selecting certain datasets ----- datasets: {datasets}"
             )
 
     return datasets
@@ -297,7 +297,6 @@ def unpack(
                      dictionary and inserted into the container dictionary.
 
     """
-
     keys = container.keys()
 
     for key in keys:
@@ -323,7 +322,6 @@ def get_ncontainers_in_file(
     filename: str, logger: Logger | None = None
 ) -> None | int64:
     """Get the number of containers in the file."""
-
     with h5py.File(filename, "r+") as f:
         a = f.attrs
 
@@ -344,7 +342,6 @@ def get_ncontainers_in_data(data, logger=None) -> None | int64:
     This is useful in case you've only pulled out subsets of the data
 
     """
-
     if not isinstance(data, dict):
         if logger is not None:
             logger.warning(f"{data} is not a dictionary!\n")
@@ -363,7 +360,6 @@ def get_ncontainers_in_data(data, logger=None) -> None | int64:
 
 def get_file_metadata(filename: str) -> None | dict[str, Any]:
     """Get the file metadata and return it as a dictionary"""
-
     f = h5py.File(filename, "r+")
 
     a = f.attrs
@@ -384,7 +380,6 @@ def get_file_metadata(filename: str) -> None | dict[str, Any]:
 
 def print_file_metadata(filename: str) -> str:
     """Pretty print the file metadata"""
-
     metadata = get_file_metadata(filename)
 
     if metadata is None:

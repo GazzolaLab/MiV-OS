@@ -9,9 +9,7 @@ Spikestamps
 
 __all__ = ["Spikestamps"]
 
-from typing import Optional, Union
-
-from collections.abc import MutableSequence, Sequence, Iterable
+from collections.abc import MutableSequence, Sequence
 
 import numpy as np
 import quantities as pq
@@ -63,9 +61,7 @@ class Spikestamps(ConcatenateMixin, DataNodeMixin, Sequence):
     def append(self, item: MutableSequence[float]) -> None:
         self.data.append(item)
 
-    def extend(
-        self, other: Union["Spikestamps", Iterable[MutableSequence[float]]]
-    ) -> None:
+    def extend(self, other: "Spikestamps | Iterable[MutableSequence[float]]]") -> None:
         """
         Extend spikestamps from another `Spikestamps` or list of arrays.
 
@@ -76,7 +72,6 @@ class Spikestamps(ConcatenateMixin, DataNodeMixin, Sequence):
 
         Examples
         --------
-
         >>> a = Spikestamps([[0,1,2],[0,3]])
         >>> b = Spikestamps([[3,5],[4],[0,1]])
         >>> a.extend(b)
@@ -156,7 +151,6 @@ class Spikestamps(ConcatenateMixin, DataNodeMixin, Sequence):
             If None, the last spikestamp will be used.
 
         """
-
         if t_start is None:
             t_start = self.get_first_spikestamp()
         if t_stop is None:
@@ -216,9 +210,9 @@ class Spikestamps(ConcatenateMixin, DataNodeMixin, Sequence):
 
         t_start = self.get_first_spikestamp() if t_start is None else t_start
         t_end = self.get_last_spikestamp() if t_end is None else t_end
-        assert (
-            t_start < t_end
-        ), f"t_start ({t_start}) should be less than t_end ({t_end})"
+        assert t_start < t_end, (
+            f"t_start ({t_start}) should be less than t_end ({t_end})"
+        )
         n_bins = int(np.ceil((t_end - t_start) / bin_size))
         time = t_start + (np.arange(n_bins + 1) * bin_size)
 

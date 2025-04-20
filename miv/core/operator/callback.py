@@ -3,22 +3,19 @@ Implementation for callback features that will be mixed in operator class.
 """
 __all__ = ["BaseCallbackMixin"]
 
-from typing import Type, TypeVar  # TODO: For python 3.11, we can use typing.Self
-from typing import Optional, Protocol, Union, Any, TYPE_CHECKING
+from typing import Any, TYPE_CHECKING
 from collections.abc import Callable
 from typing_extensions import Self
 
 import types
 import inspect
-import itertools
 import os
 import pathlib
 
 import matplotlib.pyplot as plt
 
 if TYPE_CHECKING:
-    from .protocol import _Cachable, OperatorNode
-    from ..protocol import _Tagged
+    pass
 
 
 def MixinOperators(func: Callable) -> Callable:
@@ -55,9 +52,9 @@ class BaseCallbackMixin:
         self.__cache_directory_name: str = cache_path
 
         # Default analysis path
-        assert (
-            self.tag != ""
-        ), "All operator must have self.tag attribute for identification."
+        assert self.tag != "", (
+            "All operator must have self.tag attribute for identification."
+        )
         self.set_save_path("results")  # FIXME
 
         # Callback Flags (to avoid duplicated run)

@@ -14,8 +14,7 @@ import time
 
 import numpy as np
 import scipy.special as sps
-from numba import njit, prange
-from tqdm import tqdm
+from numba import njit
 
 from miv.core.datatype import Spikestamps
 
@@ -115,10 +114,7 @@ def _numba_firing_rate(spiketimes, probe_time, h):
 
 
 if __name__ == "__main__":
-    import sys
     import time
-
-    import matplotlib.pyplot as plt
 
     from miv.core.datatype import Spikestamps
 
@@ -213,4 +209,4 @@ if __name__ == "__main__":
 
     # plt.show()
 
-    print(f"Elapsed time: {etime-stime:.4f} seconds")
+    print(f"Elapsed time: {etime - stime:.4f} seconds")

@@ -1,9 +1,6 @@
 __all__ = ["UnstructuredMEA"]
 
-from typing import Tuple
 
-import matplotlib
-import MEAutility
 import numpy as np
 from scipy.interpolate import griddata
 
@@ -31,9 +28,9 @@ class UnstructuredMEA(MEAMixin):
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
-        assert (
-            indices.shape[0] == coordinates.shape[0]
-        ), f"The number of indices ({indices.shape[0]}) and coordinates ({coordinates.shape[0]}) must be the same."
+        assert indices.shape[0] == coordinates.shape[0], (
+            f"The number of indices ({indices.shape[0]}) and coordinates ({coordinates.shape[0]}) must be the same."
+        )
         self.indices = indices
         self.coordinates = coordinates
 
@@ -46,7 +43,7 @@ class UnstructuredMEA(MEAMixin):
 
     def map_data(
         self, vector: np.ndarray, missing_value: float = 0.0
-    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Map data (1-D array) to MEA (2-D array or N-D array)"""
         values = np.full(self.indices.shape, missing_value)
         for idx, value in enumerate(vector):

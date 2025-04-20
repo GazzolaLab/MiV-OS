@@ -28,32 +28,23 @@ __all__ = ["Data", "DataManager"]
 
 import logging
 import os
-import pickle
 import re
 from collections.abc import MutableSequence
 from glob import glob
 from typing import (
     TYPE_CHECKING,
     Any,
-    Optional,
 )
-from collections.abc import Callable, Iterable, Generator
+from collections.abc import Iterable, Generator
 
-import matplotlib.pyplot as plt
 import numpy as np
 
 from miv.core.datatype.signal import Signal
 from miv.core.operator.operator import DataLoaderMixin
-from miv.io.openephys.binary import load_continuous_data, load_recording, load_ttl_event
+from miv.io.openephys.binary import load_recording, load_ttl_event
 from miv.io.protocol import DataProtocol
-from miv.signal.filter.protocol import FilterProtocol
-from miv.signal.spike.protocol import SpikeDetectionProtocol
-from miv.statistics.spiketrain_statistics import firing_rates
-from miv.typing import SignalType
 
 if TYPE_CHECKING:
-    import pathlib
-
     import mpi4py
 
 
@@ -94,8 +85,8 @@ class Data(DataLoaderMixin):
             └── mea_overlay
 
 
-        Parameters
-        ----------
+    Parameters
+    ----------
         data_path : str
     """
 
@@ -117,9 +108,9 @@ class Data(DataLoaderMixin):
         file_path: list[str] = glob(
             os.path.join(self.data_path, "**", "continuous.dat"), recursive=True
         )
-        assert (
-            len(file_path) == 1
-        ), f"There should be only one 'continuous.dat' file. (There exists {file_path})"
+        assert len(file_path) == 1, (
+            f"There should be only one 'continuous.dat' file. (There exists {file_path})"
+        )
 
         # load structure information dictionary
         info_file: str = os.path.join(self.data_path, "structure.oebin")
@@ -139,9 +130,9 @@ class Data(DataLoaderMixin):
         # Define task
         filesize = os.path.getsize(file_path[0])
         itemsize = np.dtype("int16").itemsize
-        assert (
-            filesize == itemsize * total_length * num_channels
-        ), f"{filesize=} does not match the expected {itemsize*total_length*num_channels=}. Path: {file_path[0]}"
+        assert filesize == itemsize * total_length * num_channels, (
+            f"{filesize=} does not match the expected {itemsize*total_length*num_channels=}. Path: {file_path[0]}"
+        )
         samples_per_block = sampling_rate * 60
         num_fragments = int(math.ceil(total_length / samples_per_block))
         return num_fragments
@@ -238,7 +229,6 @@ class Data(DataLoaderMixin):
         """
         Clears all present channel masks.
         """
-
         self.masking_channel_set = set()
 
     def check_path_validity(self) -> bool:
@@ -254,7 +244,6 @@ class Data(DataLoaderMixin):
             Return true if all necessary files exist in the directory.
 
         """
-
         continuous_dat_paths = glob(
             os.path.join(self.data_path, "**", "continuous.dat"), recursive=True
         )
@@ -289,8 +278,8 @@ class DataManager(MutableSequence):
             ├── settings_2.xml
             └── settings_3.xml
 
-        Parameters
-        ----------
+    Parameters
+    ----------
         data_collection_path : str
             Path for data collection.
 
@@ -396,7 +385,7 @@ class DataManager(MutableSequence):
             for match in matches:
                 if match is not None:
                     tags.append((int(match.group(1)), int(match.group(2))))
-            path_list = [path for _, path in sorted(zip(tags, path_list))]
+            path_list = [path for _, path in sorted(zip(tags, path_list, strict=False))]
         return path_list
 
     # MutableSequence abstract methods

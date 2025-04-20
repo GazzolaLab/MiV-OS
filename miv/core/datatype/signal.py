@@ -9,8 +9,7 @@ Signal
 
 __all__ = ["Signal"]
 
-from typing import Optional, cast
-from collections.abc import Iterable
+from typing import cast
 
 import pickle
 from dataclasses import dataclass
@@ -77,9 +76,9 @@ class Signal(SupportMultiprocessing, DataNodeMixin, ConcatenateMixin):
     def extend_signal(self, data: np.ndarray, time: SpikestampsType) -> None:
         """Append a signal to the end of the existing signal."""
         assert data.shape[self._SIGNALAXIS] == time.shape[0]
-        assert (
-            data.shape[self._CHANNELAXIS] == self.data.shape[self._CHANNELAXIS]
-        ), "Signal must have same number of channels"
+        assert data.shape[self._CHANNELAXIS] == self.data.shape[self._CHANNELAXIS], (
+            "Signal must have same number of channels"
+        )
         self.data = np.append(self.data, data, axis=self._SIGNALAXIS)
         self.timestamps = np.append(self.timestamps, time)
 
@@ -89,12 +88,12 @@ class Signal(SupportMultiprocessing, DataNodeMixin, ConcatenateMixin):
 
     def prepend_signal(self, data: np.ndarray, time: SpikestampsType) -> None:
         """Prepend a signal to the end of the existing signal."""
-        assert (
-            data.shape[self._SIGNALAXIS] == time.shape[0]
-        ), "Time and signal must have same length"
-        assert (
-            data.shape[self._CHANNELAXIS] == self.data.shape[self._CHANNELAXIS]
-        ), "Signal must have same number of channels"
+        assert data.shape[self._SIGNALAXIS] == time.shape[0], (
+            "Time and signal must have same length"
+        )
+        assert data.shape[self._CHANNELAXIS] == self.data.shape[self._CHANNELAXIS], (
+            "Signal must have same number of channels"
+        )
         self.data = np.append(data, self.data, axis=self._SIGNALAXIS)
         self.timestamps = np.append(self.timestamps, time)
 

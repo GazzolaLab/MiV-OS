@@ -10,19 +10,14 @@ __all__ = [
     "instantaneous_spike_rate",
 ]
 
-from typing import Any, Dict, List, Optional, Union
-from collections.abc import Callable, Iterable
-
-import datetime
 import os
+from collections.abc import Callable
 from dataclasses import dataclass
+from typing import Any
 
 import matplotlib.pyplot as plt
-import neo
 import numpy as np
 import quantities as pq
-import scipy
-import scipy.signal
 
 from miv.core.datatype import Spikestamps
 from miv.core.operator.operator import OperatorMixin
@@ -78,7 +73,9 @@ class MFRComparison(OperatorMixin):
     def __call__(self, pre_spiketrains: Spikestamps, post_spiketrains: Spikestamps):
         assert (
             pre_spiketrains.number_of_channels == post_spiketrains.number_of_channels
-        ), f"Number of channels does not match: {pre_spiketrains.number_of_channels} vs {post_spiketrains.number_of_channels}"
+        ), (
+            f"Number of channels does not match: {pre_spiketrains.number_of_channels} vs {post_spiketrains.number_of_channels}"
+        )
         pre_rates = firing_rates(pre_spiketrains)["rates"]
         post_rates = firing_rates(post_spiketrains)["rates"]
         if self.recording_duration is None:
@@ -136,7 +133,6 @@ def interspike_intervals(spikes: SpikestampsType):
 
     Examples
     --------
-
     How to draw Inter-spike interval histogram (ISIH):
 
         >>> from miv.statistics import interspike_intervals
@@ -163,7 +159,6 @@ def interspike_intervals(spikes: SpikestampsType):
         interval: numpy.ndarray
 
     """
-
     spike_interval = np.diff(spikes)
     return spike_interval
 
