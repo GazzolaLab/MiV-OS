@@ -6,7 +6,7 @@ import pytest
 from joblib import Memory
 
 from miv.core.operator.operator import DataLoaderMixin
-from miv.core.operator.wrapper import cache_functional
+from miv.core.operator.wrapper import cached_method
 
 
 class MockDataLoader(DataLoaderMixin):
@@ -17,29 +17,29 @@ class MockDataLoader(DataLoaderMixin):
         super().__init__()
         self.run_check_flag = False
 
-    @cache_functional(cache_tag="function_1")
+    @cached_method(cache_tag="function_1")
     def func1(self, a: int, b: int) -> int:
         self.run_check_flag = True
         return a + b
 
-    @cache_functional(cache_tag="function_2")
+    @cached_method(cache_tag="function_2")
     def func2(self, a: int, b: int) -> int:
         self.run_check_flag = True
         return a - b
 
-    @cache_functional(cache_tag="function_3")
+    @cached_method(cache_tag="function_3")
     def func3(self, a: int, b: int) -> int:
         self.run_check_flag = True
         # This part is to test if the cache is working properly in nested case
         self.func1(a, b)
         return a * b
 
-    @cache_functional(cache_tag="function_4")
+    @cached_method(cache_tag="function_4")
     def func4(self, a: list[int], b: int) -> list[int]:
         self.run_check_flag = True
         return [x + b for x in a]
 
-    @cache_functional(cache_tag="function_5")
+    @cached_method(cache_tag="function_5")
     def func5(self, a: int | float, b: int | float) -> int | float:
         self.run_check_flag = True
         return a * b + a + b
@@ -183,8 +183,8 @@ def test_two_function_caching_cacher_called_flag_test(cls, tmp_path, mocker):
 
 
 @pytest.mark.parametrize("cls", [MockDataLoader])
-def test_cache_functional_with_list_input(cls, tmp_path: pathlib.Path) -> None:
-    """Test cache_functional with list input and output."""
+def test_cached_method_with_list_input(cls, tmp_path: pathlib.Path) -> None:
+    """Test cached_method with list input and output."""
     runner = cls(str(tmp_path))
     runner.set_save_path(tmp_path)
 
@@ -217,8 +217,8 @@ def test_cache_functional_with_list_input(cls, tmp_path: pathlib.Path) -> None:
 
 
 @pytest.mark.parametrize("cls", [MockDataLoader])
-def test_cache_functional_with_mixed_types(cls, tmp_path: pathlib.Path) -> None:
-    """Test cache_functional with mixed numeric types."""
+def test_cached_method_with_mixed_types(cls, tmp_path: pathlib.Path) -> None:
+    """Test cached_method with mixed numeric types."""
     runner = cls(str(tmp_path))
     runner.set_save_path(tmp_path)
 
@@ -252,13 +252,13 @@ def test_cache_functional_with_mixed_types(cls, tmp_path: pathlib.Path) -> None:
 
 
 @pytest.mark.parametrize("cls", [MockDataLoader])
-def test_cache_functional_verbose_mode(cls, tmp_path: pathlib.Path) -> None:
-    """Test cache_functional with verbose mode enabled."""
+def test_cached_method_verbose_mode(cls, tmp_path: pathlib.Path) -> None:
+    """Test cached_method with verbose mode enabled."""
     runner = cls(str(tmp_path))
     runner.set_save_path(tmp_path)
 
     # Create a new method with verbose=True
-    @cache_functional(cache_tag="verbose_function", verbose=True)
+    @cached_method(cache_tag="verbose_function", verbose=True)
     def verbose_func(self, x: int) -> int:
         self.run_check_flag = True
         return x * 2

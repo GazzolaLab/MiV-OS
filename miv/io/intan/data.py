@@ -26,7 +26,7 @@ from tqdm import tqdm
 
 from miv.io.intan import rhs
 from miv.core.datatype import Signal, Spikestamps
-from miv.core.operator.wrapper import cache_functional
+from miv.core.operator.wrapper import cached_method
 from miv.io.openephys.data import Data
 
 
@@ -287,7 +287,7 @@ class DataIntan(Data):
                 stamps[channel].extend(np.asarray(sig.timestamps)[index])
         return Spikestamps(stamps)
 
-    # @cache_functional(cache_tag="digital_in")
+    # @cached_method(cache_tag="digital_in")
     def load_digital_in_event(
         self,
         progress_bar: bool = False,
@@ -307,7 +307,7 @@ class DataIntan(Data):
             "board_dig_in_data", num_channels, progress_bar=progress_bar
         )
 
-    # @cache_functional(cache_tag="digital_out")
+    # @cached_method(cache_tag="digital_out")
     def load_digital_out_event(
         self,
         progress_bar: bool = False,
@@ -327,7 +327,7 @@ class DataIntan(Data):
             "board_dig_out_data", num_channels, progress_bar=progress_bar
         )
 
-    # @cache_functional(cache_tag="ttl_events")
+    # @cached_method(cache_tag="ttl_events")
     def load_ttl_event(
         self,
         deadtime: float = 0.002,
@@ -430,7 +430,7 @@ class DataIntanTriggered(DataIntan):
             progress_bar=self.progress_bar,
         )
 
-    @cache_functional(cache_tag="trigger_grouping")
+    @cached_method(cache_tag="trigger_grouping")
     def _trigger_grouping(self) -> list[dict[str, list]]:
         def _find_sequence(arr: np.ndarray) -> np.ndarray:
             if arr.size == 0:
