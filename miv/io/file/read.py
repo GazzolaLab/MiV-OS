@@ -1,6 +1,5 @@
-from typing import Any, Dict, List, Optional, Tuple, Union
-
 from logging import Logger
+from typing import Any
 
 import h5py
 import numpy as np
@@ -10,10 +9,10 @@ from numpy import int64, ndarray
 
 def read(
     filename: str,
-    groups: Optional[Union[str, List[str]]] = None,
-    subset: Optional[Union[int, List[int], Tuple[int, int]]] = None,
-    logger: Optional[Logger] = None,
-) -> Tuple[Dict[str, Any], Dict[str, None]]:
+    groups: str | list[str] | None = None,
+    subset: int | list[int] | tuple[int, int] | None = None,
+    logger: Logger | None = None,
+) -> tuple[dict[str, Any], dict[str, None]]:
     """
     Reads all, or a subset of the data, from the HDF5 file to fill a data dictionary.
     Returns an empty dictionary to be filled later with data from individual containers.
@@ -27,20 +26,20 @@ def read(
 
         **logger** (logging.Logger): optional logger object
 
-    Returns:
+    Returns
+    -------
         **data** (dict): Selected data from HDF5 file
 
         **container** (dict): An empty container dictionary to be filled by data from select containers
 
     """
-
     # Open the HDF5 file
     infile = None
     infile = h5py.File(filename, "r")
 
     # Create the initial data and container dictionary to hold the data
-    data: Dict[str, Any] = {}
-    container: Dict[str, Any] = {}
+    data: dict[str, Any] = {}
+    container: dict[str, Any] = {}
 
     data["_MAP_DATASETS_TO_COUNTERS_"] = {}
     data["_MAP_DATASETS_TO_INDEX_"] = {}
@@ -55,7 +54,7 @@ def read(
     ncontainers = data["_NUMBER_OF_CONTAINERS_"]
 
     # Determine if only a subset of the data should be read
-    subset_: Union[None, List[int]] = None
+    subset_: None | list[int] = None
     if subset is not None:
         try:
             subset_ = validate_subset(subset, ncontainers)
@@ -69,7 +68,7 @@ def read(
         if logger is not None:
             logger.info(
                 "Will read in a subset of the file!"
-                f"From container {subset_[0]} (inclusive) through container {subset_[1]-1} (inclusive)"
+                f"From container {subset_[0]} (inclusive) through container {subset_[1] - 1} (inclusive)"
                 f"Container {subset_[1]} is not read in"
                 f"Reading in {ncontainers} containers\n"
             )
@@ -132,7 +131,7 @@ def read(
         # If this is a counter, we're going to have to grab the indices
         # differently than for a "normal" dataset
         IS_COUNTER = True
-        index_name_: Union[None, str] = None
+        index_name_: None | str = None
         if name not in data["_LIST_OF_COUNTERS_"]:
             index_name_ = data["_MAP_DATASETS_TO_INDEX_"][name]
             IS_COUNTER = False  # We will use different indices for the counters
@@ -150,12 +149,11 @@ def read(
                     # map on to the same locations for any counters
                     lo = subset_[0]
                     hi = subset_[1]
+                elif index_name_ is not None:
+                    lo = full_file_indices[index_name_][0]
+                    hi = full_file_indices[index_name_][-1]
                 else:
-                    if index_name_ is not None:
-                        lo = full_file_indices[index_name_][0]
-                        hi = full_file_indices[index_name_][-1]
-                    else:
-                        raise RuntimeError("Unknown index")
+                    raise RuntimeError("Unknown index")
                 data[dataset_name] = dataset[lo:hi]
             else:
                 data[dataset_name] = dataset[:]
@@ -173,10 +171,10 @@ def read(
 
 
 def select_datasets(
-    datasets: List[str],
-    groups: Optional[Union[str, List[str]]] = None,
-    logger: Optional[Logger] = None,
-) -> List[str]:
+    datasets: list[str],
+    groups: str | list[str] | None = None,
+    logger: Logger | None = None,
+) -> list[str]:
     # Only keep select data from file, if we have specified datasets
     if groups is not None:
         if isinstance(groups, str):
@@ -204,17 +202,17 @@ def select_datasets(
 
         if logger is not None:
             logger.debug(
-                f"After only selecting certain datasets ----- " f"datasets: {datasets}"
+                f"After only selecting certain datasets ----- datasets: {datasets}"
             )
 
     return datasets
 
 
 def validate_subset(
-    subset: Union[int, List[int], Tuple[int, int]],
+    subset: int | list[int] | tuple[int, int],
     ncontainers: int,
-    logger: Optional[Logger] = None,
-) -> List[int]:
+    logger: Logger | None = None,
+) -> list[int]:
     if isinstance(subset, tuple):
         subset_ = list(subset)
 
@@ -280,8 +278,8 @@ def calculate_index_from_counters(counters: Dataset) -> ndarray:
 
 
 def unpack(
-    container: Dict[str, Any],
-    data: Dict[str, Any],
+    container: dict[str, Any],
+    data: dict[str, Any],
     n: int = 0,
 ) -> None:
     """Fills the container dictionary with selected rows from the data dictionary.
@@ -296,7 +294,6 @@ def unpack(
                      dictionary and inserted into the container dictionary.
 
     """
-
     keys = container.keys()
 
     for key in keys:
@@ -319,10 +316,9 @@ def unpack(
 
 
 def get_ncontainers_in_file(
-    filename: str, logger: Optional[Logger] = None
-) -> Union[None, int64]:
+    filename: str, logger: Logger | None = None
+) -> None | int64:
     """Get the number of containers in the file."""
-
     with h5py.File(filename, "r+") as f:
         a = f.attrs
 
@@ -339,13 +335,12 @@ def get_ncontainers_in_file(
             return None
 
 
-def get_ncontainers_in_data(data, logger=None) -> Union[None, int64]:
+def get_ncontainers_in_data(data, logger=None) -> None | int64:
     """Get the number of containers in the data dictionary.
 
     This is useful in case you've only pulled out subsets of the data
 
     """
-
     if not isinstance(data, dict):
         if logger is not None:
             logger.warning(f"{data} is not a dictionary!\n")
@@ -362,9 +357,8 @@ def get_ncontainers_in_data(data, logger=None) -> Union[None, int64]:
         return None
 
 
-def get_file_metadata(filename: str) -> Union[None, Dict[str, Any]]:
+def get_file_metadata(filename: str) -> None | dict[str, Any]:
     """Get the file metadata and return it as a dictionary"""
-
     f = h5py.File(filename, "r+")
 
     a = f.attrs
@@ -385,7 +379,6 @@ def get_file_metadata(filename: str) -> Union[None, Dict[str, Any]]:
 
 def print_file_metadata(filename: str):
     """Pretty print the file metadata"""
-
     metadata = get_file_metadata(filename)
 
     if metadata is None:

@@ -1,22 +1,17 @@
 __doc__ = ""
 __all__ = ["ButterBandpass"]
 
-from typing import Optional
-
-import inspect
 import os
 import time
 from dataclasses import dataclass
 
 import matplotlib.pyplot as plt
 import numpy as np
-import numpy.typing as npt
 import scipy.signal as sps
 
 from miv.core.datatype import Signal
 from miv.core.operator_generator.operator import GeneratorOperatorMixin
 from miv.core.operator_generator.wrapper import cache_generator_call
-from miv.typing import SignalType
 
 
 @dataclass
@@ -40,8 +35,8 @@ class ButterBandpass(GeneratorOperatorMixin):
         If set to bandpass or bandstop, the critical frequency is '[lowcut, highcut]'.
     """
 
-    lowcut: Optional[float] = None
-    highcut: Optional[float] = None
+    lowcut: float | None = None
+    highcut: float | None = None
     order: int = 5
     tag: str = "bandpass filter"
     btype: str = "bandpass"
@@ -84,22 +79,22 @@ class ButterBandpass(GeneratorOperatorMixin):
 
     def __post_init__(self):
         if self.lowcut is not None and self.highcut is not None:
-            assert (
-                self.lowcut < self.highcut
-            ), f"{self.lowcut=} should be lower than {self.highcut=}."
-            assert (
-                min(self.lowcut, self.highcut) > 0
-            ), "Filter critical frequencies must be greater than 0"
+            assert self.lowcut < self.highcut, (
+                f"{self.lowcut=} should be lower than {self.highcut=}."
+            )
+            assert min(self.lowcut, self.highcut) > 0, (
+                "Filter critical frequencies must be greater than 0"
+            )
         elif self.lowcut is not None:
             assert self.lowcut > 0, "Filter frequencies must be greater than 0"
         elif self.highcut is not None:
             assert self.highcut > 0, "Filter frequencies must be greater than 0"
-        assert self.order > 0 and isinstance(
-            self.order, int
-        ), f"Filter {self.order} must be an nonnegative integer."
-        assert (
-            self.lowcut is not None or self.highcut is not None
-        ), "Filtering frequency cannot be both None"
+        assert self.order > 0 and isinstance(self.order, int), (
+            f"Filter {self.order} must be an nonnegative integer."
+        )
+        assert self.lowcut is not None or self.highcut is not None, (
+            "Filtering frequency cannot be both None"
+        )
         super().__init__()
         self.cacher.policy = "OFF"
 

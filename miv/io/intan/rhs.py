@@ -2,7 +2,6 @@ import logging
 import math
 import os
 import struct
-import sys
 import time
 
 import matplotlib.pyplot as plt
@@ -22,7 +21,6 @@ except ImportError:
 # Define plural function
 def plural(n):  # pragma: no cover
     """Utility function to optionally pluralize words based on the value of n."""
-
     if n == 1:
         return ""
     else:
@@ -38,7 +36,6 @@ def read_qstring(fid):  # pragma: no cover
 
     Strings are stored as unicode.
     """
-
     (length,) = struct.unpack("<I", fid.read(4))
     if length == int("ffffffff", 16):
         return ""
@@ -63,7 +60,6 @@ def read_qstring(fid):  # pragma: no cover
 # Define read_header function
 def read_header(fid):  # pragma: no cover
     """Reads the Intan File Format header from the given file."""
-
     # Check 'magic number' at beginning of file to make sure this is an Intan
     # Technologies RHD2000 data file.
     (magic_number,) = struct.unpack("<I", fid.read(4))
@@ -205,9 +201,7 @@ def read_header(fid):  # pragma: no cover
                     new_channel["chip_channel"],
                     command_stream,
                     new_channel["board_stream"],
-                ) = struct.unpack(
-                    "<hhhhhhh", fid.read(14)
-                )  # ignore command_stream
+                ) = struct.unpack("<hhhhhhh", fid.read(14))  # ignore command_stream
                 new_trigger_channel = {}
                 (
                     new_trigger_channel["voltage_trigger_mode"],
@@ -550,7 +544,6 @@ def get_bytes_per_data_block(header):  # pragma: no cover
 # Define read_one_data_block function
 def read_one_data_block(data, header, indices, fid):  # pragma: no cover
     """Reads one 128-sample data block from fid into data, at the location indicated by indices."""
-
     data["t"][indices["amplifier"] : (indices["amplifier"] + 128)] = np.array(
         struct.unpack("<" + "i" * 128, fid.read(128 * 4))
     )
@@ -615,7 +608,6 @@ def read_one_data_block(data, header, indices, fid):  # pragma: no cover
 # Define data_to_result function
 def data_to_result(header, data, data_present):  # pragma: no cover
     """Moves the header and data (if present) into a common object."""
-
     result = {}
 
     stim_parameters = {}

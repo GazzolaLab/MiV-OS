@@ -12,10 +12,6 @@ Similarity Metrics
 __all__ = ["domain_distance_matrix"]
 from typing import Literal
 
-import os
-import sys
-
-import numba
 import numpy as np
 from numba import njit
 
@@ -45,9 +41,9 @@ def domain_distance_matrix(temporal_sequence: SignalType, domain: DOMAIN_MOD = "
         2D matrix with the size (n_features, n_features)
         Each element represent the distance between the feature set.
     """
-    assert (
-        len(temporal_sequence.shape) > 1
-    ), f"Sequence must have at least two axes. Provide sequence has a shape {temporal_sequence.shape}."
+    assert len(temporal_sequence.shape) > 1, (
+        f"Sequence must have at least two axes. Provide sequence has a shape {temporal_sequence.shape}."
+    )
 
     n_time, n_features = temporal_sequence.shape
     distance_matrix = np.empty([n_features, n_features], dtype=np.float_)

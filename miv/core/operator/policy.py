@@ -9,12 +9,10 @@ __all__ = [
     "SupportMPIMerge",
 ]
 
-import inspect
 import multiprocessing
 import pathlib
-from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Optional, Protocol, Union
 from collections.abc import Callable, Generator
+from typing import TYPE_CHECKING, Any, Protocol
 
 if TYPE_CHECKING:
     # This will likely cause circular import error
@@ -153,6 +151,7 @@ class SupportMPIMerge(StrictMPIRunner):
             result = None
         result = self.comm.bcast(result, root=self.root)
         return result
+
 
 class SupportMPIWithoutBroadcast(StrictMPIRunner):
     """

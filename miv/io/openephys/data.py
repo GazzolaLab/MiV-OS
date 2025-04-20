@@ -30,28 +30,23 @@ import logging
 import os
 import pickle
 import re
-from collections.abc import MutableSequence
+from collections.abc import Iterable, MutableSequence
 from glob import glob
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
-    Iterable,
-    Optional,
 )
-from collections.abc import Callable, Iterable
 
 import matplotlib.pyplot as plt
 import numpy as np
 
 from miv.core.datatype.signal import Signal
 from miv.core.operator.operator import DataLoaderMixin
-from miv.io.openephys.binary import load_continuous_data, load_recording, load_ttl_event
+from miv.io.openephys.binary import load_recording, load_ttl_event
 from miv.io.protocol import DataProtocol
 from miv.signal.filter.protocol import FilterProtocol
 from miv.signal.spike.protocol import SpikeDetectionProtocol
 from miv.statistics.spiketrain_statistics import firing_rates
-from miv.typing import SignalType
 
 if TYPE_CHECKING:
     import pathlib
@@ -96,8 +91,8 @@ class Data(DataLoaderMixin):
             └── mea_overlay
 
 
-        Parameters
-        ----------
+    Parameters
+    ----------
         data_path : str
     """
 
@@ -117,14 +112,16 @@ class Data(DataLoaderMixin):
 
     def num_fragments(self):
         import math
+
         from .binary import load_timestamps, oebin_read
+
         # Refactor
         file_path: list[str] = glob(
             os.path.join(self.data_path, "**", "continuous.dat"), recursive=True
         )
-        assert (
-            len(file_path) == 1
-        ), f"There should be only one 'continuous.dat' file. (There exists {file_path})"
+        assert len(file_path) == 1, (
+            f"There should be only one 'continuous.dat' file. (There exists {file_path})"
+        )
 
         # load structure information dictionary
         info_file: str = os.path.join(self.data_path, "structure.oebin")
@@ -144,9 +141,9 @@ class Data(DataLoaderMixin):
         # Define task
         filesize = os.path.getsize(file_path[0])
         itemsize = np.dtype("int16").itemsize
-        assert (
-            filesize == itemsize * total_length * num_channels
-        ), f"{filesize=} does not match the expected {itemsize*total_length*num_channels=}. Path: {file_path[0]}"
+        assert filesize == itemsize * total_length * num_channels, (
+            f"{filesize=} does not match the expected {itemsize*total_length*num_channels=}. Path: {file_path[0]}"
+        )
         samples_per_block = sampling_rate * 60
         num_fragments = int(math.ceil(total_length / samples_per_block))
         return num_fragments
@@ -330,7 +327,6 @@ class Data(DataLoaderMixin):
         """
         Clears all present channel masks.
         """
-
         self.masking_channel_set = set()
 
     def _auto_channel_mask_with_correlation_matrix(
@@ -364,7 +360,6 @@ class Data(DataLoaderMixin):
             As long as this value is within a reasonable range, it should negligibly affect
             the result (see jupyter notebook demo).
         """
-
         exp_binned = self._get_binned_matrix(filter, detector, offset, bins_per_second)
         num_channels = np.shape(exp_binned["matrix"])[1]
 
@@ -446,7 +441,6 @@ class Data(DataLoaderMixin):
         empty_channels : list[int]
             List of indices of empty channels
         """
-
         result = []
         for sig, times, samp in self.load(num_fragments=1):
             start_time = times[0] + offset
@@ -494,7 +488,6 @@ class Data(DataLoaderMixin):
             Return true if all necessary files exist in the directory.
 
         """
-
         continuous_dat_paths = glob(
             os.path.join(self.data_path, "**", "continuous.dat"), recursive=True
         )
@@ -529,8 +522,8 @@ class DataManager(MutableSequence):
             ├── settings_2.xml
             └── settings_3.xml
 
-        Parameters
-        ----------
+    Parameters
+    ----------
         data_collection_path : str
             Path for data collection.
 
@@ -642,7 +635,7 @@ class DataManager(MutableSequence):
                 pattern = r"(\d+)/recording(\d+)"
             matches = [re.search(pattern, path) for path in path_list]
             tags = [(int(match.group(1)), int(match.group(2))) for match in matches]
-            path_list = [path for _, path in sorted(zip(tags, path_list))]
+            path_list = [path for _, path in sorted(zip(tags, path_list, strict=False))]
         return path_list
 
     def save(self, tag: str, format: str):  # pragma: no cover
@@ -702,7 +695,6 @@ class DataManager(MutableSequence):
             (default = 1)
 
         """
-
         for data in self.data_list:
             for sig, times, samp in data.load(num_fragments=1):
                 mask_list = []
@@ -759,7 +751,6 @@ class DataManager(MutableSequence):
             As long as this value is within a reasonable range, it should negligibly affect
             the result (see jupyter notebook demo).
         """
-
         omit_experiments_list: list[float] = (
             list(omit_experiments) if omit_experiments else []
         )
@@ -786,7 +777,7 @@ class DataManager(MutableSequence):
         )
 
         for exp_index, data in enumerate(self.data_list):
-            if not (exp_index in omit_experiments_list):
+            if exp_index not in omit_experiments_list:
                 data._auto_channel_mask_with_correlation_matrix(
                     spontaneous_binned,
                     filter,

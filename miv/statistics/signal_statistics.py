@@ -44,9 +44,9 @@ def spike_amplitude_to_background_noise(
     -------
     List[float]: The SNR for each channel.
     """
-    assert signal.shape[1] == len(
-        spikestamps
-    ), f"The number of channel for given signal {signal.shape[1]} is not equal to the number of channels in spikestamps {len(spikestamps)}."
+    assert signal.shape[1] == len(spikestamps), (
+        f"The number of channel for given signal {signal.shape[1]} is not equal to the number of channels in spikestamps {len(spikestamps)}."
+    )
 
     extract_waveforms = ExtractWaveforms(plot_n_spikes=None)
     cutouts = extract_waveforms(signal, spikestamps)

@@ -3,42 +3,29 @@ Connectivity module for localized instantaneous analysis
 """
 __all__ = ["InstantaneousConnectivity"]
 
-from typing import Any, List, Optional, Union
 
-import csv
-import functools
-import gc
-import glob
 import itertools
 import logging
-import multiprocessing as mp
 import os
-import pathlib
-import pickle as pkl
 from dataclasses import dataclass
 
-import matplotlib
 import matplotlib.animation as manimation
 import matplotlib.pyplot as plt
-import networkx as nx
 import numpy as np
 import pyinform
 import pyinform.transferentropy as pyte
-import quantities as pq
-import scipy.stats as spst
 from tqdm import tqdm
 
-from miv.core.datatype import Signal, Spikestamps
+from miv.core.datatype import Spikestamps
 from miv.core.operator.operator import OperatorMixin
 from miv.core.operator.policy import StrictMPIRunner
-from miv.mea import mea_map
 
 
 @dataclass
 class InstantaneousConnectivity(OperatorMixin):
     """ """
 
-    channels: Optional[List[int]] = None
+    channels: list[int] | None = None
     bin_size: float = 0.001
     tag: str = "instantaneous connectivity rendering"
     progress_bar: bool = False
@@ -85,7 +72,7 @@ class InstantaneousConnectivity(OperatorMixin):
         # Split tasks
         if size > ntasks:
             logging.warning(
-                f"Too many ranks. {size-ntasks} number of ranks will be idle."
+                f"Too many ranks. {size - ntasks} number of ranks will be idle."
             )
         tasks = np.array_split(pairs, size)[rank]
 

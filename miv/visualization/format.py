@@ -2,7 +2,6 @@ import matplotlib.pyplot
 
 
 def format_plot2(plt: matplotlib.pyplot):
-
     plt.style.use("default")
     plt.rcParams["axes.linewidth"] = 2.0
     plt.rcParams["axes.edgecolor"] = "black"

@@ -14,8 +14,7 @@ import time
 
 import numpy as np
 import scipy.special as sps
-from numba import njit, prange
-from tqdm import tqdm
+from numba import njit
 
 from miv.core.datatype import Spikestamps
 
@@ -47,7 +46,7 @@ def bayesian_adaptive_kernel_smoother(spikestamps, probe_time, alpha=1):
     for channel in range(num_channels):
         spiketimes = np.asarray(spikestamps[channel])
         n_spikes = len(spiketimes)
-        beta = n_spikes ** (4./5.)
+        beta = n_spikes ** (4.0 / 5.0)
         if n_spikes == 0:
             continue
 
@@ -98,10 +97,7 @@ def _numba_firing_rate(spiketimes, probe_time, h):
 
 
 if __name__ == "__main__":
-    import sys
     import time
-
-    import matplotlib.pyplot as plt
 
     from miv.core.datatype import Spikestamps
 
@@ -155,4 +151,4 @@ if __name__ == "__main__":
 
     # plt.show()
 
-    print(f"Elapsed time: {etime-stime:.4f} seconds")
+    print(f"Elapsed time: {etime - stime:.4f} seconds")

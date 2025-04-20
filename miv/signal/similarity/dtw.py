@@ -22,13 +22,9 @@ References & Footnotes
 
 """
 __all__ = ["dynamic_time_warping_distance_matrix"]
-import os
-import sys
 
 import numpy as np
 from dtaidistance import dtw
-
-from miv.typing import SignalType
 
 
 def dynamic_time_warping_distance_matrix(
@@ -53,9 +49,9 @@ def dynamic_time_warping_distance_matrix(
         2D matrix with the size (temporal_sequence.shape[axis], temporal_sequence.shape[axis])
         Each element represent the distance between the feature set.
     """
-    assert (
-        len(temporal_sequence.shape) > 1
-    ), f"Sequence must have at least two axes. Provide sequence has a shape {temporal_sequence.shape}."
+    assert len(temporal_sequence.shape) > 1, (
+        f"Sequence must have at least two axes. Provide sequence has a shape {temporal_sequence.shape}."
+    )
     if axis != 0:
         temporal_sequence = np.swapaxes(temporal_sequence, axis, 0)
 

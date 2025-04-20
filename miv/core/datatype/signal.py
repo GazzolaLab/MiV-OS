@@ -9,7 +9,6 @@ Signal
 
 __all__ = ["Signal"]
 
-from typing import Optional, Tuple
 
 import pickle
 from dataclasses import dataclass
@@ -50,7 +49,7 @@ class Signal(SupportMultiprocessing, DataNodeMixin, CollapseExtendableMixin):
     def __getitem__(self, i: int) -> SignalType:
         return self.data[:, i]  # TODO: Fix to row-major
 
-    def select(self, indices: Tuple[int, ...]) -> "Signal":
+    def select(self, indices: tuple[int, ...]) -> "Signal":
         """Select channels by indices."""
         return Signal(self.data[:, indices], self.timestamps, self.rate)
 
@@ -63,7 +62,7 @@ class Signal(SupportMultiprocessing, DataNodeMixin, CollapseExtendableMixin):
         return self.timestamps.max()
 
     @property
-    def shape(self) -> Tuple[int, int]:
+    def shape(self) -> tuple[int, int]:
         """Shape of the signal."""
         return self.data.shape
 
@@ -75,20 +74,20 @@ class Signal(SupportMultiprocessing, DataNodeMixin, CollapseExtendableMixin):
     def extend_signal(self, data: np.ndarray, time: TimestampsType) -> None:
         """Append a signal to the end of the existing signal."""
         assert data.shape[self._SIGNALAXIS] == time.shape[0]
-        assert (
-            data.shape[self._CHANNELAXIS] == self.data.shape[self._CHANNELAXIS]
-        ), "Signal must have same number of channels"
+        assert data.shape[self._CHANNELAXIS] == self.data.shape[self._CHANNELAXIS], (
+            "Signal must have same number of channels"
+        )
         self.data = np.append(self.data, data, axis=self._SIGNALAXIS)
         self.timestamps = np.append(self.timestamps, time)
 
     def prepend_signal(self, data: np.ndarray, time: TimestampsType) -> None:
         """Prepend a signal to the end of the existing signal."""
-        assert (
-            data.shape[self._SIGNALAXIS] == time.shape[0]
-        ), "Time and signal must have same length"
-        assert (
-            data.shape[self._CHANNELAXIS] == self.data.shape[self._CHANNELAXIS]
-        ), "Signal must have same number of channels"
+        assert data.shape[self._SIGNALAXIS] == time.shape[0], (
+            "Time and signal must have same length"
+        )
+        assert data.shape[self._CHANNELAXIS] == self.data.shape[self._CHANNELAXIS], (
+            "Signal must have same number of channels"
+        )
         self.data = np.append(data, self.data, axis=self._SIGNALAXIS)
         self.timestamps = np.append(self.timestamps, time)
 

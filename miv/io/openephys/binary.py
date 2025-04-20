@@ -18,19 +18,17 @@ import logging
 import math
 import os
 from ast import literal_eval
-from glob import glob
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union
 from collections.abc import Sequence
+from glob import glob
+from typing import TYPE_CHECKING, Any
 
-import neo
 import numpy as np
 import quantities as pq
-from tqdm import tqdm
 
-from miv.typing import SignalType, TimestampsType
+from miv.typing import SignalType
 
 if TYPE_CHECKING:
-    import mpi4py
+    pass
 
 try:
     from mpi4py import MPI
@@ -62,7 +60,6 @@ def apply_channel_mask(signal: np.ndarray, channel_mask: set[int]):
         If signal is non numpy array type.
 
     """
-
     num_channels = signal.shape[1]
     channel_index_set = set(range(num_channels)) - channel_mask
     channel_index = np.array(np.sort(list(channel_index_set)))
@@ -166,7 +163,6 @@ def load_ttl_event(
         No events recorded in data.
 
     """
-
     # Check TTL event recorded
     info_file: str = os.path.join(folder, "structure.oebin")
     info: dict[str, Any] = oebin_read(info_file)
@@ -178,9 +174,9 @@ def load_ttl_event(
         if "TTL Input" in data["channel_name"] or "TTL events" in data["channel_name"]
     ]
     assert len(ttl_info) > 0, "No events recorded (TTL)."
-    assert (
-        len(ttl_info) == 1
-    ), "Multiple TTL input is found, which is not supported yet. (TODO)"
+    assert len(ttl_info) == 1, (
+        "Multiple TTL input is found, which is not supported yet. (TODO)"
+    )
     ttl_info = ttl_info[0]
 
     # Data Structure (OpenEphys Structure)
@@ -280,13 +276,12 @@ def load_recording(
         If more than one "continuous.dat" file exist in the directory.
 
     """
-
     file_path: list[str] = glob(
         os.path.join(folder, "**", "continuous.dat"), recursive=True
     )
-    assert (
-        len(file_path) == 1
-    ), f"There should be only one 'continuous.dat' file. (There exists {file_path})"
+    assert len(file_path) == 1, (
+        f"There should be only one 'continuous.dat' file. (There exists {file_path})"
+    )
 
     # load structure information dictionary
     info_file: str = os.path.join(folder, "structure.oebin")
@@ -357,10 +352,10 @@ def load_recording(
             f"generate {_signal.shape=}, {_timestamps.shape=}, {sampling_rate=}"
         )
         logger.info(
-            f"signal: {i*samples_per_block} - {min((i+1)*samples_per_block, signal.shape[0])}"
+            f"signal: {i * samples_per_block} - {min((i + 1) * samples_per_block, signal.shape[0])}"
         )
         logger.info(
-            f"timestamps: {task*samples_per_block} - {min((task+1)*samples_per_block, total_length)}"
+            f"timestamps: {task * samples_per_block} - {min((task + 1) * samples_per_block, total_length)}"
         )
 
         _signal = _signal.astype(dtype)
@@ -421,7 +416,6 @@ def load_continuous_data(
         make sure the num_channels is set accurately.
 
     """
-
     # Read raw data signal
     if os.path.getsize(data_path) == 0:
         raise ValueError(f"Data {data_path} has zero-size.")

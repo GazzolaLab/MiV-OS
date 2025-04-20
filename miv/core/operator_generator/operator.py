@@ -4,17 +4,10 @@ __all__ = [
     "GeneratorOperatorMixin",
 ]
 
-from typing import TYPE_CHECKING, Callable, Generator, List, Optional, Protocol, Union
-
-import functools
-import inspect
-import itertools
-import os
-import pathlib
-from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from miv.core.datatype import DataTypes
+    pass
 
 from miv.core.operator.cachable import DataclassCacher
 from miv.core.operator.operator import OperatorMixin
@@ -47,9 +40,9 @@ class GeneratorOperatorMixin(OperatorMixin, GeneratorCallbackMixin):
             self.logger.info("Cache not found.")
             self.logger.info(f"Using runner: {self.runner.__class__} type.")
             args = self.receive()  # Receive data from upstream
-            assert (
-                len(args) > 0
-            ), "No data received from upstream. Generator-operator must receive other generators from upstream."
+            assert len(args) > 0, (
+                "No data received from upstream. Generator-operator must receive other generators from upstream."
+            )
             output = self.runner(self.__call__, args)
 
             # Callback: After-run

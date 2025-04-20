@@ -9,8 +9,6 @@ Spikestamps
 
 __all__ = ["Spikestamps"]
 
-from typing import List, Optional
-
 from collections.abc import Sequence
 
 import numpy as np
@@ -29,7 +27,7 @@ class Spikestamps(CollapseExtendableMixin, DataNodeMixin, Sequence):
     Comply with `ChannelWise` and `Extendable` protocols.
     """
 
-    def __init__(self, iterable: Optional[List] = None):
+    def __init__(self, iterable: list | None = None):
         super().__init__()
         if iterable is None:  # Default
             iterable = []
@@ -72,7 +70,6 @@ class Spikestamps(CollapseExtendableMixin, DataNodeMixin, Sequence):
 
         Examples
         --------
-
         >>> a = Spikestamps([[0,1,2],[0,3]])
         >>> b = Spikestamps([[3,5],[4],[0,1]])
         >>> a.extend(b)
@@ -135,7 +132,7 @@ class Spikestamps(CollapseExtendableMixin, DataNodeMixin, Sequence):
         else:
             return Spikestamps([self.data[idx] for idx in indices])
 
-    def neo(self, t_start: Optional[float] = None, t_stop: Optional[float] = None):
+    def neo(self, t_start: float | None = None, t_stop: float | None = None):
         """Cast to neo.SpikeTrain
 
         Parameters
@@ -170,8 +167,8 @@ class Spikestamps(CollapseExtendableMixin, DataNodeMixin, Sequence):
     def binning(
         self,
         bin_size: float = 1 * pq.ms,
-        t_start: Optional[float] = None,
-        t_end: Optional[float] = None,
+        t_start: float | None = None,
+        t_end: float | None = None,
         minimum_count: int = 1,
         return_count: bool = False,
     ) -> Signal:
@@ -210,9 +207,9 @@ class Spikestamps(CollapseExtendableMixin, DataNodeMixin, Sequence):
 
         t_start = self.get_first_spikestamp() if t_start is None else t_start
         t_end = self.get_last_spikestamp() if t_end is None else t_end
-        assert (
-            t_start < t_end
-        ), f"t_start ({t_start}) should be less than t_end ({t_end})"
+        assert t_start < t_end, (
+            f"t_start ({t_start}) should be less than t_end ({t_end})"
+        )
         n_bins = int(np.ceil((t_end - t_start) / bin_size))
         time = t_start + (np.arange(n_bins + 1) * bin_size)
 

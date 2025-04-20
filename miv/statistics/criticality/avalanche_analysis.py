@@ -4,22 +4,19 @@ Avalanche Analysis
 
 __all__ = ["AvalancheDetection", "AvalancheAnalysis"]
 
-from typing import List, Optional, Tuple, Union
 
 import logging
 import os
-import sys
 from collections import defaultdict
 from dataclasses import dataclass
 
-import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import quantities as pq
 from scipy.optimize import curve_fit
 from tqdm import tqdm
 
-from miv.core.datatype import Signal, Spikestamps
+from miv.core.datatype import Spikestamps
 from miv.core.operator.operator import OperatorMixin
 from miv.core.operator.wrapper import cache_call
 
@@ -66,7 +63,7 @@ class AvalancheDetection(OperatorMixin):
 
     # Miscellaneous configurations
     threshold_percentage: float = 2.0
-    time_difference: Optional[float] = None
+    time_difference: float | None = None
     allow_multiple_spike_per_bin: bool = False
     minimum_bins_in_avalanche: int = 10
 
@@ -163,7 +160,7 @@ class AvalancheDetection(OperatorMixin):
         fig, ax = plt.subplots(figsize=(16, 6))
         ax.eventplot(spikestamps)
 
-        for start, end in zip(starts_time, ends_time):
+        for start, end in zip(starts_time, ends_time, strict=False):
             ax.axvspan(start, end, facecolor="r", alpha=0.5)
 
         ax.set_title("Avalanche Marks on Raster")
@@ -225,7 +222,7 @@ class AvalancheAnalysis(OperatorMixin):
         branching_ratio = np.zeros(starts.size, dtype=np.float_)
         avalanches = []
         for idx, (s, e) in tqdm(
-            enumerate(zip(starts, ends)),
+            enumerate(zip(starts, ends, strict=False)),
             total=len(starts),
             desc="Avalanche analysis",
             disable=not self.progress_bar,
@@ -400,12 +397,12 @@ class AvalancheAnalysis(OperatorMixin):
             mean = np.array(shapes[count]).mean(axis=0)
             err = np.array(shapes[count]).std(axis=0)
             axes[0].errorbar(
-                time, mean, yerr=err, label=f"duration {bin_size*count*1000:.2f}ms"
+                time, mean, yerr=err, label=f"duration {bin_size * count * 1000:.2f}ms"
             )
             axes[1].plot(
                 time / T,
                 mean / (T ** (self.svz - 1)),
-                label=f"duration {bin_size*count*1000:.2f}ms",
+                label=f"duration {bin_size * count * 1000:.2f}ms",
             )
 
         axes[0].set_xlabel("Time in Avalanche (s)")

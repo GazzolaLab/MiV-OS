@@ -1,14 +1,11 @@
 __all__ = ["MedianFilter"]
 
-from typing import Optional, Tuple, Union
 
 import logging
 from dataclasses import dataclass
 
 import numpy as np
-import numpy.typing as npt
 
-from miv.core.datatype import Signal
 from miv.core.operator_generator.operator import GeneratorOperatorMixin
 from miv.core.operator_generator.wrapper import cache_generator_call
 from miv.typing import SignalType
@@ -38,7 +35,7 @@ class MedianFilter(GeneratorOperatorMixin):
     """
 
     threshold: float
-    k: Union[int, Tuple[int, int]] = 20
+    k: int | tuple[int, int] = 20
     tag: str = "median filter"
 
     @cache_generator_call
@@ -65,16 +62,16 @@ class MedianFilter(GeneratorOperatorMixin):
         else:
             k = self.k
         outlier_i, outlier_ch = np.where(np.abs(signal) > self.threshold)
-        for i, ch in zip(outlier_i, outlier_ch):
+        for i, ch in zip(outlier_i, outlier_ch, strict=False):
             low_bound = np.max((0, i - k[0]))
             up_bound = np.min((i + k[1], signal.shape[0])) + 1
             y[low_bound:up_bound, ch] = np.median(signal[low_bound:up_bound, ch])
         return y
 
     def __post_init__(self):
-        assert (
-            self.threshold is None or self.threshold > 0.0
-        ), f"Filter threshold {self.threshold} must be positive real number."
+        assert self.threshold is None or self.threshold > 0.0, (
+            f"Filter threshold {self.threshold} must be positive real number."
+        )
         if self.threshold is not None and self.threshold < 50.0:
             logging.warning(
                 "Threshold is less than 50.0 uV, which could alter the spike signal"
