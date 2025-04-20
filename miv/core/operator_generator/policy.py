@@ -2,12 +2,11 @@ __all__ = [
     "VanillaGeneratorRunner",
 ]
 
-from typing import Any, Callable, Generator, Optional, Protocol, Union
+from typing import Any
+from collections.abc import Generator
 
-import inspect
-import multiprocessing
-import pathlib
-from dataclasses import dataclass
+
+from ..protocol import _LazyCallable
 
 
 class VanillaGeneratorRunner:
@@ -18,8 +17,11 @@ class VanillaGeneratorRunner:
     This runner is meant to be used for generator operators.
     """
 
-    def __init__(self):
-        pass
+    def __call__(
+        self, func: _LazyCallable, inputs: list[Generator[Any]] | None = None
+    ) -> Generator:
+        # FIXME: fix type
+        return func(*inputs)  # type: ignore
 
-    def __call__(self, func, inputs, **kwargs):
-        return func(*inputs)
+    def get_run_order(self) -> int:
+        return 0

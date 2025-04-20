@@ -1,11 +1,9 @@
-from typing import Any, Union
+from typing import Any
 
-from miv.core.datatype.collapsable import *
 from miv.core.datatype.events import *
-from miv.core.datatype.protocol import *
-from miv.core.datatype.pure_python import *
-from miv.core.datatype.signal import *
-from miv.core.datatype.spikestamps import *
+from .pure_python import *
+from .signal import *
+from .spikestamps import *
 
 DataTypes = Any  # Union[ # TODO
 #    miv.core.datatype.signal.Signal,

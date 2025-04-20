@@ -46,7 +46,7 @@ def domain_distance_matrix(temporal_sequence: SignalType, domain: DOMAIN_MOD = "
     )
 
     n_time, n_features = temporal_sequence.shape
-    distance_matrix = np.empty([n_features, n_features], dtype=np.float_)
+    distance_matrix = np.empty([n_features, n_features], dtype=np.float64)
 
     if domain == "time":
         func = nb_time_domain_similarity

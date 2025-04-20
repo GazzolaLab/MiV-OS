@@ -94,5 +94,5 @@ def test_clean_cache_verbose(tmp_path):
 
     # Check that the cache directory is gone
     assert result.exit_code == 0
-    assert cache_dir.as_posix() in result.output
+    assert str(cache_dir) in result.output
     assert not cache_dir.exists()

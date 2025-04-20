@@ -1,20 +1,39 @@
 __doc__ = """"""
 
-from typing import TypeVar  # TODO: For python 3.11, we can use typing.Self
-from typing import Callable, Optional, Protocol, Union
+from typing import TYPE_CHECKING, Any, Protocol
 
-import inspect
-import itertools
-import os
 import pathlib
 
 import matplotlib.pyplot as plt
 
 from miv.core.operator.callback import (
-    BaseCallbackMixin,
-    SelfCallback,
     get_methods_from_feature_classes_by_startswith_str,
 )
+
+if TYPE_CHECKING:
+    from miv.core.datatype import DataTypes
+
+
+class _GeneratorCallback(Protocol):
+    _done_flag_generator_plot: bool
+    _done_flag_firstiter_plot: bool
+
+    def _callback_generator_plot(
+        self,
+        iter_index: int,
+        output: "DataTypes",
+        inputs: tuple["DataTypes", ...] | None = None,
+        show: bool = False,
+        save_path: str | pathlib.Path | None = None,
+    ) -> None: ...
+
+    def _callback_firstiter_plot(
+        self,
+        output: "DataTypes",
+        inputs: tuple["DataTypes", ...] | None = None,
+        show: bool = False,
+        save_path: str | pathlib.Path | None = None,
+    ) -> None: ...
 
 
 class GeneratorCallbackMixin:
@@ -25,56 +44,50 @@ class GeneratorCallbackMixin:
     The function take `show` and `save_path` arguments similar to `plot` method.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
-    def generator_plot_from_callbacks(self, *args, **kwargs):
-        for func, name in zip(self._callback_collection, self._callback_names):
-            if name.startswith("generator_plot_"):
-                func(self, *args, **kwargs)
+        self._done_flag_generator_plot = False
+        self._done_flag_firstiter_plot = False
 
-    def generator_plot(
+    def reset_callbacks(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        self._done_flag_generator_plot = getattr(kwargs, "plot", False)
+        self._done_flag_firstiter_plot = getattr(kwargs, "plot", False)
+
+    def _callback_generator_plot(
         self,
-        iter_index,
-        output,
-        inputs=None,
+        iter_index: int,
+        output: "DataTypes",
+        inputs: tuple["DataTypes", ...] | None = None,
         show: bool = False,
-        save_path: Optional[Union[bool, str, pathlib.Path]] = None,
-    ):
-        if save_path is True:
-            os.makedirs(self.analysis_path, exist_ok=True)
-            save_path = self.analysis_path
+        save_path: bool | str | pathlib.Path | None = None,
+    ) -> None:
+        if self._done_flag_generator_plot:
+            return
 
         plotters_for_generator_out = get_methods_from_feature_classes_by_startswith_str(
             self, "generator_plot_"
         )
         for plotter in plotters_for_generator_out:
             plotter(
-                self,
                 output,
                 inputs,
                 show=show,
                 save_path=save_path,
                 index=iter_index,
             )
-        if not show:
-            plt.close("all")
+        plt.close("all")
 
-    def firstiter_plot_from_callbacks(self, *args, **kwargs):
-        for func, name in zip(self._callback_collection, self._callback_names):
-            if name.startswith("firstiter_plot_"):
-                func(self, *args, **kwargs)
-
-    def firstiter_plot(
+    def _callback_firstiter_plot(
         self,
-        output,
-        inputs=None,
+        output: "DataTypes",
+        inputs: tuple["DataTypes", ...] | None = None,
         show: bool = False,
-        save_path: Optional[Union[bool, str, pathlib.Path]] = None,
-    ):
-        if save_path is True:
-            os.makedirs(self.analysis_path, exist_ok=True)
-            save_path = self.analysis_path
+        save_path: str | pathlib.Path | None = None,
+    ) -> None:
+        if self._done_flag_firstiter_plot:
+            return
 
         plotters_for_generator_out = get_methods_from_feature_classes_by_startswith_str(
             self, "firstiter_plot_"
@@ -82,11 +95,9 @@ class GeneratorCallbackMixin:
 
         for plotter in plotters_for_generator_out:
             plotter(
-                self,
                 output,
                 inputs,
                 show=show,
                 save_path=save_path,
             )
-        if not show:
-            plt.close("all")
+        plt.close("all")

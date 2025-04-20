@@ -20,7 +20,7 @@ import numpy as np
 import quantities as pq
 
 from miv.core.datatype import Spikestamps
-from miv.core.operator import OperatorMixin
+from miv.core.operator.operator import OperatorMixin
 from miv.typing import SpikestampsType
 
 
@@ -209,7 +209,7 @@ def fano_factor(
     bin_spike = spiketrains.binning(
         bin_size=bin_size, t_start=t_start, t_end=t_end, return_count=True
     )
-    fano_factor = np.zeros(bin_spike.number_of_channels, dtype=np.float_)
+    fano_factor = np.zeros(bin_spike.number_of_channels, dtype=np.float64)
     for channel in range(bin_spike.number_of_channels):
         array = bin_spike[channel]
         if np.sum(array) == 0:
@@ -272,7 +272,7 @@ def instantaneous_spike_rate(spiketrain, probe_times, window=1, batchsize=32):
     """
 
     def kernel(x):
-        return np.logical_and(x >= 0, x <= window).astype(np.float_)
+        return np.logical_and(x >= 0, x <= window).astype(np.float64)
 
     return spike_counts_with_kernel(spiketrain, probe_times, kernel, batchsize)
 

@@ -15,14 +15,12 @@ from typing import Any
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
-import pyinform
-import pyinform.transferentropy as pyte
 import scipy.stats as spst
 from elephant.causality.granger import pairwise_granger
 from tqdm import tqdm
 
 from miv.core.datatype import Signal, Spikestamps
-from miv.core.operator import OperatorMixin
+from miv.core.operator.operator import OperatorMixin
 from miv.core.operator.wrapper import cache_call
 from miv.mea import mea_map
 from miv.statistics.spiketrain_statistics import firing_rates
@@ -105,7 +103,7 @@ class DirectedConnectivity(OperatorMixin):
         # Get adjacency matrix based on transfer entropy
         adj_matrix = np.zeros([n_nodes, n_nodes], dtype=np.bool_)  # source -> target
         connectivity_metric_matrix = np.zeros(
-            [n_nodes, n_nodes], dtype=np.float_
+            [n_nodes, n_nodes], dtype=np.float64
         )  # source -> target
 
         pairs = [
@@ -138,7 +136,7 @@ class DirectedConnectivity(OperatorMixin):
         for idx, pair in enumerate(pairs):
             pbar.update(1)
             result = func(pair)
-            i, j = pairs[idx]
+            i, j = pair
             adj_matrix[i, j] = result[0] < self.p_threshold
             connectivity_metric_matrix[i, j] = result[1]
 
@@ -151,55 +149,6 @@ class DirectedConnectivity(OperatorMixin):
         )
 
         return info
-
-    @staticmethod
-    def _surrogate_t_test(
-        source, target, skip_surrogate=False, surrogate_N=30, seed=None
-    ):
-        """
-        Surrogate t-test
-        """
-        # Function configuration. TODO: Make this dependency injection
-        te_history = 4
-        sublength = 64
-        stride = 8
-
-        assert source.shape[0] == target.shape[0], (
-            f"source.shape={source.shape}, target.shape={target.shape}"
-        )
-        assert source.shape[0] - sublength > 0, (
-            f"source.shape[0]={source.shape[0]}, sublength={sublength}"
-        )
-
-        rng = np.random.default_rng(seed)  # TODO take rng instead
-
-        func = pyte.transfer_entropy
-        te = func(source, target, te_history)
-        normalizer = pyinform.entropyrate.entropy_rate(
-            target, k=te_history, local=False
-        )
-        if np.isclose(normalizer, 0.0):
-            return 0.0, [0.0]
-        te = te / normalizer
-
-        surrogate_tes = []
-
-        if skip_surrogate:
-            return te, surrogate_tes
-
-        for _ in range(surrogate_N):
-            surrogate_source = source.copy()
-            rng.shuffle(surrogate_source)
-            for start_index in np.arange(0, source.shape[0] - sublength, stride):
-                end_index = start_index + sublength
-                surr_te = func(
-                    surrogate_source[start_index:end_index],
-                    target[start_index:end_index],
-                    te_history,
-                )
-                surrogate_tes.append(surr_te / normalizer)
-
-        return te, surrogate_tes
 
     @staticmethod
     def _get_connection_info(
@@ -231,8 +180,7 @@ class DirectedConnectivity(OperatorMixin):
         )
         if te < H_threshold:
             return 1, 0
-        if skip_surrogate:
-            return 1, te
+        return 1, te
         t_value, p_value = spst.ttest_1samp(surrogate_te_list, te, nan_policy="omit")
         return p_value, te
 
@@ -500,7 +448,7 @@ class UndirectedConnectivity(OperatorMixin):
         # Get adjacency matrix based on transfer entropy
         adj_matrix = np.zeros([n_nodes, n_nodes], dtype=np.bool_)  # source -> target
         connectivity_metric_matrix = np.zeros(
-            [n_nodes, n_nodes], dtype=np.float_
+            [n_nodes, n_nodes], dtype=np.float64
         )  # source -> target
 
         pairs = [
@@ -526,7 +474,7 @@ class UndirectedConnectivity(OperatorMixin):
         for idx, pair in enumerate(pairs):
             pbar.update(1)
             result = func(pair)
-            i, j = pairs[idx]
+            i, j = pair
             adj_matrix[i, j] = result[0] < self.p_threshold
             connectivity_metric_matrix[i, j] = result[1][0]
             connectivity_metric_matrix[j, i] = result[1][1]

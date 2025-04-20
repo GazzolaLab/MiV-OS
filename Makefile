@@ -27,7 +27,7 @@ formatting:
 #* Linting
 .PHONY: test
 test:
-	uv run pytest -c pyproject.toml --cov=miv --cov-report=xml
+	uv run pytest -c pyproject.toml --cov=miv/core --cov-report=xml
 
 .PHONY: check-codestyle
 check-codestyle:
@@ -35,7 +35,7 @@ check-codestyle:
 
 .PHONY: mypy
 mypy:
-	uv run mypy --config-file pyproject.toml miv
+	uv run mypy --config-file pyproject.toml miv/core
 
 #* Cleaning
 .PHONY: pycache-remove
@@ -58,9 +58,13 @@ ipynbcheckpoints-remove:
 pytestcache-remove:
 	find . | grep -E ".pytest_cache" | xargs rm -rf
 
+.PHONY: ruffcache-remove
+ruffcache-remove:
+	find . | grep -E ".ruff_cache" | xargs rm -rf
+
 .PHONY: build-remove
 build-remove:
 	rm -rf build/
 
 .PHONY: cleanup
-cleanup: pycache-remove dsstore-remove mypycache-remove ipynbcheckpoints-remove pytestcache-remove
+cleanup: pycache-remove dsstore-remove mypycache-remove ipynbcheckpoints-remove pytestcache-remove ruffcache-remove

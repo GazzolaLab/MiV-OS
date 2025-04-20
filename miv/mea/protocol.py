@@ -1,27 +1,24 @@
 __all__ = ["MEAGeometryProtocol"]
 
-import typing
-from typing import Any, Iterable, Protocol, Tuple
+from typing import Protocol
 
-import matplotlib
 import numpy as np
 
-from miv.core.operator.cachable import _Jsonable
-from miv.core.operator.chainable import _Chainable
-from miv.core.operator.policy import _Runnable
+from miv.core.protocol import _Jsonable
+from miv.core.operator.protocol import _Chainable
 
 
-class MEAGeometryProtocol(_Jsonable, _Chainable, _Runnable, Protocol):
+class MEAGeometryProtocol(_Jsonable, _Chainable, Protocol):
     @property
     def coordinates(self) -> np.ndarray:
         """Return coordinates of MEA electrodes location"""
         ...
 
-    def get_xy(self, idx: int) -> Tuple[float, float]:
+    def get_xy(self, idx: int) -> tuple[float, float]:
         """Given node index, return xy coordinate"""
         ...
 
-    def get_ixiy(self, idx: int) -> Tuple[int, int]:
+    def get_ixiy(self, idx: int) -> tuple[int, int]:
         """Given node index, return coordinate index"""
         ...
 

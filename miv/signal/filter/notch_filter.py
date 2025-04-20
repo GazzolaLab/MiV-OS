@@ -1,20 +1,17 @@
 __doc__ = ""
 __all__ = ["Notch"]
 
-from typing import Optional
 
 import os
 from dataclasses import dataclass
 
 import matplotlib.pyplot as plt
 import numpy as np
-import numpy.typing as npt
 import scipy.signal as sps
 
 from miv.core.datatype import Signal
 from miv.core.operator_generator.operator import GeneratorOperatorMixin
 from miv.core.operator_generator.wrapper import cache_generator_call
-from miv.typing import SignalType
 
 
 @dataclass
@@ -31,8 +28,8 @@ class Notch(GeneratorOperatorMixin):
         Tag for the collection of filter.
     """
 
-    f0: Optional[float] = 60.0  # Hz
-    Q: Optional[float] = 30.0
+    f0: float | None = 60.0  # Hz
+    Q: float | None = 30.0
     tag: str = "notch filter"
 
     @cache_generator_call

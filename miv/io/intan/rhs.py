@@ -1,3 +1,5 @@
+from typing import BinaryIO
+
 import logging
 import math
 import os
@@ -58,7 +60,7 @@ def read_qstring(fid):  # pragma: no cover
 
 
 # Define read_header function
-def read_header(fid):  # pragma: no cover
+def read_header(fid: BinaryIO) -> dict[str, ...]:  # pragma: no cover
     """Reads the Intan File Format header from the given file."""
     # Check 'magic number' at beginning of file to make sure this is an Intan
     # Technologies RHD2000 data file.
@@ -606,7 +608,9 @@ def read_one_data_block(data, header, indices, fid):  # pragma: no cover
 
 
 # Define data_to_result function
-def data_to_result(header, data, data_present):  # pragma: no cover
+def data_to_result(
+    header: dict[str, ...], data: dict[str, ...], data_present: bool
+) -> dict[str, ...]:  # pragma: no cover
     """Moves the header and data (if present) into a common object."""
     result = {}
 
@@ -725,7 +729,7 @@ def plot_channel(channel_name, result):  # pragma: no cover
 
 
 # Define load_file function
-def load_file(filename):  # pragma: no cover
+def load_file(filename: str) -> tuple[dict[str, ...], bool]:  # pragma: no cover
     # Start timing
     tic = time.time()
 

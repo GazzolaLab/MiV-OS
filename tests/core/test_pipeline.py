@@ -1,7 +1,7 @@
 import pytest
 
 from miv.core.pipeline import Pipeline
-from tests.core.mock_chain import MockChainRunnable
+from tests.core.mock_chain import MockChainRunnable, MockChainRunnableWithCache
 
 
 def test_pipeline():
@@ -21,9 +21,25 @@ def pipeline():
     return Pipeline(e)
 
 
-def test_pipeline_run(pipeline):
-    pipeline.run(verbose=True)
+def test_pipeline_run(tmp_path, pipeline):
+    pipeline.run(tmp_path / "results", verbose=True)
 
 
 def test_pipeline_summarize(pipeline):
     pipeline.summarize()
+
+
+def test_pipeline_execution_count(tmp_path):
+    a = MockChainRunnable(1)
+    b = MockChainRunnable(2)
+    c = MockChainRunnable(3)
+
+    a >> b >> c
+
+    # Note, Pipeline-run itself should not invoke chain
+    Pipeline(c).run(tmp_path / "results")
+    assert c.run_counter == 1
+
+    Pipeline([a, c]).run(tmp_path / "results")
+    assert a.run_counter == 1
+    assert c.run_counter == 2

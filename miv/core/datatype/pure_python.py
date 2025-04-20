@@ -1,31 +1,26 @@
 __all__ = ["PythonDataType", "NumpyDType", "GeneratorType"]
 
-from typing import Protocol, Union
+from typing import TypeAlias, Any
+from collections.abc import Generator, Iterator
 
 import numpy as np
 
+from miv.core.operator.operator import DataNodeMixin
 from miv.core.operator.chainable import BaseChainingMixin
 
-
-class RawValuesProtocol(Protocol):
-    @staticmethod
-    def is_valid(value) -> bool: ...
+PurePythonTypes: TypeAlias = int | float | str | bool | list | tuple | dict
 
 
-class ValuesMixin(BaseChainingMixin):
+class ValuesMixin(DataNodeMixin, BaseChainingMixin):
     """
     This mixin is used to convert pure/numpy data type to be a valid input/output of a node.
     """
 
-    def __init__(self, value, *args, **kwargs):
+    def __init__(
+        self, data: np.ndarray | PurePythonTypes, *args: Any, **kwargs: Any
+    ) -> None:
         super().__init__(*args, **kwargs)
-        self.value = value
-
-    def output(self):
-        return self.value
-
-    def run(self, *args, **kwargs):
-        return self.output()
+        self.data = data
 
 
 class PythonDataType(ValuesMixin):
@@ -35,9 +30,9 @@ class PythonDataType(ValuesMixin):
     """
 
     @staticmethod
-    def is_valid(value):
-        return value is None or isinstance(
-            value, (int, float, str, bool, list, tuple, dict)
+    def is_valid(data: Any) -> bool:
+        return data is None or isinstance(
+            data, int | float | str | bool | list | tuple | dict
         )
 
 
@@ -47,23 +42,23 @@ class NumpyDType(ValuesMixin):
     """
 
     @staticmethod
-    def is_valid(value):
-        return isinstance(value, np.ndarray)
+    def is_valid(data: Any) -> bool:
+        return isinstance(data, np.ndarray)
 
 
 class GeneratorType(BaseChainingMixin):
-    def __init__(self, iterator, *args, **kwargs):
+    def __init__(self, iterator: Iterator, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self.iterator = iterator
 
-    def output(self):
+    def output(self) -> Generator:
         yield from self.iterator
 
-    def run(self, **kwargs):
+    def run(self, **kwargs: Any) -> Generator:
         yield from self.output()
 
     @staticmethod
-    def is_valid(value):
+    def is_valid(data: Any) -> bool:
         import inspect
 
-        return inspect.isgenerator(value)
+        return inspect.isgenerator(data)

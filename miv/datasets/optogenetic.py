@@ -1,10 +1,6 @@
 __doc__ = """Sample signal readout from optogenetic neuron."""
 __all__ = ["load_data"]
 
-import gzip
-import os
-
-import numpy as np
 
 from miv.datasets.utils import get_file
 from miv.io.openephys import DataManager

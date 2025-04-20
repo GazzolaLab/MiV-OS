@@ -9,17 +9,19 @@ Spikestamps
 
 __all__ = ["Spikestamps"]
 
-from collections.abc import Sequence
+from collections.abc import MutableSequence, Sequence, Iterable
 
 import numpy as np
 import quantities as pq
 
-from miv.core.datatype.collapsable import CollapseExtendableMixin
-from miv.core.datatype.signal import Signal
+import neo
+
+from .mixin_colapsable import ConcatenateMixin
+from .signal import Signal
 from miv.core.operator.operator import DataNodeMixin
 
 
-class Spikestamps(CollapseExtendableMixin, DataNodeMixin, Sequence):
+class Spikestamps(ConcatenateMixin, DataNodeMixin, Sequence):
     """List of array of spike times
 
     Represents spikes emitted by the same unit in a period of times.
@@ -27,14 +29,14 @@ class Spikestamps(CollapseExtendableMixin, DataNodeMixin, Sequence):
     Comply with `ChannelWise` and `Extendable` protocols.
     """
 
-    def __init__(self, iterable: list | None = None):
+    def __init__(self, iterable: list | None = None) -> None:
         super().__init__()
         if iterable is None:  # Default
             iterable = []
-        self.data = iterable
+        self.data: list[MutableSequence[float]] = iterable
 
     @classmethod
-    def empty(clf, number_of_channels: int):
+    def empty(clf, number_of_channels: int) -> "Spikestamps":
         return clf([[] for _ in range(number_of_channels)])
 
     @property
@@ -42,24 +44,24 @@ class Spikestamps(CollapseExtendableMixin, DataNodeMixin, Sequence):
         """Number of channels"""
         return len(self.data)
 
-    def __setitem__(self, index, item):
+    def __setitem__(self, index: int, item: MutableSequence[float]) -> None:
         self.data[index] = item
 
-    def __getitem__(self, index):
+    def __getitem__(self, index: int) -> MutableSequence[float]:  # type: ignore[override]
         return self.data[index]
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.data)
 
-    def insert(self, index, item):
+    def insert(self, index: int, item: MutableSequence[float]) -> None:
         if index > len(self.data) or index < 0:
             raise IndexError("Index out of range")
         self.data.insert(index, item)
 
-    def append(self, item):
+    def append(self, item: MutableSequence[float]) -> None:
         self.data.append(item)
 
-    def extend(self, other):
+    def extend(self, other: "Spikestamps | Iterable[MutableSequence[float]]") -> None:
         """
         Extend spikestamps from another `Spikestamps` or list of arrays.
 
@@ -92,27 +94,29 @@ class Spikestamps(CollapseExtendableMixin, DataNodeMixin, Sequence):
         else:
             self.data.extend(item for item in other)
 
-    def get_count(self):
+    def get_count(self) -> list[int]:
         """Return list of spike-counts for each channel."""
         return [len(data) for data in self.data]
 
-    def get_last_spikestamp(self):
+    def get_last_spikestamp(self) -> float:
         """Return timestamps of the last spike in this spikestamps"""
         rowmax = [max(data) for data in self.data if len(data) > 0]
         return 0 if len(rowmax) == 0 else max(rowmax)
 
-    def get_first_spikestamp(self):
+    def get_first_spikestamp(self) -> float:
         """Return timestamps of the first spike in this spikestamps"""
         rowmin = [min(data) for data in self.data if len(data) > 0]
         return 0 if len(rowmin) == 0 else min(rowmin)
 
-    def get_view(self, t_start: float, t_end: float, reset_start: bool = False):
+    def get_view(
+        self, t_start: float, t_end: float, reset_start: bool = False
+    ) -> "Spikestamps":
         """
         Truncate array and only includes spikestamps between t_start and t_end.
         If reset_start is True, the first spikestamp will be set to zero.
         """
         spikestamps_array = [
-            np.array(sorted(list(filter(lambda x: t_start <= x <= t_end, arr))))
+            np.array(sorted(filter(lambda x: t_start <= x <= t_end, arr)))
             for arr in self.data
         ]
         if reset_start:
@@ -121,7 +125,7 @@ class Spikestamps(CollapseExtendableMixin, DataNodeMixin, Sequence):
             ]
         return Spikestamps(spikestamps_array)
 
-    def select(self, indices, keepdims: bool = True):
+    def select(self, indices: Sequence[int], keepdims: bool = True) -> "Spikestamps":
         """Select channels by indices. The order of the channels will be preserved."""
         if keepdims:
             data = [
@@ -132,7 +136,9 @@ class Spikestamps(CollapseExtendableMixin, DataNodeMixin, Sequence):
         else:
             return Spikestamps([self.data[idx] for idx in indices])
 
-    def neo(self, t_start: float | None = None, t_stop: float | None = None):
+    def neo(
+        self, t_start: float | None = None, t_stop: float | None = None
+    ) -> list[neo.SpikeTrain]:
         """Cast to neo.SpikeTrain
 
         Parameters
@@ -145,8 +151,6 @@ class Spikestamps(CollapseExtendableMixin, DataNodeMixin, Sequence):
             If None, the last spikestamp will be used.
 
         """
-        import neo
-
         if t_start is None:
             t_start = self.get_first_spikestamp()
         if t_stop is None:
@@ -156,9 +160,10 @@ class Spikestamps(CollapseExtendableMixin, DataNodeMixin, Sequence):
             for arr in self.data
         ]
 
-    def flatten(self):
+    def flatten(self) -> tuple[np.ndarray, np.ndarray]:
         """Flatten spikestamps into a single array. One can plot the spikestamps using this array with scatter plot."""
-        x, y = [], []
+        x: list[float] = []
+        y: list[float] = []
         for idx, arr in enumerate(self.data):
             x.extend(arr)
             y.extend([idx] * len(arr))
@@ -166,7 +171,7 @@ class Spikestamps(CollapseExtendableMixin, DataNodeMixin, Sequence):
 
     def binning(
         self,
-        bin_size: float = 1 * pq.ms,
+        bin_size: float = 0.001,
         t_start: float | None = None,
         t_end: float | None = None,
         minimum_count: int = 1,
@@ -195,8 +200,6 @@ class Spikestamps(CollapseExtendableMixin, DataNodeMixin, Sequence):
             binned spiketrain with 1 corresponding to spike and zero otherwise
 
         """
-        spiketrain = self.data
-
         if isinstance(bin_size, pq.Quantity):
             bin_size = bin_size.rescale(pq.s).magnitude
         assert bin_size > 0, "bin size should be greater than 0"
@@ -223,7 +226,7 @@ class Spikestamps(CollapseExtendableMixin, DataNodeMixin, Sequence):
             rate=1.0 / bin_size,
         )
         for idx, spiketrain in enumerate(self.data):
-            bins = np.digitize(spiketrain, time)
+            bins = np.digitize(np.asarray(spiketrain), time)
             bincount = np.bincount(bins, minlength=n_bins + 2)[1:-1]
             if return_count:
                 bin_spike = bincount
@@ -232,7 +235,7 @@ class Spikestamps(CollapseExtendableMixin, DataNodeMixin, Sequence):
             signal.data[:, idx] = bin_spike
         return signal
 
-    def get_portion(self, start_ratio, end_ratio):
+    def get_portion(self, start_ratio: float, end_ratio: float) -> "Spikestamps":
         """
         (Experimental)
         Return spiketrain view inbetween (start_ratio, end_ratio)
@@ -246,7 +249,7 @@ class Spikestamps(CollapseExtendableMixin, DataNodeMixin, Sequence):
         )
 
     @classmethod
-    def from_pickle(cls, filename):
+    def from_pickle(cls, filename: str) -> "Spikestamps":
         import pickle as pkl
 
         with open(filename, "rb") as f:

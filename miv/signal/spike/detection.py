@@ -52,10 +52,10 @@ class ThresholdCutoff(OperatorMixin):
             (default=0.003)
         search_range : float
             (default=0.002)
-        cutoff : Union[float, np.ndarray]
+        cutoff : float | np.ndarray
             (default=5.0)
         tag : str
-        units : Union[str, pq.UnitTime]
+        units : str | pq.UnitTime
             (default='sec')
         progress_bar : bool
             Toggle progress bar (default=True)
@@ -98,7 +98,7 @@ class ThresholdCutoff(OperatorMixin):
 
         Returns
         -------
-        spiketrain_list : List[SpikestampsType]
+        spiketrain_list : list[SpikestampsType]
 
         """
         if not inspect.isgenerator(
@@ -154,7 +154,7 @@ class ThresholdCutoff(OperatorMixin):
                 )
                 spiketrain_list.append(spiketrain)
             else:
-                spiketrain_list.append(spikestamp.astype(np.float_))
+                spiketrain_list.append(spikestamp.astype(np.float64))
         spikestamps = Spikestamps(spiketrain_list)
         return spikestamps
 

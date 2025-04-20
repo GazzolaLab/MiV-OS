@@ -33,17 +33,33 @@ class MockGeneratorOperatorModule(GeneratorOperatorMixin):
             np.save(savepath, output)
 
 
-def generator_plot_test_callback(
-    self, output, inputs, show=False, save_path=None, index=-1
-):
+def generator_plot_test_callback(output, inputs, show=False, save_path=None, index=-1):
     savepath = os.path.join(save_path, f"gen_callback_{index}.npy")
     # Save temporary file
     if save_path is not None:
         np.save(savepath, output)
 
 
-def firstiter_plot_test_callback(self, output, inputs, show=False, save_path=None):
+def firstiter_plot_test_callback(output, inputs, show=False, save_path=None):
     savepath = os.path.join(save_path, "firstiter_callback_13.npy")
+    # Save temporary file
+    if save_path is not None:
+        np.save(savepath, output)
+
+
+def generator_plot_test_callback_as_method(
+    self, output, inputs, show=False, save_path=None, index=-1
+):
+    savepath = os.path.join(save_path, f"gen_callback2_{index}.npy")
+    # Save temporary file
+    if save_path is not None:
+        np.save(savepath, output)
+
+
+def firstiter_plot_test_callback_as_method(
+    self, output, inputs, show=False, save_path=None
+):
+    savepath = os.path.join(save_path, "firstiter_callback2_15.npy")
     # Save temporary file
     if save_path is not None:
         np.save(savepath, output)

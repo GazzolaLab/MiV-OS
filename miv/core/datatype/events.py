@@ -9,55 +9,54 @@ Events
 
 __all__ = ["Events"]
 
-from typing import List, Optional
+from typing import cast
 
-from collections import UserList
 
 import numpy as np
 import quantities as pq
 
-from miv.core.datatype.collapsable import CollapseExtendableMixin
+from miv.core.datatype.mixin_colapsable import ConcatenateMixin
 from miv.core.datatype.signal import Signal
 from miv.core.operator.operator import DataNodeMixin
 
 
-class Events(CollapseExtendableMixin, DataNodeMixin):
+class Events(ConcatenateMixin, DataNodeMixin):
     """
     A list of events.
 
     Comply with `Extendable` protocols.
     """
 
-    def __init__(self, data: List[float] = None):
+    def __init__(self, data: list[float] | None = None) -> None:
         super().__init__()
-        self.data = np.asarray(data) if data is not None else []
+        self.data = np.asarray(data) if data is not None else np.array([])
 
-    def append(self, item):
-        raise NotImplementedError("Not implemented yet. Need to append and sort")
+    def append(self, item: float) -> None:
+        self.data = np.append(self.data, item)
 
-    def extend(self, other):
-        raise NotImplementedError("Not implemented yet. Need to extend and sort")
+    def extend(self, other: "Events") -> None:
+        self.data = np.append(self.data, other.data)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.data)
 
-    def get_last_event(self):
+    def get_last_event(self) -> float:
         """Return timestamps of the last event"""
-        return max(self.data)
+        return cast(float, max(self.data))
 
-    def get_first_event(self):
+    def get_first_event(self) -> float:
         """Return timestamps of the first event"""
-        return min(self.data)
+        return cast(float, min(self.data))
 
-    def get_view(self, t_start: float, t_end: float):
+    def get_view(self, t_start: float, t_end: float) -> "Events":
         """Truncate array and only includes spikestamps between t_start and t_end."""
-        return Events(sorted(list(filter(lambda x: t_start <= x <= t_end, self.data))))
+        return Events(sorted(filter(lambda x: t_start <= x <= t_end, self.data)))
 
     def binning(
         self,
-        bin_size: float = 1 * pq.ms,
-        t_start: Optional[float] = None,
-        t_end: Optional[float] = None,
+        bin_size: float | pq.Quantity = 0.001,
+        t_start: float | None = None,
+        t_end: float | None = None,
         return_count: bool = False,
     ) -> Signal:
         """
@@ -89,6 +88,7 @@ class Events(CollapseExtendableMixin, DataNodeMixin):
             rate=1.0 / bin_size,
         )
 
+        # TODO: Make separate free function for this binning process
         bins = np.digitize(self.data, time)
         bincount = np.bincount(bins, minlength=n_bins + 2)[1:-1]
         if return_count:

@@ -1,11 +1,8 @@
 __all__ = ["interp_2d"]
 
-import subprocess
 
 import numpy as np
-import scipy.signal as sps
 from scipy.interpolate import interp2d
-from scipy.ndimage import gaussian_filter
 
 
 def interp_2d(data, ratio=10):

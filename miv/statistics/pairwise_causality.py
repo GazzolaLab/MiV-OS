@@ -1,5 +1,4 @@
 # Pairwise Granger Causality
-import os
 
 import numpy as np
 from elephant.causality.granger import pairwise_granger

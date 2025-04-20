@@ -1,5 +1,6 @@
+from typing import Any, cast
+
 from logging import Logger
-from typing import Any
 
 import h5py
 import numpy as np
@@ -12,7 +13,7 @@ def read(
     groups: str | list[str] | None = None,
     subset: int | list[int] | tuple[int, int] | None = None,
     logger: Logger | None = None,
-) -> tuple[dict[str, Any], dict[str, None]]:
+) -> tuple[dict[str, Any], dict[str, Any]]:
     """
     Reads all, or a subset of the data, from the HDF5 file to fill a data dictionary.
     Returns an empty dictionary to be filled later with data from individual containers.
@@ -273,7 +274,8 @@ def validate_subset(
 
 
 def calculate_index_from_counters(counters: Dataset) -> ndarray:
-    index = np.add.accumulate(counters) - counters
+    index = np.add.accumulate(counters[:]) - counters[:]
+    index = cast(ndarray, index)
     return index
 
 
@@ -324,14 +326,12 @@ def get_ncontainers_in_file(
 
         if a.__contains__("_NUMBER_OF_CONTAINERS_"):
             _NUMBER_OF_CONTAINERS_ = a.get("_NUMBER_OF_CONTAINERS_")
-            f.close()
-            return _NUMBER_OF_CONTAINERS_
+            return cast(int64, _NUMBER_OF_CONTAINERS_)
         else:
             if logger is not None:
                 logger.warning(
                     '\nFile does not contain the attribute, "_NUMBER_OF_CONTAINERS_"\n'
                 )
-            f.close()
             return None
 
 
@@ -377,7 +377,7 @@ def get_file_metadata(filename: str) -> None | dict[str, Any]:
     return metadata
 
 
-def print_file_metadata(filename: str):
+def print_file_metadata(filename: str) -> str:
     """Pretty print the file metadata"""
     metadata = get_file_metadata(filename)
 

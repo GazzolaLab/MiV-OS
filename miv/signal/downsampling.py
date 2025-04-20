@@ -1,19 +1,14 @@
 __doc__ = "Downsample Operator for Signals"
 __all__ = ["Downsample"]
 
-import os
 from dataclasses import dataclass
-from typing import Optional
 
-import matplotlib.pyplot as plt
 import numpy as np
-import numpy.typing as npt
 import scipy.signal as sps
 
 from miv.core.datatype import Signal
 from miv.core.operator_generator.operator import GeneratorOperatorMixin
 from miv.core.operator_generator.wrapper import cache_generator_call
-from miv.typing import SignalType
 
 
 @dataclass

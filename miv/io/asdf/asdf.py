@@ -10,21 +10,24 @@ author: tvarley
 """
 __all__ = ["DataASDF"]
 
-import os
-import sys
+from typing import Any
+
 
 import numpy as np
-import pandas as pd
 from scipy.io import loadmat
 
-from miv.core.datatype import Spikestamps
-from miv.core.operator import DataLoaderMixin
+from miv.core.datatype.spikestamps import Spikestamps
+from miv.core.operator.operator import DataLoaderMixin
 
 
 class DataASDF(DataLoaderMixin):
     """ASDF file type loader"""
 
-    def __init__(self, data_path, rate: float, *args, **kwargs):  # pragma: no cover
+    tag = "ASDF loader"
+
+    def __init__(
+        self, data_path: str, rate: float, *args: Any, **kwargs: Any
+    ) -> None:  # pragma: no cover
         """
         Constructor
 
@@ -35,7 +38,7 @@ class DataASDF(DataLoaderMixin):
         self.rate = rate
         super().__init__(*args, **kwargs)
 
-    def load(self):  # pragma: no cover
+    def load(self) -> Spikestamps:  # pragma: no cover
         """
         Load data from ASDF file
         """
