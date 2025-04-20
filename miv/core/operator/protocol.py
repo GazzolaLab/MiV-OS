@@ -35,10 +35,7 @@ class _Runnable(Protocol):
 
 
 class _Cachable(_Tagged, _Loggable, _Runnable, Protocol):
-    @property
-    def cacher(self) -> _CacherProtocol: ...
-    @cacher.setter
-    def cacher(self, value: _CacherProtocol) -> None: ...
+    cacher: _CacherProtocol
 
     def set_caching_policy(self, policy: CACHE_POLICY) -> None: ...
 

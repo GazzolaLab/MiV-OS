@@ -16,9 +16,11 @@ __all__ = [
     "cache_functional",
 ]
 
-from typing import Any, TypeVar
+from typing import Any, TypeVar, Concatenate, ParamSpec
 from collections.abc import Callable
-
+import os
+import functools
+from joblib import Memory
 
 from .protocol import _Cachable
 
@@ -46,30 +48,36 @@ def cache_call(func: Callable[..., F]) -> Callable[..., F]:
     return wrapper
 
 
+SELF = TypeVar("SELF", bound=_Cachable)
+P = ParamSpec("P")
+R = TypeVar("R")
+
+
 def cache_functional(
     cache_tag: str | None = None,
-) -> Callable[[Callable[..., F]], Callable[..., F]]:
+    verbose: bool = False,
+) -> Callable[[Callable[Concatenate[SELF, P], R]], Callable[Concatenate[SELF, P], R]]:
     """
     Cache the functionals.
     """
 
-    def decorator(func: Callable[..., F]) -> Callable[..., F]:
-        def wrapper(self: _Cachable, *args: Any, **kwargs: Any) -> F:
-            cacher = self.cacher
-            tag = "data" if cache_tag is None else cache_tag
-
-            # TODO: check cache by parameters should be improved
-            if cacher.check_cached(params=(args, kwargs), tag=tag):
-                loader = cacher.load_cached(tag=tag)
-                value = next(loader)
-                return value  # type: ignore[no-any-return]
-            else:
-                result = func(self, *args, **kwargs)
-                if result is None:
-                    return None
-                cacher.save_cache(result, tag=tag)
-                cacher.save_config(params=(args, kwargs), tag=tag)
-                return result
+    def decorator(
+        func: Callable[Concatenate[SELF, P], R],
+    ) -> Callable[Concatenate[SELF, P], R]:
+        @functools.wraps(func)
+        def wrapper(self: _Cachable, *args: Any, **kwargs: Any) -> R:
+            cached_methods: dict[str, Callable] = getattr(self, "_cached_methods", {})
+            cache_dir = self.cacher.cache_dir
+            tag = cache_tag if cache_tag is not None else func.__name__
+            if tag not in cached_methods:
+                cache_path = os.path.join(cache_dir, tag)
+                memory = Memory(cache_path, verbose=verbose)
+                # Dev note: __get__ is used to bind the method to this "self" instance.
+                # This is necessary because the memory.cache decorator expects a bound method.
+                # Otherwise, there is no way to pass the "self" instance during the cache call.
+                _func = memory.cache(func.__get__(self, type(self)))
+                cached_methods[tag] = _func
+            return cached_methods[tag](*args, **kwargs)
 
         return wrapper
 
