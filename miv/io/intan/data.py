@@ -404,7 +404,7 @@ class DataIntanTriggered(DataIntan):
         *args: Any,
         **kwargs: Any,
     ) -> None:
-        super().__init__(data_path=data_path, *args, **kwargs)
+        super().__init__(*args, data_path=data_path, **kwargs)
         self.index = index
         self.trigger_key = trigger_key
         self.trigger_index = trigger_index
