@@ -20,11 +20,11 @@ def burst_array(spiketrain: Spikestamps, min_isi: float, min_len: int):
     )  # Only spikes within specified min ISI are 1 otherwise 0 and are stored
 
     # Try to find the start and end indices for burst interval
+    burst_spike = np.r_[False, burst_spike, False]
     delta = np.logical_xor(burst_spike[:-1], burst_spike[1:])
     interval = np.where(delta)[0]
     if len(interval) % 2:
         interval = np.append(interval, len(delta))
-    interval += 1
     interval = interval.reshape([-1, 2])
     mask = np.diff(interval) >= min_len
     interval = interval[mask.ravel(), :]
