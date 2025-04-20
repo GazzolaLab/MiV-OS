@@ -13,7 +13,8 @@ import os
 import pathlib
 import time
 
-from miv.core.operator.protocol import OperatorNode
+from miv.core.operator.protocol import _Node
+from miv.core.utils.graph_sorting import topological_sort
 
 
 class Pipeline:
@@ -34,14 +35,14 @@ class Pipeline:
     For example, if E is already cached, then the execution order of `Pipeline(F)` is A->B->D->F. (C is skipped, E is loaded from cache)
     """
 
-    def __init__(self, node: OperatorNode | Sequence[OperatorNode]) -> None:
-        self.nodes_to_run: list[OperatorNode]
+    def __init__(self, node: _Node | Sequence[_Node]) -> None:
+        self.nodes_to_run: list[_Node]
         if not isinstance(node, list):
             # FIXME: check if the node is standalone operator
-            node = cast(OperatorNode, node)
+            node = cast(_Node, node)
             self.nodes_to_run = [node]
         else:
-            node = cast(Sequence[OperatorNode], node)
+            node = cast(Sequence[_Node], node)
             self.nodes_to_run = list(node)
 
     def run(
@@ -74,7 +75,7 @@ class Pipeline:
 
         # Reset all callbacks
         for last_node in self.nodes_to_run:
-            for node in last_node.topological_sort():
+            for node in topological_sort(last_node):
                 if hasattr(node, "reset_callbacks"):
                     node.reset_callbacks(plot=skip_plot)
                 if hasattr(node, "set_save_path"):
@@ -90,7 +91,7 @@ class Pipeline:
                 print("Running: ", node, flush=True)
 
             try:
-                node.run()
+                node.output()
             except Exception as e:
                 print("  Exception raised: ", node, flush=True)
                 raise e
@@ -108,7 +109,7 @@ class Pipeline:
     def summarize(self) -> str:
         strs = []
         for node in self.nodes_to_run:
-            execution_order = node.topological_sort()
+            execution_order = topological_sort(node)
 
             strs.append(f"Execution order for {node}:")
             for i, op in enumerate(execution_order):

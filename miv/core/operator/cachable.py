@@ -26,7 +26,7 @@ import numpy as np
 from miv.utils.formatter import TColors
 
 if TYPE_CHECKING:
-    from .protocol import _Cachable
+    from .protocol import _Cachable, _Node
     from miv.core.datatype import DataTypes
 
 # ON: Always use cache if cache exist. Otherwise, run and save cache.
@@ -78,7 +78,7 @@ class BaseCacher:
     Base class for cacher.
     """
 
-    def __init__(self, parent: _Cachable) -> None:
+    def __init__(self, parent: _Node) -> None:
         super().__init__()
         self.policy: CACHE_POLICY = "ON"
         self.parent = parent

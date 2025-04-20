@@ -5,13 +5,12 @@ Here, we define the behavior of basic operator class, and useful mixin classes t
 be used to create new operators that conform to required behaviors.
 """
 __all__ = [
-    "DataLoaderNode",
     "DataLoaderMixin",
     "DataNodeMixin",
     "OperatorMixin",
 ]
 
-from typing import TYPE_CHECKING, Protocol, Any, cast
+from typing import TYPE_CHECKING, Any, cast
 from collections.abc import Generator
 from typing_extensions import Self
 
@@ -31,22 +30,11 @@ if TYPE_CHECKING:
     from miv.core.datatype import DataTypes
     from miv.core.datatype.signal import Signal
     from miv.core.datatype.spikestamps import Spikestamps
-    from .protocol import _Chainable, _Callback, OperatorNode
-
-    class DataLoaderNode(
-        _Callback,
-        _Chainable,
-        Protocol,
-    ):
-        """ """
-
-        def load(
-            self, *args: Any, **kwargs: Any
-        ) -> Generator[DataTypes] | Spikestamps | Generator[Signal]: ...
+    from .protocol import _Node
 
 else:
-    # FIXME
-    class DataLoaderNode: ...
+
+    class _Node: ...
 
 
 class DataNodeMixin(BaseChainingMixin, DefaultLoggerMixin):
@@ -84,9 +72,6 @@ class DataLoaderMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
     def output(self) -> Generator[DataTypes] | Spikestamps | Generator[Signal]:
         output = self.load(**self._load_param)
         return output
-
-    def run(self) -> DataTypes:
-        return self.output()
 
     def load(
         self, *args: Any, **kwargs: Any
@@ -131,7 +116,7 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
         Receive input data from each upstream operator.
         Essentially, this method recursively call upstream operators' run() method.
         """
-        return [cast("OperatorNode", node).run() for node in self.iterate_upstream()]
+        return [cast(_Node, node).output() for node in self.iterate_upstream()]
 
     def output(self) -> DataTypes:
         """
@@ -179,12 +164,3 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
         args = self.receive()  # Receive data from upstream
         self._done_flag_plot = False  # FIXME
         self._callback_plot(output, args, show=show, save_path=save_path)
-
-    def run(self) -> DataTypes:
-        """
-        Execute the module. This is the function called by the pipeline.
-        Input to the parameters are received from upstream operators.
-        """
-        output = self.output()
-
-        return output

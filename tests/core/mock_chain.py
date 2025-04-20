@@ -45,7 +45,7 @@ class MockChainRunnable(MockChain):
         self.runner = MockRunner()
         self.run_counter = 0
 
-    def run(self, save_path=None, dry_run=False, cache_dir=None, skip_plot=False):
+    def output(self, save_path=None, dry_run=False, cache_dir=None, skip_plot=False):
         print("run ", self.tag)
         self.run_counter += 1
 
@@ -64,7 +64,7 @@ class MockChainRunnableWithCache(MockChainRunnable):
         self.run_counter = 0
         self.cacher = TemporaryCacher(False)
 
-    def run(self, save_path=None, dry_run=False, cache_dir=None, skip_plot=False):
+    def output(self, save_path=None, dry_run=False, cache_dir=None, skip_plot=False):
         print("run ", self.tag)
         self.cacher.value = True
         self.run_counter += 1

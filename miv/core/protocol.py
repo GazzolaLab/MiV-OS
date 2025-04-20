@@ -15,10 +15,6 @@ import logging
 _LazyCallable = Callable[[Generator[Any]], Generator[Any]]  # FIXME
 
 
-class _Tagged(Protocol):
-    tag: str
-
-
 class _Loggable(Protocol):
     """
     A protocol for a logger policy.

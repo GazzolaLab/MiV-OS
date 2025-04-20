@@ -14,6 +14,7 @@ from miv.core.operator.wrapper import cache_call
 from miv.core.operator_generator.operator import GeneratorOperatorMixin
 from miv.core.operator_generator.wrapper import cache_generator_call
 from miv.core.pipeline import Pipeline
+from miv.core.utils.graph_sorting import topological_sort
 
 
 class MockDataLoaderNode(DataLoaderMixin):
@@ -86,7 +87,7 @@ def pipeline(tmp_path):
 
 @pytest.mark.mpi_xfail
 def test_pipeline_run1(pipeline, tmp_path):
-    execution_order = pipeline.nodes_to_run[0].topological_sort()
+    execution_order = topological_sort(pipeline.nodes_to_run[0])
     pipeline.run(tmp_path, verbose=True)
 
     assert len(execution_order) == 5
