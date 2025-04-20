@@ -119,13 +119,13 @@ class StrictMPIRunner:
         self.root = root
 
     def get_run_order(self) -> int:
-        return self.get_rank()
+        return int(self.get_rank())
 
     def get_rank(self) -> int:
-        return self.comm.Get_rank()
+        return int(self.comm.Get_rank())
 
     def get_size(self) -> int:
-        return self.comm.Get_size()
+        return int(self.comm.Get_size())
 
     def get_root(self) -> int:
         return self.root
