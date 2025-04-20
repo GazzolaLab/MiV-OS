@@ -2,16 +2,8 @@ __all__ = ["ImportSignal"]
 
 from collections.abc import Generator
 
-import logging
-import os
-import pickle
-from pathlib import Path
 
-import h5py
-import numpy as np
-from tqdm import tqdm
-
-from miv.core.datatype import Events, Signal, Spikestamps
+from miv.core.datatype import Signal
 from miv.core.operator.operator import DataLoaderMixin
 from miv.io import file as miv_file
 

@@ -1,26 +1,20 @@
 __all__ = ["zip_results"]
 
-from typing import List
 
-import glob
-import logging
-import os
 import pathlib
-import shutil
 import zipfile
 
 import click
 
 
 def is_path_valid(
-    path: pathlib.Path, ignore_directory: List[str], ignore_extension: List[str]
+    path: pathlib.Path, ignore_directory: list[str], ignore_extension: list[str]
 ):
     if path.is_file():
         if ignore_extension and path.suffix in ignore_extension:
             return False
-    else:
-        if not ignore_directory:
-            return True
+    elif not ignore_directory:
+        return True
 
     if ignore_directory:
         for directory in path.as_posix().split("/"):

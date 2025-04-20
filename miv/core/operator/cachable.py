@@ -156,10 +156,10 @@ class DataclassCacher(BaseCacher):
         try:
             with open(self.config_filename(tag=tag), "w") as f:
                 json.dump(config, f, indent=4)
-        except (TypeError, OverflowError):
+        except (TypeError, OverflowError) as err:
             raise TypeError(
                 "Some property of caching objects are not JSON serializable."
-            )
+            ) from err
         return True
 
     def load_cached(self, tag: str = "data") -> Generator[DataTypes]:
@@ -210,10 +210,10 @@ class FunctionalCacher(BaseCacher):
         try:
             with open(self.config_filename(tag), "w") as f:
                 json.dump(config, f, indent=4)
-        except (TypeError, OverflowError):
+        except (TypeError, OverflowError) as err:
             raise TypeError(
                 "Some property of caching objects are not JSON serializable."
-            )
+            ) from err
         return True
 
     def load_cached(self, tag: str = "data") -> Generator[DataTypes]:

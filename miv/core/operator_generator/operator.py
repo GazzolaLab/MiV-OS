@@ -4,15 +4,9 @@ __all__ = [
     "GeneratorOperatorMixin",
 ]
 
-from typing import TYPE_CHECKING, List, Optional, Protocol, Union
-from collections.abc import Callable, Generator
+from typing import TYPE_CHECKING, Protocol
+from collections.abc import Generator
 
-import functools
-import inspect
-import itertools
-import os
-import pathlib
-from dataclasses import dataclass
 
 if TYPE_CHECKING:
     pass

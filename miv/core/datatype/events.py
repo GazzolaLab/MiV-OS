@@ -9,9 +9,8 @@ Events
 
 __all__ = ["Events"]
 
-from typing import Optional, cast
+from typing import cast
 
-from collections import UserList
 
 import numpy as np
 import quantities as pq
@@ -51,7 +50,7 @@ class Events(ConcatenateMixin, DataNodeMixin):
 
     def get_view(self, t_start: float, t_end: float) -> "Events":
         """Truncate array and only includes spikestamps between t_start and t_end."""
-        return Events(sorted(list(filter(lambda x: t_start <= x <= t_end, self.data))))
+        return Events(sorted(filter(lambda x: t_start <= x <= t_end, self.data)))
 
     def binning(
         self,

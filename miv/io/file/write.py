@@ -1,5 +1,4 @@
-from typing import Any, Dict, List, Optional, Type, Union
-from collections.abc import Sequence
+from typing import Any
 
 import datetime
 import sys
@@ -96,7 +95,7 @@ def create_container(
 def create_group(
     data: dict[str, Any],
     group_name: str,
-    metadata: dict[str, str | int | float] = {},
+    metadata: dict[str, str | int | float] | None = None,
     counter: str | None = None,
     logger: Logger | None = None,
 ) -> str:
@@ -110,6 +109,8 @@ def create_group(
         **counter** (string): Name of the counter key. None by default
 
     """
+    if metadata is None:
+        metadata = {}
 
     group_id = group_name.replace("/", "-")
     if logger is not None:
@@ -312,27 +313,26 @@ def pack(
                         break
                     # Otherwise, we'll check that *all* the datasets have the same
                     # length.
-                    else:
-                        if counter_value is None:
-                            counter_value = temp_counter_value
-                            container[counter] = temp_counter_value
-                        elif counter_value != temp_counter_value:
-                            # In this case, we found two groups of different length!
-                            # Print this to help the user identify their error
-                            if logger is not None:
-                                logger.warning(
-                                    f"Two datasets in group {group} have different sizes!"
-                                )
-                            for tempd in datasets:
-                                temp_full_dataset_name = group + "/" + tempd
-                                # Don't worry about the dataset
-                                if counter == temp_full_dataset_name:
-                                    continue
-
-                            # Return a value for the external program to catch.
-                            raise RuntimeError(
+                    elif counter_value is None:
+                        counter_value = temp_counter_value
+                        container[counter] = temp_counter_value
+                    elif counter_value != temp_counter_value:
+                        # In this case, we found two groups of different length!
+                        # Print this to help the user identify their error
+                        if logger is not None:
+                            logger.warning(
                                 f"Two datasets in group {group} have different sizes!"
                             )
+                        for tempd in datasets:
+                            temp_full_dataset_name = group + "/" + tempd
+                            # Don't worry about the dataset
+                            if counter == temp_full_dataset_name:
+                                continue
+
+                        # Return a value for the external program to catch.
+                        raise RuntimeError(
+                            f"Two datasets in group {group} have different sizes!"
+                        )
 
     # Then pack the container into the data
     keys = list(container.keys())
@@ -394,7 +394,7 @@ def convert_dict_to_string_data(dictionary: dict[str, str]) -> list[list[bytes_]
     keys = dictionary.keys()
 
     mydataset = []
-    for i, key in enumerate(keys):
+    for _i, key in enumerate(keys):
         a = np.string_(key)
         b = np.string_(dictionary[key])
         mydataset.append([a, b])
@@ -404,7 +404,7 @@ def convert_dict_to_string_data(dictionary: dict[str, str]) -> list[list[bytes_]
 
 def write_metadata(
     filename: str,
-    metadata: dict[str, str] = {},
+    metadata: dict[str, str] | None = None,
     write_default_values: bool = True,
     append: bool = True,
 ) -> File:
@@ -426,6 +426,8 @@ def write_metadata(
     **hdoutfile** (HDF5): File with new metadata
 
     """
+    if metadata is None:
+        metadata = {}
 
     hdoutfile = h5py.File(filename, "a")
 
@@ -558,8 +560,7 @@ def write(
                     f"{countername} and {prevcounter} have differing numbers of entries!"
                 )
 
-        if _NUMBER_OF_CONTAINERS_ < ncounter:
-            _NUMBER_OF_CONTAINERS_ = ncounter
+        _NUMBER_OF_CONTAINERS_ = max(_NUMBER_OF_CONTAINERS_, ncounter)
 
         prevcounter = countername
 

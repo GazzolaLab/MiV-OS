@@ -12,11 +12,8 @@ __all__ = ["DataASDF"]
 
 from typing import Any
 
-import os
-import sys
 
 import numpy as np
-import pandas as pd
 from scipy.io import loadmat
 
 from miv.core.datatype.spikestamps import Spikestamps

@@ -3,19 +3,16 @@ from __future__ import annotations
 __doc__ = """"""
 __all__ = ["BaseChainingMixin"]
 
-from typing import TYPE_CHECKING, Any, List, Optional, Protocol, Set, Union, cast
-from collections.abc import Callable, Iterator
-from typing_extensions import Self
+from typing import TYPE_CHECKING, Any, cast
+from collections.abc import Iterator
 
-import functools
 import itertools
 
 import networkx as nx
 import matplotlib.pyplot as plt
 
 if TYPE_CHECKING:
-    from miv.core.datatype import DataTypes
-    from .protocol import _Chainable, OperatorNode
+    from .protocol import _Chainable
 
 
 class BaseChainingMixin:
@@ -90,7 +87,7 @@ class BaseChainingMixin:
         prefix: str = "|__ ",
     ) -> str:
         output = []
-        for i, item in enumerate(string_list):
+        for _i, item in enumerate(string_list):
             depth, label = item
             if depth > 0:
                 output.append("    " * (depth - 1) + prefix + str(label))

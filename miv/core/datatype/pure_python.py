@@ -1,6 +1,6 @@
 __all__ = ["PythonDataType", "NumpyDType", "GeneratorType"]
 
-from typing import Protocol, Union, TypeAlias, Any
+from typing import TypeAlias, Any
 from collections.abc import Generator, Iterator
 
 import numpy as np
@@ -8,7 +8,7 @@ import numpy as np
 from miv.core.operator.operator import DataNodeMixin
 from miv.core.operator.chainable import BaseChainingMixin
 
-PurePythonTypes: TypeAlias = Union[int, float, str, bool, list, tuple, dict]
+PurePythonTypes: TypeAlias = int | float | str | bool | list | tuple | dict
 
 
 class ValuesMixin(DataNodeMixin, BaseChainingMixin):
@@ -32,7 +32,7 @@ class PythonDataType(ValuesMixin):
     @staticmethod
     def is_valid(data: Any) -> bool:
         return data is None or isinstance(
-            data, (int, float, str, bool, list, tuple, dict)
+            data, int | float | str | bool | list | tuple | dict
         )
 
 

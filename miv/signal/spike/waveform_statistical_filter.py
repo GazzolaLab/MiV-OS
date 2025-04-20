@@ -7,7 +7,6 @@ Motivated by _[1].
 """
 __all__ = ["WaveformStatisticalFilter"]
 
-from typing import Dict, Optional
 
 import csv
 import os

@@ -1,19 +1,16 @@
 __all__ = ["get_file", "check_file_hash"]
 
-import typing
-from typing import Any, Callable, Optional
+from typing import Any
 
 import hashlib
 import logging
 import os
-import pathlib
 import shutil
 import tarfile
 import urllib
 import zipfile
 from urllib.request import urlopen
 
-import numpy as np
 from tqdm import tqdm
 
 
@@ -21,8 +18,8 @@ def get_file(
     file_url: str,
     directory: str,
     fname: str,
-    file_hash: Optional[str] = None,
-    archive_format: Optional[str] = "zip",
+    file_hash: str | None = None,
+    archive_format: str | None = "zip",
     cache_dir: str = "datasets",
     progbar_disable: bool = False,
 ):
@@ -167,7 +164,7 @@ def check_file_hash(filepath: str, file_hash: str, packet_size: int = 65535) -> 
 
 
 def _url_retrieve(
-    url: str, filename: str, url_data: Optional[Any] = None, progbar_disable=False
+    url: str, filename: str, url_data: Any | None = None, progbar_disable=False
 ):
     """
     Download file given URL

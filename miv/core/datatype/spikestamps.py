@@ -9,7 +9,7 @@ Spikestamps
 
 __all__ = ["Spikestamps"]
 
-from collections.abc import MutableSequence, Sequence
+from collections.abc import MutableSequence, Sequence, Iterable
 
 import numpy as np
 import quantities as pq
@@ -36,7 +36,7 @@ class Spikestamps(ConcatenateMixin, DataNodeMixin, Sequence):
         self.data: list[MutableSequence[float]] = iterable
 
     @classmethod
-    def empty(clf, number_of_channels: int):
+    def empty(clf, number_of_channels: int) -> "Spikestamps":
         return clf([[] for _ in range(number_of_channels)])
 
     @property
@@ -61,7 +61,7 @@ class Spikestamps(ConcatenateMixin, DataNodeMixin, Sequence):
     def append(self, item: MutableSequence[float]) -> None:
         self.data.append(item)
 
-    def extend(self, other: "Spikestamps | Iterable[MutableSequence[float]]]") -> None:
+    def extend(self, other: "Spikestamps | Iterable[MutableSequence[float]]") -> None:
         """
         Extend spikestamps from another `Spikestamps` or list of arrays.
 
@@ -116,7 +116,7 @@ class Spikestamps(ConcatenateMixin, DataNodeMixin, Sequence):
         If reset_start is True, the first spikestamp will be set to zero.
         """
         spikestamps_array = [
-            np.array(sorted(list(filter(lambda x: t_start <= x <= t_end, arr))))
+            np.array(sorted(filter(lambda x: t_start <= x <= t_end, arr)))
             for arr in self.data
         ]
         if reset_start:

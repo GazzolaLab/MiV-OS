@@ -2,13 +2,9 @@ __all__ = [
     "VanillaGeneratorRunner",
 ]
 
-from typing import Any, Optional, Protocol, Union
-from collections.abc import Callable, Generator, Sequence
+from typing import Any
+from collections.abc import Generator
 
-import inspect
-import multiprocessing
-import pathlib
-from dataclasses import dataclass
 
 from ..protocol import _LazyCallable
 

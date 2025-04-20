@@ -2,20 +2,11 @@ __all__ = [
     "cache_generator_call",
 ]
 
-import types
-from typing import Protocol, Union, TypeVar, Any
+from typing import Any
 from collections.abc import Generator, Callable
 
-import functools
 import inspect
-from collections import UserList
-from dataclasses import dataclass, make_dataclass
 
-from miv.core.operator.cachable import (
-    DataclassCacher,
-    FunctionalCacher,
-    _CacherProtocol,
-)
 from .operator import GeneratorOperator
 
 
@@ -41,7 +32,7 @@ def cache_generator_call(func: Callable) -> Callable:
         if is_all_generator:
 
             def generator_func(*args: tuple[Generator, ...]) -> Generator:
-                for idx, zip_arg in enumerate(zip(*args)):
+                for idx, zip_arg in enumerate(zip(*args, strict=False)):
                     result = func(self, *zip_arg, **kwargs)
                     if result is not None:
                         # In case the module does not return anything
@@ -54,9 +45,8 @@ def cache_generator_call(func: Callable) -> Callable:
                             result, zip_arg, save_path=self.analysis_path
                         )
                     yield result
-                else:
-                    cacher.save_config(tag=tag)
-                    # TODO: add lastiter_plot
+                cacher.save_config(tag=tag)
+                # TODO: add lastiter_plot
                 # FIXME
                 self._done_flag_generator_plot = True
                 self._done_flag_firstiter_plot = True

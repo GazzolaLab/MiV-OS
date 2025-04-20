@@ -1,10 +1,7 @@
 __all__ = ["MEAGeometryProtocol"]
 
-import typing
-from typing import Any, Protocol, Tuple
-from collections.abc import Iterable
+from typing import Protocol
 
-import matplotlib
 import numpy as np
 
 from miv.core.protocol import _Jsonable

@@ -5,9 +5,8 @@ import os
 import sys
 
 import click
-import numpy as np
 
-from miv.io import Data, DataManager
+from miv.io import DataManager
 from miv.io import file as miv_file
 
 

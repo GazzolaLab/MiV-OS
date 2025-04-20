@@ -1,5 +1,4 @@
 import matplotlib as mpl
-import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import LinearSegmentedColormap
@@ -97,7 +96,7 @@ if __name__ == "__main__":
         )
         axs[0].set_title(f"{category} colormaps", fontsize=14)
 
-        for ax, name in zip(axs, cmap_list):
+        for ax, name in zip(axs, cmap_list, strict=False):
             ax.imshow(gradient, aspect="auto", cmap=mpl.colormaps[name])
             ax.text(
                 -0.01,

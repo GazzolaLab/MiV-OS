@@ -1,8 +1,6 @@
 __all__ = ["burst", "burst_array"]
 
-import os
 
-import matplotlib.pyplot as plt
 import numpy as np
 
 from miv.core.datatype.spikestamps import Spikestamps

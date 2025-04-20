@@ -1,7 +1,6 @@
-from typing import Any, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, cast
 
 from logging import Logger
-from typing import Any
 
 import h5py
 import numpy as np

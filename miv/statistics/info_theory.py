@@ -14,17 +14,11 @@ __all__ = [
 ]
 
 
-from typing import Any, Callable, Dict, Iterable, List, Literal, Optional, Union
+from typing import Literal
+from collections.abc import Callable
 
-import datetime
 
-import elephant.statistics
-import matplotlib.pyplot as plt
-import neo
 import numpy as np
-import quantities as pq
-import scipy
-import scipy.signal
 from tqdm import tqdm
 
 from miv.core.datatype import Spikestamps
@@ -52,8 +46,8 @@ def tag_info_metrics(tag: INFO_METRICS_TAG) -> Callable:  # Pragma: no cover
 def probability_distribution(
     spiketrains: Spikestamps,
     bin_size: float,
-    t_start: Optional[float] = None,
-    t_end: Optional[float] = None,
+    t_start: float | None = None,
+    t_end: float | None = None,
 ):
     """
     Forms the probability distribution required to compute the information theory measures. Probability is computed based on the binned spiketrain generated for the specified bin size.
@@ -92,8 +86,8 @@ def probability_distribution(
 def shannon_entropy(
     spiketrains: Spikestamps,
     bin_size: float,
-    t_start: Optional[float] = None,
-    t_end: Optional[float] = None,
+    t_start: float | None = None,
+    t_end: float | None = None,
 ):
     """
     Estimates the shannon entropy for a single channel recording using the binned spiketrain.
@@ -132,8 +126,8 @@ def block_entropy(
     spiketrains: Spikestamps,
     history: int,
     bin_size: float,
-    t_start: Optional[float] = None,
-    t_end: Optional[float] = None,
+    t_start: float | None = None,
+    t_end: float | None = None,
 ):
     """
     Estimates the block entropy for a recording using the binned spiketrain
@@ -174,8 +168,8 @@ def entropy_rate(
     spiketrains: Spikestamps,
     history: float,
     bin_size: float,
-    t_start: Optional[float] = None,
-    t_end: Optional[float] = None,
+    t_start: float | None = None,
+    t_end: float | None = None,
 ):
     """
     Estimates the entropy rate for a each channel recording using the binned spiketrain
@@ -218,8 +212,8 @@ def active_information(
     spiketrains: Spikestamps,
     history: float,
     bin_size: float,
-    t_start: Optional[float] = None,
-    t_end: Optional[float] = None,
+    t_start: float | None = None,
+    t_end: float | None = None,
 ):
     """
     Estimates the active information for a single channel recording using the binned spiketrain
@@ -260,8 +254,8 @@ def transfer_entropy(
     spiketrains: Spikestamps,
     history: float,
     bin_size: float,
-    t_start: Optional[float] = None,
-    t_end: Optional[float] = None,
+    t_start: float | None = None,
+    t_end: float | None = None,
 ):
     """
     Estimates the transfer entropy for the pair of electorde recordings (X & Y) using the binned spiketrains and history
@@ -323,8 +317,8 @@ def mutual_information(
     channelx: float,
     channely: float,
     bin_size: float,
-    t_start: Optional[float] = None,
-    t_end: Optional[float] = None,
+    t_start: float | None = None,
+    t_end: float | None = None,
 ):
     """
     Estimates the mutual information for the pair of electorde recordings (X & Y) using the binned spiketrains
@@ -366,8 +360,8 @@ def joint_entropy(
     channelx: float,
     channely: float,
     bin_size: float,
-    t_start: Optional[float] = None,
-    t_end: Optional[float] = None,
+    t_start: float | None = None,
+    t_end: float | None = None,
 ):
     """
     Estimates the joint entropy for the pair of electorde recordings (X & Y) using the binned spiketrains
@@ -413,8 +407,8 @@ def relative_entropy(
     channelx: float,
     channely: float,
     bin_size: float,
-    t_start: Optional[float] = None,
-    t_end: Optional[float] = None,
+    t_start: float | None = None,
+    t_end: float | None = None,
 ):
     """
     Estimates the relative entropy for the pair of electorde recordings (X & Y) using the binned spiketrains
@@ -459,8 +453,8 @@ def conditional_entropy(
     channelx: float,
     channely: float,
     bin_size: float,
-    t_start: Optional[float] = None,
-    t_end: Optional[float] = None,
+    t_start: float | None = None,
+    t_end: float | None = None,
 ):
     """
     Estimates the conditional entropy for the pair of electorde recordings (X & Y) using the binned spiketrains
@@ -505,8 +499,8 @@ def cross_entropy(
     channelx: float,
     channely: float,
     bin_size: float,
-    t_start: Optional[float] = None,
-    t_end: Optional[float] = None,
+    t_start: float | None = None,
+    t_end: float | None = None,
 ):
     """
     Estimates the cross entropy for the pair of electorde recordings (X & Y) using the binned spiketrains
@@ -552,8 +546,8 @@ def partial_information_decomposition(
     channely: float,
     channelz: float,
     bin_size: float,
-    t_start: Optional[float] = None,
-    t_end: Optional[float] = None,
+    t_start: float | None = None,
+    t_end: float | None = None,
 ):
     """
     Decomposes the information provided by channel x and y about channel z in redundancy, unique information, and synergy.

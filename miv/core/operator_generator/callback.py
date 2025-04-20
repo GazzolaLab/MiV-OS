@@ -1,18 +1,12 @@
 __doc__ = """"""
 
-from typing import TypeVar  # TODO: For python 3.11, we can use typing.Self
-from typing import TYPE_CHECKING, Any, Optional, Protocol, Union
-from collections.abc import Callable
+from typing import TYPE_CHECKING, Any, Protocol
 
-import inspect
-import itertools
-import os
 import pathlib
 
 import matplotlib.pyplot as plt
 
 from miv.core.operator.callback import (
-    BaseCallbackMixin,
     get_methods_from_feature_classes_by_startswith_str,
 )
 

@@ -1,6 +1,5 @@
 __all__ = ["generate_random_spiketrain"]
 
-from typing import List
 
 import numpy as np
 from neo.core import SpikeTrain
@@ -17,7 +16,7 @@ def generate_random_spiketrain(
     spike_strength: int = 3,
     random_noise_multiplier: bool = False,
     noise_multiplier: float = 10,
-) -> List[SpikestampsType]:
+) -> list[SpikestampsType]:
     """Generate spiketrains with noise
 
     Parameters

@@ -1,11 +1,8 @@
 __doc__ = """ Base mixin for MEA classes. """
 
-from typing import Tuple
 
-import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
 
 from miv.core.operator.operator import BaseChainingMixin
 from miv.core.operator.loggable import DefaultLoggerMixin

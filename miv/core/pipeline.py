@@ -6,7 +6,7 @@ __doc__ = """
 """
 __all__ = ["Pipeline"]
 
-from typing import Optional, Union, cast
+from typing import cast
 from collections.abc import Sequence
 
 import os

@@ -11,13 +11,11 @@ __all__ = [
 ]
 from typing import TYPE_CHECKING, Any, Protocol, cast
 import multiprocessing
-from dataclasses import dataclass
 from collections.abc import Callable, Generator
 
 if TYPE_CHECKING:
     # This will likely cause circular import error
     from miv.core.datatype import DataTypes
-    from miv.core.datatype.collapsable import _Collapsable
     import mpi4py
 
 

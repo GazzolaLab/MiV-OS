@@ -6,14 +6,10 @@ author: <Seung Hyun Kim skim0119@gmail.com>
 """
 __all__ = ["StimjimSerial"]
 
-from typing import List, Optional, Any
+from typing import Any
 
-import os
-import sys
-import time
 
 import numpy as np
-import serial
 
 from miv.io.serial import ArduinoSerial
 

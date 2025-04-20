@@ -1,19 +1,12 @@
 __all__ = ["PSTH", "PeristimulusActivity", "peri_stimulus_time", "PSTHOverlay"]
 
-from typing import List
 
 import itertools
 import os
-import sys
 from dataclasses import dataclass
-from glob import glob
 
-import matplotlib.cm as cm
-import matplotlib.colors as colors
 import matplotlib.pyplot as plt
 import numpy as np
-import scipy as sp
-from tqdm import tqdm
 
 from miv.core.datatype import Signal, Spikestamps
 from miv.core.operator.operator import OperatorMixin

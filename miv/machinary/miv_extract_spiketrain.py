@@ -1,18 +1,7 @@
 import logging
-import multiprocessing as mp
-import os
-import sys
-from glob import glob
 
 import click
-import matplotlib.cm as cm
-import matplotlib.colors as colors
-import matplotlib.pyplot as plt
-import numpy as np
-import scipy as sp
-from tqdm import tqdm
 
-from miv.core.datatype import Spikestamps
 from miv.core.pipeline import Pipeline
 from miv.signal.filter import ButterBandpass
 from miv.signal.spike import ThresholdCutoff

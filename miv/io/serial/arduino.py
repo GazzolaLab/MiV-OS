@@ -7,9 +7,6 @@ author: <Seung Hyun Kim skim0119@gmail.com>
 """
 __all__ = ["ArduinoSerial", "list_serial_ports"]
 
-import os
-import sys
-import time
 
 import serial
 

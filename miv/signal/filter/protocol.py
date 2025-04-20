@@ -1,14 +1,10 @@
 __doc__ = ""
 __all__ = ["FilterProtocol"]
 
-import typing
-from typing import Callable, Optional, Protocol, Union
+from typing import Protocol
 
-import numpy as np
-import numpy.typing as npt
 
 from miv.core.datatype import Signal
-from miv.typing import SignalType
 
 
 class FilterProtocol(Protocol):

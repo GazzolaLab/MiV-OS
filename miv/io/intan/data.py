@@ -12,26 +12,22 @@ Module (Intan)
 """
 __all__ = ["DataIntan", "DataIntanTriggered"]
 
-from typing import Any, Optional, Union, cast
-from typing_extensions import Self
-from collections.abc import Callable, Iterable, Generator
+from typing import Any, cast
+from collections.abc import Iterable, Generator
 
 import logging
 import os
-import pickle
 import xml.etree.ElementTree as ET
 from glob import glob
 from pathlib import Path
 
-import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
 
-import miv.io.intan.rhs as rhs
-from miv.core.datatype import Events, Signal, Spikestamps
+from miv.io.intan import rhs
+from miv.core.datatype import Signal, Spikestamps
 from miv.core.operator.wrapper import cache_functional
-from miv.io.openephys.data import Data, DataManager
-from miv.typing import SignalType
+from miv.io.openephys.data import Data
 
 
 class DataIntan(Data):
@@ -529,7 +525,7 @@ class DataIntanTriggered(DataIntan):
         active_channels, total = self._get_active_channels()
         # Read each files
         for filename, sidx, eidx in tqdm(
-            zip(files, sindex, eindex), disable=not progress_bar
+            zip(files, sindex, eindex, strict=False), disable=not progress_bar
         ):
             result, data_present = rhs.load_file(filename)
             assert data_present, f"Data does not present: {filename=}."

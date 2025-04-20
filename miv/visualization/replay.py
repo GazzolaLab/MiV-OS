@@ -1,18 +1,14 @@
 __doc__ = """Multi-channel signal and spike rendering for each MEA channels"""
 __all__ = ["ReplayRecording"]
 
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
 import inspect
 import logging
-import multiprocessing as mp
 import os
 import shutil
 from dataclasses import dataclass
 
-import matplotlib
-import matplotlib.animation as manimation
-import matplotlib.gridspec as gridspec
+from matplotlib import gridspec
 import numpy as np
 from matplotlib import pyplot as plt
 from tqdm import tqdm
@@ -21,7 +17,6 @@ from miv.core.datatype import Signal, Spikestamps
 from miv.core.operator.operator import OperatorMixin
 from miv.core.operator.policy import StrictMPIRunner
 from miv.mea.protocol import MEAGeometryProtocol
-from miv.typing import SignalType
 from miv.utils.cli import command_run
 
 
@@ -50,7 +45,7 @@ class ReplayRecording(OperatorMixin):
         signals: Signal,
         signals2: Signal,
         spikestamps: Spikestamps,
-        cutouts: Dict[int, Signal],
+        cutouts: dict[int, Signal],
         mea: MEAGeometryProtocol,
     ):  # pragma: no cover
         comm = self.runner.comm
@@ -60,7 +55,7 @@ class ReplayRecording(OperatorMixin):
         assert inspect.isgenerator(signals)
         assert inspect.isgenerator(signals2)
 
-        for vidx, (signal, signal2) in enumerate(zip(signals, signals2)):
+        for vidx, (signal, signal2) in enumerate(zip(signals, signals2, strict=False)):
             spikestamps_view = spikestamps.get_view(
                 signal.get_start_time(), signal.get_end_time()
             )
@@ -195,5 +190,3 @@ class ReplayRecording(OperatorMixin):
                 # if os.path.exists(images_path):
                 #    shutil.rmtree(images_path)
             comm.barrier()
-
-        return

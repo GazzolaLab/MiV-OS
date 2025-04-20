@@ -16,16 +16,10 @@ __all__ = [
     "cache_functional",
 ]
 
-import types
-from typing import Any, Protocol, Type, TypeVar, Union
+from typing import Any, TypeVar
 from collections.abc import Callable
 
-import functools
-import inspect
-from collections import UserList
-from dataclasses import dataclass, make_dataclass
 
-from .cachable import DataclassCacher, FunctionalCacher, _CacherProtocol
 from .protocol import _Cachable
 
 F = TypeVar("F")

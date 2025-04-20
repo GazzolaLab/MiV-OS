@@ -1,4 +1,4 @@
-from typing import Any, Union
+from typing import Any
 
 from miv.core.datatype.events import *
 from .pure_python import *

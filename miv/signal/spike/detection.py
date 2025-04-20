@@ -20,7 +20,6 @@ Code Example::
 """
 __all__ = ["ThresholdCutoff", "query_firing_rate_between"]
 
-from typing import Any
 
 import csv
 import inspect

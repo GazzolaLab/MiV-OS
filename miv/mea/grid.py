@@ -1,8 +1,6 @@
 __all__ = ["GridMEA"]
 
-from typing import Tuple
 
-import matplotlib
 import MEAutility
 import numpy as np
 
@@ -65,7 +63,7 @@ class GridMEA(MEAMixin, MEAutility.core.MEA):
 
     def map_data(
         self, vector: np.ndarray, missing_value: float = 0.0
-    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Map data (1-D array) to MEA (2-D array or N-D array)"""
         value_grid = np.full_like(self.grid, missing_value, dtype=np.float64)
         for idx, value in enumerate(vector):

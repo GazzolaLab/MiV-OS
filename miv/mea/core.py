@@ -1,6 +1,5 @@
 __all__ = ["MEA"]
 
-from typing import List, Type
 
 import logging
 import os
@@ -10,8 +9,8 @@ import yaml
 
 from miv.mea.grid import GridMEA
 
-_MEA_MODULE: Type[MEAutility.core.MEA] = MEAutility.core.MEA
-_RECTMEA_MODULE: Type[MEAutility.core.MEA] = GridMEA  # MEAutility.core.RectMEA
+_MEA_MODULE: type[MEAutility.core.MEA] = MEAutility.core.MEA
+_RECTMEA_MODULE: type[MEAutility.core.MEA] = GridMEA  # MEAutility.core.RectMEA
 
 
 class _MEA:

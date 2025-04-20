@@ -119,11 +119,9 @@ lint.select = [
     "B",    # flake8-bugbear
     "C4",   # flake8-comprehensions
     "UP",   # pyupgrade
-    "D",    # pydocstyle
-    "N",    # pep8-naming
-    "PL",   # pylint
 ]
 lint.ignore = [
+    "F403",  # 'from module import *' used; unable to detect undefined names
     "E203",  # whitespace before ':'
     "E266",  # too many leading '#' for block comment
     "E501",  # line too long (handled by formatter)
@@ -131,6 +129,9 @@ lint.ignore = [
     "B008",  # do not perform function calls in argument defaults
     "PLR0913", # too many arguments
     "I",     # ignore all import sorting rules
+    "D",  # missing docstring in public module
+    "N",    # pep8-naming
+    "PL",   # pylint
 ]
 lint.pydocstyle.convention = "numpy"
 lint.isort.known-first-party = ["miv"]

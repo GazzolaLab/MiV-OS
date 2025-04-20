@@ -3,7 +3,7 @@ Implementation for callback features that will be mixed in operator class.
 """
 __all__ = ["BaseCallbackMixin"]
 
-from typing import Any, TYPE_CHECKING
+from typing import Any
 from collections.abc import Callable
 from typing_extensions import Self
 
@@ -14,15 +14,8 @@ import pathlib
 
 import matplotlib.pyplot as plt
 
-if TYPE_CHECKING:
-    pass
 
-
-def MixinOperators(func: Callable) -> Callable:
-    return func
-
-
-@MixinOperators
+# MixinOperators
 def get_methods_from_feature_classes_by_startswith_str(
     cls: type, method_name: str
 ) -> list[Callable]:
@@ -34,7 +27,7 @@ def get_methods_from_feature_classes_by_startswith_str(
     return methods
 
 
-@MixinOperators
+# MixinOperators
 def get_methods_from_feature_classes_by_endswith_str(
     cls: type, method_name: str
 ) -> list[Callable]:

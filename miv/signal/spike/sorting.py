@@ -56,16 +56,13 @@ __all__ = [
     "SuperParamagneticClustering",
 ]
 
-from typing import Any, Optional, Union
 
 import os
 from dataclasses import dataclass
 
 import matplotlib.pyplot as plt
-import neo
 import numpy as np
 import pywt
-import quantities as pq
 import scipy
 import scipy.special
 from sklearn.decomposition import PCA
@@ -77,7 +74,6 @@ from miv.signal.spike.protocol import (
     SpikeFeatureExtractionProtocol,
     UnsupervisedFeatureClusteringProtocol,
 )
-from miv.typing import SignalType, SpikestampsType
 
 
 class SpikeSorting:
