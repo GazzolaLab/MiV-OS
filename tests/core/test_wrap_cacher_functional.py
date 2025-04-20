@@ -97,7 +97,7 @@ def test_two_function_caching(cls, tmp_path):
     assert cached_ans2 == ans2
     cached_ans3 = runner.func3(a, b)
     assert cached_ans3 == ans3
-    assert runner.run_check_flag
+    assert not runner.run_check_flag
 
     assert ans1 == cached_ans1
     assert ans2 == cached_ans2

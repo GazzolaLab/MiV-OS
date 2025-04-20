@@ -16,7 +16,7 @@ __all__ = [
     "cached_method",
 ]
 
-from typing import Any, TypeVar, Concatenate, ParamSpec
+from typing import Any, TypeVar, Concatenate, ParamSpec, cast
 from collections.abc import Callable
 import os
 import functools
@@ -25,6 +25,9 @@ from joblib import Memory
 from .protocol import _Cachable
 
 F = TypeVar("F")
+P = ParamSpec("P")
+R = TypeVar("R")
+SELF = TypeVar("SELF", bound=_Cachable)
 
 
 def cache_call(func: Callable[..., F]) -> Callable[..., F]:
@@ -40,17 +43,12 @@ def cache_call(func: Callable[..., F]) -> Callable[..., F]:
         result = func(self, *args, **kwargs)
         if result is None:
             # In case the module does not return anything
-            return None
+            return cast(F, None)
         cacher.save_cache(result, tag=tag)
         cacher.save_config(tag=tag)
         return result
 
     return wrapper
-
-
-SELF = TypeVar("SELF", bound=_Cachable)
-P = ParamSpec("P")
-R = TypeVar("R")
 
 
 def cached_method(
@@ -61,9 +59,6 @@ def cached_method(
     """
     Cache the results of instance methods.
     Uses joblib's Memory to handle caching with optional custom tag and verbosity.
-
-    In order for the caching to work properly, the method should not depend on any
-    instance of the class.
 
     Example
     -------
@@ -82,25 +77,13 @@ def cached_method(
         >>> op = MyOperator()
         >>> result = op.expensive_computation(5)  # Computes and caches
         >>> result = op.expensive_computation(5)  # Returns cached result
-
-    Example
-    -------
-        >>> class WrongUsage(OperatorMixin):
-        ...     def __init__(self):
-        ...         self.cacher: _CacherProtocol
-        ...         self.x = 1
-        ...
-        ...     @cached_method()
-        ...     def method(self, y: int) -> int:
-        ...         self.x += 1
-        ...         return y * self.x  # This is dangerous: it dynamically depends on self.x
     """
 
     def decorator(
         func: Callable[Concatenate[SELF, P], R],
     ) -> Callable[Concatenate[SELF, P], R]:
         @functools.wraps(func)
-        def wrapper(self: _Cachable, *args: Any, **kwargs: Any) -> R:
+        def wrapper(self: _Cachable, *args: P.args, **kwargs: P.kwargs) -> R:
             # Check if caching is allowed based on policy
             policy = self.cacher.policy
             if policy == "OFF":
@@ -115,10 +98,9 @@ def cached_method(
             if tag not in cached_methods:
                 cache_path = os.path.join(cache_dir, tag)
                 memory = Memory(cache_path, verbose=verbose)
-                # Dev note: __get__ is used to bind the method to this "self" instance.
-                # This is necessary because the memory.cache decorator expects a bound method.
-                # Otherwise, there is no way to pass the "self" instance during the cache call.
-                _func = memory.cache(func.__get__(self, type(self)))
+                _func = memory.cache(
+                    func, ignore=["self"]
+                )  # ignore is used to bypass un-hashable self
                 cached_methods[tag] = _func
                 self._cached_methods = cached_methods
             if policy == "MUST":
@@ -129,7 +111,7 @@ def cached_method(
             elif policy == "OVERWRITE":
                 cached_methods[tag].clear(warn=False)  # type: ignore
 
-            return cached_methods[tag](*args, **kwargs)  # type: ignore
+            return cached_methods[tag](self, *args, **kwargs)  # type: ignore
 
         return wrapper  # type: ignore
 
