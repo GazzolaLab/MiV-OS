@@ -25,10 +25,7 @@ class GeneratorOperator(
     _Node,
     _GeneratorCallback,
     Protocol,
-):
-    """ """
-
-    pass
+): ...
 
 
 class GeneratorOperatorMixin(OperatorMixin, GeneratorCallbackMixin):

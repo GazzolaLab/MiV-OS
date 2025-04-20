@@ -58,9 +58,13 @@ ipynbcheckpoints-remove:
 pytestcache-remove:
 	find . | grep -E ".pytest_cache" | xargs rm -rf
 
+.PHONY: ruffcache-remove
+ruffcache-remove:
+	find . | grep -E ".ruff_cache" | xargs rm -rf
+
 .PHONY: build-remove
 build-remove:
 	rm -rf build/
 
 .PHONY: cleanup
-cleanup: pycache-remove dsstore-remove mypycache-remove ipynbcheckpoints-remove pytestcache-remove
+cleanup: pycache-remove dsstore-remove mypycache-remove ipynbcheckpoints-remove pytestcache-remove ruffcache-remove

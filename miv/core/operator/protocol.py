@@ -3,8 +3,7 @@ Specification of the behaviors for Operator modules.
 """
 
 from typing import Protocol, Any, TypeVar
-from collections.abc import Callable, Iterator
-from typing_extensions import Self
+from collections.abc import Iterator
 
 import pathlib
 from abc import abstractmethod
@@ -61,40 +60,11 @@ class _Chainable(Protocol[C]):
     def iterate_downstream(self) -> Iterator[C]: ...
 
 
-class _Callback(Protocol):
-    """
-    A protocol for callback behavior.
-    """
-
-    def set_save_path(
-        self,
-        path: str | pathlib.Path,
-        cache_path: str | pathlib.Path | None = None,
-    ) -> None: ...
-
-    def __lshift__(self, right: Callable) -> Self: ...
-
-    def reset_callbacks(
-        self, *, after_run: bool = False, plot: bool = False
-    ) -> None: ...
-
-    def _callback_after_run(self, *args: Any, **kwargs: Any) -> None: ...
-
-    def _callback_plot(
-        self,
-        output: tuple | None,
-        inputs: list | None = None,
-        show: bool = False,
-        save_path: str | pathlib.Path | None = None,
-    ) -> None: ...
-
-
 class _Node(
     _Loggable,
     _Runnable,
-    _Cachable,
     _Chainable,
-    _Callback,
+    _Cachable,
     Protocol,
 ):
     """
@@ -105,3 +75,9 @@ class _Node(
     analysis_path: str
 
     def output(self) -> DataTypes: ...
+
+    def set_save_path(
+        self,
+        path: str | pathlib.Path,
+        cache_path: str | pathlib.Path | None = None,
+    ) -> None: ...
