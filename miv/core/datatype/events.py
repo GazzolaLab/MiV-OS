@@ -16,12 +16,12 @@ from collections import UserList
 import numpy as np
 import quantities as pq
 
-from miv.core.datatype.collapsable import CollapseExtendableMixin
+from miv.core.datatype.mixin_colapsable import ConcatenateMixin
 from miv.core.datatype.signal import Signal
 from miv.core.operator.operator import DataNodeMixin
 
 
-class Events(CollapseExtendableMixin, DataNodeMixin):
+class Events(ConcatenateMixin, DataNodeMixin):
     """
     A list of events.
 

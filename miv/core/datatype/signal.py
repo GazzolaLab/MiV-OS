@@ -17,14 +17,14 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from miv.core.datatype.collapsable import CollapseExtendableMixin
+from miv.core.datatype.mixin_colapsable import ConcatenateMixin
 from miv.core.operator.operator import DataNodeMixin
 from miv.core.operator.policy import SupportMultiprocessing
 from miv.typing import SignalType, SpikestampsType
 
 
 @dataclass
-class Signal(SupportMultiprocessing, DataNodeMixin, CollapseExtendableMixin):
+class Signal(SupportMultiprocessing, DataNodeMixin, ConcatenateMixin):
     """
     Contiguous array of raw signal type.
 

@@ -18,12 +18,12 @@ import quantities as pq
 
 import neo
 
-from .collapsable import CollapseExtendableMixin
+from .mixin_colapsable import ConcatenateMixin
 from .signal import Signal
 from miv.core.operator.operator import DataNodeMixin
 
 
-class Spikestamps(CollapseExtendableMixin, DataNodeMixin, Sequence):
+class Spikestamps(ConcatenateMixin, DataNodeMixin, Sequence):
     """List of array of spike times
 
     Represents spikes emitted by the same unit in a period of times.
