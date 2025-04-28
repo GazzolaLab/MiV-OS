@@ -82,7 +82,7 @@ opencv-python = "^4.7.0.72"
 black = "^24.4.2"
 isort = {extras = ["colors"], version = "^5.10.1"}
 mypy = "^1.12.1"
-mypy-extensions = "^1.0.0"
+mypy-extensions = "^1.1.0"
 pre-commit = "^3.0.4"
 pydocstyle = "^6.1.1"
 pylint = "^3.2.3"
