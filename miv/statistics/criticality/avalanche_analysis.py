@@ -250,7 +250,7 @@ class AvalancheAnalysis(OperatorMixin):
         super().__init__()
 
     def plot_power_law_fitting(self, outputs, inputs, show=False, save_path=None):
-        durations, size, branching_ratio, _, _ = outputs
+        durations, size, branching_ratio, avalanches, bin_size = outputs
 
         def power(x, a, c):
             return c * (x**a)
@@ -355,39 +355,8 @@ class AvalancheAnalysis(OperatorMixin):
 
         if save_path is not None:
             plt.savefig(os.path.join(save_path, "avalanche_power_fitting.png"))
-        if show:
-            plt.show()
         plt.close(fig)
 
-    def plot_branching_ratio_histogram(
-        self, outputs, inputs, show=False, save_path=None
-    ):
-        _, _, branching_ratio, _, _ = outputs
-
-        nbins = 100
-
-        fig, ax = plt.subplots(1, 1)
-        # hist, bins = np.histogram(size, bins=nbins)
-        # logbins = np.logspace(np.log10(bins[0]), np.log10(bins[-1]), len(bins))
-        self.mean_branching_ratio = branching_ratio[np.nonzero(branching_ratio)].mean()
-        ax.hist(
-            branching_ratio[np.nonzero(branching_ratio)],
-            bins=nbins,
-            histtype="step",
-            label="data",
-        )
-        ax.set_xlabel("branching ratio")
-        ax.set_ylabel("Event Frequency")
-        ax.set_title("branching ratio")
-        if save_path is not None:
-            plt.savefig(os.path.join(save_path, "branching_ratio.png"))
-        if show:
-            plt.show()
-        plt.close(fig)
-
-    def plot_avalanche_shape_collapse(
-        self, outputs, inputs, show=False, save_path=None
-    ):
         _, _, _, avalanches, bin_size = outputs
 
         shapes = defaultdict(list)
@@ -428,6 +397,32 @@ class AvalancheAnalysis(OperatorMixin):
 
         if save_path is not None:
             plt.savefig(os.path.join(save_path, "avalanche_shape_collapse.png"))
+        if show:
+            plt.show()
+        plt.close(fig)
+
+    def plot_branching_ratio_histogram(
+        self, outputs, inputs, show=False, save_path=None
+    ):
+        _, _, branching_ratio, _, _ = outputs
+
+        nbins = 100
+
+        fig, ax = plt.subplots(1, 1)
+        # hist, bins = np.histogram(size, bins=nbins)
+        # logbins = np.logspace(np.log10(bins[0]), np.log10(bins[-1]), len(bins))
+        self.mean_branching_ratio = branching_ratio[np.nonzero(branching_ratio)].mean()
+        ax.hist(
+            branching_ratio[np.nonzero(branching_ratio)],
+            bins=nbins,
+            histtype="step",
+            label="data",
+        )
+        ax.set_xlabel("branching ratio")
+        ax.set_ylabel("Event Frequency")
+        ax.set_title("branching ratio")
+        if save_path is not None:
+            plt.savefig(os.path.join(save_path, "branching_ratio.png"))
         if show:
             plt.show()
         plt.close(fig)
