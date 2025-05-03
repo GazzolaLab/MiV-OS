@@ -28,6 +28,7 @@ __all__ = ["Data", "DataManager"]
 
 import logging
 import os
+import math
 import re
 from collections.abc import MutableSequence
 from glob import glob
@@ -43,6 +44,7 @@ from miv.core.datatype.signal import Signal
 from miv.core.operator.operator import DataLoaderMixin
 from miv.io.openephys.binary import load_recording, load_ttl_event
 from miv.io.protocol import DataProtocol
+from .binary import load_timestamps, oebin_read
 
 if TYPE_CHECKING:
     import mpi4py
@@ -101,9 +103,6 @@ class Data(DataLoaderMixin):
         self.masking_channel_set: set[int] = set()
 
     def num_fragments(self) -> int:
-        import math
-        from .binary import load_timestamps, oebin_read
-
         # Refactor
         file_path: list[str] = glob(
             os.path.join(self.data_path, "**", "continuous.dat"), recursive=True
@@ -136,6 +135,12 @@ class Data(DataLoaderMixin):
         samples_per_block = sampling_rate * 60
         num_fragments = int(math.ceil(total_length / samples_per_block))
         return num_fragments
+
+    @property
+    def number_of_channels(self):
+        info_file = os.path.join(self.data_path, "structure.oebin")
+        info = oebin_read(info_file)
+        return info["continuous"][0]["num_channels"]
 
     def load(
         self,
