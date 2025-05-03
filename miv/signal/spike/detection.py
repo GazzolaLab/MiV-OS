@@ -18,7 +18,7 @@ Code Example::
    WaveformStatisticalFilter
 
 """
-__all__ = ["ThresholdCutoff", "query_firing_rate_between"]
+__all__ = ["ThresholdCutoff", "query_firing_rate_between", "plot_firing_rate_for_each_channel"]
 
 
 import csv
@@ -277,8 +277,6 @@ class ThresholdCutoff(OperatorMixin):
                 plt.close("all")
         if show:
             plt.show()
-            plt.close("all")
-        return ax
 
     def plot_firing_rate_histogram(
         self, spikestamps, inputs, show=False, save_path=None
@@ -347,9 +345,9 @@ class ThresholdCutoff(OperatorMixin):
         plt.ylabel("Average (channel-wise) Firing rate (Hz)")
         plt.xlabel("Time (minute)")
         if save_path is not None:
-            fig.savefig(os.path.join(f"{save_path}", "instantaneous_firing_rate.png"))
+            fig.savefig(os.path.join(save_path, "instantaneous_firing_rate.png"))
             with open(
-                os.path.join(f"{save_path}", "instantaneous_firing_rate.csv"), "w"
+                os.path.join(save_path, "instantaneous_firing_rate.csv"), "w"
             ) as f:
                 writer = csv.writer(f)
                 writer.writerow(["time", "mean_firing_rate"])
@@ -357,7 +355,39 @@ class ThresholdCutoff(OperatorMixin):
                     writer.writerow([tm, mfr])
         if show:
             plt.show()
+        plt.close('all')
 
+def plot_firing_rate_for_each_channel(
+    spikestamps, inputs, show=False, save_path=None
+):
+    if save_path is None:
+        return
+    """Plot firing rate throughout time"""
+    binsize = 0.10
+    binned_spiketrain = spikestamps.binning(binsize, return_count=True)
+    time_minute = binned_spiketrain.timestamps / 60  # minute
+    time_minute -= time_minute[0]  # Reset the time to zero
+
+    fname = "channel_firing_rates"
+    save_path = os.path.join(save_path, fname)
+    os.makedirs(save_path, exist_ok=True)
+
+    for channel in range(binned_spiketrain.number_of_channels):
+        firing_rate = binned_spiketrain[channel] / binsize
+
+        fig = plt.figure()
+        plt.plot(time_minute, firing_rate)
+        plt.ylabel(f"Average (channel-wise) Firing rate (Hz) ch{channel:04d}")
+        plt.xlabel("Time (minute)")
+        fig.savefig(os.path.join(save_path, f"firing_rate_ch{channel:04d}.png"))
+        plt.close('all')
+        with open(
+            os.path.join(save_path, "instantaneous_firing_rate.csv"), "w"
+        ) as f:
+            writer = csv.writer(f)
+            writer.writerow(["time", "firing_rate"])
+            for tm, fr in zip(time_minute, firing_rate): 
+                writer.writerow([tm, fr])
 
 @dataclass
 class ThresholdCutoffNonSparse(ThresholdCutoff):

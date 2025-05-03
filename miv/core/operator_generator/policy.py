@@ -33,7 +33,7 @@ class VanillaGeneratorRunner:
             return result
 
         def generator_func(*args: tuple[Generator, ...]) -> Generator:
-            chunk_size = 2
+            chunk_size = 4
             istart = 0
             tasks = zip(*args)
             while zip_arg := list(islice(tasks, chunk_size)):
