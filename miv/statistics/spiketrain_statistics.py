@@ -239,15 +239,25 @@ def spike_counts_with_kernel(spiketrain, probe_times, kernel: Callable, batchsiz
         batchsize
     """
     if len(spiketrain) == 0:
+        # Zero spike in the channel
         return np.zeros_like(probe_times)
     spiketrain = np.asarray(spiketrain)
+    result = np.zeros_like(probe_times)
+    
+    # Non-batch implementation : temporary
+    for s in spiketrain:
+        mask = (s + 1e-8) > probe_times
+        exponent = kernel((s-probe_times)[mask])
+        exponent[exponent < 1e-2] = 0.0
+        result[mask] += exponent
+    return result
 
+    # Batch implementation
     batchsize = min(spiketrain.shape[0], batchsize)
     num_sections = spiketrain.shape[0] // batchsize + (
         1 if spiketrain.shape[0] % batchsize > 0 else 0
     )
 
-    result = np.zeros_like(probe_times)
     for subspiketrain in np.array_split(spiketrain, num_sections):
         exponent = (
             np.tile(probe_times, (len(subspiketrain), 1)) - subspiketrain[:, None]
@@ -265,7 +275,7 @@ def decay_spike_counts(
     spiketrain, probe_times, amplitude=1.0, decay_rate=5, batchsize=256
 ):
     def kernel(x):
-        return amplitude * np.exp(-decay_rate * x)
+        return amplitude * np.exp(-decay_rate * x) / decay_rate
 
     return spike_counts_with_kernel(spiketrain, probe_times, kernel, batchsize)
 

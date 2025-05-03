@@ -84,10 +84,13 @@ class AvalancheDetection(OperatorMixin):
         population_firing = bincount.data.sum(
             axis=bincount._CHANNELAXIS
         )  # Spike count accross channel per bin
-        threshold = (
-            population_firing[np.nonzero(population_firing)].mean()
-            / self.threshold_percentage
-        )
+        #threshold = (
+        #    population_firing[np.nonzero(population_firing)].mean()
+        #    / self.threshold_percentage
+        #)
+        non_zero_firing = population_firing[np.nonzero(population_firing)]
+        mad = np.median(np.abs(non_zero_firing - np.median(non_zero_firing)))
+        threshold = 1.4826 * mad * 4.0
         # TODO: try to reuse the code from miv.statistics.burst.burst
         events = (population_firing > threshold).astype(np.bool_)
 
