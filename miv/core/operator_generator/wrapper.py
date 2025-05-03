@@ -5,6 +5,7 @@ __all__ = [
 import types
 from typing import Protocol, Union
 
+import time
 import functools
 import inspect
 from collections import UserList
@@ -40,7 +41,9 @@ def cache_generator_call(func):
 
             def generator_func(*args):
                 for idx, zip_arg in enumerate(zip(*args)):
+                    stime = time.time()
                     result = func(self, *zip_arg, **kwargs)
+                    # print(f"    iter {idx:03d} {self}: {time.time() - stime:.03f}sec", flush=True)
                     if result is not None:
                         # In case the module does not return anything
                         cacher.save_cache(result, idx, tag=tag)
