@@ -349,6 +349,13 @@ class ThresholdCutoff(OperatorMixin):
         plt.xlabel("Time (minute)")
         if save_path is not None:
             fig.savefig(os.path.join(f"{save_path}", "instantaneous_firing_rate.png"))
+            with open(
+                os.path.join(f"{save_path}", "instantaneous_firing_rate.csv"), "w"
+            ) as f:
+                writer = csv.writer(f)
+                writer.writerow(["time", "mean_firing_rate"])
+                for tm, mfr in zip(time_minute, mean_firing_rate): 
+                    writer.writerow([tm, mfr])
         if show:
             plt.show()
 
