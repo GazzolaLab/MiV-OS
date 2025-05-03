@@ -81,10 +81,10 @@ class AvalancheDetection(OperatorMixin):
         population_firing = bincount.data.sum(
             axis=bincount._CHANNELAXIS
         )  # Spike count accross channel per bin
-        #threshold = (
+        # threshold = (
         #    population_firing[np.nonzero(population_firing)].mean()
         #    / self.threshold_percentage
-        #)
+        # )
         non_zero_firing = population_firing[np.nonzero(population_firing)]
         mad = np.median(np.abs(non_zero_firing - np.median(non_zero_firing)))
         threshold = 1.4826 * mad * 4.0
@@ -335,6 +335,8 @@ class AvalancheAnalysis(OperatorMixin):
         axes[2].set_yscale("log")
         axes[2].set_xlabel("duration (s)")
         axes[2].set_ylabel("Average size (# channels)")
+
+        self.svz = None
         try:
             popt, pcov = curve_fit(power, values, avearges)
             self.svz = popt[0]
@@ -405,20 +407,24 @@ class AvalancheAnalysis(OperatorMixin):
             axes[0].errorbar(
                 time, mean, yerr=err, label=f"duration {bin_size * count * 1000:.2f}ms"
             )
-            axes[1].plot(
-                time / T,
-                mean / (T ** (self.svz - 1)),
-                label=f"duration {bin_size * count * 1000:.2f}ms",
-            )
+            if self.svz is not None:
+                axes[1].plot(
+                    time / T,
+                    mean / (T ** (self.svz - 1)),
+                    label=f"duration {bin_size * count * 1000:.2f}ms",
+                )
 
         axes[0].set_xlabel("Time in Avalanche (s)")
         axes[0].set_ylabel("Average Number of Firing s(t,T)")
         axes[0].set_title("Raw Shapes")
         # axes[0].legend()
-        axes[1].set_xlabel("Time in Avalanche Duration (s / T)")
-        axes[1].set_ylabel("Average Number of Firing s(t,T) / T^1/svz-1 ")
-        axes[1].set_title(f"Normalized/Collapsed Avalanche Shape {self.svz:.2f}")
-        # axes[1].legend()
+        if self.svz is not None:
+            axes[1].set_xlabel("Time in Avalanche Duration (s / T)")
+            axes[1].set_ylabel("Average Number of Firing s(t,T) / T^1/svz-1 ")
+            axes[1].set_title(f"Normalized/Collapsed Avalanche Shape {self.svz:.2f}")
+            # axes[1].legend()
+        else:
+            axes[1].set_title("Normalized/Collapsed Avalanche Shape (No fit)")
 
         if save_path is not None:
             plt.savefig(os.path.join(save_path, "avalanche_shape_collapse.png"))
