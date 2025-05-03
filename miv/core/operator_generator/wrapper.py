@@ -11,6 +11,29 @@ import inspect
 
 from .operator import GeneratorOperator
 
+def cache_generator_call(func: Callable) -> Callable:
+    def wrapper(
+        self: GeneratorOperator, *args: Any, *, idx:int
+    ) -> Generator | Any | None:
+        tag = "data"
+        cacher = self.cacher
+        result = func(self, *args)
+        if result is not None:
+            cacher.save_cache(result, idx=idx, tag=tag)
+            if idx == 0:
+                cacher.save_config(tag=tag)  # config saved only once
+
+        # Plotting  # FIXME: Somehow move it in operator mixin?
+        self._callback_generator_plot(
+            idx, result, zip_arg, save_path=self.analysis_path
+        )
+        if idx == 0:
+            self._callback_firstiter_plot(
+                result, zip_arg, save_path=self.analysis_path
+            )
+
+        return result
+    return wrapper
 
 def cache_generator_call(func: Callable) -> Callable:
     """
