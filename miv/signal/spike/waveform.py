@@ -3,31 +3,24 @@ Module for extracting each spike waveform and visualize.
 """
 __all__ = ["ExtractWaveforms", "WaveformAverage"]
 
-from typing import Any, Dict, Generator, List, Optional, Tuple, Union
-
 import inspect
-import itertools
 import os
 import pathlib
+from collections.abc import Generator
 from dataclasses import dataclass
+from typing import Any
 
 import matplotlib
 import matplotlib.pyplot as plt
-import neo
 import numpy as np
 import quantities as pq
 from matplotlib import cm
-from scipy.signal import lfilter, savgol_filter
-from sklearn.decomposition import PCA
-from sklearn.mixture import GaussianMixture
-from sklearn.preprocessing import StandardScaler
 from tqdm import tqdm
 
 from miv.core.datatype import Signal, Spikestamps
 from miv.core.operator.operator import OperatorMixin
 from miv.core.operator.wrapper import cache_call
 from miv.mea import MEAGeometryProtocol
-from miv.typing import SignalType, SpikestampsType
 
 
 @dataclass
@@ -47,7 +40,7 @@ class ExtractWaveforms(OperatorMixin):
         The number of cutouts to plot. None to plot all. (default: 100)
     """
 
-    channels: Optional[List[int]] = None
+    channels: list[int] | None = None
     pre: float = 0.001
     post: float = 0.002
     plot_n_spikes: int = 100
@@ -62,7 +55,7 @@ class ExtractWaveforms(OperatorMixin):
     @cache_call
     def __call__(
         self, signal: Generator[Signal, None, None], spikestamps: Spikestamps
-    ) -> Dict[int, Signal]:
+    ) -> dict[int, Signal]:
         """__call__
 
         Parameters
@@ -78,7 +71,6 @@ class ExtractWaveforms(OperatorMixin):
             Return stacks of spike cutout; shape(n_spikes, width).
 
         """
-
         if isinstance(self.pre, pq.Quantity):
             pre = self.pre.rescale(pq.s).magnitude
         else:
@@ -107,9 +99,9 @@ class ExtractWaveforms(OperatorMixin):
             channels = range(num_channels) if self.channels is None else self.channels
             pre_idx = int(pre * sampling_rate)
             post_idx = int(post * sampling_rate)
-            assert (
-                pre_idx + post_idx > 0
-            ), "Set larger pre/post duration. pre+post duration must be more than 1/sampling_rate."
+            assert pre_idx + post_idx > 0, (
+                "Set larger pre/post duration. pre+post duration must be more than 1/sampling_rate."
+            )
             spikestamps_view = spikestamps.get_view(
                 sig.get_start_time(), sig.get_end_time()
             )
@@ -136,7 +128,7 @@ class ExtractWaveforms(OperatorMixin):
                     waveforms[ch] = Signal(
                         data=cutout,
                         timestamps=(
-                            np.arange(pre_idx + post_idx).astype(np.float_) - pre
+                            np.arange(pre_idx + post_idx).astype(np.float64) - pre
                         )
                         / sampling_rate,
                         rate=sampling_rate,
@@ -149,11 +141,11 @@ class ExtractWaveforms(OperatorMixin):
 
     def plot_waveforms(
         self,
-        waveforms: Dict[int, Signal],
+        waveforms: dict[int, Signal],
         inputs,
         show: bool = False,
-        save_path: Optional[pathlib.Path] = None,
-        plot_kwargs: Dict[Any, Any] = None,
+        save_path: pathlib.Path | None = None,
+        plot_kwargs: dict[Any, Any] = None,
     ):
         """
         Plot an overlay of spike waveforms
@@ -210,7 +202,7 @@ class WaveformAverage(OperatorMixin):
         super().__init__()
 
     @cache_call
-    def __call__(self, waveforms: Dict[int, Signal], mea: MEAGeometryProtocol):
+    def __call__(self, waveforms: dict[int, Signal], mea: MEAGeometryProtocol):
         mean_waveform = {}
         std_waveform = {}
         for channel, cutout in waveforms.items():

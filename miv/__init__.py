@@ -2,7 +2,6 @@ __doc__ = (
     """Python software for analysis and computing framework used in MiV project."""
 )
 
-import sys
 from importlib import metadata as importlib_metadata
 
 

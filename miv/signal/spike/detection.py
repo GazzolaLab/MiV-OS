@@ -20,13 +20,9 @@ Code Example::
 """
 __all__ = ["ThresholdCutoff", "query_firing_rate_between"]
 
-from typing import Any, Dict, Generator, Iterable, List, Optional, Tuple, Union
 
 import csv
-import functools
 import inspect
-import logging
-import multiprocessing
 import os
 import pathlib
 import time
@@ -35,15 +31,13 @@ from dataclasses import dataclass
 import matplotlib.pyplot as plt
 import neo
 import numpy as np
-import quantities as pq
 from tqdm import tqdm
 
 from miv.core.datatype import Signal, Spikestamps
 from miv.core.operator.operator import OperatorMixin
-from miv.core.operator.policy import InternallyMultiprocessing
 from miv.core.operator.wrapper import cache_call
 from miv.statistics.spiketrain_statistics import firing_rates
-from miv.typing import SignalType, SpikestampsType, TimestampsType
+from miv.typing import SignalType, SpikestampsType
 from miv.visualization.event import plot_spiketrain_raster
 
 
@@ -52,16 +46,16 @@ class ThresholdCutoff(OperatorMixin):
     """ThresholdCutoff
     Spike sorting step by step guide is well documented `here <http://www.scholarpedia.org/article/Spike_sorting>`_.
 
-        Attributes
-        ----------
+    Attributes
+    ----------
         dead_time : float
             (default=0.003)
         search_range : float
             (default=0.002)
-        cutoff : Union[float, np.ndarray]
+        cutoff : float | np.ndarray
             (default=5.0)
         tag : str
-        units : Union[str, pq.UnitTime]
+        units : str | pq.UnitTime
             (default='sec')
         progress_bar : bool
             Toggle progress bar (default=True)
@@ -80,7 +74,7 @@ class ThresholdCutoff(OperatorMixin):
     units: str = "sec"
     return_neotype: bool = False  # TODO: Remove, shift to spikestamps datatype
 
-    exclude_channels: Tuple[int] = None
+    exclude_channels: tuple[int] = None
 
     num_proc: int = 1
 
@@ -104,7 +98,7 @@ class ThresholdCutoff(OperatorMixin):
 
         Returns
         -------
-        spiketrain_list : List[SpikestampsType]
+        spiketrain_list : list[SpikestampsType]
 
         """
         if not inspect.isgenerator(
@@ -124,7 +118,7 @@ class ThresholdCutoff(OperatorMixin):
                 stime = time.time()
                 collapsed_result.extend(self._detection(sig))
                 self.logger.info(
-                    f"Processing segment {idx}: {time.time()-stime:.02f} sec"
+                    f"Processing segment {idx}: {time.time() - stime:.02f} sec"
                 )
             return collapsed_result
 
@@ -160,7 +154,7 @@ class ThresholdCutoff(OperatorMixin):
                 )
                 spiketrain_list.append(spiketrain)
             else:
-                spiketrain_list.append(spikestamp.astype(np.float_))
+                spiketrain_list.append(spikestamp.astype(np.float64))
         spikestamps = Spikestamps(spiketrain_list)
         return spikestamps
 
@@ -253,7 +247,7 @@ class ThresholdCutoff(OperatorMixin):
         spikestamps,
         inputs,
         show: bool = False,
-        save_path: Optional[pathlib.Path] = None,
+        save_path: pathlib.Path | None = None,
     ) -> plt.Axes:
         """
         Plot spike train in raster
@@ -274,7 +268,11 @@ class ThresholdCutoff(OperatorMixin):
                 spikestamps, idx * term + t0, min((idx + 1) * term + t0, tf)
             )
             if save_path is not None:
-                plt.savefig(os.path.join(save_path, f"spiketrain_raster_{idx:03d}.png"), format="png", dpi=300)
+                plt.savefig(
+                    os.path.join(save_path, f"spiketrain_raster_{idx:03d}.png"),
+                    format="png",
+                    dpi=300,
+                )
             if not show:
                 plt.close("all")
         if show:
@@ -336,12 +334,13 @@ class ThresholdCutoff(OperatorMixin):
         self, spikestamps, inputs, show=False, save_path=None
     ):
         """Plot firing rate throughout time"""
-
         binsize = 0.10
         binned_spiketrain = spikestamps.binning(binsize, return_count=True)
         time_minute = binned_spiketrain.timestamps / 60  # minute
         time_minute -= time_minute[0]  # Reset the time to zero
-        mean_firing_rate = binned_spiketrain.data.mean(axis=binned_spiketrain._CHANNELAXIS) / binsize
+        mean_firing_rate = (
+            binned_spiketrain.data.mean(axis=binned_spiketrain._CHANNELAXIS) / binsize
+        )
 
         fig = plt.figure()
         plt.plot(time_minute, mean_firing_rate)
@@ -359,6 +358,7 @@ class ThresholdCutoff(OperatorMixin):
         if show:
             plt.show()
 
+
 @dataclass
 class ThresholdCutoffNonSparse(ThresholdCutoff):
     bin_size: float = 0.002
@@ -373,8 +373,8 @@ class ThresholdCutoffNonSparse(ThresholdCutoff):
         self,
         signal,
         spikestamps,
-        t_start: Optional[float] = None,
-        t_end: Optional[float] = None,
+        t_start: float | None = None,
+        t_end: float | None = None,
     ) -> Signal:
         t_start = signal.timestamps[0]
         t_end = signal.timestamps[0]
@@ -384,7 +384,10 @@ class ThresholdCutoffNonSparse(ThresholdCutoff):
 
         num_channels = spikestamps.number_of_channels
         signal = Signal(
-            data=np.zeros([n_bins, num_channels], dtype=np.int_,),
+            data=np.zeros(
+                [n_bins, num_channels],
+                dtype=np.int_,
+            ),
             timestamps=time[:-1],
             rate=1.0 / self.bin_size,
         )
@@ -394,6 +397,7 @@ class ThresholdCutoffNonSparse(ThresholdCutoff):
             bin_spike = bincount
             signal.data[:, idx] = bin_spike
         return signal
+
 
 def query_firing_rate_between(
     spikestamps: Spikestamps,

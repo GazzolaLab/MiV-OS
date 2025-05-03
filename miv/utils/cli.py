@@ -5,7 +5,7 @@ import subprocess
 
 def command_run(cmd, logger=None, exception="skip"):  # pragma: no cover
     args = cmd
-    output = subprocess.run(args, capture_output=True)
+    output = subprocess.run(args, capture_output=True, check=False)
     if logger is not None:
         logger.info(f"Running: {cmd=}")
         logger.info(f"{output.returncode=}")
@@ -16,12 +16,10 @@ def command_run(cmd, logger=None, exception="skip"):  # pragma: no cover
         logger.info("Done")
     if output.returncode != 0:
         if exception == "raise":
-            raise RuntimeError(
-                f"Error running {cmd=}\n" f"{output.stderr.decode('utf-8')}"
-            )
+            raise RuntimeError(f"Error running {cmd=}\n{output.stderr.decode('utf-8')}")
         elif exception == "skip":
             if logger is not None:
                 logger.warning(
-                    f"CLI error running {cmd=}\n" f"{output.stderr.decode('utf-8')}"
+                    f"CLI error running {cmd=}\n{output.stderr.decode('utf-8')}"
                 )
     return output.returncode

@@ -2,25 +2,17 @@ __all__ = [
     "cache_generator_call",
 ]
 
-import types
-from typing import Protocol, Union
+from typing import Any
+from collections.abc import Generator, Callable
 
 import time
 import functools
 import inspect
-from collections import UserList
-from dataclasses import dataclass, make_dataclass
 
-from miv.core.datatype import DataTypes, Extendable
-from miv.core.operator.cachable import (
-    DataclassCacher,
-    FunctionalCacher,
-    _CacherProtocol,
-)
-from miv.core.operator.operator import Operator, OperatorMixin
+from .operator import GeneratorOperator
 
 
-def cache_generator_call(func):
+def cache_generator_call(func: Callable) -> Callable:
     """
     Cache the methods of the operator.
     It is special case for the generator in-out stream.
@@ -29,32 +21,39 @@ def cache_generator_call(func):
     If inputs are not all generators, it will run regular function.
     """
 
-    def wrapper(self: Operator, *args, **kwargs):
+    def wrapper(
+        self: GeneratorOperator, *args: Any, **kwargs: Any
+    ) -> Generator | Any | None:
         is_all_generator = all(inspect.isgenerator(v) for v in args) and all(
             inspect.isgenerator(v) for v in kwargs.values()
         )
 
         tag = "data"
-        cacher: DataclassCacher = self.cacher
+        cacher = self.cacher
 
         if is_all_generator:
 
-            def generator_func(*args):
-                for idx, zip_arg in enumerate(zip(*args)):
+            def generator_func(*args: tuple[Generator, ...]) -> Generator:
+                for idx, zip_arg in enumerate(zip(*args, strict=False)):
                     stime = time.time()
                     result = func(self, *zip_arg, **kwargs)
                     # print(f"    iter {idx:03d} {self}: {time.time() - stime:.03f}sec", flush=True)
                     if result is not None:
                         # In case the module does not return anything
                         cacher.save_cache(result, idx, tag=tag)
-                    if not self.skip_plot:
-                        self.generator_plot(idx, result, zip_arg, save_path=True)
-                        if idx == 0:
-                            self.firstiter_plot(result, zip_arg, save_path=True)
+                    self._callback_generator_plot(
+                        idx, result, zip_arg, save_path=self.analysis_path
+                    )
+                    if idx == 0:
+                        self._callback_firstiter_plot(
+                            result, zip_arg, save_path=self.analysis_path
+                        )
                     yield result
-                else:
-                    cacher.save_config(tag=tag)
-                    # TODO: add lastiter_plot
+                cacher.save_config(tag=tag)
+                # TODO: add lastiter_plot
+                # FIXME
+                self._done_flag_generator_plot = True
+                self._done_flag_firstiter_plot = True
 
             generator = generator_func(*args, *kwargs.values())
             return generator

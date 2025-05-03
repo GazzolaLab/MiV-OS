@@ -2,18 +2,20 @@ name: CI
 
 on:
   push:
-    branches: [ main, update-** ]
+    branches: [main, update-**]
   pull_request:
-    branches: [ '**' ]
+    branches: ["**"]
 
 jobs:
-  build:
+  build_and_test:
     runs-on: ${{ matrix.os }}
+    env:
+      UV_CACHE_DIR: /tmp/.uv-cache
     strategy:
       matrix:
         python-version: ["3.10", "3.11", "3.12"]
         os: [macos-13, ubuntu-latest]
-        mpi: ["openmpi"]  # [ 'mpich', 'openmpi', 'intelmpi']
+        mpi: ["openmpi"] # [ 'mpich', 'openmpi', 'intelmpi']
         include:
           - os: macos-13
             path: ~/Library/Caches/pip
@@ -26,29 +28,37 @@ jobs:
         shell: bash
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          uv-version: latest
+
       # - uses: mpi4py/setup-mpi@v1
       #   with:
       #    mpi: ${{ matrix.mpi }}
-      - name: Set up Python ${{ matrix.python-version }}
+
+      - name: Install python
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          virtualenvs-create: true
-          virtualenvs-in-project: true
-          virtualenvs-path: .venv
-          installer-parallel: true
+
       - name: Load cached venv
-        id: cached-poetry-dependencies
+        id: cached-dependencies
         uses: actions/cache@v4
         with:
-          path: .venv
-          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
-      - name: Install dependencies
-        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install --no-interaction --no-root --all-extras --with=dev,algorithmExtension,sortingExtension #,mpi
+          path: ${{ env.UV_CACHE_DIR }}
+          key: uv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('uv.lock') }}
+          restore-keys: |
+            uv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('uv.lock') }}
+            uv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}
+
+      - name: Install and activate the project
+        run: |
+          make install-all
+          uv cache prune --ci
+          source .venv/bin/activate
+
       - uses: FedericoCarboni/setup-ffmpeg@v3
         id: setup-ffmpeg
         with:
@@ -56,32 +66,28 @@ jobs:
           # only on Windows, on other platforms they are allowed but version is matched
           # exactly regardless.
           ffmpeg-version: release
-          # Target architecture of the ffmpeg executable to install. Defaults to the
-          # system architecture. Only x64 and arm64 are supported (arm64 only on Linux).
-          architecture: ''
           # Linking type of the binaries. Use "shared" to download shared binaries and
           # "static" for statically linked ones. Shared builds are currently only available
           # for windows releases. Defaults to "static"
-          linking-type: static
+          # linking-type: static
           # As of version 3 of this action, builds are no longer downloaded from GitHub
           # except on Windows: https://github.com/GyanD/codexffmpeg/releases.
           github-token: ${{ github.server_url == 'https://github.com' && github.token || '' }}
+
       # Test MiV-OS using pytest
       - name: Run pytests
         if: always()
         run: |
-          source $VENV
           make test
       - name: Run mypy
         if: always()
         run: |
-          source $VENV
           make mypy
       - name: Run formatting check
         if: always()
         run: |
-          source $VENV
           make check-codestyle
+
       # Upload coverage to Codecov (use python 3.10 ubuntu-latest)
       - name: Upload coverage to Codecov (only on 3.10 ubuntu-latest)
         if: ${{ matrix.os == 'ubuntu-latest' && matrix.python-version == '3.10' }}

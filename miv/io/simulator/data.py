@@ -9,20 +9,18 @@ Module (MiV-Simulator)
 """
 __all__ = ["Data"]
 
-from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, Union
+from typing import (
+    Any,
+)
+from collections.abc import Generator
 
-import logging
 import os
-import pickle
-from glob import glob
 
 import h5py
-import matplotlib.pyplot as plt
 import numpy as np
-from tqdm import tqdm
 
-from miv.core.datatype import Signal, Spikestamps
-from miv.core.operator import DataLoaderMixin
+from miv.core.datatype.signal import Signal
+from miv.core.operator.operator import DataLoaderMixin
 
 
 class Data(DataLoaderMixin):
@@ -34,17 +32,21 @@ class Data(DataLoaderMixin):
 
     """
 
-    def __init__(self, data_path: str, *args, **kwargs):
+    tag = "Simulation data loader"
+
+    def __init__(self, data_path: str, *args: Any, **kwargs: Any) -> None:
         self.data_path = data_path
         super().__init__(*args, **kwargs)
 
         self._lfp_key = "Local Field Potential"  # TODO: refactor
         self._load_every = 60  # sec. Parse every 60 sec.
 
-    def load(self):
+    def load(self) -> Generator[Signal]:
         yield from self.load_lfp_recordings()
 
-    def load_lfp_recordings(self, indices: Optional[List[int]] = None):
+    def load_lfp_recordings(
+        self, indices: list[int] | None = None
+    ) -> Generator[Signal]:
         infile = h5py.File(self.data_path)
 
         if indices is not None:
@@ -57,9 +59,9 @@ class Data(DataLoaderMixin):
             keys = [key for key in infile.keys() if self._lfp_key in key]
 
         # Check if t matches
-        t0 = None
+        t0: np.ndarray = np.array([])
         for _, namespace_id in enumerate(keys):
-            if t0 is None:
+            if t0.size == 0:
                 t0 = np.asarray(infile[namespace_id]["t"])
                 continue
             t = np.asarray(infile[namespace_id]["t"])
@@ -69,8 +71,8 @@ class Data(DataLoaderMixin):
                     "Check if the sampling rates for each electrode are the same."
                 )
 
-        sampling_rate = 1000.0 / np.median(
-            np.diff(t0)
+        sampling_rate = float(
+            1000.0 / np.median(np.diff(t0))
         )  # FIXME: Try to infer from environment configuration instead
         length = int(self._load_every * sampling_rate)
         findex = len(t0)
@@ -88,7 +90,7 @@ class Data(DataLoaderMixin):
             sindex += length
             eindex = min(eindex + length, len(t0))
 
-    def check_path_validity(self):
+    def check_path_validity(self) -> bool:
         """
         Check if necessary files exist in the directory.
 

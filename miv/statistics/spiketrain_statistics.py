@@ -10,25 +10,21 @@ __all__ = [
     "instantaneous_spike_rate",
 ]
 
-from typing import Any, Callable, Dict, Iterable, List, Optional, Union
-
-import datetime
 import os
+from collections.abc import Callable
 from dataclasses import dataclass
+from typing import Any
 
 import matplotlib.pyplot as plt
-import neo
 import numpy as np
 import quantities as pq
-import scipy
-import scipy.signal
 
 from miv.core.datatype import Spikestamps
-from miv.core.operator import OperatorMixin
+from miv.core.operator.operator import OperatorMixin
 from miv.typing import SpikestampsType
 
 
-def firing_rates(spiketrains: Spikestamps) -> Dict[str, Any]:
+def firing_rates(spiketrains: Spikestamps) -> dict[str, Any]:
     """
     Process basic spiketrains statistics: rates, mean, variance.
 
@@ -72,12 +68,14 @@ def firing_rates(spiketrains: Spikestamps) -> Dict[str, Any]:
 class MFRComparison(OperatorMixin):
     recording_duration: float = None
     tag: str = "Mean Firing Rate Comparison"
-    channels: List[int] = None
+    channels: list[int] = None
 
     def __call__(self, pre_spiketrains: Spikestamps, post_spiketrains: Spikestamps):
         assert (
             pre_spiketrains.number_of_channels == post_spiketrains.number_of_channels
-        ), f"Number of channels does not match: {pre_spiketrains.number_of_channels} vs {post_spiketrains.number_of_channels}"
+        ), (
+            f"Number of channels does not match: {pre_spiketrains.number_of_channels} vs {post_spiketrains.number_of_channels}"
+        )
         pre_rates = firing_rates(pre_spiketrains)["rates"]
         post_rates = firing_rates(post_spiketrains)["rates"]
         if self.recording_duration is None:
@@ -135,7 +133,6 @@ def interspike_intervals(spikes: SpikestampsType):
 
     Examples
     --------
-
     How to draw Inter-spike interval histogram (ISIH):
 
         >>> from miv.statistics import interspike_intervals
@@ -162,7 +159,6 @@ def interspike_intervals(spikes: SpikestampsType):
         interval: numpy.ndarray
 
     """
-
     spike_interval = np.diff(spikes)
     return spike_interval
 
@@ -187,8 +183,8 @@ def coefficient_variation(self, spikes: SpikestampsType):
 def fano_factor(
     spiketrains: SpikestampsType,
     bin_size: float = 0.002,
-    t_start: Optional[float] = None,
-    t_end: Optional[float] = None,
+    t_start: float | None = None,
+    t_end: float | None = None,
 ):
     """
     Calculates the Fano factor for given signal by dividing it into the specified number of bins
@@ -213,7 +209,7 @@ def fano_factor(
     bin_spike = spiketrains.binning(
         bin_size=bin_size, t_start=t_start, t_end=t_end, return_count=True
     )
-    fano_factor = np.zeros(bin_spike.number_of_channels, dtype=np.float_)
+    fano_factor = np.zeros(bin_spike.number_of_channels, dtype=np.float64)
     for channel in range(bin_spike.number_of_channels):
         array = bin_spike[channel]
         if np.sum(array) == 0:
@@ -286,7 +282,7 @@ def instantaneous_spike_rate(spiketrain, probe_times, window=1, batchsize=32):
     """
 
     def kernel(x):
-        return np.logical_and(x >= 0, x <= window).astype(np.float_)
+        return np.logical_and(x >= 0, x <= window).astype(np.float64)
 
     return spike_counts_with_kernel(spiketrain, probe_times, kernel, batchsize)
 

@@ -19,5 +19,8 @@ help:
 %: Makefile
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
+.PHONY: clean clean_cache
+clean:
+	rm -rf $(BUILDDIR)/*
 clean_cache:
 	rm -rf **/results **/datasets

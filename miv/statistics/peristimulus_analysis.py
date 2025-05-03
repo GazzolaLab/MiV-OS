@@ -1,19 +1,12 @@
 __all__ = ["PSTH", "PeristimulusActivity", "peri_stimulus_time", "PSTHOverlay"]
 
-from typing import List
 
 import itertools
 import os
-import sys
 from dataclasses import dataclass
-from glob import glob
 
-import matplotlib.cm as cm
-import matplotlib.colors as colors
 import matplotlib.pyplot as plt
 import numpy as np
-import scipy as sp
-from tqdm import tqdm
 
 from miv.core.datatype import Signal, Spikestamps
 from miv.core.operator.operator import OperatorMixin
@@ -151,7 +144,7 @@ class PSTH(OperatorMixin):
         # TODO: Change events datatype to be Event, not Spikestamps
         n_time = int(np.ceil(self.interval / self.binsize))
         time_axis = np.linspace(0, self.interval, n_time) + self.stimulus_length
-        psth = np.zeros((spikestamps.number_of_channels, n_time), dtype=np.float_)
+        psth = np.zeros((spikestamps.number_of_channels, n_time), dtype=np.float64)
         for t_start in events[0]:
             t_end = t_start + n_time * self.binsize
             bst = spikestamps.binning(

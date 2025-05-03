@@ -5,119 +5,77 @@ Here, we define the behavior of basic operator class, and useful mixin classes t
 be used to create new operators that conform to required behaviors.
 """
 __all__ = [
-    "Operator",
-    "DataLoader",
     "DataLoaderMixin",
-    "OperatorMixin",
     "DataNodeMixin",
-    "DataNode",
+    "OperatorMixin",
 ]
 
-from typing import TYPE_CHECKING, List, Optional, Protocol, Union
-from collections.abc import Callable, Generator
+from typing import TYPE_CHECKING, Any, cast
+from collections.abc import Generator
+from typing_extensions import Self
 
-import functools
-import inspect
-import itertools
-import os
 import pathlib
-from dataclasses import dataclass
+
+
+from miv.core.operator.cachable import (
+    DataclassCacher,
+    FunctionalCacher,
+)
+from miv.core.operator.callback import BaseCallbackMixin
+from miv.core.operator.chainable import BaseChainingMixin
+from miv.core.operator.loggable import DefaultLoggerMixin
+from miv.core.operator.policy import VanillaRunner, _RunnerProtocol
 
 if TYPE_CHECKING:
     from miv.core.datatype import DataTypes
+    from miv.core.datatype.signal import Signal
+    from miv.core.datatype.spikestamps import Spikestamps
+    from .protocol import _Node
 
-from miv.core.operator.cachable import (
-    CACHE_POLICY,
-    DataclassCacher,
-    FunctionalCacher,
-    _Cachable,
-    _CacherProtocol,
-)
-from miv.core.operator.callback import BaseCallbackMixin, _Callback
-from miv.core.operator.chainable import BaseChainingMixin, _Chainable
-from miv.core.operator.loggable import DefaultLoggerMixin, _Loggable
-from miv.core.operator.policy import VanillaRunner, _Runnable, _RunnerProtocol
+else:
 
-
-class Operator(
-    _Callback,
-    _Chainable,
-    _Cachable,
-    _Runnable,
-    _Loggable,
-    Protocol,
-):
-    """ """
-
-    def run(self) -> None: ...
-
-
-class DataLoader(
-    _Callback,
-    _Chainable,
-    _Cachable,
-    _Runnable,
-    _Loggable,
-    Protocol,
-):
-    """ """
-
-    def load(self) -> Generator[DataTypes]: ...
-
-
-class DataNode(_Chainable, _Runnable, _Loggable, Protocol): ...
+    class _Node: ...
 
 
 class DataNodeMixin(BaseChainingMixin, DefaultLoggerMixin):
     """ """
 
-    def __init__(self):
-        super().__init__()
+    data: DataTypes
 
-    def output(self) -> list[DataTypes]:
+    def output(self) -> Self:
         return self
 
-    def run(self, *args, **kwargs):
+    def run(self) -> Self:
         return self.output()
 
 
 class DataLoaderMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
     """ """
 
-    def __init__(self):
-        super().__init__()
-
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         self.runner = VanillaRunner()
-        self.cacher = FunctionalCacher(self)
+        super().__init__(*args, cacher=FunctionalCacher(self), **kwargs)
+        self._load_param: dict = {}
 
-        self.tag = "data_loader"
-        self.set_save_path(self.data_path)  # Default analysis path
+        # Attribute from upstream
+        self.tag: str
 
-        self._load_param = {}
-        self.skip_plot = True
+    def __call__(self) -> DataTypes:
+        raise NotImplementedError("Please implement __call__ method.")
 
-    def configure_load(self, **kwargs):
+    def configure_load(self, **kwargs: Any) -> None:
         """
         (Experimental Feature)
         """
         self._load_param = kwargs
 
-    def output(self) -> list[DataTypes]:
+    def output(self) -> Generator[DataTypes] | Spikestamps | Generator[Signal]:
         output = self.load(**self._load_param)
-        if not self.skip_plot:
-            # if output is generator, raise error
-            if inspect.isgenerator(output):
-                raise ValueError(
-                    "output() method of DataLoaderMixin cannot support generator type."
-                )
-            self.make_analysis_path()
-            self.plot(output, None, show=False, save_path=True)
         return output
 
-    def run(self, *args, **kwargs):
-        return self.output()
-
-    def load(self):
+    def load(
+        self, *args: Any, **kwargs: Any
+    ) -> Generator[DataTypes] | Spikestamps | Generator[Signal]:
         raise NotImplementedError("load() method must be implemented to be DataLoader.")
 
 
@@ -135,31 +93,32 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
             - All results from callback
     """
 
-    def __init__(self) -> None:
-        super().__init__()
-        self.runner = VanillaRunner()
-        self.cacher = DataclassCacher(self)
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        self.runner: _RunnerProtocol = VanillaRunner()
+        self.analysis_path = "analysis"
 
-        assert self.tag != ""
-        self.set_save_path("results")  # Default analysis path
+        super().__init__(*args, cacher=DataclassCacher(self), **kwargs)
 
-    def __repr__(self):
+        # Attribute from upstream
+        self.tag: str
+
+    def __call__(self) -> DataTypes:
+        raise NotImplementedError("Please implement __call__ method.")
+
+    def __repr__(self) -> str:
         return self.tag
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.tag
-
-    def set_caching_policy(self, policy: CACHE_POLICY) -> None:
-        self.cacher.policy = policy
 
     def receive(self) -> list[DataTypes]:
         """
         Receive input data from each upstream operator.
         Essentially, this method recursively call upstream operators' run() method.
         """
-        return [node.run(skip_plot=self.skip_plot) for node in self.iterate_upstream()]
+        return [cast(_Node, node).output() for node in self.iterate_upstream()]
 
-    def output(self):
+    def output(self) -> DataTypes:
         """
         Output viewer. If cache exist, read result from cache value.
         Otherwise, execute (__call__) the module and return the value.
@@ -179,30 +138,29 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
                 output = self.runner(self.__call__, args)
 
             # Callback: After-run
-            self.callback_after_run(output)
+            self._callback_after_run(output)
 
             # Plotting: Only happened when cache is not called
-            if not self.skip_plot:
-                if len(args) == 0:
-                    self.plot(output, None, show=False, save_path=True)
-                elif len(args) == 1:
-                    self.plot(output, args[0], show=False, save_path=True)
-                else:
-                    self.plot(output, args, show=False, save_path=True)
+            self._callback_plot(output, args, show=False)
 
         return output
 
-    def run(
-        self,
-        skip_plot: bool = False,
+    def plot(
+        self, show: bool = False, save_path: str | pathlib.Path | None = None
     ) -> None:
         """
-        Execute the module. This is the function called by the pipeline.
-        Input to the parameters are received from upstream operators.
+        Standalone plotting operation.
         """
-        self.make_analysis_path()
-        self.skip_plot = skip_plot
+        cache_called = self.cacher.check_cached()
+        if not cache_called:
+            raise NotImplementedError(
+                "Standalone plotting is only possible if this operator has"
+                "results stored in cache. Please use Pipeline(op).run() first."
+            )
+        loader = self.cacher.load_cached()
+        output = next(loader, None)
 
-        output = self.output()
-
-        return output
+        # Plotting: Only happened when cache is not called
+        args = self.receive()  # Receive data from upstream
+        self._done_flag_plot = False  # FIXME
+        self._callback_plot(output, args, show=show, save_path=save_path)

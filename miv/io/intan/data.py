@@ -12,24 +12,22 @@ Module (Intan)
 """
 __all__ = ["DataIntan", "DataIntanTriggered"]
 
-from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, Union
+from typing import Any, cast
+from collections.abc import Iterable, Generator
 
 import logging
 import os
-import pickle
 import xml.etree.ElementTree as ET
 from glob import glob
 from pathlib import Path
 
-import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
 
-import miv.io.intan.rhs as rhs
-from miv.core.datatype import Events, Signal, Spikestamps
-from miv.core.operator.wrapper import cache_functional
-from miv.io.openephys.data import Data, DataManager
-from miv.typing import SignalType
+from miv.io.intan import rhs
+from miv.core.datatype import Signal, Spikestamps
+from miv.core.operator.wrapper import cached_method
+from miv.io.openephys.data import Data
 
 
 class DataIntan(Data):
@@ -55,10 +53,15 @@ class DataIntan(Data):
         data_path : str
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
 
-    def export(self, filename, channels=None, progress_bar: bool = False):
+    def export(
+        self,
+        filename: str | Path,
+        channels: Iterable[int] | None = None,
+        progress_bar: bool = False,
+    ) -> None:
         """
         Export data to the specified path.
         TODO: implement "view" time range
@@ -82,7 +85,7 @@ class DataIntan(Data):
             if channels is None:
                 matrix = signal.data
             else:
-                channels = np.asarray(channels)
+                channels = np.asarray(channels, dtype=np.int_)
                 matrix = signal.data[:, channels]
             if data_shape is None:
                 data_shape = matrix.shape
@@ -94,9 +97,13 @@ class DataIntan(Data):
             test = miv_file.pack(data, container)
             assert test == 0
 
-        miv_file.write(filename, data)
+        miv_file.write(str(filename), data)
 
-    def load(self):
+    def load(
+        self,
+        *args: Any,
+        **kwargs: Any,
+    ) -> Generator[Signal]:
         """
         Iterator to load data fragmentally.
         This function loads each file separately.
@@ -112,7 +119,7 @@ class DataIntan(Data):
         signal : SignalType, neo.core.AnalogSignal
             The length of the first axis `signal.shape[0]` correspond to the length of the
             signal, while second axis `signal.shape[1]` correspond to the number of channels.
-        timestamps : TimestampsType, numpy array
+        timestamps : numpy array
         sampling_rate : float
 
         Raises
@@ -126,12 +133,12 @@ class DataIntan(Data):
             self._expand_channels(sig, active_channels, total)
             yield sig
 
-    def get_stimulation(self, progress_bar=False):
+    def get_stimulation(self, progress_bar: bool = False) -> Signal:
         """
         Load stimulation recorded data.
         """
         signals, timestamps = [], []
-        sampling_rate = None
+        sampling_rate: float
         for data in self._generator_by_channel_name("stim_data", progress_bar):
             signals.append(data.data)
             timestamps.append(data.timestamps)
@@ -146,7 +153,9 @@ class DataIntan(Data):
         self._expand_channels(signal, active_channels, total)
         return signal
 
-    def _generator_by_channel_name(self, name: str, progress_bar: bool = False):
+    def _generator_by_channel_name(
+        self, name: str, progress_bar: bool = False
+    ) -> Generator[Signal]:
         if not self.check_path_validity():
             raise FileNotFoundError("Data directory does not have all necessary files.")
         files = self.get_recording_files()
@@ -167,7 +176,9 @@ class DataIntan(Data):
                 rate=sampling_rate,
             )
 
-    def _get_active_channels(self, group_prefix=("A", "B", "C", "D")):
+    def _get_active_channels(
+        self, group_prefix: tuple[str, ...] = ("A", "B", "C", "D")
+    ) -> tuple[np.ndarray, int]:
         setting_path = os.path.join(self.data_path, "settings.xml")
         root = ET.parse(setting_path).getroot()
         total = 0
@@ -184,8 +195,8 @@ class DataIntan(Data):
         return np.array(active_channels), total
 
     def _expand_channels(
-        self, signal: SignalType, active_channels, num_active_channels: int
-    ):
+        self, signal: Signal, active_channels: np.ndarray, num_active_channels: int
+    ) -> None:
         """
         Expand number of channels in `signal` to match the active channels.
         """
@@ -206,13 +217,13 @@ class DataIntan(Data):
                 _data[:, active_channels] = signal.data
             signal.data = _data
 
-    def _read_header(self):
+    def _read_header(self) -> dict[str, Any]:
         filename = self.get_recording_files()[0]
         fid = open(filename, "rb")
         header = rhs.read_header(fid)
         return header
 
-    def check_path_validity(self):
+    def check_path_validity(self) -> bool:
         """
         Check if necessary files exist in the directory.
 
@@ -234,7 +245,7 @@ class DataIntan(Data):
             return False
         return True
 
-    def get_recording_files(self):
+    def get_recording_files(self) -> list[str]:
         """
         Get list of path of all recording files.
         """
@@ -242,7 +253,7 @@ class DataIntan(Data):
         paths.sort()
         return paths
 
-    def get_stimulation_events(self):  # TODO: refactor
+    def get_stimulation_events(self) -> Spikestamps | None:  # TODO: refactor
         """
         Get stimulation in Spikestamps form, where each stamps represent the stimulus event.
         """
@@ -266,19 +277,21 @@ class DataIntan(Data):
         ret = Spikestamps([eventstrain])  # TODO: use datatype.Events
         return ret
 
-    def _load_digital_event_common(self, name, num_channels, progress_bar=False):
-        stamps = [[] for _ in range(num_channels)]
+    def _load_digital_event_common(
+        self, name: str, num_channels: int, progress_bar: bool = False
+    ) -> Spikestamps:
+        stamps: list[list[float]] = [[] for _ in range(num_channels)]
         for sig in self._generator_by_channel_name(name, progress_bar=progress_bar):
             for channel in range(num_channels):
                 index = np.where(sig.data[:, channel])[0]
                 stamps[channel].extend(np.asarray(sig.timestamps)[index])
         return Spikestamps(stamps)
 
-    # @cache_functional(cache_tag="digital_in")
+    # @cached_method(cache_tag="digital_in")
     def load_digital_in_event(
         self,
         progress_bar: bool = False,
-    ):  # pragma: no cover
+    ) -> Spikestamps:  # pragma: no cover
         """
         Load recorded data from digital input ports.
         Result is a list of timestamps for each channel, in Spikestamps format.
@@ -294,11 +307,11 @@ class DataIntan(Data):
             "board_dig_in_data", num_channels, progress_bar=progress_bar
         )
 
-    # @cache_functional(cache_tag="digital_out")
+    # @cached_method(cache_tag="digital_out")
     def load_digital_out_event(
         self,
         progress_bar: bool = False,
-    ):  # pragma: no cover
+    ) -> Spikestamps:  # pragma: no cover
         """
         Load recorded data from digital output ports.
         Result is a list of timestamps for each channel, in Spikestamps format.
@@ -314,13 +327,13 @@ class DataIntan(Data):
             "board_dig_out_data", num_channels, progress_bar=progress_bar
         )
 
-    # @cache_functional(cache_tag="ttl_events")
+    # @cached_method(cache_tag="ttl_events")
     def load_ttl_event(
         self,
         deadtime: float = 0.002,
         compress: bool = False,
         progress_bar: bool = False,
-    ):
+    ) -> Signal:
         """
         Load TTL events recorded data.
 
@@ -335,7 +348,7 @@ class DataIntan(Data):
         """
 
         signals, timestamps = [], []
-        sampling_rate = None
+        sampling_rate: float
         active_channels, total = self._get_active_channels()
         for data in self._generator_by_channel_name("stim_data", progress_bar):
             self._expand_channels(data, active_channels, total)
@@ -363,13 +376,15 @@ class DataIntan(Data):
             timestamps.append(data.timestamps)
             sampling_rate = data.rate
 
-        data = np.concatenate(signals, axis=0)
+        concatenated_arrays = np.concatenate(signals, axis=0)
         timestamps = np.concatenate(timestamps)
 
         if compress:  # TODO
             raise NotImplementedError
 
-        return Signal(data=data, timestamps=timestamps, rate=sampling_rate)
+        return Signal(
+            data=concatenated_arrays, timestamps=timestamps, rate=sampling_rate
+        )
 
 
 class DataIntanTriggered(DataIntan):
@@ -380,27 +395,27 @@ class DataIntanTriggered(DataIntan):
 
     def __init__(
         self,
-        data_path,  # FIXME: argument order with intan.DATA
+        data_path: str,  # FIXME: argument order with intan.DATA
         index: int = 0,
         trigger_key: str = "board_adc_data",
         trigger_index: int = 0,
-        trigger_threshold_voltage=1.0,
+        trigger_threshold_voltage: float = 1.0,
         progress_bar: bool = False,
-        *args,
-        **kwargs,
-    ):
-        super().__init__(data_path=data_path, *args, **kwargs)
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(*args, data_path=data_path, **kwargs)
         self.index = index
         self.trigger_key = trigger_key
         self.trigger_index = trigger_index
         self.trigger_threshold_voltage = trigger_threshold_voltage
         self.progress_bar = progress_bar
 
-    def __len__(self):
+    def __len__(self) -> int:
         groups = self._trigger_grouping()
         return len(groups)
 
-    def __getitem__(self, index):
+    def __getitem__(self, index: int) -> "DataIntanTriggered":
         groups = self._trigger_grouping()
         if len(groups) <= index:
             raise IndexError(
@@ -415,17 +430,18 @@ class DataIntanTriggered(DataIntan):
             progress_bar=self.progress_bar,
         )
 
-    @cache_functional(cache_tag="trigger_grouping")
-    def _trigger_grouping(self):
-        def _find_sequence(arr):
+    @cached_method(cache_tag="trigger_grouping")
+    def _trigger_grouping(self) -> list[dict[str, list]]:
+        def _find_sequence(arr: np.ndarray) -> np.ndarray:
             if arr.size == 0:
                 return arr
-            return arr[np.concatenate([np.array([True]), arr[1:] - 1 != arr[:-1]])]
+            selected = arr[np.concatenate([np.array([True]), arr[1:] - 1 != arr[:-1]])]
+            return cast(np.ndarray, selected)
 
         paths = DataIntan.get_recording_files(self)
 
         group_files = []
-        group = {"paths": [], "start index": [], "end index": []}
+        group: dict[str, list] = {"paths": [], "start index": [], "end index": []}
         status = 0
         for file in tqdm(paths, disable=not self.progress_bar):
             result, _ = rhs.load_file(file)
@@ -489,11 +505,13 @@ class DataIntanTriggered(DataIntan):
                     )
         return group_files
 
-    def get_recording_files(self):
+    def get_recording_files(self) -> list[str]:
         groups = self._trigger_grouping()
         return groups[self.index]["paths"]
 
-    def _generator_by_channel_name(self, name: str, progress_bar: bool = False):
+    def _generator_by_channel_name(
+        self, name: str, progress_bar: bool = False
+    ) -> Generator[Signal]:
         # TODO: move out _get_active_channels
         if not self.check_path_validity():
             raise FileNotFoundError("Data directory does not have all necessary files.")
@@ -507,7 +525,7 @@ class DataIntanTriggered(DataIntan):
         active_channels, total = self._get_active_channels()
         # Read each files
         for filename, sidx, eidx in tqdm(
-            zip(files, sindex, eindex), disable=not progress_bar
+            zip(files, sindex, eindex, strict=False), disable=not progress_bar
         ):
             result, data_present = rhs.load_file(filename)
             assert data_present, f"Data does not present: {filename=}."

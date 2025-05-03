@@ -211,8 +211,6 @@ class MEA128:
         if show:
             plt.show()
 
-        return
-
 
 class MEA64:
     def __init__(

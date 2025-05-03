@@ -9,12 +9,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
 
-from miv.core.datatype import Spikestamps
-from miv.core.operator import OperatorMixin
+from miv.core.datatype.spikestamps import Spikestamps
+from miv.core.operator.operator import OperatorMixin
 from miv.core.operator.policy import StrictMPIRunner
 from miv.mea import MEAGeometryProtocol
 from miv.statistics.spiketrain_statistics import spike_counts_with_kernel
-from miv.visualization.utils import interp_2d
 
 
 @dataclass
@@ -78,7 +77,7 @@ class NeuralActivity(OperatorMixin):
                 spikestamps[i],
                 probe_times,
                 lambda x: np.logical_and(x > 0, x < self.firing_rate_interval).astype(
-                    np.float_
+                    np.float64
                 ),
             )
             xs.append(x)
@@ -89,9 +88,11 @@ class NeuralActivity(OperatorMixin):
 
         # Output Images
         FFMpegWriter = manimation.writers["ffmpeg"]
-        metadata = dict(
-            title="Movie Test", artist="Matplotlib", comment="Movie support!"
-        )
+        metadata = {
+            "title": "Movie Test",
+            "artist": "Matplotlib",
+            "comment": "Movie support!",
+        }
         writer = FFMpegWriter(fps=self.fps, metadata=metadata)
 
         os.makedirs(self.analysis_path, exist_ok=True)
