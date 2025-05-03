@@ -341,6 +341,7 @@ class DataManager(MutableSequence):
         # Create data object
         self.data_list = []
         invalid_count = 0
+        counter = 0
         for counter, path in enumerate(data_path_list):
             data = Data(path)
             if data.check_path_validity():
