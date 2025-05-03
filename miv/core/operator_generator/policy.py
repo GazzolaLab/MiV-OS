@@ -28,18 +28,19 @@ class VanillaGeneratorRunner:
         self, func: _LazyCallable, inputs: list[Generator[Any]] | None = None
     ) -> Generator:
         is_all_generator = all(inspect.isgenerator(v) for v in inputs)
-        if not all_generator:
-            result = func(self, *inputs, idx=0)
+        if not is_all_generator:
+            result = func(self, *inputs)
             return result
 
         def generator_func(*args: tuple[Generator, ...]) -> Generator:
-            chunk_size = 8
+            chunk_size = 2
             istart = 0
-            while zip_arg := list(islice(args, chunk_size)):
-                func = functools.partial(func, self)
-                args = [tuple(arg + [istart + i]) for i, arg in enumerate(zip_arg)]
+            tasks = zip(*args)
+            while zip_arg := list(islice(tasks, chunk_size)):
+                proxy_func = getattr(self.parent.__class__, func.__name__)
+                _args = [tuple([self.parent] + [istart + i] + list(za)) for i, za in enumerate(zip_arg)]
                 with mp.Pool(processes=chunk_size) as pool:
-                    results = pool.starmap(func, args)
+                    results = pool.starmap(proxy_func, _args)
                 istart += chunk_size
 
                 for result in results:
@@ -55,7 +56,7 @@ class VanillaGeneratorRunner:
             self.parent._done_flag_generator_plot = True
             self.parent._done_flag_firstiter_plot = True
 
-        generator = generator_func(*args)
+        generator = generator_func(*inputs)
         return generator
 
         # return func(*inputs)  # type: ignore

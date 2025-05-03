@@ -343,12 +343,8 @@ class AvalancheAnalysis(OperatorMixin):
             axes[2].plot(
                 logbins, power(logbins, *popt), label=f"fit 1/svz={popt[0]:.2f}"
             )
-        except RuntimeError:
+        except (RuntimeError, TypeError, ValueError):
             logging.warning("Power-fit failed. No fitted line will be plotted.")
-            self.svz = 0
-        except TypeError:
-            logging.warning("Power-fit failed. No fitted line will be plotted.")
-            self.svz = 0
         axes[2].legend()
         axes[2].set_title(f"({(alpha-1)/(tau-1)=:.2f})")
         self.svz_estim_ratio = (alpha - 1) / (tau - 1)
