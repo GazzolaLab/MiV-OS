@@ -115,7 +115,7 @@ class BaseCallbackMixin:
         self.cacher.cache_dir = _cache_path
 
         # Make directory  # Not sure if this needs to be done here
-        # os.makedirs(self.analysis_path, exist_ok=True)
+        os.makedirs(self.analysis_path, exist_ok=True)
 
     def _callback_after_run(self, *args: Any, **kwargs: Any) -> None:
         if self._done_flag_after_run:
