@@ -38,7 +38,10 @@ class VanillaGeneratorRunner:
             tasks = zip(*args)
             while zip_arg := list(islice(tasks, chunk_size)):
                 proxy_func = getattr(self.parent.__class__, func.__name__)
-                _args = [tuple([self.parent] + [istart + i] + list(za)) for i, za in enumerate(zip_arg)]
+                _args = [
+                    tuple([self.parent] + [istart + i] + list(za))
+                    for i, za in enumerate(zip_arg)
+                ]
                 with mp.Pool(processes=chunk_size) as pool:
                     results = pool.starmap(proxy_func, _args)
                 istart += chunk_size

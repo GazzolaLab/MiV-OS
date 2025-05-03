@@ -11,10 +11,13 @@ import inspect
 
 from .operator import GeneratorOperator
 
+
 def cache_generator_call(func: Callable) -> Callable:
     @functools.wraps(func)
     def wrapper(
-        self: GeneratorOperator, idx, *args,
+        self: GeneratorOperator,
+        idx,
+        *args,
     ) -> Generator | Any | None:
         tag = "data"
         cacher = self.cacher
@@ -25,18 +28,16 @@ def cache_generator_call(func: Callable) -> Callable:
                 cacher.save_config(tag=tag)  # config saved only once
 
         # Plotting  # FIXME: Somehow move it in operator mixin?
-        self._callback_generator_plot(
-            idx, result, args, save_path=self.analysis_path
-        )
+        self._callback_generator_plot(idx, result, args, save_path=self.analysis_path)
         if idx == 0:
-            self._callback_firstiter_plot(
-                result, args, save_path=self.analysis_path
-            )
+            self._callback_firstiter_plot(result, args, save_path=self.analysis_path)
 
         return result
+
     return wrapper
 
-#def cache_generator_call(func: Callable) -> Callable:
+
+# def cache_generator_call(func: Callable) -> Callable:
 #    """
 #    Cache the methods of the operator.
 #    It is special case for the generator in-out stream.

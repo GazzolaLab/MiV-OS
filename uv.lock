@@ -1203,7 +1203,7 @@ wheels = [
 
 [[package]]
 name = "miv-os"
-version = "0.3.2"
+version = "0.3.2.post2"
 source = { editable = "." }
 dependencies = [
     { name = "click" },

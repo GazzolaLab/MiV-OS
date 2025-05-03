@@ -239,11 +239,11 @@ def spike_counts_with_kernel(spiketrain, probe_times, kernel: Callable, batchsiz
         return np.zeros_like(probe_times)
     spiketrain = np.asarray(spiketrain)
     result = np.zeros_like(probe_times)
-    
+
     # Non-batch implementation : temporary
     for s in spiketrain:
         mask = (s + 1e-8) > probe_times
-        exponent = kernel((s-probe_times)[mask])
+        exponent = kernel((s - probe_times)[mask])
         exponent[exponent < 1e-2] = 0.0
         result[mask] += exponent
     return result
