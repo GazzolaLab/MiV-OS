@@ -44,6 +44,8 @@ from miv.statistics.spiketrain_statistics import firing_rates
 from miv.typing import SignalType, SpikestampsType
 from miv.visualization.event import plot_spiketrain_raster
 
+from miv.signal.utils import downsample_average
+
 
 @dataclass
 class ThresholdCutoff(OperatorMixin):
@@ -345,7 +347,8 @@ class ThresholdCutoff(OperatorMixin):
         )
 
         fig = plt.figure()
-        plt.plot(time_minute, mean_firing_rate)
+        tm, mfr = downsample_average(time_minute, mean_firing_rate)
+        plt.plot(tm, mfr)
         plt.ylabel("Average (channel-wise) Firing rate (Hz)")
         plt.xlabel("Time (minute)")
         if save_path is not None:
@@ -379,7 +382,8 @@ def plot_firing_rate_for_each_channel(spikestamps, inputs, show=False, save_path
         firing_rate = binned_spiketrain[channel] / binsize
 
         fig = plt.figure()
-        plt.plot(time_minute, firing_rate)
+        tm, mfr = downsample_average(time_minute, firing_rate)
+        plt.plot(tm, mfr)
         plt.ylabel(f"Average (channel-wise) Firing rate (Hz) ch{channel:04d}")
         plt.xlabel("Time (minute)")
         fig.savefig(os.path.join(save_path, f"firing_rate_ch{channel:04d}.png"))
