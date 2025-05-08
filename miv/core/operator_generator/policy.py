@@ -4,11 +4,9 @@ __all__ = [
 
 from typing import Any
 import inspect
-import functools
 from itertools import islice
 import time
 from collections.abc import Generator
-from tqdm import tqdm
 
 import multiprocessing as mp
 
@@ -37,7 +35,7 @@ class VanillaGeneratorRunner:
         def generator_func(*args: tuple[Generator, ...]) -> Generator:
             num_workers = 4
             istart = 0
-            tasks = zip(*args)
+            tasks = zip(*args, strict=False)
             with mp.Pool(processes=num_workers) as pool:
                 while zip_arg := list(islice(tasks, num_workers)):
                     proxy_func = getattr(self.parent.__class__, func.__name__)
@@ -49,14 +47,18 @@ class VanillaGeneratorRunner:
                     # results = pool.imap(prox_func, _args)
                     results = pool.starmap(proxy_func, _args)
                     istart += len(_args)
-                    print(f"completed tasks: {istart}(+{len(_args)}) ({time.time() - stime:.2f}sec)", flush=True)
+                    print(
+                        f"completed tasks: {istart}(+{len(_args)}) ({time.time() - stime:.2f}sec)",
+                        flush=True,
+                    )
 
                     stime = time.time()
-                    for result in results:
-                        yield result
-                    print(f"external_tasks:  ({time.time() - stime:.2f}sec)", flush=True)
+                    yield from results
+                    print(
+                        f"external_tasks:  ({time.time() - stime:.2f}sec)", flush=True
+                    )
 
-            print(f"generator-tasks done", flush=True)
+            print("generator-tasks done", flush=True)
 
             # for idx, zip_arg in enumerate(zip(*args, strict=False)):
             #    stime = time.time()

@@ -1,5 +1,6 @@
-from typing import Sequence
+from collections.abc import Sequence
 import numpy as np
+
 
 def downsample_average(
     x: Sequence[float],
@@ -39,4 +40,3 @@ def downsample_average(
     x_ds = x_trim.mean(axis=1)
     y_ds = y_trim.mean(axis=1)
     return x_ds, y_ds
-
