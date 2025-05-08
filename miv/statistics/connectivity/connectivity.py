@@ -412,7 +412,7 @@ class UndirectedConnectivity(OperatorMixin):
     bin_size: float = 0.001
     minimum_count: int = 1
     firing_rate_limit: float = 5e-1
-    tag: str = "directional connectivity analysis"
+    tag: str = "undirected connectivity analysis"
     progress_bar: bool = False
 
     skip_surrogate: bool = False

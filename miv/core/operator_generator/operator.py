@@ -32,7 +32,7 @@ class GeneratorOperatorMixin(OperatorMixin, GeneratorCallbackMixin):
     def __init__(self) -> None:
         super().__init__()
 
-        self.runner = VanillaGeneratorRunner()
+        self.runner = VanillaGeneratorRunner(self)
 
     def set_caching_policy(self, policy: CACHE_POLICY) -> None:
         self.cacher.policy = policy

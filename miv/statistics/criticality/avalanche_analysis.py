@@ -81,10 +81,13 @@ class AvalancheDetection(OperatorMixin):
         population_firing = bincount.data.sum(
             axis=bincount._CHANNELAXIS
         )  # Spike count accross channel per bin
-        threshold = (
-            population_firing[np.nonzero(population_firing)].mean()
-            / self.threshold_percentage
-        )
+        # threshold = (
+        #    population_firing[np.nonzero(population_firing)].mean()
+        #    / self.threshold_percentage
+        # )
+        non_zero_firing = population_firing[np.nonzero(population_firing)]
+        mad = np.median(np.abs(non_zero_firing - np.median(non_zero_firing)))
+        threshold = 1.4826 * mad * 4.0
         # TODO: try to reuse the code from miv.statistics.burst.burst
         events = (population_firing > threshold).astype(np.bool_)
 
@@ -247,7 +250,7 @@ class AvalancheAnalysis(OperatorMixin):
         super().__init__()
 
     def plot_power_law_fitting(self, outputs, inputs, show=False, save_path=None):
-        durations, size, branching_ratio, _, _ = outputs
+        durations, size, branching_ratio, avalanches, bin_size = outputs
 
         def power(x, a, c):
             return c * (x**a)
@@ -332,24 +335,64 @@ class AvalancheAnalysis(OperatorMixin):
         axes[2].set_yscale("log")
         axes[2].set_xlabel("duration (s)")
         axes[2].set_ylabel("Average size (# channels)")
+
+        self.svz = None
         try:
             popt, pcov = curve_fit(power, values, avearges)
             self.svz = popt[0]
             axes[2].plot(
                 logbins, power(logbins, *popt), label=f"fit 1/svz={popt[0]:.2f}"
             )
-        except RuntimeError:
+        except (RuntimeError, TypeError, ValueError):
             logging.warning("Power-fit failed. No fitted line will be plotted.")
-            self.svz = 0
-        except TypeError:
-            logging.warning("Power-fit failed. No fitted line will be plotted.")
-            self.svz = 0
         axes[2].legend()
         axes[2].set_title(f"({(alpha-1)/(tau-1)=:.2f})")
         self.svz_estim_ratio = (alpha - 1) / (tau - 1)
 
         if save_path is not None:
             plt.savefig(os.path.join(save_path, "avalanche_power_fitting.png"))
+        plt.close(fig)
+
+        _, _, _, avalanches, bin_size = outputs
+
+        shapes = defaultdict(list)
+        for avalanche in avalanches:
+            count = avalanche.shape[0]
+            if count <= 1:
+                continue
+            shapes[count].append(avalanche.sum(axis=1))
+
+        fig, axes = plt.subplots(1, 2, figsize=(12, 6))
+        for idx, count in enumerate(shapes.keys()):
+            shapes[count] = np.array(shapes[count])
+            time = np.arange(count) * bin_size
+            T = count * bin_size
+            mean = np.array(shapes[count]).mean(axis=0)
+            err = np.array(shapes[count]).std(axis=0)
+            axes[0].errorbar(
+                time, mean, yerr=err, label=f"duration {bin_size * count * 1000:.2f}ms"
+            )
+            if self.svz is not None:
+                axes[1].plot(
+                    time / T,
+                    mean / (T ** (self.svz - 1)),
+                    label=f"duration {bin_size * count * 1000:.2f}ms",
+                )
+
+        axes[0].set_xlabel("Time in Avalanche (s)")
+        axes[0].set_ylabel("Average Number of Firing s(t,T)")
+        axes[0].set_title("Raw Shapes")
+        # axes[0].legend()
+        if self.svz is not None:
+            axes[1].set_xlabel("Time in Avalanche Duration (s / T)")
+            axes[1].set_ylabel("Average Number of Firing s(t,T) / T^1/svz-1 ")
+            axes[1].set_title(f"Normalized/Collapsed Avalanche Shape {self.svz:.2f}")
+            # axes[1].legend()
+        else:
+            axes[1].set_title("Normalized/Collapsed Avalanche Shape (No fit)")
+
+        if save_path is not None:
+            plt.savefig(os.path.join(save_path, "avalanche_shape_collapse.png"))
         if show:
             plt.show()
         plt.close(fig)
@@ -376,49 +419,6 @@ class AvalancheAnalysis(OperatorMixin):
         ax.set_title("branching ratio")
         if save_path is not None:
             plt.savefig(os.path.join(save_path, "branching_ratio.png"))
-        if show:
-            plt.show()
-        plt.close(fig)
-
-    def plot_avalanche_shape_collapse(
-        self, outputs, inputs, show=False, save_path=None
-    ):
-        _, _, _, avalanches, bin_size = outputs
-
-        shapes = defaultdict(list)
-        for avalanche in avalanches:
-            count = avalanche.shape[0]
-            if count <= 1:
-                continue
-            shapes[count].append(avalanche.sum(axis=1))
-
-        fig, axes = plt.subplots(1, 2, figsize=(12, 6))
-        for idx, count in enumerate(shapes.keys()):
-            shapes[count] = np.array(shapes[count])
-            time = np.arange(count) * bin_size
-            T = count * bin_size
-            mean = np.array(shapes[count]).mean(axis=0)
-            err = np.array(shapes[count]).std(axis=0)
-            axes[0].errorbar(
-                time, mean, yerr=err, label=f"duration {bin_size * count * 1000:.2f}ms"
-            )
-            axes[1].plot(
-                time / T,
-                mean / (T ** (self.svz - 1)),
-                label=f"duration {bin_size * count * 1000:.2f}ms",
-            )
-
-        axes[0].set_xlabel("Time in Avalanche (s)")
-        axes[0].set_ylabel("Average Number of Firing s(t,T)")
-        axes[0].set_title("Raw Shapes")
-        # axes[0].legend()
-        axes[1].set_xlabel("Time in Avalanche Duration (s / T)")
-        axes[1].set_ylabel("Average Number of Firing s(t,T) / T^1/svz-1 ")
-        axes[1].set_title(f"Normalized/Collapsed Avalanche Shape {self.svz:.2f}")
-        # axes[1].legend()
-
-        if save_path is not None:
-            plt.savefig(os.path.join(save_path, "avalanche_shape_collapse.png"))
         if show:
             plt.show()
         plt.close(fig)

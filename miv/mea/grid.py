@@ -86,12 +86,21 @@ class GridMEA(MEAMixin, MEAutility.core.MEA):
         return self.Xn, self.Yn, value_grid
 
     def get_ixiy(self, channel: int):
+        # FIXME: ixiy return ys xs
         """Given node index, return x y coordinate index"""
         if channel not in self.grid:
             return None
         ys, xs = np.where(self.grid == channel)
         assert len(xs) == 1 and len(ys) == 1, f"The index {channel} is not unique."
         return ys[0], xs[0]
+
+    def get_xy(self, channel: int):
+        """Given node index, return x y coordinate index"""
+        if channel not in self.grid:
+            return None
+        ys, xs = np.where(self.grid == channel)
+        assert len(xs) == 1 and len(ys) == 1, f"The index {channel} is not unique."
+        return self.Y[ys[0]], self.X[xs[0]]
 
     @property
     def coordinates(self):
