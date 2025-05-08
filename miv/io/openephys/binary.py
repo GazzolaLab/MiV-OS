@@ -315,7 +315,7 @@ def load_recording(
         )
         total_length = int(np.floor(filesize / itemsize * num_channels))
         timestamps = timestamps[:total_length]
-    samples_per_block = sampling_rate * 60
+    samples_per_block = sampling_rate * 60  # TODO: 1 minute chunking
     num_fragments = int(math.ceil(total_length / samples_per_block))
     tasks = None
     if mpi_comm is not None:

@@ -6,7 +6,9 @@ from typing import Any
 import inspect
 import functools
 from itertools import islice
+import time
 from collections.abc import Generator
+from tqdm import tqdm
 
 import multiprocessing as mp
 
@@ -33,21 +35,28 @@ class VanillaGeneratorRunner:
             return result
 
         def generator_func(*args: tuple[Generator, ...]) -> Generator:
-            chunk_size = 4
+            num_workers = 4
             istart = 0
             tasks = zip(*args)
-            while zip_arg := list(islice(tasks, chunk_size)):
-                proxy_func = getattr(self.parent.__class__, func.__name__)
-                _args = [
-                    tuple([self.parent] + [istart + i] + list(za))
-                    for i, za in enumerate(zip_arg)
-                ]
-                with mp.Pool(processes=chunk_size) as pool:
+            with mp.Pool(processes=num_workers) as pool:
+                while zip_arg := list(islice(tasks, num_workers)):
+                    proxy_func = getattr(self.parent.__class__, func.__name__)
+                    stime = time.time()
+                    _args = [
+                        tuple([self.parent] + [istart + i] + list(za))
+                        for i, za in enumerate(zip_arg)
+                    ]
+                    # results = pool.imap(prox_func, _args)
                     results = pool.starmap(proxy_func, _args)
-                istart += chunk_size
+                    istart += len(_args)
+                    print(f"completed tasks: {istart}(+{len(_args)}) ({time.time() - stime:.2f}sec)", flush=True)
 
-                for result in results:
-                    yield result
+                    stime = time.time()
+                    for result in results:
+                        yield result
+                    print(f"external_tasks:  ({time.time() - stime:.2f}sec)", flush=True)
+
+            print(f"generator-tasks done", flush=True)
 
             # for idx, zip_arg in enumerate(zip(*args, strict=False)):
             #    stime = time.time()

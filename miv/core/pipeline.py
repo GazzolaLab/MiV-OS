@@ -98,8 +98,8 @@ class Pipeline:
 
             if verbose:
                 etime = time.time()
-                print(f"  Finished: {etime - stime:.03f} sec", flush=True)
-                print("Pipeline done.")
+                print(f"  Finished: {etime - stime:.03f} sec")
+                print("Pipeline done.", flush=True)
 
         if temporary_directory is not None:
             os.system(f"cp -rf {temporary_directory}/* {working_directory}/")
