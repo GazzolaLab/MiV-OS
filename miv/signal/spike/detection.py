@@ -99,8 +99,6 @@ class ThresholdCutoff(OperatorMixin):
         Parameters
         ----------
         signal : Signal
-        custom_spike_threshold : np.ndarray
-            If not None, use this value * cutoff as spike threshold.
 
         Returns
         -------
@@ -358,7 +356,7 @@ class ThresholdCutoff(OperatorMixin):
             ) as f:
                 writer = csv.writer(f)
                 writer.writerow(["time", "mean_firing_rate"])
-                for tm, mfr in zip(time_minute, mean_firing_rate):
+                for tm, mfr in zip(time_minute, mean_firing_rate, strict=False):
                     writer.writerow([tm, mfr])
         if show:
             plt.show()
@@ -391,7 +389,7 @@ def plot_firing_rate_for_each_channel(spikestamps, inputs, show=False, save_path
         with open(os.path.join(save_path, "instantaneous_firing_rate.csv"), "w") as f:
             writer = csv.writer(f)
             writer.writerow(["time", "firing_rate"])
-            for tm, fr in zip(time_minute, firing_rate):
+            for tm, fr in zip(time_minute, firing_rate, strict=False):
                 writer.writerow([tm, fr])
 
 
