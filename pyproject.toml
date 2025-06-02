@@ -10,7 +10,7 @@ include = ["miv"]
 
 [project]
 name = "MiV-OS"
-version = "0.3.2.post2"
+version = "0.3.2.post5"
 description = "Python software for analysis and computing framework used in MiV project."
 readme = "README.md"
 authors = [
