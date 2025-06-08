@@ -33,30 +33,31 @@ class VanillaGeneratorRunner:
             return result
 
         def generator_func(*args: tuple[Generator, ...]) -> Generator:
-            num_workers = 4
+            num_workers = 4  # Full: 28 (ish) :: diminish after 4
             istart = 0
             tasks = zip(*args, strict=False)
-            with mp.Pool(processes=num_workers) as pool:
-                while zip_arg := list(islice(tasks, num_workers)):
-                    proxy_func = getattr(self.parent.__class__, func.__name__)
-                    stime = time.time()
-                    _args = [
-                        tuple([self.parent] + [istart + i] + list(za))
-                        for i, za in enumerate(zip_arg)
-                    ]
+            while zip_arg := list(islice(tasks, num_workers)):
+                proxy_func = getattr(self.parent.__class__, func.__name__)
+                stime = time.time()
+                _args = [
+                    tuple([self.parent] + [istart + i] + list(za))
+                    for i, za in enumerate(zip_arg)
+                ]
+                with mp.Pool(processes=num_workers) as pool:
                     # results = pool.imap(prox_func, _args)
                     results = pool.starmap(proxy_func, _args)
-                    istart += len(_args)
-                    print(
-                        f"completed tasks: {istart}(+{len(_args)}) ({time.time() - stime:.2f}sec)",
-                        flush=True,
-                    )
+                istart += len(_args)
+                print(
+                    f"completed tasks: {istart}(+{len(_args)}) ({time.time() - stime:.2f}sec)",
+                    flush=True,
+                )
+                _args = []
 
-                    stime = time.time()
-                    yield from results
-                    print(
-                        f"external_tasks:  ({time.time() - stime:.2f}sec)", flush=True
-                    )
+                stime = time.time()
+                yield from results
+                print(
+                    f"external_tasks:  ({time.time() - stime:.2f}sec)", flush=True
+                )
 
             print("generator-tasks done", flush=True)
 
