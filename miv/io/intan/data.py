@@ -33,10 +33,8 @@ from miv.io.openephys.data import Data
 class DataIntan(Data):
     """Single data unit handler, collected from Intan.
 
-    Each data unit that contains single recording. This class provides useful tools,
-    such as masking channel, export data, interface with other packages, etc.
-    If you have multiple recordings you would like to handle at the same time, use
-    `DataManager` instead.
+    Intan collect all recording in a same directory with 1 minute interval (single .rhs).
+    This classs accumulate all .rhs as a single data unit.
 
     By default recording setup, the following directory structure is expected in ``data_path``::
 
