@@ -49,6 +49,11 @@ class DataIntan(Data):
         Parameters
         ----------
         data_path : str
+
+        Examples
+        --------
+            >>> data = DataIntan(data_path)
+            >>> data >> bandpass_filter >> threshold_cutoff
     """
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
