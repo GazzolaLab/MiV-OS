@@ -84,8 +84,6 @@ For instance, the following example passes the recorded signal through the bandp
 # Build analysis pipeline
 data >> bandpass_filter >> spike_detection
 data >> lfp_filter
-
-print(data.summarize())  # Print the summary of data flow
 ```
 
 To complete the analysis, we can create a `Pipeline` object and execute it by calling the `.run()` method.
@@ -139,18 +137,6 @@ pipeline = Pipeline(bandpass_filter)
 
 In this example, we first create a `MedianFilter` module with a specified threshold of 100 mV, and then pass the output from this module into the `bandpass_filter` module.
 The resulting pipeline can then be executed using a `Pipeline` object, as described earlier.
-
-### Visualize Pipeline
-
-To view the order of processing operations in a pipeline, we can use the `summarize()` method of a `Pipeline` object.
-This method construct a summary of the pipeline in text form, including the sequence of operations that will be applied to the input data.
-The following code block demonstrates how to use the `summarize()` method:
-
-```{code-cell} ipython3
-print(pipeline.summarize())
-```
-
-By calling this method, you can quickly confirm the sequence of operations in the pipeline and ensure that it matches your intended workflow.
 
 ## Rasterplot Visualization
 
