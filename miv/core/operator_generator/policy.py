@@ -33,12 +33,14 @@ class VanillaGeneratorRunner:
             return result
 
         def generator_func(*args: tuple[Generator, ...]) -> Generator:
-            num_workers = 1
             tasks = zip(*args, strict=False)
             for idx, zip_arg in enumerate(tasks):
                 stime = time.time()
                 result = func(idx, *zip_arg)
-                print(f"    iter {idx:03d} {self}: {time.time() - stime:.03f}sec", flush=True)
+                print(
+                    f"    iter {idx:03d} {self}: {time.time() - stime:.03f}sec",
+                    flush=True,
+                )
                 yield result
             print("generator-tasks done", flush=True)
 
@@ -55,6 +57,7 @@ class VanillaGeneratorRunner:
     def get_run_order(self) -> int:
         return 0
 
+
 class GeneratorRunnerInMultiprocessing:
     """Default runner without any modification.
     Simply, the operator will be executed in embarrassingly parallel manner.
@@ -63,7 +66,7 @@ class GeneratorRunnerInMultiprocessing:
     This runner is meant to be used for generator operators.
     """
 
-    def __init__(self, parent, chunk_size:int=4):
+    def __init__(self, parent, chunk_size: int = 4):
         self.parent = parent
         self.chunk_size = chunk_size
 

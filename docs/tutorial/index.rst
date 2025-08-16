@@ -17,6 +17,12 @@ Tutorial
    spike_cutout
    spike_sorting
 
+.. toctree::
+   :maxdepth: 2
+   :caption: Experimental Features
+
+   mpi_support
+
 
 Indices and tables
 ==================
