@@ -43,6 +43,13 @@ class Signal(SupportMultiprocessing, DataNodeMixin, ConcatenateMixin):
         self.data = np.asarray(self.data)
         assert len(self.data.shape) == 2, "Signal must be 2D array"
 
+    @classmethod
+    def empty(clf, number_of_channels: int) -> "Signal":
+        return clf(
+            data=[[] for _ in range(number_of_channels)],
+            timestamps=[],
+        )
+
     @property
     def number_of_channels(self) -> int:
         """Number of channels in the signal."""

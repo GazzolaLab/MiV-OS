@@ -31,6 +31,10 @@ class Events(ConcatenateMixin, DataNodeMixin):
         super().__init__()
         self.data = np.asarray(data) if data is not None else np.array([])
 
+    @classmethod
+    def empty(clf) -> "Events":
+        return clf()
+
     def append(self, item: float) -> None:
         self.data = np.append(self.data, item)
 

@@ -156,7 +156,7 @@ class SupportMPIMerge(StrictMPIRunner):
 
         outputs = self.comm.gather(output, root=self.root)
         if self.is_root():
-            result = output.from_collapse(outputs)  # Class method
+            result = output.concatenate(outputs)  # Class method
         else:
             result = None
         result = self.comm.bcast(result, root=self.root)
@@ -178,7 +178,7 @@ class SupportMPIWithoutBroadcast(StrictMPIRunner):
 
         outputs = self.comm.gather(output, root=self.root)
         if self.is_root():
-            result = output.from_collapse(outputs)  # Class method
+            result = output.concatenate(outputs)  # Class method
         else:
             result = None
         return result
