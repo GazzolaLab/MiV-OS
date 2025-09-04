@@ -21,18 +21,24 @@ class VanillaGeneratorRunner:
     This runner is meant to be used for generator operators.
     """
 
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         self.parent = parent
 
     def __call__(
-        self, func: _LazyCallable, inputs: list[Generator[Any]] | None = None
-    ) -> Generator:
+        self,
+        func: _LazyCallable,
+        inputs: list[Generator[Any, None, None]] | None = None,
+    ) -> Generator[Any, None, None]:
+        if inputs is None:
+            inputs = []
         is_all_generator = all(inspect.isgenerator(v) for v in inputs)
         if not is_all_generator:
             result = func(self, *inputs)  # FIXME: this will probably cause issue
             return result
 
-        def generator_func(*args: tuple[Generator, ...]) -> Generator:
+        def generator_func(
+            *args: tuple[Generator[Any, None, None], ...]
+        ) -> Generator[Any, None, None]:
             tasks = zip(*args, strict=False)
             for idx, zip_arg in enumerate(tasks):
                 stime = time.time()
@@ -66,19 +72,25 @@ class GeneratorRunnerInMultiprocessing:
     This runner is meant to be used for generator operators.
     """
 
-    def __init__(self, parent, chunk_size: int = 4):
+    def __init__(self, parent: Any, chunk_size: int = 4) -> None:
         self.parent = parent
         self.chunk_size = chunk_size
 
     def __call__(
-        self, func: _LazyCallable, inputs: list[Generator[Any]] | None = None
-    ) -> Generator:
+        self,
+        func: _LazyCallable,
+        inputs: list[Generator[Any, None, None]] | None = None,
+    ) -> Generator[Any, None, None]:
+        if inputs is None:
+            inputs = []
         is_all_generator = all(inspect.isgenerator(v) for v in inputs)
         if not is_all_generator:
             result = func(self, *inputs)  # FIXME: this will probably cause issue
             return result
 
-        def generator_func(*args: tuple[Generator, ...]) -> Generator:
+        def generator_func(
+            *args: tuple[Generator[Any, None, None], ...]
+        ) -> Generator[Any, None, None]:
             num_workers = self.chunk_size
             istart = 0
             tasks = zip(*args, strict=False)

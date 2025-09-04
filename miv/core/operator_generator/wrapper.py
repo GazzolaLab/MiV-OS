@@ -10,9 +10,9 @@ def cache_generator_call(func: Callable) -> Callable:
     @functools.wraps(func)
     def wrapper(
         self: GeneratorOperator,
-        idx,
-        *args,
-        **kwargs,
+        idx: int,
+        *args: Any,
+        **kwargs: Any,
     ) -> Generator | Any | None:
         tag = "data"
         cacher = self.cacher
