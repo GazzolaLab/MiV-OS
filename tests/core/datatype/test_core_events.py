@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 import quantities as pq
 
-from miv.core.datatype import Events, Signal
+from miv.core import Events, Signal
 
 
 class TestEvents:

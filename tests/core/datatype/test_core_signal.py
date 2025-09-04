@@ -3,7 +3,7 @@ from typing import List, Tuple
 import numpy as np
 import pytest
 
-from miv.core.datatype import Signal
+from miv.core import Signal
 
 
 @pytest.fixture

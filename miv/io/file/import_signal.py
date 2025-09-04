@@ -3,7 +3,7 @@ __all__ = ["ImportSignal"]
 from collections.abc import Generator
 
 
-from miv.core.datatype import Signal
+from miv.core import Signal
 from miv.core.operator.operator import DataLoaderMixin
 from miv.io import file as miv_file
 

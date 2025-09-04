@@ -37,7 +37,7 @@ import neo
 import numpy as np
 from tqdm import tqdm
 
-from miv.core.datatype import Signal, Spikestamps
+from miv.core import Signal, Spikestamps
 from miv.core.operator.operator import OperatorMixin
 from miv.core.operator.wrapper import cache_call
 from miv.statistics.spiketrain_statistics import firing_rates

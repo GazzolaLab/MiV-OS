@@ -1,6 +1,3 @@
-__all__ = ["burst", "burst_array"]
-
-
 import numpy as np
 
 from miv.core.datatype.spikestamps import Spikestamps

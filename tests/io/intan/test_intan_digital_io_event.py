@@ -36,4 +36,6 @@ class TestYourClass:
             np.testing.assert_array_equal(result.data, [[1, 2, 4], [0, 3, 4]])
 
             # Assertions for mock calls
-            mock_generator.assert_called_once_with("test_str", progress_bar=False)
+            mock_generator.assert_called_once_with(
+                "test_str", progress_bar=False, mpi_comm=None
+            )

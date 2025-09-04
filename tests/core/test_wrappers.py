@@ -100,8 +100,9 @@ def test_wrap_generator_no_cache(mock_object_without_cache, tmp_path):
         yield 2
         yield 3
 
+    idx = 0
     assert foo(mock_object_without_cache, 1, 2) == 3
-    assert tuple(foo2(mock_object_without_cache, bar(), bar())) == (2, 4, 6)
+    assert foo2(mock_object_without_cache, idx, 3, 4) == 7
 
     class FooClass(MockObjectWithoutCache):
         @cache_call
@@ -114,7 +115,7 @@ def test_wrap_generator_no_cache(mock_object_without_cache, tmp_path):
 
     a = FooClass(tmp_path)
     assert a(1, 2) == 3
-    assert tuple(a.other(bar(), bar())) == (2, 4, 6)
+    assert a.other(idx, 12, 13) == 25
 
 
 class FooClassV2(MockObjectWithCache):
@@ -144,13 +145,14 @@ def test_wrap_generator_cache(mock_object_with_cache, tmp_path):
         yield 2
         yield 3
 
-    assert tuple(foo(mock_object_with_cache, bar(), bar())) == (2, 4, 6)
+    idx = 0
+    assert foo(mock_object_with_cache, idx, 3, 4) == 7
     for v in mock_object_with_cache.cacher.load_cached():
         assert v == 0  # mock cache only saves zero. (above)
 
     # Test cache_generator_call
     a = FooClassV2(tmp_path)
-    assert tuple(a(bar(), bar())) == (2, 4, 6)
+    assert a(idx, 12, 13) == 25
     for v in a.cacher.load_cached():
         assert v == 0  # mock cache only saves zero. (above)
 

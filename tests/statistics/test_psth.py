@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from miv.core.datatype import Signal, Spikestamps
+from miv.core import Signal, Spikestamps
 from miv.statistics.peristimulus_analysis import PSTH, peri_stimulus_time
 
 SpikeTrainTestSet = [

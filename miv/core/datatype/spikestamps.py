@@ -7,8 +7,6 @@ Spikestamps
 
 """
 
-__all__ = ["Spikestamps"]
-
 from collections.abc import MutableSequence, Sequence, Iterable
 
 import numpy as np
@@ -16,12 +14,11 @@ import quantities as pq
 
 import neo
 
-from .mixin_colapsable import ConcatenateMixin
 from .signal import Signal
-from miv.core.operator.operator import DataNodeMixin
+from ..operator.operator import DataNodeMixin
 
 
-class Spikestamps(ConcatenateMixin, DataNodeMixin, Sequence):
+class Spikestamps(DataNodeMixin, Sequence):
     """List of array of spike times
 
     Represents spikes emitted by the same unit in a period of times.

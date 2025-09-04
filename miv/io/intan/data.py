@@ -25,7 +25,7 @@ import numpy as np
 from tqdm import tqdm
 
 from miv.io.intan import rhs
-from miv.core.datatype import Signal, Spikestamps
+from miv.core import Signal, Spikestamps
 from miv.core.operator.wrapper import cached_method
 from miv.io.openephys.data import Data
 

@@ -1,5 +1,3 @@
-__all__ = ["plot_frequency_domain", "plot_spectral"]
-
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy import fftpack

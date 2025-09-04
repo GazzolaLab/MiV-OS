@@ -1,5 +1,4 @@
 __doc__ = """Multi-channel signal and spike rendering for each MEA channels"""
-__all__ = ["ReplayRecording"]
 
 
 import inspect
@@ -13,7 +12,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 
-from miv.core.datatype import Signal, Spikestamps
+from miv.core import Signal, Spikestamps
 from miv.core.operator.operator import OperatorMixin
 from miv.core.operator.policy import StrictMPIRunner
 from miv.mea.protocol import MEAGeometryProtocol

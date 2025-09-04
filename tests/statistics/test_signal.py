@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from miv.core.datatype import Signal, Spikestamps
+from miv.core import Signal, Spikestamps
 from miv.statistics.signal_statistics import (
     signal_to_noise,
     spike_amplitude_to_background_noise,

@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from miv.core.datatype import Spikestamps
+from miv.core.datatype.spikestamps import Spikestamps
 from miv.statistics import decay_spike_counts, spike_counts_with_kernel
 
 

@@ -1,19 +1,3 @@
-__all__ = [
-    "probability_distribution",
-    "shannon_entropy",
-    "block_entropy",
-    "entropy_rate",
-    "active_information",
-    "mutual_information",
-    "relative_entropy",
-    "joint_entropy",
-    "conditional_entropy",
-    "cross_entropy",
-    "transfer_entropy",
-    "partial_information_decomposition",
-]
-
-
 from typing import Literal
 from collections.abc import Callable
 
@@ -21,7 +5,7 @@ from collections.abc import Callable
 import numpy as np
 from tqdm import tqdm
 
-from miv.core.datatype import Spikestamps
+from miv.core import Spikestamps
 from miv.statistics.spiketrain_statistics import binned_spiketrain
 
 INFO_METRICS_TAG = Literal["self", "pair", "all"]  # Pragma: no cover
@@ -198,7 +182,7 @@ def entropy_rate(
     assert history > 0, "history length should be a finite positive value"
     bin_spike = spiketrains.binning(bin_size=bin_size, t_start=t_start, t_end=t_end)
     entropy_rate = []
-    for idx, bin_spike_channel in enumerate(bin_spike):
+    for _idx, bin_spike_channel in enumerate(bin_spike):
         entropy_rate.append(
             pyinform.entropyrate.entropy_rate(bin_spike_channel, k=history, local=True)[
                 0

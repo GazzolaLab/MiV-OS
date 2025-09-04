@@ -1,15 +1,3 @@
-__all__ = [
-    "firing_rates",
-    "MFRComparison",
-    "interspike_intervals",
-    "coefficient_variation",
-    "binned_spiketrain",
-    "fano_factor",
-    "spike_counts_with_kernel",
-    "decay_spike_counts",
-    "instantaneous_spike_rate",
-]
-
 import os
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -19,8 +7,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import quantities as pq
 
-from miv.core.datatype import Spikestamps
-from miv.core.operator.operator import OperatorMixin
+from miv.core import Spikestamps
+from miv.core import OperatorMixin
 from miv.typing import SpikestampsType
 
 

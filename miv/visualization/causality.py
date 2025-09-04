@@ -1,11 +1,8 @@
-__all__ = ["pairwise_causality_plot", "spike_triggered_average_plot"]
-
-
 import matplotlib.pyplot as plt
 import numpy as np
 from viziphant.spike_train_correlation import plot_corrcoef
 
-from miv.core.datatype import Signal, Spikestamps
+from miv.core import Signal, Spikestamps
 from miv.statistics import pairwise_causality
 from miv.typing import SignalType
 

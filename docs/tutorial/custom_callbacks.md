@@ -24,7 +24,7 @@ In this tutorial, we will learn how to embedd customized plotting script into th
 import numpy as np
 import matplotlib.pyplot as plt
 
-from miv.core.datatype import Signal
+from miv.core import Signal
 from miv.core.operator import Operator, DataLoader
 from miv.core.pipeline import Pipeline
 from miv.io.openephys import DataManager

@@ -3,7 +3,7 @@ import pytest
 import quantities as pq
 from neo.core import Segment, SpikeTrain
 
-from miv.core.datatype import Spikestamps
+from miv.core.datatype.spikestamps import Spikestamps
 from miv.statistics.spiketrain_statistics import firing_rates, interspike_intervals
 
 SpikestampsTestSet = [

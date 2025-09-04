@@ -6,7 +6,7 @@ from dataclasses import dataclass
 import numpy as np
 import scipy.signal as sps
 
-from miv.core.datatype import Signal
+from miv.core import Signal
 from miv.core.operator_generator.operator import GeneratorOperatorMixin
 from miv.core.operator_generator.wrapper import cache_generator_call
 

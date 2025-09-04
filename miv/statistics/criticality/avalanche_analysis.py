@@ -2,8 +2,6 @@ __doc__ = """
 Avalanche Analysis
 """
 
-__all__ = ["AvalancheDetection", "AvalancheAnalysis"]
-
 
 import logging
 import os
@@ -16,7 +14,7 @@ import quantities as pq
 from scipy.optimize import curve_fit
 from tqdm import tqdm
 
-from miv.core.datatype import Spikestamps
+from miv.core import Spikestamps
 from miv.core.operator.operator import OperatorMixin
 from miv.core.operator.wrapper import cache_call
 
@@ -363,7 +361,7 @@ class AvalancheAnalysis(OperatorMixin):
             shapes[count].append(avalanche.sum(axis=1))
 
         fig, axes = plt.subplots(1, 2, figsize=(12, 6))
-        for idx, count in enumerate(shapes.keys()):
+        for _idx, count in enumerate(shapes.keys()):
             shapes[count] = np.array(shapes[count])
             time = np.arange(count) * bin_size
             T = count * bin_size

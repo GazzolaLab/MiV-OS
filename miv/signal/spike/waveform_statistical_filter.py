@@ -16,7 +16,7 @@ from dataclasses import dataclass
 import matplotlib.pyplot as plt
 import numpy as np
 
-from miv.core.datatype import Signal, Spikestamps
+from miv.core import Signal, Spikestamps
 from miv.core.operator.operator import OperatorMixin
 from miv.visualization.event import plot_spiketrain_raster
 

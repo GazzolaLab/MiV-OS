@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from neo.core import AnalogSignal, Segment, SpikeTrain
 
-from miv.core.datatype import Spikestamps
+from miv.core import Spikestamps
 from miv.statistics import fano_factor
 
 # Test set for Fano Factor

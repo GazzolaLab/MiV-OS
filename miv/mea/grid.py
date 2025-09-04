@@ -4,7 +4,7 @@ __all__ = ["GridMEA"]
 import MEAutility
 import numpy as np
 
-from miv.core.datatype import Signal
+from miv.core import Signal
 from miv.mea.base import MEAMixin
 
 

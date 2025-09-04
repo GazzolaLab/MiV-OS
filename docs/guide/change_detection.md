@@ -31,7 +31,7 @@ Here, we provide example of using the Python package [ruptures](https://centre-b
 ```{code-cell} ipython3
 import miv
 from miv.statistics import firing_rates
-from miv.core.datatype import Spikestamps
+from miv.core import Spikestamps
 from miv.statistics import binned_spiketrain
 
 import numpy as np

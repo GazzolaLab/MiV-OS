@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from miv.core.datatype import Spikestamps
-from miv.statistics import burst
+from miv.core import Spikestamps
+from miv.statistics import burst_detection
 from miv.typing import SpikestampsType
 
 

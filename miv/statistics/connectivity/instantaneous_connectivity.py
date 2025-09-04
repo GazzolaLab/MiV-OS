@@ -1,7 +1,6 @@
 __doc__ = """
 Connectivity module for localized instantaneous analysis
 """
-__all__ = ["InstantaneousConnectivity"]
 
 
 import itertools
@@ -16,7 +15,7 @@ import pyinform
 import pyinform.transferentropy as pyte
 from tqdm import tqdm
 
-from miv.core.datatype import Spikestamps
+from miv.core import Spikestamps
 from miv.core.operator.operator import OperatorMixin
 from miv.core.operator.policy import StrictMPIRunner
 
@@ -93,9 +92,11 @@ class InstantaneousConnectivity(OperatorMixin):
             )[0]
 
             FFMpegWriter = manimation.writers["ffmpeg"]
-            metadata = dict(
-                title="Movie Test", artist="Matplotlib", comment="Movie support!"
-            )
+            metadata = {
+                "title": "Movie Test",
+                "artist": "Matplotlib",
+                "comment": "Movie support!",
+            }
             writer = FFMpegWriter(fps=self.fps, metadata=metadata)
             video_name = os.path.join(
                 self.analysis_path, f"local_te_channel_{i}_{j}.mp4"

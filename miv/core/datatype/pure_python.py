@@ -5,8 +5,8 @@ from collections.abc import Generator, Iterator
 
 import numpy as np
 
-from miv.core.operator.operator import DataNodeMixin
-from miv.core.operator.chainable import BaseChainingMixin
+from ..operator.operator import DataNodeMixin
+from ..operator.chainable import BaseChainingMixin
 
 PurePythonTypes: TypeAlias = int | float | str | bool | list | tuple | dict
 

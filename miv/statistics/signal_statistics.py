@@ -1,5 +1,3 @@
-__all__ = ["signal_to_noise", "spike_amplitude_to_background_noise"]
-
 import numpy as np
 
 from miv.signal.spike.waveform import ExtractWaveforms
