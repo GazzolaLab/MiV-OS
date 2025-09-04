@@ -12,10 +12,11 @@ def cache_generator_call(func: Callable) -> Callable:
         self: GeneratorOperator,
         idx,
         *args,
+        **kwargs,
     ) -> Generator | Any | None:
         tag = "data"
         cacher = self.cacher
-        result = func(self, *args)
+        result = func(self, *args, **kwargs)
         if result is not None:
             cacher.save_cache(result, idx=idx, tag=tag)
             if idx == 0:

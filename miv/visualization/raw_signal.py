@@ -53,7 +53,7 @@ class MultiChannelSignalVisualization(OperatorMixin):
             metadata = {
                 "title": "Signal Visualization",
                 "artist": "MIV",
-                "comment": "Multi-channel signal rendering"
+                "comment": "Multi-channel signal rendering",
             }
             writer = FFMpegWriter(fps=self.fps, metadata=metadata)
 

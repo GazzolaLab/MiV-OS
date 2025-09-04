@@ -28,7 +28,9 @@ def burst_array(spiketrain: Spikestamps, min_isi: float, min_len: int):
     return Q
 
 
-def burst(spiketrains: SpikestampsType, channel: int, min_isi: float, min_len: int):
+def burst_detection(
+    spiketrains: SpikestampsType, channel: int, min_isi: float, min_len: int
+):
     """
     Calculates parameters critical to characterize bursting phenomenon on a single channel. [1]_
     Bursting is defined as the occurence of a specified number of spikes (usually >10), with a small interspike interval (usually < 100ms) [2]_, [3]_

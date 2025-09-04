@@ -15,9 +15,16 @@ def probe_times():
     return np.linspace(0, 10, 5)
 
 
+def test_no_spike_counts():
+    result = decay_spike_counts(
+        [], np.arange(10), amplitude=1.0, decay_rate=5, batchsize=256
+    )
+    np.testing.assert_allclose(np.zeros(10), result)
+
+
 def test_decay_spike_counts(spiketrain, probe_times):
     result = decay_spike_counts(
-        spiketrain, probe_times, amplitude=1.0, decay_rate=5, batchsize=256
+        spiketrain, probe_times, amplitude=0.2, decay_rate=5, batchsize=256
     )
     print(repr(result))
 

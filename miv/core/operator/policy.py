@@ -13,6 +13,8 @@ from typing import TYPE_CHECKING, Any, Protocol, cast
 import multiprocessing
 from collections.abc import Callable, Generator
 
+from miv.core.datatype.operation.concatenate import concatenate
+
 if TYPE_CHECKING:
     # This will likely cause circular import error
     from miv.core.datatype import DataTypes
@@ -156,7 +158,7 @@ class SupportMPIMerge(StrictMPIRunner):
 
         outputs = self.comm.gather(output, root=self.root)
         if self.is_root():
-            result = output.concatenate(outputs)  # Class method
+            result = concatenate(outputs)  # Class method
         else:
             result = None
         result = self.comm.bcast(result, root=self.root)
@@ -178,7 +180,7 @@ class SupportMPIWithoutBroadcast(StrictMPIRunner):
 
         outputs = self.comm.gather(output, root=self.root)
         if self.is_root():
-            result = output.concatenate(outputs)  # Class method
+            result = concatenate(outputs)  # Class method
         else:
             result = None
         return result

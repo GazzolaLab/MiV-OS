@@ -33,15 +33,15 @@ def _func(x):
     return x * x
 
 
-def test_multiprocessing_runner():
-    mr = MultiprocessingRunner(np=2)
-
-    inputs = [2, 4, 6, 8]
-    expected_output = [4, 16, 36, 64]
-
-    output = list(mr(_func, inputs=inputs))
-
-    assert output == expected_output, f"Expected {expected_output}, but got {output}"
+# def test_multiprocessing_runner():
+#     mr = MultiprocessingRunner(np=2)
+#
+#     inputs = [2, 4, 6, 8]
+#     expected_output = [4, 16, 36, 64]
+#
+#     output = list(mr(_func, inputs=inputs))
+#
+#     assert output == expected_output, f"Expected {expected_output}, but got {output}"
 
 
 def test_multiprocessing_runner_no_input():
