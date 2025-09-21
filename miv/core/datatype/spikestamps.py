@@ -33,8 +33,8 @@ class Spikestamps(DataNodeMixin, Sequence):
         self.data: list[MutableSequence[float]] = iterable
 
     @classmethod
-    def empty(clf, number_of_channels: int) -> "Spikestamps":
-        return clf([[] for _ in range(number_of_channels)])
+    def empty(clf) -> "Spikestamps":
+        return clf()
 
     @property
     def number_of_channels(self) -> int:
@@ -45,7 +45,7 @@ class Spikestamps(DataNodeMixin, Sequence):
         self.data[index] = item
 
     def __getitem__(self, index: int) -> MutableSequence[float]:  # type: ignore[override]
-        return self.data[index]
+        return np.asarray(self.data[index])
 
     def __len__(self) -> int:
         return len(self.data)
@@ -84,8 +84,7 @@ class Spikestamps(DataNodeMixin, Sequence):
         if isinstance(other, type(self)):
             length_diff = len(other) - len(self.data)
             if length_diff > 0:
-                for _ in range(length_diff):
-                    self.data.append([])
+                self.data.extend([[]] * length_diff)
             for idx, array in enumerate(other):
                 self.data[idx].extend(array)
         else:

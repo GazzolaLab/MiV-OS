@@ -1,9 +1,13 @@
-from typing import no_type_check
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .datatype.spikestamps import Spikestamps
 
 # Alias/Shortcut
 from ..import_helper import getter_upon_call
 
 _submodule_paths_for_alias = {
+    "pipeline": ["Pipeline"],
     "datatype.events": ["Events"],
     "datatype.signal": ["Signal"],
     "datatype.spikestamps": ["Spikestamps"],

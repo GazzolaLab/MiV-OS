@@ -4,6 +4,7 @@ from typing import no_type_check
 from ..import_helper import getter_upon_call
 
 _submodule_paths_for_alias = {
+    "baks": ["bayesian_adaptive_kernel_smoother"],
     "burst": ["burst_detection", "burst_array"],
     "info_theory": [
         "probability_distribution",
