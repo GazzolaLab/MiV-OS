@@ -84,7 +84,7 @@ class Spikestamps(DataNodeMixin, Sequence):
         if isinstance(other, type(self)):
             length_diff = len(other) - len(self.data)
             if length_diff > 0:
-                self.data.extend([[]] * length_diff)
+                self.data.extend([[] for _ in range(length_diff)])
             for idx, array in enumerate(other):
                 self.data[idx].extend(array)
         else:
