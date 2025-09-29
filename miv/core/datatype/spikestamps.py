@@ -7,7 +7,7 @@ Spikestamps
 
 """
 
-from collections.abc import MutableSequence, Sequence, Iterable
+from collections.abc import MutableSequence, Sequence, Iterable, Generator
 
 import numpy as np
 import quantities as pq
@@ -120,6 +120,54 @@ class Spikestamps(DataNodeMixin, Sequence):
                 (arr - t_start) if arr.size > 0 else arr for arr in spikestamps_array
             ]
         return Spikestamps(spikestamps_array)
+
+    def get_view_stream(
+        self,
+        t_start: float,
+        t_end: float,
+        step_size: float,
+        interval: float,
+        reset_start: bool = False,
+    ) -> Generator["Spikestamps", None, None]:
+        """
+        Get spikestamps view in a stream of time.
+        """
+        n_intervals = int(np.ceil((t_end - t_start) / step_size)) + 1
+        bins = (np.arange(n_intervals) * step_size) + t_start
+        window_size = int(np.ceil(interval / step_size))
+        digitized_indices = [np.digitize(arr, bins, right=True) for arr in self.data]
+
+        start_time = t_start
+        start_indices, end_indices = 1, window_size + 1
+        sindices = [np.searchsorted(arr, start_indices) for arr in digitized_indices]
+        eindices = [np.searchsorted(arr, end_indices) for arr in digitized_indices]
+        while start_indices < n_intervals:
+            if reset_start:
+                view = [
+                    arr[sidx:eidx] - start_time
+                    for arr, sidx, eidx in zip(
+                        self.data, sindices, eindices, strict=False
+                    )
+                ]
+            else:
+                view = [
+                    arr[sidx:eidx]
+                    for arr, sidx, eidx in zip(
+                        self.data, sindices, eindices, strict=False
+                    )
+                ]
+
+            yield Spikestamps(view)
+
+            start_indices += 1
+            end_indices += 1
+            start_time += step_size
+            sindices = [
+                np.searchsorted(arr, start_indices) for arr in digitized_indices
+            ]
+            eindices = [np.searchsorted(arr, end_indices) for arr in digitized_indices]
+
+        return True
 
     def select(self, indices: Sequence[int], keepdims: bool = True) -> "Spikestamps":
         """Select channels by indices. The order of the channels will be preserved."""
