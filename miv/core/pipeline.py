@@ -4,7 +4,6 @@ __doc__ = """
    :members:
 
 """
-__all__ = ["Pipeline"]
 
 from typing import cast
 from collections.abc import Sequence
