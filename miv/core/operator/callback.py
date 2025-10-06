@@ -19,6 +19,17 @@ from miv.core.operator.cachable import (
     CACHE_POLICY,
 )
 
+def execute_callback(logger, callback, *args, **kwargs):
+    """
+    Executes a callback function with optional args/kwargs.
+    Logs a warning if an exception occurs.
+    """
+    try:
+        return callback(*args, **kwargs)
+    except Exception as e:
+        logger.warning("There was an issue running the following callback: %s", e)
+        return None  # or raise/log/handle as needed
+
 
 # MixinOperators
 def get_methods_from_feature_classes_by_startswith_str(
@@ -125,7 +136,7 @@ class BaseCallbackMixin:
             self, "after_run"
         )
         for callback in predefined_callbacks:
-            callback(*args, **kwargs)
+            execute_callback(callback, *args, **kwargs)
 
         self._done_flag_after_run = True
 
@@ -151,7 +162,7 @@ class BaseCallbackMixin:
 
         plotters = get_methods_from_feature_classes_by_startswith_str(self, "plot_")
         for plotter in plotters:
-            plotter(output, inputs, show=show, save_path=save_path)
+            execute_callback(self.logger, plotter, output, inputs, show=show, save_path=save_path)
         if not show:
             plt.close("all")
 

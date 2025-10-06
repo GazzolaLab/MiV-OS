@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 
 from miv.core.operator.callback import (
     get_methods_from_feature_classes_by_startswith_str,
+    execute_callback
 )
 
 if TYPE_CHECKING:
@@ -70,7 +71,9 @@ class GeneratorCallbackMixin:
             self, "generator_plot_"
         )
         for plotter in plotters_for_generator_out:
-            plotter(
+            execute_callback(
+                self.logger,
+                plotter,
                 output,
                 inputs,
                 show=show,
@@ -94,7 +97,9 @@ class GeneratorCallbackMixin:
         )
 
         for plotter in plotters_for_generator_out:
-            plotter(
+            execute_callback(
+                self.logger,
+                plotter,
                 output,
                 inputs,
                 show=show,

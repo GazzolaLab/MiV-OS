@@ -270,15 +270,31 @@ class ThresholdCutoff(OperatorMixin):
         for idx in range(n_terms):
             if self.num_save is not None and idx > self.num_save:
                 break
-            fig, ax = plot_spiketrain_raster(
-                spikestamps, idx * term + t0, min((idx + 1) * term + t0, tf)
-            )
+            #fig, ax = plot_spiketrain_raster(
+            #    spikestamps, idx * term + t0, min((idx + 1) * term + t0, tf)
+            #)
+            t_start = idx * term + t0
+            t_stop = min((idx+1)*term + t0, tf)
+            evts = spikestamps.get_view(t_start, t_stop).data
+            X = np.concatenate([np.ones(len(arr))*idx for idx, arr in enumerate(evts)])
+            Y = np.concatenate(evts)
+            fig = plt.figure(figsize=(8, 6))
+            plt.scatter(Y, X, color="#4a5fa2", s=0.5)
+            plt.xlim(t_start, t_stop)
+            plt.ylabel("Channel")
+            plt.xlabel("Time (s)")
+            plt.title(f"Raster plot (from {t_start} to {t_stop})")
             if save_path is not None:
                 plt.savefig(
                     os.path.join(save_path, f"spiketrain_raster_{idx:03d}.png"),
                     format="png",
                     dpi=300,
                 )
+                # plt.savefig(
+                #     os.path.join(save_path, f"spiketrain_raster_{idx:03d}.eps"),
+                #     format="eps",
+                #     dpi=300,
+                # )
             if not show:
                 plt.close("all")
         if show:

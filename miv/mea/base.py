@@ -36,7 +36,6 @@ class MEAMixin(BaseChainingMixin, DefaultLoggerMixin):
         """Simplified view of MEA orientation"""
         raise NotImplementedError
 
-    @property
     def output(self):
         return self
 
