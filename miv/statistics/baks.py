@@ -16,7 +16,7 @@ import numpy as np
 import scipy.special as sps
 from numba import njit
 
-from miv.core.datatype import Spikestamps
+from miv.core import Spikestamps
 
 
 def bayesian_adaptive_kernel_smoother(
@@ -116,7 +116,7 @@ def _numba_firing_rate(spiketimes, probe_time, h):
 if __name__ == "__main__":
     import time
 
-    from miv.core.datatype import Spikestamps
+    from miv.core import Spikestamps
 
     from numba import set_num_threads
 

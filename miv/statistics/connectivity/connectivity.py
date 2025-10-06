@@ -1,7 +1,6 @@
 __doc__ = """
 Connectivity module
 """
-__all__ = ["DirectedConnectivity", "UndirectedConnectivity"]
 
 import csv
 import functools
@@ -19,7 +18,7 @@ import scipy.stats as spst
 from elephant.causality.granger import pairwise_granger
 from tqdm import tqdm
 
-from miv.core.datatype import Signal, Spikestamps
+from miv.core import Signal, Spikestamps
 from miv.core.operator.operator import OperatorMixin
 from miv.core.operator.wrapper import cache_call
 from miv.mea import mea_map
@@ -133,7 +132,7 @@ class DirectedConnectivity(OperatorMixin):
         #        adj_matrix[i, j] = result[0] < self.p_threshold
         #        connectivity_metric_matrix[i, j] = result[1]
         pbar = tqdm(total=len(pairs), disable=not self.progress_bar)
-        for idx, pair in enumerate(pairs):
+        for _idx, pair in enumerate(pairs):
             pbar.update(1)
             result = func(pair)
             i, j = pair
@@ -142,11 +141,11 @@ class DirectedConnectivity(OperatorMixin):
 
         connection_ratio = adj_matrix.sum() / adj_matrix.ravel().shape[0]
 
-        info = dict(
-            adjacency_matrix=adj_matrix,
-            connectivity_matrix=connectivity_metric_matrix,
-            connection_ratio=connection_ratio,
-        )
+        info = {
+            "adjacency_matrix": adj_matrix,
+            "connectivity_matrix": connectivity_metric_matrix,
+            "connection_ratio": connection_ratio,
+        }
 
         return info
 
@@ -471,7 +470,7 @@ class UndirectedConnectivity(OperatorMixin):
             seed=self.seed,
         )
         pbar = tqdm(total=len(pairs), disable=not self.progress_bar)
-        for idx, pair in enumerate(pairs):
+        for _idx, pair in enumerate(pairs):
             pbar.update(1)
             result = func(pair)
             i, j = pair
@@ -481,11 +480,11 @@ class UndirectedConnectivity(OperatorMixin):
 
         connection_ratio = adj_matrix.sum() / adj_matrix.ravel().shape[0]
 
-        info = dict(
-            adjacency_matrix=adj_matrix,
-            connectivity_matrix=connectivity_metric_matrix,
-            connection_ratio=connection_ratio,
-        )
+        info = {
+            "adjacency_matrix": adj_matrix,
+            "connectivity_matrix": connectivity_metric_matrix,
+            "connection_ratio": connection_ratio,
+        }
 
         return info
 

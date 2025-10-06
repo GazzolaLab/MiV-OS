@@ -1,15 +1,3 @@
-__all__ = [
-    "firing_rates",
-    "MFRComparison",
-    "interspike_intervals",
-    "coefficient_variation",
-    "binned_spiketrain",
-    "fano_factor",
-    "spike_counts_with_kernel",
-    "decay_spike_counts",
-    "instantaneous_spike_rate",
-]
-
 import os
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -17,10 +5,11 @@ from typing import Any
 
 import matplotlib.pyplot as plt
 import numpy as np
+from numba import njit
 import quantities as pq
 
-from miv.core.datatype import Spikestamps
-from miv.core.operator.operator import OperatorMixin
+from miv.core import Spikestamps
+from miv.core import OperatorMixin
 from miv.typing import SpikestampsType
 
 
@@ -237,18 +226,9 @@ def spike_counts_with_kernel(spiketrain, probe_times, kernel: Callable, batchsiz
     if len(spiketrain) == 0:
         # Zero spike in the channel
         return np.zeros_like(probe_times)
-    spiketrain = np.asarray(spiketrain)
     result = np.zeros_like(probe_times)
 
-    # Non-batch implementation : temporary
-    for s in spiketrain:
-        mask = (s + 1e-8) > probe_times
-        exponent = kernel((s - probe_times)[mask])
-        exponent[exponent < 1e-2] = 0.0
-        result[mask] += exponent
-    return result
-
-    # Batch implementation
+    # Batch implementation (alternative implementation)
     batchsize = min(spiketrain.shape[0], batchsize)
     num_sections = spiketrain.shape[0] // batchsize + (
         1 if spiketrain.shape[0] % batchsize > 0 else 0
@@ -258,22 +238,81 @@ def spike_counts_with_kernel(spiketrain, probe_times, kernel: Callable, batchsiz
         exponent = (
             np.tile(probe_times, (len(subspiketrain), 1)) - subspiketrain[:, None]
         )
+        # Zero out future spikes (exponent < 0)
         mask = exponent < 0
         exponent[mask] = 0
+
         decay_count = kernel(exponent)
-        # decay_count = np.exp(-decay_rate * exponent)
+        # Zero out future spikes again after kernel application
         decay_count[mask] = 0
+
         result += decay_count.sum(axis=0)
+
     return result
+
+
+@njit(parallel=True)
+def nb_spike_counts_with_kernel(
+    spiketrain, probe_times, kernel: Callable, batchsize=32
+):
+    """
+    Both spiketrain and probe_times should be a 1-d array representing time.
+
+    Parameters
+    ----------
+    spiketrain :
+        Single-channel spiketrain
+    probe_times :
+        probe_times
+    kernel :
+        kernel function
+    """
+    n_spike = spiketrain.size
+    n_probe = probe_times.size
+    if n_probe == 0:
+        return np.zeros(0)
+    if n_spike == 0:
+        return np.zeros_like(probe_times)
+
+    out = np.zeros_like(probe_times)
+
+    for i in range(n_spike):
+        s = spiketrain[i]
+        # first probe index with t >= s (requires sorted probe_times)
+        j0 = np.searchsorted(probe_times, s)
+        for j in range(j0, n_probe):
+            dt = probe_times[j] - s  # dt >= 0 by construction
+            out[j] += kernel(dt)
+
+    return out
+
+    # # Batch implementation (alternative implementation)
+    # exponent = np.tile(probe_times, (len(spiketrain), 1)) - spiketrain[:, None]
+    # # Zero out future spikes (exponent < 0)
+    # mask = exponent < 0
+    # exponent[mask] = 0
+
+    # decay_count = kernel(exponent)
+    # # Zero out future spikes again after kernel application
+    # decay_count[mask] = 0
+
+    # out += decay_count.sum(axis=0)
+
+    # return out
 
 
 def decay_spike_counts(
     spiketrain, probe_times, amplitude=1.0, decay_rate=5, batchsize=256
 ):
-    def kernel(x):
-        return amplitude * np.exp(-decay_rate * x) / decay_rate
+    @njit
+    def _decay_kernel(x):
+        return amplitude * np.exp(-decay_rate * x) * decay_rate
 
-    return spike_counts_with_kernel(spiketrain, probe_times, kernel, batchsize)
+    return nb_spike_counts_with_kernel(
+        np.asarray(spiketrain),
+        probe_times,
+        _decay_kernel,  # , batchsize
+    )
 
 
 def instantaneous_spike_rate(spiketrain, probe_times, window=1, batchsize=32):
@@ -281,10 +320,10 @@ def instantaneous_spike_rate(spiketrain, probe_times, window=1, batchsize=32):
     Set window=1 for unit Hz.
     """
 
-    def kernel(x):
+    def _kernel(x):
         return np.logical_and(x >= 0, x <= window).astype(np.float64)
 
-    return spike_counts_with_kernel(spiketrain, probe_times, kernel, batchsize)
+    return spike_counts_with_kernel(spiketrain, probe_times, _kernel, batchsize)
 
 
 def binned_spiketrain(self):

@@ -2,7 +2,7 @@ import neo
 import numpy as np
 import pytest
 
-from miv.core.datatype import Signal
+from miv.core import Signal
 from miv.signal.spike import ThresholdCutoff
 
 

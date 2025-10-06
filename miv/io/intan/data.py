@@ -12,7 +12,7 @@ Module (Intan)
 """
 __all__ = ["DataIntan", "DataIntanTriggered"]
 
-from typing import Any, cast
+from typing import Any, cast, TYPE_CHECKING
 from collections.abc import Iterable, Generator
 
 import logging
@@ -25,18 +25,19 @@ import numpy as np
 from tqdm import tqdm
 
 from miv.io.intan import rhs
-from miv.core.datatype import Signal, Spikestamps
+from miv.core import Signal, Spikestamps
 from miv.core.operator.wrapper import cached_method
 from miv.io.openephys.data import Data
+
+if TYPE_CHECKING:
+    import mpi4py
 
 
 class DataIntan(Data):
     """Single data unit handler, collected from Intan.
 
-    Each data unit that contains single recording. This class provides useful tools,
-    such as masking channel, export data, interface with other packages, etc.
-    If you have multiple recordings you would like to handle at the same time, use
-    `DataManager` instead.
+    Intan collect all recording in a same directory with 1 minute interval (single .rhs).
+    This classs accumulate all .rhs as a single data unit.
 
     By default recording setup, the following directory structure is expected in ``data_path``::
 
@@ -51,6 +52,11 @@ class DataIntan(Data):
         Parameters
         ----------
         data_path : str
+
+        Examples
+        --------
+            >>> data = DataIntan(data_path)
+            >>> data >> bandpass_filter >> threshold_cutoff
     """
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
@@ -101,12 +107,20 @@ class DataIntan(Data):
 
     def load(
         self,
+        mpi_comm: "mpi4py.MPI.Comm | None" = None,
+        progress_bar: bool = False,
         *args: Any,
         **kwargs: Any,
     ) -> Generator[Signal]:
         """
         Iterator to load data fragmentally.
         This function loads each file separately.
+
+        Parameters
+        ----------
+        mpi_comm: Optional[MPI.COMM_WORLD]
+            (Experimental Feature)
+        progress_bar: bool
 
         Examples
         --------
@@ -129,17 +143,31 @@ class DataIntan(Data):
         """
 
         active_channels, total = self._get_active_channels()
-        for sig in self._generator_by_channel_name("amplifier_data"):
+        for sig in self._generator_by_channel_name(
+            "amplifier_data", progress_bar=progress_bar, mpi_comm=mpi_comm
+        ):
             self._expand_channels(sig, active_channels, total)
             yield sig
 
-    def get_stimulation(self, progress_bar: bool = False) -> Signal:
+    def get_stimulation(
+        self, progress_bar: bool = False, mpi_comm: "mpi4py.MPI.Comm | None" = None
+    ) -> Signal:
         """
         Load stimulation recorded data.
+
+        Parameters
+        ----------
+        progress_bar : bool
+            Visible progress bar
+        mpi_comm: Optional[MPI.COMM_WORLD]
+            (Experimental Feature) If the load is executed in MPI environment, user can pass
+            MPI.COMM_WORLD to split the load.
         """
         signals, timestamps = [], []
         sampling_rate: float
-        for data in self._generator_by_channel_name("stim_data", progress_bar):
+        for data in self._generator_by_channel_name(
+            "stim_data", progress_bar=False, mpi_comm=mpi_comm
+        ):
             signals.append(data.data)
             timestamps.append(data.timestamps)
             sampling_rate = data.rate
@@ -154,11 +182,28 @@ class DataIntan(Data):
         return signal
 
     def _generator_by_channel_name(
-        self, name: str, progress_bar: bool = False
+        self,
+        name: str,
+        progress_bar: bool = False,
+        mpi_comm: "mpi4py.MPI.Comm | None" = None,
     ) -> Generator[Signal]:
         if not self.check_path_validity():
             raise FileNotFoundError("Data directory does not have all necessary files.")
         files = self.get_recording_files()
+
+        # Handle MPI task splitting
+        if mpi_comm is not None:
+            from miv.utils.mpi import task_index_split
+
+            tasks = task_index_split(mpi_comm, len(files))
+            files = [files[i] for i in tasks]
+            self.logger.info(
+                f"MPI enabled: rank {mpi_comm.Get_rank()}/{mpi_comm.Get_size()} processing {len(files)} files out of {len(self.get_recording_files())} total files"
+            )
+        else:
+            # None-mpi case: Load all files
+            tasks = list(range(len(files)))
+
         # Get sampling rate from setting file
         setting_path = os.path.join(self.data_path, "settings.xml")
         sampling_rate = int(ET.parse(setting_path).getroot().attrib["SampleRateHertz"])
@@ -278,10 +323,16 @@ class DataIntan(Data):
         return ret
 
     def _load_digital_event_common(
-        self, name: str, num_channels: int, progress_bar: bool = False
+        self,
+        name: str,
+        num_channels: int,
+        progress_bar: bool = False,
+        mpi_comm: "mpi4py.MPI.Comm | None" = None,
     ) -> Spikestamps:
         stamps: list[list[float]] = [[] for _ in range(num_channels)]
-        for sig in self._generator_by_channel_name(name, progress_bar=progress_bar):
+        for sig in self._generator_by_channel_name(
+            name, progress_bar=progress_bar, mpi_comm=mpi_comm
+        ):
             for channel in range(num_channels):
                 index = np.where(sig.data[:, channel])[0]
                 stamps[channel].extend(np.asarray(sig.timestamps)[index])
@@ -291,6 +342,7 @@ class DataIntan(Data):
     def load_digital_in_event(
         self,
         progress_bar: bool = False,
+        mpi_comm: "mpi4py.MPI.Comm | None" = None,
     ) -> Spikestamps:  # pragma: no cover
         """
         Load recorded data from digital input ports.
@@ -298,19 +350,25 @@ class DataIntan(Data):
 
         Parameters
         ----------
-        progress_bar : bool, optional
+        progress_bar : bool | None
             Show progress bar, by default False
+        mpi_comm: MPI.COMM_WORLD | None
+            (Experimental Feature)
         """
         self.header = self._read_header()
         num_channels = self.header["num_board_dig_in_channels"]
         return self._load_digital_event_common(
-            "board_dig_in_data", num_channels, progress_bar=progress_bar
+            "board_dig_in_data",
+            num_channels,
+            progress_bar=progress_bar,
+            mpi_comm=mpi_comm,
         )
 
     # @cached_method(cache_tag="digital_out")
     def load_digital_out_event(
         self,
         progress_bar: bool = False,
+        mpi_comm: "mpi4py.MPI.Comm | None" = None,
     ) -> Spikestamps:  # pragma: no cover
         """
         Load recorded data from digital output ports.
@@ -318,13 +376,18 @@ class DataIntan(Data):
 
         Parameters
         ----------
-        progress_bar : bool, optional
+        progress_bar : bool, None
             Show progress bar, by default False
+        mpi_comm: MPI.COMM_WORLD | None
+            (Experimental Feature)
         """
         self.header = self._read_header()
         num_channels = self.header["num_board_dig_out_channels"]
         return self._load_digital_event_common(
-            "board_dig_out_data", num_channels, progress_bar=progress_bar
+            "board_dig_out_data",
+            num_channels,
+            progress_bar=progress_bar,
+            mpi_comm=mpi_comm,
         )
 
     # @cached_method(cache_tag="ttl_events")
@@ -333,6 +396,7 @@ class DataIntan(Data):
         deadtime: float = 0.002,
         compress: bool = False,
         progress_bar: bool = False,
+        mpi_comm: "mpi4py.MPI.Comm | None" = None,
     ) -> Signal:
         """
         Load TTL events recorded data.
@@ -345,12 +409,16 @@ class DataIntan(Data):
             If True, reduce rate of the signal. (default: False)
         progress_bar : bool
             If True, show progress bar. (default: False)
+        mpi_comm: Optional[MPI.COMM_WORLD]
+            (Experimental Feature)
         """
 
         signals, timestamps = [], []
         sampling_rate: float
         active_channels, total = self._get_active_channels()
-        for data in self._generator_by_channel_name("stim_data", progress_bar):
+        for data in self._generator_by_channel_name(
+            "stim_data", progress_bar, mpi_comm
+        ):
             self._expand_channels(data, active_channels, total)
             dead_time_idx = int(deadtime * data.rate)
             num_channels = data.number_of_channels
@@ -510,7 +578,10 @@ class DataIntanTriggered(DataIntan):
         return groups[self.index]["paths"]
 
     def _generator_by_channel_name(
-        self, name: str, progress_bar: bool = False
+        self,
+        name: str,
+        progress_bar: bool = False,
+        mpi_comm: "mpi4py.MPI.Comm | None" = None,
     ) -> Generator[Signal]:
         # TODO: move out _get_active_channels
         if not self.check_path_validity():
@@ -519,6 +590,19 @@ class DataIntanTriggered(DataIntan):
         files = groups[self.index]["paths"]
         sindex = groups[self.index]["start index"]
         eindex = groups[self.index]["end index"]
+
+        # Handle MPI task splitting for triggered data
+        if mpi_comm is not None:
+            from miv.utils.mpi import task_index_split
+
+            tasks = task_index_split(mpi_comm, len(files))
+            files = [files[i] for i in tasks]
+            sindex = [sindex[i] for i in tasks]
+            eindex = [eindex[i] for i in tasks]
+            self.logger.info(
+                f"MPI enabled: rank {mpi_comm.Get_rank()}/{mpi_comm.Get_size()} processing {len(files)} triggered segments out of {len(groups[self.index]['paths'])} total segments"
+            )
+
         # Get sampling rate from setting file
         setting_path = os.path.join(self.data_path, "settings.xml")
         sampling_rate = int(ET.parse(setting_path).getroot().attrib["SampleRateHertz"])

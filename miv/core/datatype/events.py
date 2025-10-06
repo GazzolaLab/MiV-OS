@@ -7,7 +7,6 @@ Events
 
 """
 
-__all__ = ["Events"]
 
 from typing import cast
 
@@ -15,12 +14,11 @@ from typing import cast
 import numpy as np
 import quantities as pq
 
-from miv.core.datatype.mixin_colapsable import ConcatenateMixin
-from miv.core.datatype.signal import Signal
-from miv.core.operator.operator import DataNodeMixin
+from ..datatype.signal import Signal
+from ..operator.operator import DataNodeMixin
 
 
-class Events(ConcatenateMixin, DataNodeMixin):
+class Events(DataNodeMixin):
     """
     A list of events.
 
@@ -30,6 +28,10 @@ class Events(ConcatenateMixin, DataNodeMixin):
     def __init__(self, data: list[float] | None = None) -> None:
         super().__init__()
         self.data = np.asarray(data) if data is not None else np.array([])
+
+    @classmethod
+    def empty(clf) -> "Events":
+        return clf()
 
     def append(self, item: float) -> None:
         self.data = np.append(self.data, item)

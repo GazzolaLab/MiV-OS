@@ -7,8 +7,6 @@ Signal
 
 """
 
-__all__ = ["Signal"]
-
 from typing import cast
 
 import pickle
@@ -16,14 +14,13 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from miv.core.datatype.mixin_colapsable import ConcatenateMixin
-from miv.core.operator.operator import DataNodeMixin
-from miv.core.operator.policy import SupportMultiprocessing
+from ..operator.operator import DataNodeMixin
+from ..operator.policy import SupportMultiprocessing
 from miv.typing import SignalType, SpikestampsType
 
 
 @dataclass
-class Signal(SupportMultiprocessing, DataNodeMixin, ConcatenateMixin):
+class Signal(SupportMultiprocessing, DataNodeMixin):
     """
     Contiguous array of raw signal type.
 
@@ -42,6 +39,13 @@ class Signal(SupportMultiprocessing, DataNodeMixin, ConcatenateMixin):
         super().__init__()
         self.data = np.asarray(self.data)
         assert len(self.data.shape) == 2, "Signal must be 2D array"
+
+    @classmethod
+    def empty(clf, number_of_channels: int) -> "Signal":
+        return clf(
+            data=[[] for _ in range(number_of_channels)],
+            timestamps=[],
+        )
 
     @property
     def number_of_channels(self) -> int:

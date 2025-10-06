@@ -35,7 +35,7 @@ from tqdm import tqdm
 from miv.io import load_continuous_data
 from miv.signal.filter import ButterBandpass
 from miv.signal.spike import ThresholdCutoff
-from miv.core.datatype import Spikestamps
+from miv.core import Spikestamps
 ```
 
 ## Import Data

@@ -21,6 +21,9 @@ class _MEA:
     _reg_electrode_paths = [
         os.path.join(os.path.split(MEAutility.__file__)[0], "electrodes"),  # default
         os.path.join(os.path.split(__file__)[0], "electrodes"),  # for development
+        os.path.join(
+            os.path.split(__file__)[0], "electrodes_Y_junction"
+        ),  # for development
     ]
 
     # Make it singleton class

@@ -27,7 +27,6 @@ from miv.utils.formatter import TColors
 
 if TYPE_CHECKING:
     from .protocol import _Cachable, _Node
-    from miv.core.datatype import DataTypes
 
 # ON: Always use cache if cache exist. Otherwise, run and save cache.
 # OFF: Never use cache functions, always run. No cache save.
@@ -57,12 +56,10 @@ class _CacherProtocol(Protocol):
 
 def when_policy_is(*allowed_policy: CACHE_POLICY) -> Callable:
     def decorator(
-        func: Callable[[_CacherProtocol, Any, Any], bool | DataTypes],
+        func: Callable[[_CacherProtocol, Any, Any], Any],
     ) -> Callable:
         # @functools.wraps(func) # TODO: fix this
-        def wrapper(
-            self: _CacherProtocol, *args: Any, **kwargs: Any
-        ) -> bool | DataTypes:
+        def wrapper(self: _CacherProtocol, *args: Any, **kwargs: Any) -> Any:
             if self.policy in allowed_policy:
                 return func(self, *args, **kwargs)
             else:
@@ -162,7 +159,7 @@ class DataclassCacher(BaseCacher):
             ) from err
         return True
 
-    def load_cached(self, tag: str = "data") -> Generator[DataTypes]:
+    def load_cached(self, tag: str = "data") -> Generator[Any]:
         paths = glob.glob(self.cache_filename("*", tag=tag))
         paths.sort()
         for path in paths:
@@ -216,7 +213,7 @@ class FunctionalCacher(BaseCacher):
             ) from err
         return True
 
-    def load_cached(self, tag: str = "data") -> Generator[DataTypes]:
+    def load_cached(self, tag: str = "data") -> Generator[Any]:
         path = glob.glob(self.cache_filename(0, tag=tag))[0]
         with open(path, "rb") as f:
             self.parent.logger.info(f"Loading cache from: {path}")

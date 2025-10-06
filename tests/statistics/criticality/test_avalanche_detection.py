@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 import miv.statistics.criticality.avalanche_analysis as module
-from miv.core.datatype import Signal, Spikestamps
+from miv.core import Signal, Spikestamps
 
 
 @patch("%s.module.plt" % __name__)  # mock matplotlib.plt

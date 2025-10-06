@@ -1,5 +1,4 @@
 __doc__ = """Centrality module"""
-__all__ = ["plot_eigenvector_centrality"]
 
 import os
 

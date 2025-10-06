@@ -3,7 +3,7 @@ from collections.abc import Sequence
 import numpy as np
 import pytest
 
-from miv.core.datatype import Spikestamps
+from miv.core import Spikestamps
 
 
 def test_spikestamps_init():

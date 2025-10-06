@@ -1,9 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from miv.core.datatype import Spikestamps
-from miv.statistics import burst
+from miv.core import Spikestamps
 from miv.typing import SpikestampsType
+from miv.statistics import burst_detection
 
 
 def plot_spiketrain_raster(
@@ -60,13 +60,13 @@ def plot_burst(
     burst_len = []
     burst_rate = []
     for i in np.arange(len(spiketrains)):
-        start_time, burst_duration, burst_len, burst_rate = burst(
+        start_time, burst_duration, burst_len, burst_rate = burst_detection(
             spiketrains, i, min_isi, min_len
         )
         a = np.column_stack((start_time, burst_duration))
         ax.broken_barh(a, (i, 0.5), facecolors="tab:orange")
 
-    times = np.concatenate([train for train in spiketrains])
+    times = np.concatenate(list(spiketrains))
     channel = np.concatenate(
         [np.full_like(train, i, dtype=np.float_) for i, train in enumerate(spiketrains)]
     )

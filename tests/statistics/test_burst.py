@@ -6,7 +6,7 @@ from neo.core import AnalogSignal, Segment, SpikeTrain
 
 
 def test_burst_analysis_output():
-    from miv.statistics import burst
+    from miv.statistics import burst_detection
 
     # Initialize the spiketrain as below
     seg = Segment(index=1)
@@ -18,7 +18,7 @@ def test_burst_analysis_output():
     # train0 = SpikeTrain(times=[0.1,4,5,5.1,5.2,9.5], units='sec', t_stop=10)
     seg.spiketrains.append(train0)
 
-    output = burst(seg.spiketrains, 0, 0.2, 2)
+    output = burst_detection(seg.spiketrains, 0, 0.2, 2)
     # The function above should return two burst events from 1.2 (duration 0.4, length 5, rate 12.5 )
     # and 5(duration 0.2, length 3, rate 15)
     np.testing.assert_allclose(output[0], [1.2, 5])
@@ -34,7 +34,7 @@ def test_burst_analysis_output():
     )
     seg1.spiketrains.append(train1)
     with np.testing.assert_raises(AssertionError):
-        output = burst(seg1.spiketrains, 0, 0.2, 2)
+        output = burst_detection(seg1.spiketrains, 0, 0.2, 2)
     # The function above should throw an error since the rate will become 1/0
 
     # When the first spike should be in a burst
@@ -46,7 +46,7 @@ def test_burst_analysis_output():
     )
     seg2.spiketrains.append(train2)
 
-    output = burst(seg2.spiketrains, 0, 0.2, 2)
+    output = burst_detection(seg2.spiketrains, 0, 0.2, 2)
     np.testing.assert_allclose(output[0], [1.1, 5])
     np.testing.assert_allclose(output[1], [0.5, 0.2])
     np.testing.assert_allclose(output[2], [6, 3])

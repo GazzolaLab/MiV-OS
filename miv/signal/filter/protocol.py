@@ -4,7 +4,7 @@ __all__ = ["FilterProtocol"]
 from typing import Protocol
 
 
-from miv.core.datatype import Signal
+from miv.core import Signal
 
 
 class FilterProtocol(Protocol):

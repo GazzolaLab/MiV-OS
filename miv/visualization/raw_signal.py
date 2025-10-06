@@ -1,5 +1,4 @@
 __doc__ = """Multi-channel signal plotting for MEA channels"""
-__all__ = ["MultiChannelSignalVisualization"]
 
 
 import inspect
@@ -11,7 +10,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 
-from miv.core.datatype import Spikestamps
+from miv.core import Spikestamps
 from miv.core.operator.operator import OperatorMixin
 from miv.mea.protocol import MEAGeometryProtocol
 
@@ -51,9 +50,11 @@ class MultiChannelSignalVisualization(OperatorMixin):
 
             # Output Images
             FFMpegWriter = manimation.writers["ffmpeg"]
-            metadata = dict(
-                title="Movie Test", artist="Matplotlib", comment="Movie support!"
-            )
+            metadata = {
+                "title": "Signal Visualization",
+                "artist": "MIV",
+                "comment": "Multi-channel signal rendering",
+            }
             writer = FFMpegWriter(fps=self.fps, metadata=metadata)
 
             os.makedirs(self.analysis_path, exist_ok=True)

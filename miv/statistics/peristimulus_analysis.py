@@ -1,6 +1,3 @@
-__all__ = ["PSTH", "PeristimulusActivity", "peri_stimulus_time", "PSTHOverlay"]
-
-
 import itertools
 import os
 from dataclasses import dataclass
@@ -8,7 +5,7 @@ from dataclasses import dataclass
 import matplotlib.pyplot as plt
 import numpy as np
 
-from miv.core.datatype import Signal, Spikestamps
+from miv.core import Signal, Spikestamps
 from miv.core.operator.operator import OperatorMixin
 from miv.core.operator.wrapper import cache_call
 from miv.mea import mea_map
@@ -277,7 +274,7 @@ class PSTHOverlay(OperatorMixin):
             c = w[1][0]
 
             hist = []
-            for idx, psth in enumerate(psths):
+            for _idx, psth in enumerate(psths):
                 p = psth[channel]
                 time = psth.timestamps
                 hist.append(np.trapz(p, time))

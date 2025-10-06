@@ -1,6 +1,3 @@
-__all__ = ["plot_connectivity", "plot_connectivity_interactive"]
-
-
 import graphviz
 import numpy as np
 from pyvis.network import Network

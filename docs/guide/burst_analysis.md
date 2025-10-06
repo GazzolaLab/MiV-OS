@@ -68,7 +68,7 @@ Calculates parameters critical to characterize bursting phenomenon on a single c
 ```{code-cell} ipython3
 # Estimates the burst parameters for 45th electrode with bursts defined as more than 10 simultaneous spikes with 0.1 s interspike interval
 channel = 45
-burst(spiketrains, channel, 0.1, 10)
+burst_detection(spiketrains, channel, 0.1, 10)
 ```
 
 ## 3. Plotting

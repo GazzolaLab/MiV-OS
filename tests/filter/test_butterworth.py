@@ -3,7 +3,7 @@ import numpy as np
 import pytest
 import scipy.signal as sps
 
-from miv.core.datatype import Signal
+from miv.core import Signal
 from miv.signal.filter import ButterBandpass
 from tests.filter.test_filter_protocol import RuntimeFilterProtocol
 
@@ -102,7 +102,7 @@ AnalyticalTestSet = [  # t: linspace 0->0.005 (w=50)+(w=500)
 @pytest.mark.parametrize("sig, result", AnalyticalTestSet)
 def test_butterworth_filter_analytical(lowcut, highcut, order, tag, sig, result):
     filt = ButterBandpass(lowcut, highcut, order, tag)
-    ans = filt(signal=sig)
+    ans = filt(idx=0, signal=sig)
     np.testing.assert_allclose(ans.data, result, rtol=1e-5)
 
 

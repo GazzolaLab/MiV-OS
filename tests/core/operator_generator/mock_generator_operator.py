@@ -4,7 +4,8 @@ from dataclasses import dataclass
 import numpy as np
 import pytest
 
-from miv.core.operator_generator import GeneratorOperatorMixin, cache_generator_call
+from miv.core.operator_generator.operator import GeneratorOperatorMixin
+from miv.core.operator_generator.wrapper import cache_generator_call
 
 
 @dataclass

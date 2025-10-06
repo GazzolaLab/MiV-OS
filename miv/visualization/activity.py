@@ -1,5 +1,3 @@
-__all__ = ["NeuralActivity"]
-
 import logging
 import os
 from dataclasses import dataclass
