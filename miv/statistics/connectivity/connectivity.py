@@ -579,7 +579,7 @@ class UndirectedConnectivity(OperatorMixin):
         im = ax.imshow(connectivity_metric_matrix, cmap="gray_r", vmin=0)
         ax.set_xlabel("Target")
         ax.set_ylabel("Source")
-        ax.set_title("Transfer Entropy")
+        ax.set_title("Connectivity")
         plt.colorbar(im, ax=ax)
 
         if save_path is not None:
@@ -598,9 +598,9 @@ class UndirectedConnectivity(OperatorMixin):
         # Plot values in heatmap
         fig, ax = plt.subplots(figsize=(12, 12))
         ax.hist(connectivity_metric_matrix, bins=30)
-        ax.set_xlabel("transfer entropy")
+        ax.set_xlabel("connectivity")
         ax.set_ylabel("count")
-        ax.set_title("Transfer Entropy Histogram")
+        ax.set_title("Connectivity Histogram")
 
         if save_path is not None:
             plt.savefig(os.path.join(save_path, "te_histogram.png"))
