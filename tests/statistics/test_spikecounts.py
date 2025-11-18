@@ -22,6 +22,19 @@ def test_no_spike_counts():
     np.testing.assert_allclose(np.zeros(10), result)
 
 
+def test_empty_probe_times():
+    """Test edge case where probe_times is empty (n_probe == 0)"""
+    spiketrain = np.array([1.5, 2.7, 3.1])
+    probe_times = np.array([])
+    result = decay_spike_counts(
+        spiketrain, probe_times, amplitude=1.0, decay_rate=5, batchsize=256
+    )
+    assert isinstance(result, np.ndarray)
+    assert result.shape == (0,)
+    assert result.dtype == np.float64
+    np.testing.assert_allclose(np.array([]), result)
+
+
 def test_decay_spike_counts(spiketrain, probe_times):
     result = decay_spike_counts(
         spiketrain, probe_times, amplitude=0.2, decay_rate=5, batchsize=256
@@ -63,3 +76,17 @@ def test_spike_counts_with_kernel(spiketrain, probe_times):
         assert isinstance(result, np.ndarray)
         assert result.shape == probe_times.shape
         np.testing.assert_allclose(result, expected[idx])
+
+
+def test_spike_counts_with_kernel_empty_probe_times():
+    """Test edge case where probe_times is empty for spike_counts_with_kernel"""
+    spiketrain = np.array([1.5, 2.7, 3.1])
+    probe_times = np.array([])
+
+    def exponential(x):
+        return np.exp(-x)
+
+    result = spike_counts_with_kernel(spiketrain, probe_times, exponential)
+    assert isinstance(result, np.ndarray)
+    assert result.shape == (0,)
+    np.testing.assert_allclose(np.array([]), result)

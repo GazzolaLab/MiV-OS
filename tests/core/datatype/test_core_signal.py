@@ -26,6 +26,49 @@ def signal_object(signal_data) -> Signal:
     return Signal(data=data, timestamps=timestamps, rate=rate)
 
 
+def test_signal_initialization_with_valid_data():
+    """Test that Signal can be initialized with valid 2D data and timestamps."""
+    data = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
+    timestamps = np.array([0.0, 1.0])
+    rate = 1000.0
+
+    signal = Signal(data=data, timestamps=timestamps, rate=rate)
+
+    assert signal is not None
+    assert np.array_equal(signal.data, data)
+    assert np.array_equal(signal.timestamps, timestamps)
+    assert signal.rate == rate
+    assert signal.shape == (2, 3)
+    assert signal.number_of_channels == 3
+
+
+def test_signal_validation_invalid_data_wrong_shape():
+    """Test that Signal validation rejects invalid data with wrong shapes."""
+    timestamps = np.array([0.0, 1.0])
+
+    # Test 1D data (should fail - Signal requires 2D array)
+    with pytest.raises(AssertionError, match="Signal must be 2D array"):
+        Signal(data=np.array([1.0, 2.0, 3.0]), timestamps=timestamps)
+
+    # Test 3D data (should fail - Signal requires 2D array)
+    with pytest.raises(AssertionError, match="Signal must be 2D array"):
+        Signal(data=np.array([[[1.0, 2.0], [3.0, 4.0]], [[5.0, 6.0], [7.0, 8.0]]]), timestamps=timestamps)
+
+    # Test 0D scalar (should fail - Signal requires 2D array)
+    with pytest.raises(AssertionError, match="Signal must be 2D array"):
+        Signal(data=np.array(5.0), timestamps=timestamps)
+
+    # Test empty 1D list (should fail - Signal requires 2D array)
+    with pytest.raises(AssertionError, match="Signal must be 2D array"):
+        Signal(data=[1, 2, 3], timestamps=timestamps)
+
+    # Test valid 2D data should work
+    valid_data = np.array([[1.0, 2.0], [3.0, 4.0]])
+    signal = Signal(data=valid_data, timestamps=timestamps)
+    assert signal is not None
+    assert signal.shape == (2, 2)
+
+
 def test_number_of_channels(signal_object):
     assert signal_object.number_of_channels == 3
 

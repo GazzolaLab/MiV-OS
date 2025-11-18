@@ -270,11 +270,11 @@ def nb_spike_counts_with_kernel(
     n_spike = spiketrain.size
     n_probe = probe_times.size
     if n_probe == 0:
-        return np.zeros(0)
+        return np.zeros(0, dtype=np.float64)
     if n_spike == 0:
-        return np.zeros_like(probe_times)
+        return np.zeros(probe_times.shape, dtype=np.float64)
 
-    out = np.zeros_like(probe_times)
+    out = np.zeros(probe_times.shape, dtype=np.float64)
 
     for i in range(n_spike):
         s = spiketrain[i]
