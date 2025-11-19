@@ -1,0 +1,64 @@
+name: MPI Tests
+
+on:
+  push:
+    branches: [main, update-**]
+  pull_request:
+    branches: ["**"]
+
+jobs:
+  mpi_test:
+    runs-on: ${{ matrix.os }}
+    env:
+      UV_CACHE_DIR: /tmp/.uv-cache
+    strategy:
+      matrix:
+        python-version: ["3.10"]
+        os: [ubuntu-latest]
+        mpi: ["openmpi"]
+        include:
+          - os: ubuntu-latest
+            path: ~/.cache/pip
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          uv-version: latest
+
+      - name: Install MPI
+        uses: mpi4py/setup-mpi@v1
+        with:
+          mpi: ${{ matrix.mpi }}
+
+      - name: Install python
+        id: setup-python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Load cached venv
+        id: cached-dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.UV_CACHE_DIR }}
+          key: uv-mpi-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('uv.lock') }}
+          restore-keys: |
+            uv-mpi-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('uv.lock') }}
+            uv-mpi-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}
+
+      - name: Install and activate the project with MPI
+        run: |
+          uv sync --all-extras --dev
+          uv cache prune --ci
+          source .venv/bin/activate
+
+      # Test MiV-OS MPI tests using pytest
+      - name: Run MPI pytests
+        if: always()
+        run: |
+          make test-mpi

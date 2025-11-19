@@ -91,7 +91,7 @@ algorithmExtension = [
   "rupture>=1.4.5"
 ]
 mpi = [
-  "mpi4py>=4.0.1"
+  "mpi4py>=4.0.3"
 ]
 dev = [
   "ruff>=0.3.4",
@@ -206,6 +206,13 @@ addopts = [
   "--tb=short",
 #  "--doctest-modules", TODO: Try to include pytest.doctest
 #  "--doctest-continue-on-failure",
+]
+
+# Markers for pytest
+markers = [
+  "mpi: marks tests as MPI-related (deselect with '-m \"not mpi\"')",
+  "mpi_xfail: marks tests as expected to fail with MPI",
+  "mpi_fixture: marks fixtures as MPI-related (only used with MPI tests)",
 ]
 
 [tool.coverage.report]

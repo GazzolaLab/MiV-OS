@@ -27,7 +27,11 @@ formatting:
 #* Linting
 .PHONY: test
 test:
-	uv run pytest -c pyproject.toml --cov=miv/core --cov-report=xml
+	uv run pytest -c pyproject.toml --cov=miv/core --cov-report=xml tests
+
+.PHONY: test-mpi
+test-mpi:
+	mpirun -n 4 uv run pytest --with-mpi -c pyproject.toml tests-mpi
 
 .PHONY: check-codestyle
 check-codestyle:
