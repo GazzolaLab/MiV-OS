@@ -6,12 +6,12 @@ from collections.abc import Generator, Iterator
 import numpy as np
 
 from ..operator.operator import DataNodeMixin
-from ..operator.chainable import BaseChainingMixin
+from ..chainable import ChainingMixin
 
 PurePythonTypes: TypeAlias = int | float | str | bool | list | tuple | dict
 
 
-class ValuesMixin(DataNodeMixin, BaseChainingMixin):
+class ValuesMixin(DataNodeMixin, ChainingMixin):
     """
     This mixin is used to convert pure/numpy data type to be a valid input/output of a node.
     """
@@ -46,7 +46,7 @@ class NumpyDType(ValuesMixin):
         return isinstance(data, np.ndarray)
 
 
-class GeneratorType(BaseChainingMixin):
+class GeneratorType(ChainingMixin):
     def __init__(self, iterator: Iterator, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self.iterator = iterator

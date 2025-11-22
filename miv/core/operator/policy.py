@@ -1,3 +1,7 @@
+"""
+This module contains the runner policies for the operator system.
+"""
+
 from __future__ import annotations
 
 __all__ = [
@@ -43,9 +47,10 @@ class _RunnerProtocol(Protocol):
 
 
 class VanillaRunner:
-    """Default runner without any high-level parallelism.
+    """
+    Default runner without any high-level parallelism.
     Simply, the operator will be executed in root-rank, and distributed across other ranks.
-    If MPI is not available, the operator will be executed in root-rank only.
+    If MPI is not available, the operator will be executed in root-rank only and all ranks will get the same result.
     """
 
     def __init__(self, *, comm: mpi4py.MPI.Comm | None = None, root: int = 0) -> None:

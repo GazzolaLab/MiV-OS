@@ -4,11 +4,11 @@ __doc__ = """ Base mixin for MEA classes. """
 import matplotlib.pyplot as plt
 import numpy as np
 
-from miv.core.operator.operator import BaseChainingMixin
+from miv.core.operator.operator import ChainingMixin
 from miv.core.operator.loggable import DefaultLoggerMixin
 
 
-class MEAMixin(BaseChainingMixin, DefaultLoggerMixin):
+class MEAMixin(ChainingMixin, DefaultLoggerMixin):
     """Base mixin for MEA classes.
 
     Functional module.

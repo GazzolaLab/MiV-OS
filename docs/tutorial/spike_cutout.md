@@ -81,7 +81,9 @@ Notice, `extract_waveform` module takes two inputs: `Signal` and `Spikestamps`, 
 Before proceeding further, let's visualize the data pipeline to ensure the processing order.
 
 ```{code-cell} ipython3
-data.visualize(show=True)
+fig, ax = plt.subplots()
+data.visualize(ax)
+plt.show()
 ```
 
 ## Run Pipeline

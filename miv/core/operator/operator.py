@@ -17,7 +17,7 @@ from miv.core.operator.cachable import (
     FunctionalCacher,
 )
 from .callback import BaseCallbackMixin
-from .chainable import BaseChainingMixin
+from ..chainable import ChainingMixin
 from .loggable import DefaultLoggerMixin
 from .policy import VanillaRunner, _RunnerProtocol
 
@@ -32,7 +32,7 @@ else:
     class _Node: ...
 
 
-class DataNodeMixin(BaseChainingMixin, DefaultLoggerMixin):
+class DataNodeMixin(ChainingMixin, DefaultLoggerMixin):
     """ """
 
     data: DataTypes
@@ -44,7 +44,7 @@ class DataNodeMixin(BaseChainingMixin, DefaultLoggerMixin):
         return self.output()
 
 
-class DataLoaderMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
+class DataLoaderMixin(ChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
     """ """
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
@@ -74,7 +74,7 @@ class DataLoaderMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
         raise NotImplementedError("load() method must be implemented to be DataLoader.")
 
 
-class OperatorMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
+class OperatorMixin(ChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
     """
     Behavior includes:
         - Whenever "run()" method is executed:

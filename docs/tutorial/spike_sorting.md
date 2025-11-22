@@ -58,7 +58,9 @@ data >> bandpass_filter >> spike_detection
 bandpass_filter >> extract_waveforms
 spike_detection >> extract_waveforms
 
-data.visualize(show=True)
+fig, ax = plt.subplots()
+data.visualize(ax)
+plt.show()
 ```
 
 ## Build Operator
@@ -93,7 +95,9 @@ class CutoutShape(OperatorMixin):
 cutout_shape = CutoutShape()
 extract_waveforms >> cutout_shape
 
-data.visualize(show=True)
+fig, ax = plt.subplots()
+data.visualize(ax)
+plt.show()
 ```
 
 The operator `CutoutShape` will print out the shape of the cutouts.
@@ -204,7 +208,9 @@ class PCAClustering(OperatorMixin):
 cluster = PCAClustering()
 extract_waveforms >> cluster
 
-data.visualize(show=True, seed=150)
+fig, ax = plt.subplots()
+data.visualize(ax, seed=150)
+plt.show()
 ```
 
 ## Run Pipeline

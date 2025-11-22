@@ -1,4 +1,4 @@
-from miv.core.operator.operator import BaseChainingMixin
+from miv.core.operator.operator import ChainingMixin
 from tests.core.mock_runner import MockRunner
 
 
@@ -10,7 +10,7 @@ class TemporaryCacher:
         return self.value
 
 
-class MockChain(BaseChainingMixin):
+class MockChain(ChainingMixin):
     def __init__(self, name):
         super().__init__()
         self.cacher = TemporaryCacher()
@@ -20,7 +20,7 @@ class MockChain(BaseChainingMixin):
         return str(self.tag)
 
 
-class MockChainWithoutCacher(BaseChainingMixin):
+class MockChainWithoutCacher(ChainingMixin):
     def __init__(self, name):
         super().__init__()
         self.tag = name
@@ -29,7 +29,7 @@ class MockChainWithoutCacher(BaseChainingMixin):
         return str(self.tag)
 
 
-class MockChainWithCache(BaseChainingMixin):
+class MockChainWithCache(ChainingMixin):
     def __init__(self, name):
         super().__init__()
         self.cacher = TemporaryCacher(True)
