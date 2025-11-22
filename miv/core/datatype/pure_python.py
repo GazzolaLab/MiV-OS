@@ -51,6 +51,9 @@ class GeneratorType(ChainingMixin):
         super().__init__(*args, **kwargs)
         self.iterator = iterator
 
+    def flow_blocked(self) -> bool:
+        return False
+
     def output(self) -> Generator:
         yield from self.iterator
 

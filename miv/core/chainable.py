@@ -7,6 +7,8 @@ __all__ = ["ChainingMixin", "node_graph_visualize"]
 
 from typing import TYPE_CHECKING, Any
 from collections.abc import Iterator
+from collections import deque
+from abc import ABC, abstractmethod
 
 import itertools
 
@@ -18,7 +20,7 @@ if TYPE_CHECKING:
     from .protocol import _Chainable
 
 
-class ChainingMixin:
+class ChainingMixin(ABC):
     """
     Base mixin to create chaining structure between objects.
 
@@ -62,7 +64,18 @@ class ChainingMixin:
     def iterate_upstream(self) -> Iterator[_Chainable]:
         return iter(self._upstream_list)
 
-    def visualize(self, ax: "plt.Axes", seed: int = 200) -> "nx.DiGraph":
+    @abstractmethod
+    def flow_blocked(self) -> bool:
+        """
+        Flow control for upstream graph search.
+        Check if the flow is blocked (e.g., when node is cached).
+        When flow is blocked, upstream nodes should not be executed.
+
+        Returns:
+            True if flow is blocked, False otherwise.
+        """
+
+    def visualize(self, ax: plt.Axes, seed: int = 200) -> nx.DiGraph:
         """
         Visualize the network structure of the "Operator".
         """
@@ -97,7 +110,10 @@ class ChainingMixin:
                 output.append(str(label))
         return "\n".join(output)
 
-def node_graph_visualize(ax: "plt.Axes", start_node: _Chainable, seed: int = 200) -> "nx.DiGraph":
+
+def node_graph_visualize(
+    ax: plt.Axes, start_node: _Chainable, seed: int = 200
+) -> nx.DiGraph:
     """
     Visualize a node graph starting from a given node.
 
@@ -114,13 +130,14 @@ def node_graph_visualize(ax: "plt.Axes", start_node: _Chainable, seed: int = 200
     """
 
     import networkx as nx
+
     G = nx.DiGraph()
 
     # BFS
     visited: list[_Chainable] = []
-    next_list: list[_Chainable] = [start_node]
+    next_list: deque[_Chainable] = deque([start_node])
     while next_list:
-        v = next_list.pop()
+        v = next_list.popleft()  # Use popleft() for FIFO (BFS)
         visited.append(v)
         for node in itertools.chain(v.iterate_downstream()):
             G.add_edge(repr(v), repr(node))

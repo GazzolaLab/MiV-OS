@@ -37,6 +37,9 @@ class DataNodeMixin(ChainingMixin, DefaultLoggerMixin):
 
     data: DataTypes
 
+    def flow_blocked(self) -> bool:
+        return False
+
     def output(self) -> Self:
         return self
 
@@ -63,6 +66,9 @@ class DataLoaderMixin(ChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
         (Experimental Feature)
         """
         self._load_param = kwargs
+
+    def flow_blocked(self) -> bool:
+        return False
 
     def output(self) -> Generator[DataTypes] | Spikestamps | Generator[Signal]:
         output = self.load(**self._load_param)
@@ -112,6 +118,12 @@ class OperatorMixin(ChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
         Essentially, this method recursively call upstream operators' run() method.
         """
         return [cast(_Node, node).output() for node in self.iterate_upstream()]
+
+    def flow_blocked(self) -> bool:
+        try:
+            return self.cacher.check_cached()
+        except (AttributeError, FileNotFoundError):
+            return False
 
     def output(self) -> DataTypes:
         """

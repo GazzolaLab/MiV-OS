@@ -24,9 +24,9 @@ def test_vanilla_runner(inputs, expected_output):
 )
 def test_multiprocessing_number_of_processors(n, expected_output):
     mr = MultiprocessingRunner(np=n)
-    assert (
-        mr.num_proc == expected_output
-    ), f"Expected {expected_output}, but got {mr.num_proc}"
+    assert mr.num_proc == expected_output, (
+        f"Expected {expected_output}, but got {mr.num_proc}"
+    )
 
 
 def _func(x):

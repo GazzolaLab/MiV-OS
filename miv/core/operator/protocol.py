@@ -59,6 +59,8 @@ class _Chainable(Protocol[C]):
 
     def iterate_downstream(self) -> Iterator[C]: ...
 
+    def flow_blocked(self) -> bool: ...
+
 
 class _Node(
     _Loggable,

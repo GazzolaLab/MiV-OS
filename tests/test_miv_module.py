@@ -1,6 +1,7 @@
 """
 Test that the miv module can be imported without mpi4py available.
 """
+
 import sys
 import importlib.util
 
@@ -14,8 +15,10 @@ def test_miv_module_loads_without_mpi4py():
     part of the normal import process.
     """
 
-    msg = "If you see this error, it means mpi4py was loaded as part of loading miv or miv.core,\n" \
+    msg = (
+        "If you see this error, it means mpi4py was loaded as part of loading miv or miv.core,\n"
         "but it should not be loaded as part of the import process."
+    )
 
     import builtins
 
@@ -33,6 +36,7 @@ def test_miv_module_loads_without_mpi4py():
         if name == "mpi4py" or name.startswith("mpi4py."):
             raise ImportError(msg)
         return orig_import(name, *args, **kwargs)
+
     builtins.__import__ = fake_import
 
     import miv

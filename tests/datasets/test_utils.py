@@ -69,9 +69,9 @@ class TestDownloadUtilities:
             open_fn = zipfile.ZipFile
 
         # Create zip files
-        assert os.path.exists(
-            filepath
-        ), "File is not created. Check 'make_mockfile' fixture"
+        assert os.path.exists(filepath), (
+            "File is not created. Check 'make_mockfile' fixture"
+        )
         with open_fn(zippath, "w") as arcfile:
             if archive_format.startswith("tar"):
                 arcfile.add(filepath, arcname=arcname)
@@ -83,9 +83,9 @@ class TestDownloadUtilities:
         unzippath = filepath + "." + archive_format + ".unziped"
         unzipfile = os.path.join(unzippath, os.path.basename(filepath))
         assert _extract_archive(zippath, unzippath, archive_format)
-        assert check_file_hash(
-            unzipfile, hashstr
-        ), "Hash changed during archive extraction."
+        assert check_file_hash(unzipfile, hashstr), (
+            "Hash changed during archive extraction."
+        )
 
         # Test download and extraction
         file_url = "file:///" + zippath
@@ -100,9 +100,9 @@ class TestDownloadUtilities:
             cache_dir=os.path.join(tmp_path, "datasets"),
         )
         assert downloadfile == downloadedpath, f"{downloadpath} vs {downloadedpath}"
-        assert check_file_hash(
-            os.path.join(downloadpath, arcname), hashstr
-        ), "Hash changed during download and extraction."
+        assert check_file_hash(os.path.join(downloadpath, arcname), hashstr), (
+            "Hash changed during download and extraction."
+        )
 
     def test_get_file_without_extraction(self, make_mockfile, tmp_path):
         from miv.datasets.utils import check_file_hash, get_file
@@ -118,9 +118,9 @@ class TestDownloadUtilities:
             archive_format=None,
             cache_dir=os.path.join(tmp_path, "datasets"),
         )
-        assert check_file_hash(
-            downloaded_path, hashstr
-        ), "Hash changed during URL download."
+        assert check_file_hash(downloaded_path, hashstr), (
+            "Hash changed during URL download."
+        )
 
     def test_get_file_wrong_hash(self, make_mockfile, tmp_path):
         from miv.datasets.utils import check_file_hash, get_file
@@ -147,9 +147,9 @@ class TestDownloadUtilities:
         fname = filepath + ".from_download"
         downloaded_path = os.path.join(tmp_path, "datasets", "testfiles", fname)
         pathlib.Path(downloaded_path).touch()  # create arbitrary file
-        assert not check_file_hash(
-            downloaded_path, hashstr
-        ), "Hash changed during URL download."
+        assert not check_file_hash(downloaded_path, hashstr), (
+            "Hash changed during URL download."
+        )
         get_file(
             file_url,
             "testfiles",
@@ -158,9 +158,9 @@ class TestDownloadUtilities:
             archive_format=None,
             cache_dir=os.path.join(tmp_path, "datasets"),
         )
-        assert check_file_hash(
-            downloaded_path, hashstr
-        ), "Hash changed during URL download."
+        assert check_file_hash(downloaded_path, hashstr), (
+            "Hash changed during URL download."
+        )
 
     @pytest.mark.parametrize("expected_repeat", [2, 5])
     def test_get_file_redownload_log(

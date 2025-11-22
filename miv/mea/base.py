@@ -22,6 +22,9 @@ class MEAMixin(ChainingMixin, DefaultLoggerMixin):
         self.tag = tag
         self.runner = None
 
+    def flow_blocked(self) -> bool:
+        return False
+
     def get_xy(self, idx: int) -> tuple[float, float]:
         """Given node index, return xy coordinate"""
         raise NotImplementedError

@@ -13,8 +13,11 @@ class TemporaryCacher:
 class MockChain(ChainingMixin):
     def __init__(self, name):
         super().__init__()
-        self.cacher = TemporaryCacher()
         self.tag = name
+        self._flow_blocked = False
+
+    def flow_blocked(self) -> bool:
+        return self._flow_blocked
 
     def __repr__(self):
         return str(self.tag)
@@ -25,6 +28,9 @@ class MockChainWithoutCacher(ChainingMixin):
         super().__init__()
         self.tag = name
 
+    def flow_blocked(self) -> bool:
+        return False
+
     def __repr__(self):
         return str(self.tag)
 
@@ -34,6 +40,9 @@ class MockChainWithCache(ChainingMixin):
         super().__init__()
         self.cacher = TemporaryCacher(True)
         self.tag = name
+
+    def flow_blocked(self) -> bool:
+        return True
 
     def __repr__(self):
         return str(self.tag)
