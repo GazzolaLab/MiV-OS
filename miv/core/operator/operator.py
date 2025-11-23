@@ -7,7 +7,6 @@ be used to create new operators that conform to required behaviors.
 
 from typing import TYPE_CHECKING, Any, cast
 from collections.abc import Generator
-from typing_extensions import Self
 
 import pathlib
 
@@ -19,7 +18,7 @@ from miv.core.operator.cachable import (
 from .callback import BaseCallbackMixin
 from ..chainable import ChainingMixin
 from .loggable import DefaultLoggerMixin
-from .policy import VanillaRunner, _RunnerProtocol
+from .policy import VanillaRunner, RunnerBase
 
 if TYPE_CHECKING:
     from ..datatype import DataTypes
@@ -30,21 +29,6 @@ if TYPE_CHECKING:
 else:
 
     class _Node: ...
-
-
-class DataNodeMixin(ChainingMixin, DefaultLoggerMixin):
-    """ """
-
-    data: DataTypes
-
-    def flow_blocked(self) -> bool:
-        return False
-
-    def output(self) -> Self:
-        return self
-
-    def run(self) -> Self:
-        return self.output()
 
 
 class DataLoaderMixin(ChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
@@ -95,7 +79,7 @@ class OperatorMixin(ChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
     """
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
-        self.runner: _RunnerProtocol = VanillaRunner()
+        self.runner: RunnerBase = VanillaRunner()
         self.analysis_path = "analysis"
 
         super().__init__(*args, cacher=DataclassCacher(self), **kwargs)

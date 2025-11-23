@@ -81,7 +81,6 @@ This creates a dependency graph where `operator1` is upstream of `operator2`, et
 **Runner Policies**: Different execution strategies for parallelization:
 
 - `VanillaRunner`: Default sequential execution (supports MPI broadcast if available)
-- `MultiprocessingRunner`: Parallel execution using Python multiprocessing
 - `StrictMPIRunner`: MPI-based execution where each rank processes independently
 - `SupportMPIMerge`: MPI execution with automatic result merging
 

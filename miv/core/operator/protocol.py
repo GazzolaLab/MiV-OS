@@ -8,7 +8,7 @@ from collections.abc import Iterator
 import pathlib
 from abc import abstractmethod
 
-from .policy import _RunnerProtocol
+from .policy import RunnerBase
 from .cachable import _CacherProtocol, CACHE_POLICY
 from ..protocol import _Loggable
 from miv.core.datatype import DataTypes
@@ -24,7 +24,7 @@ class _Runnable(Protocol):
     @property
     def runner(
         self,
-    ) -> _RunnerProtocol: ...
+    ) -> RunnerBase: ...
 
     @abstractmethod
     def __call__(self, *args: Any, **kwargs: Any) -> Any: ...

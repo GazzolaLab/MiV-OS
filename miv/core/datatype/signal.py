@@ -14,7 +14,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from ..operator.operator import DataNodeMixin
+from .base import DataNodeMixin
 from ..operator.policy import SupportMultiprocessing
 from miv.typing import SignalType, SpikestampsType
 
