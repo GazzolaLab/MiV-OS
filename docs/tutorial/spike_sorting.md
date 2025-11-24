@@ -33,10 +33,9 @@ import numpy as np
 import quantities as pq
 import matplotlib.pyplot as plt
 
-from miv.core.pipeline import Pipeline
-from miv.io.openephys import Data, DataManager
-from miv.signal.filter import ButterBandpass
-from miv.signal.spike import ThresholdCutoff, ExtractWaveforms
+from miv.core import Pipeline
+from miv.io.openephys import DataManager
+from miv.signal import ButterBandpass, ThresholdCutoff, ExtractWaveforms
 
 from miv.datasets.openephys_sample import load_data
 
@@ -73,7 +72,7 @@ The mixin `OperatorMixin` provides most of the necessary variables and methods t
 
 ```{code-cell} ipython3
 from dataclasses import dataclass
-from miv.core.operator import OperatorMixin
+from miv.core import OperatorMixin
 
 @dataclass
 class CutoutShape(OperatorMixin):

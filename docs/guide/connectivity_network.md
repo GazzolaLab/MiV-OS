@@ -25,17 +25,15 @@ import numpy as np
 import quantities as pq
 import matplotlib.pyplot as plt
 
-from miv.core.operator import Operator, DataLoader
-from miv.core.pipeline import Pipeline
+from miv.core import Pipeline
 from miv.io.openephys import Data, DataManager
-from miv.signal.filter import ButterBandpass, MedianFilter
-from miv.signal.spike import ThresholdCutoff
+from miv.signal import ButterBandpass, MedianFilter, ThresholdCutoff
 
 from miv.datasets.openephys_sample import load_data
 
 # Prepare data
 dataset: DataManager = load_data(progbar_disable=True)
-data: DataLoader = dataset[0]
+data = dataset[0]
 ```
 
 ## Pre-Processing Pipeline
@@ -44,22 +42,21 @@ Before we dive into connectivity analysis, it's important to ensure that the dat
 
 ```{code-cell} ipython3
 # Create operator modules:
-bandpass_filter: Operator = ButterBandpass(lowcut=300, highcut=3000, order=4, tag="bandpass")
-spike_detection: Operator = ThresholdCutoff(cutoff=4.0, dead_time=0.002, tag="spikes")
+bandpass_filter = ButterBandpass(lowcut=300, highcut=3000, order=4, tag="bandpass")
+spike_detection = ThresholdCutoff(cutoff=4.0, dead_time=0.002, tag="spikes")
 
 data >> bandpass_filter >> spike_detection
 ```
 
 ## Connectivity Module
 
-Next, we will import the "DirectedConnectivity" module from the "miv.statistics.connectivity" package. This module allows us to construct connectivity graph measured by causal relationships among channels. We will create an instance of the `DirectedConnectivity` class, and attach next to `ThresholdCutoff` operation. Two operators are compatible because the output of `ThresholdCutoff` is a `SpikeTrain` object, which is the input of `DirectedConnectivity`.
+Next, we will import the "DirectedConnectivity" module from the "miv.statistics.connectivity" package. This module allows us to construct connectivity graph measured by causal relationships among channels. We will create an instance of the `DirectedConnectivity` class, and attach next to `ThresholdCutoff` operation. Two operators are compatible because the output of `ThresholdCutoff` is a `Spikestamps` object, which is the input of `DirectedConnectivity`.
 
 ```{code-cell} ipython3
 from miv.statistics.connectivity import DirectedConnectivity
 connectivity_analysis = DirectedConnectivity(mea="64_intanRHD", skip_surrogate=True, progress_bar=True, channels=[11, 26, 37, 50])
 
 spike_detection >> connectivity_analysis
-print(data.summarize())  # Print the summary of data flow
 ```
 
 ```{note}

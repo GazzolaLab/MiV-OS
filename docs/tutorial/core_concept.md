@@ -20,7 +20,7 @@ Each nodes are isolated, and they can be chained to form a graph of data process
 Some node may only have input (upstream) connections, and they are called `end nodes`, such as plotter or visualizer nodes that does not produce any output.
 Generally, a node can form both upstream and downstream connections, where operator are in charge of processing the data and producing the output.
 
-```mermaid
+```{mermaid]
 graph LR
     Data("Data Node")
     Operator("Operator Node")

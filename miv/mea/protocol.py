@@ -4,8 +4,7 @@ from typing import Protocol
 
 import numpy as np
 
-from miv.core.protocol import _Jsonable
-from miv.core.operator.protocol import _Chainable
+from miv.core.protocol import _Jsonable, _Chainable
 
 
 class MEAGeometryProtocol(_Jsonable, _Chainable, Protocol):
