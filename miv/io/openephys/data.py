@@ -41,7 +41,7 @@ from collections.abc import Iterable, Generator
 import numpy as np
 
 from miv.core.datatype.signal import Signal
-from miv.core.operator.operator import DataLoaderMixin
+from miv.core.source.node_mixin import DataLoaderMixin
 from miv.io.openephys.binary import load_recording, load_ttl_event
 from miv.io.protocol import DataProtocol
 from .binary import load_timestamps, oebin_read
@@ -347,12 +347,13 @@ class DataManager(MutableSequence):
         self.data_list = []
         invalid_count = 0
         counter = 0
-        for counter, path in enumerate(data_path_list):
+        for path in data_path_list:
             data = Data(path)
             if data.check_path_validity():
                 self.data_list.append(data)
             else:
                 invalid_count += 1
+            counter += 1
         logging.info(
             f"Total {counter} recording found. There are {invalid_count} invalid paths."
         )

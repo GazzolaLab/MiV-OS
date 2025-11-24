@@ -15,7 +15,9 @@ def test_vanilla_runner_get_run_order():
     VanillaRunner should implement get_run_order() method and return 0.
     """
     vr = VanillaRunner()
-    assert hasattr(vr, "get_run_order"), "VanillaRunner should have get_run_order method"
+    assert hasattr(vr, "get_run_order"), (
+        "VanillaRunner should have get_run_order method"
+    )
     assert callable(getattr(vr, "get_run_order")), "get_run_order should be callable"
     assert vr.get_run_order() == 0, "VanillaRunner.get_run_order() should return 0"
 
@@ -115,4 +117,6 @@ def test_vanilla_runner_executes_only_once():
     assert result1 == 2
     assert result2 == 4
     assert result3 == 6
-    assert execution_count == 3, "Function should execute exactly 3 times (once per call)"
+    assert execution_count == 3, (
+        "Function should execute exactly 3 times (once per call)"
+    )

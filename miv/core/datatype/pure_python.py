@@ -5,7 +5,7 @@ from collections.abc import Generator, Iterator
 
 import numpy as np
 
-from .base import DataNodeMixin
+from .node_mixin import DataNodeMixin
 from ..chainable import ChainingMixin
 
 PurePythonTypes: TypeAlias = int | float | str | bool | list | tuple | dict

@@ -4,7 +4,7 @@ from collections.abc import Generator
 
 
 from miv.core import Signal
-from miv.core.operator.operator import DataLoaderMixin
+from miv.core.source.node_mixin import DataLoaderMixin
 from miv.io import file as miv_file
 
 

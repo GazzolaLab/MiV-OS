@@ -7,34 +7,21 @@ from __future__ import annotations
 __all__ = [
     "RunnerBase",
     "VanillaRunner",
-    "SupportMultiprocessing",
-    "InternallyMultiprocessing",
     "StrictMPIRunner",
     "SupportMPIMerge",
 ]
-from typing import TYPE_CHECKING, Any, cast
-from collections.abc import Callable, Generator
-from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING, cast
+from collections.abc import Callable
 
+from ..policy import RunnerBase
+
+from miv.import_helper import require_library
 from miv.core.datatype.operation.concatenate import concatenate
 
 if TYPE_CHECKING:
     # This will likely cause circular import error
     from miv.core.datatype import DataTypes
     import mpi4py
-
-
-class RunnerBase(ABC):
-    def __call__(
-        self, func: Callable, inputs: Any | None = None
-    ) -> Generator[Any] | Any: ...
-
-    @abstractmethod
-    def get_run_order(self) -> int:
-        """
-        The method determines the order of execution, useful for
-        multiprocessing or MPI.
-        """
 
 
 class VanillaRunner(RunnerBase):
@@ -84,9 +71,15 @@ class VanillaRunner(RunnerBase):
         return output
 
 
+@require_library(["mpi4py"])
 class StrictMPIRunner(RunnerBase):
-    def __init__(self, *, comm: mpi4py.MPI.Comm, root: int = 0) -> None:
-        self.comm = comm
+    def __init__(self, *, comm: mpi4py.MPI.Comm | None = None, root: int = 0) -> None:
+        if comm is not None:
+            self.comm = comm
+        else:
+            from mpi4py import MPI
+
+            self.comm = MPI.COMM_WORLD
         self.root = root
 
     def get_run_order(self) -> int:
@@ -119,11 +112,7 @@ class SupportMPIMerge(StrictMPIRunner):
     """
 
     def __call__(self, func: Callable, inputs: DataTypes | None = None) -> DataTypes:
-        if inputs is None:
-            output = func()
-        else:
-            inputs = cast(tuple["DataTypes"], inputs)
-            output = func(*inputs)
+        output = super().__call__(func, inputs)
 
         outputs = self.comm.gather(output, root=self.root)
         if self.is_root():
@@ -142,10 +131,7 @@ class SupportMPIWithoutBroadcast(StrictMPIRunner):
     def __call__(
         self, func: Callable, inputs: tuple[DataTypes] | None = None
     ) -> DataTypes | None:
-        if inputs is None:
-            output = func()
-        else:
-            output = func(*inputs)
+        output = super().__call__(func, inputs)
 
         outputs = self.comm.gather(output, root=self.root)
         if self.is_root():
@@ -153,12 +139,3 @@ class SupportMPIWithoutBroadcast(StrictMPIRunner):
         else:
             result = None
         return result
-
-
-class SupportMultiprocessing:
-    pass
-
-
-class InternallyMultiprocessing:
-    @property
-    def num_proc(self) -> int: ...

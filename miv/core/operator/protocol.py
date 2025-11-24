@@ -77,7 +77,6 @@ class _Node(
     analysis_path: str
 
     def output(self) -> DataTypes: ...
-
     def set_save_path(
         self,
         path: str | pathlib.Path,

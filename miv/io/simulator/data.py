@@ -20,7 +20,7 @@ import h5py
 import numpy as np
 
 from miv.core.datatype.signal import Signal
-from miv.core.operator.operator import DataLoaderMixin
+from miv.core.source.node_mixin import DataLoaderMixin
 
 
 class Data(DataLoaderMixin):

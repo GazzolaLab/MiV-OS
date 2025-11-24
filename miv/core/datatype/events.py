@@ -15,7 +15,7 @@ import numpy as np
 import quantities as pq
 
 from ..datatype.signal import Signal
-from .base import DataNodeMixin
+from .node_mixin import DataNodeMixin
 
 
 class Events(DataNodeMixin):

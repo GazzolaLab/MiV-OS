@@ -1,8 +1,3 @@
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from .datatype.spikestamps import Spikestamps
-
 # Alias/Shortcut
 from ..import_helper import getter_upon_call
 
@@ -11,9 +6,11 @@ _submodule_paths_for_alias = {
     "datatype.events": ["Events"],
     "datatype.signal": ["Signal"],
     "datatype.spikestamps": ["Spikestamps"],
-    "operator.operator": ["DataLoaderMixin", "DataNodeMixin", "OperatorMixin"],
+    "datatype.node_mixin": ["DataNodeMixin"],
+    "operator.operator": ["OperatorMixin"],
     "operator.wrapper": ["cache_call", "cached_method"],
     "operator_generator.operator": ["GeneratorOperatorMixin"],
     "operator_generator.wrapper": ["cache_generator_call"],
+    "source.node_mixin": ["DataLoaderMixin"],
 }
 __getattr__ = getter_upon_call(__name__, _submodule_paths_for_alias)

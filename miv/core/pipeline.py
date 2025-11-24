@@ -65,6 +65,10 @@ class Pipeline:
         temporary_directory : Optional[Union[str, pathlib.Path]], optional
             If given, files will be saved in temporary directory, and will be moved to
             working directory after. Cache directory is not altered.
+            This feature is useful when the pipeline is running with MPI but I/O bandwidth
+            is limited. Each node can save results to local temporary directory, and then
+            collectively moved to working directory. This is only suppored when mpi4py is
+            available.
         verbose : bool, optional
             If True, the pipeline will log debugging informations. By default False
         """

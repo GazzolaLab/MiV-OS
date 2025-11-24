@@ -15,7 +15,7 @@ import quantities as pq
 import neo
 
 from .signal import Signal
-from .base import DataNodeMixin
+from .node_mixin import DataNodeMixin
 
 
 class Spikestamps(DataNodeMixin, Sequence):

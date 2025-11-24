@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Any
 from typing_extensions import Self
 
 from ..chainable import ChainingMixin
-from ..operator.loggable import DefaultLoggerMixin
+from ..loggable import DefaultLoggerMixin
 
 if TYPE_CHECKING:
     from . import DataTypes
