@@ -30,7 +30,8 @@ import quantities as pq
 from miv.typing import SignalType
 
 if TYPE_CHECKING:
-    pass
+    from mpi4py import MPI
+    import mpi4py
 
 try:
     from mpi4py import MPI

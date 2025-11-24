@@ -7,8 +7,8 @@ module/protocol.py files.
 """
 __all__ = ["_Loggable"]
 
-from collections.abc import Callable, Generator
-from typing import Any, Protocol
+from collections.abc import Callable, Generator, Iterator
+from typing import Any, Protocol, TypeVar
 import logging
 
 # Lazy-callable function takes generators as input and returns a generator
@@ -28,3 +28,30 @@ class _Jsonable(Protocol):
     def to_json(self) -> dict[str, Any]: ...
 
     # TODO: need more features to switch the I/O of the logger or MPI-aware logging.
+
+
+C = TypeVar("C", bound="_Chainable")
+
+
+class _Chainable(Protocol[C]):
+    """
+    Defines the behavior for chaining operator modules:
+    - Forward direction defines execution order
+    - Backward direction defines dependency order
+    """
+
+    def __rshift__(self, right: C) -> C: ...
+
+    def append_upstream(self, node: C) -> None: ...
+
+    def append_downstream(self, node: C) -> None: ...
+
+    def disconnect_upstream(self, node: C) -> None: ...
+
+    def disconnect_downstream(self, node: C) -> None: ...
+
+    def iterate_upstream(self) -> Iterator[C]: ...
+
+    def iterate_downstream(self) -> Iterator[C]: ...
+
+    def flow_blocked(self) -> bool: ...

@@ -37,7 +37,7 @@ class VanillaGeneratorRunner:
             return result
 
         def generator_func(
-            *args: tuple[Generator[Any, None, None], ...]
+            *args: tuple[Generator[Any, None, None], ...],
         ) -> Generator[Any, None, None]:
             tasks = zip(*args, strict=False)
             for idx, zip_arg in enumerate(tasks):
@@ -89,7 +89,7 @@ class GeneratorRunnerInMultiprocessing:
             return result
 
         def generator_func(
-            *args: tuple[Generator[Any, None, None], ...]
+            *args: tuple[Generator[Any, None, None], ...],
         ) -> Generator[Any, None, None]:
             num_workers = self.chunk_size
             istart = 0
@@ -113,9 +113,7 @@ class GeneratorRunnerInMultiprocessing:
 
                 stime = time.time()
                 yield from results
-                print(
-                    f"external_tasks:  ({time.time() - stime:.2f}sec)", flush=True
-                )
+                print(f"external_tasks:  ({time.time() - stime:.2f}sec)", flush=True)
 
             print("generator-tasks done", flush=True)
 

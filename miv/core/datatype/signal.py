@@ -14,13 +14,12 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from ..operator.operator import DataNodeMixin
-from ..operator.policy import SupportMultiprocessing
+from .node_mixin import DataNodeMixin
 from miv.typing import SignalType, SpikestampsType
 
 
 @dataclass
-class Signal(SupportMultiprocessing, DataNodeMixin):
+class Signal(DataNodeMixin):
     """
     Contiguous array of raw signal type.
 

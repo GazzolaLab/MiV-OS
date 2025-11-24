@@ -25,16 +25,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from miv.core import Signal
-from miv.core.operator import Operator, DataLoader
-from miv.core.pipeline import Pipeline
+from miv.core import Pipeline
 from miv.io.openephys import DataManager
-from miv.signal.filter import ButterBandpass
+from miv.signal import ButterBandpass
 
 from miv.datasets.openephys_sample import load_data
 
 # Prepare data
 dataset: DataManager = load_data(progbar_disable=True)
-data: DataLoader = dataset[0]
+data = dataset[0]
 ```
 
 ## What is Callback
@@ -52,7 +51,7 @@ The callback for pre-processing stage is not yet supported. It will be included 
 Take the bandpass filter as an example, we can define a callback function to plot the filtered signal.
 
 ```{code-cell} ipython3
-bandpass_filter: Operator = ButterBandpass(lowcut=300, highcut=3000, order=4, tag="bandpass")
+bandpass_filter = ButterBandpass(lowcut=300, highcut=3000, order=4, tag="bandpass")
 data >> bandpass_filter
 ```
 

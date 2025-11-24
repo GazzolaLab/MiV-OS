@@ -9,7 +9,8 @@ import numpy as np
 import pytest
 
 from miv.core.datatype.signal import Signal
-from miv.core.operator.operator import DataLoaderMixin, OperatorMixin
+from miv.core.operator.operator import OperatorMixin
+from miv.core.source.node_mixin import DataLoaderMixin
 from miv.core.operator.wrapper import cache_call
 from miv.core.operator_generator.operator import GeneratorOperatorMixin
 from miv.core.operator_generator.wrapper import cache_generator_call

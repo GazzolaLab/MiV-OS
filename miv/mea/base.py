@@ -4,11 +4,11 @@ __doc__ = """ Base mixin for MEA classes. """
 import matplotlib.pyplot as plt
 import numpy as np
 
-from miv.core.operator.operator import BaseChainingMixin
-from miv.core.operator.loggable import DefaultLoggerMixin
+from miv.core.chainable import ChainingMixin
+from miv.core.loggable import DefaultLoggerMixin
 
 
-class MEAMixin(BaseChainingMixin, DefaultLoggerMixin):
+class MEAMixin(ChainingMixin, DefaultLoggerMixin):
     """Base mixin for MEA classes.
 
     Functional module.
@@ -21,6 +21,9 @@ class MEAMixin(BaseChainingMixin, DefaultLoggerMixin):
         super().__init__(*args, **kwargs)
         self.tag = tag
         self.runner = None
+
+    def flow_blocked(self) -> bool:
+        return False
 
     def get_xy(self, idx: int) -> tuple[float, float]:
         """Given node index, return xy coordinate"""

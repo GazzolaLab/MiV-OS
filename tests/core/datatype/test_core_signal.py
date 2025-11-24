@@ -52,7 +52,10 @@ def test_signal_validation_invalid_data_wrong_shape():
 
     # Test 3D data (should fail - Signal requires 2D array)
     with pytest.raises(AssertionError, match="Signal must be 2D array"):
-        Signal(data=np.array([[[1.0, 2.0], [3.0, 4.0]], [[5.0, 6.0], [7.0, 8.0]]]), timestamps=timestamps)
+        Signal(
+            data=np.array([[[1.0, 2.0], [3.0, 4.0]], [[5.0, 6.0], [7.0, 8.0]]]),
+            timestamps=timestamps,
+        )
 
     # Test 0D scalar (should fail - Signal requires 2D array)
     with pytest.raises(AssertionError, match="Signal must be 2D array"):

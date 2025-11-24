@@ -19,6 +19,7 @@ from miv.core.operator.cachable import (
     CACHE_POLICY,
 )
 
+
 def execute_callback(logger, callback, *args, **kwargs):
     """
     Executes a callback function with optional args/kwargs.
@@ -162,7 +163,9 @@ class BaseCallbackMixin:
 
         plotters = get_methods_from_feature_classes_by_startswith_str(self, "plot_")
         for plotter in plotters:
-            execute_callback(self.logger, plotter, output, inputs, show=show, save_path=save_path)
+            execute_callback(
+                self.logger, plotter, output, inputs, show=show, save_path=save_path
+            )
         if not show:
             plt.close("all")
 

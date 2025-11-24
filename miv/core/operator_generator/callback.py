@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 from miv.core.operator.callback import (
     get_methods_from_feature_classes_by_startswith_str,
-    execute_callback
+    execute_callback,
 )
 
 if TYPE_CHECKING:

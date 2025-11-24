@@ -1,18 +1,21 @@
+"""
+This module contains the runner policies for the operator system.
+"""
+
 from __future__ import annotations
 
 __all__ = [
-    "_RunnerProtocol",
+    "RunnerBase",
     "VanillaRunner",
-    "SupportMultiprocessing",
-    "MultiprocessingRunner",
-    "InternallyMultiprocessing",
     "StrictMPIRunner",
     "SupportMPIMerge",
 ]
-from typing import TYPE_CHECKING, Any, Protocol, cast
-import multiprocessing
-from collections.abc import Callable, Generator
+from typing import TYPE_CHECKING, cast
+from collections.abc import Callable
 
+from ..policy import RunnerBase
+
+from miv.import_helper import require_library
 from miv.core.datatype.operation.concatenate import concatenate
 
 if TYPE_CHECKING:
@@ -21,31 +24,10 @@ if TYPE_CHECKING:
     import mpi4py
 
 
-class _RunnerProtocol(Protocol):
-    def __init__(
-        self,
-        *,
-        comm: mpi4py.MPI.Comm | None = None,
-        root: int = 0,
-        **kwargs: Any,
-    ) -> None: ...
-
-    def __call__(
-        self, func: Callable, inputs: Any | None = None
-    ) -> Generator[Any] | Any: ...
-
-    def get_run_order(self) -> int:
-        """
-        The method determines the order of execution, useful for
-        multiprocessing or MPI.
-        """
-        ...
-
-
-class VanillaRunner:
-    """Default runner without any high-level parallelism.
+class VanillaRunner(RunnerBase):
+    """
+    Default runner without any high-level parallelism.
     Simply, the operator will be executed in root-rank, and distributed across other ranks.
-    If MPI is not available, the operator will be executed in root-rank only.
     """
 
     def __init__(self, *, comm: mpi4py.MPI.Comm | None = None, root: int = 0) -> None:
@@ -89,35 +71,15 @@ class VanillaRunner:
         return output
 
 
-class MultiprocessingRunner:
-    def __init__(self, *, np: int | None = None) -> None:
-        if np is None:
-            self._np = multiprocessing.cpu_count()
+@require_library(["mpi4py"])
+class StrictMPIRunner(RunnerBase):
+    def __init__(self, *, comm: mpi4py.MPI.Comm | None = None, root: int = 0) -> None:
+        if comm is not None:
+            self.comm = comm
         else:
-            self._np = np
+            from mpi4py import MPI
 
-    def get_run_order(self) -> int:
-        return 0  # FIXME
-
-    @property
-    def num_proc(self) -> int:
-        return self._np
-
-    def __call__(
-        self, func: Callable, inputs: Generator[DataTypes] | None = None
-    ) -> Generator[DataTypes]:
-        if inputs is None:
-            raise NotImplementedError(
-                "Multiprocessing for operator with no generator input is not supported yet. Please use VanillaRunner for this operator."
-            )
-        else:
-            with multiprocessing.Pool(self.num_proc) as p:
-                yield from p.imap(func, inputs)
-
-
-class StrictMPIRunner:
-    def __init__(self, *, comm: mpi4py.MPI.Comm, root: int = 0) -> None:
-        self.comm = comm
+            self.comm = MPI.COMM_WORLD
         self.root = root
 
     def get_run_order(self) -> int:
@@ -150,11 +112,7 @@ class SupportMPIMerge(StrictMPIRunner):
     """
 
     def __call__(self, func: Callable, inputs: DataTypes | None = None) -> DataTypes:
-        if inputs is None:
-            output = func()
-        else:
-            inputs = cast(tuple["DataTypes"], inputs)
-            output = func(*inputs)
+        output = super().__call__(func, inputs)
 
         outputs = self.comm.gather(output, root=self.root)
         if self.is_root():
@@ -173,10 +131,7 @@ class SupportMPIWithoutBroadcast(StrictMPIRunner):
     def __call__(
         self, func: Callable, inputs: tuple[DataTypes] | None = None
     ) -> DataTypes | None:
-        if inputs is None:
-            output = func()
-        else:
-            output = func(*inputs)
+        output = super().__call__(func, inputs)
 
         outputs = self.comm.gather(output, root=self.root)
         if self.is_root():
@@ -184,12 +139,3 @@ class SupportMPIWithoutBroadcast(StrictMPIRunner):
         else:
             result = None
         return result
-
-
-class SupportMultiprocessing:
-    pass
-
-
-class InternallyMultiprocessing(Protocol):
-    @property
-    def num_proc(self) -> int: ...

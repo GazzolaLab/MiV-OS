@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 from joblib import Memory
 
-from miv.core.operator.operator import DataLoaderMixin
+from miv.core.source.node_mixin import DataLoaderMixin
 from miv.core.operator.wrapper import cached_method
 
 

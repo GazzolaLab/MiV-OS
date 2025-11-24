@@ -17,7 +17,7 @@ import numpy as np
 from scipy.io import loadmat
 
 from miv.core.datatype.spikestamps import Spikestamps
-from miv.core.operator.operator import DataLoaderMixin
+from miv.core.source.node_mixin import DataLoaderMixin
 
 
 class DataASDF(DataLoaderMixin):

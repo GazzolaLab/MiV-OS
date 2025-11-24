@@ -4,12 +4,15 @@ Topological sorting of the graph.
 
 __all__ = ["topological_sort"]
 
-from ..operator.protocol import _Node
+from typing import TypeVar
+from ..chainable import ChainingMixin
+
+C = TypeVar("C", bound=ChainingMixin)
 
 
 def _get_upstream_topology(
-    node: _Node, upstream_nodelist: list[_Node] | None = None
-) -> list[_Node]:
+    node: C, upstream_nodelist: list[C] | None = None
+) -> list[C]:
     """
     Get the upstream topology of a node.
 
@@ -23,20 +26,9 @@ def _get_upstream_topology(
     if upstream_nodelist is None:
         upstream_nodelist = []
 
-    # Check if node is cachable
-    cached_flag = False
-    try:
-        cached_flag = node.cacher.check_cached()
-    except (AttributeError, FileNotFoundError):
-        """
-        For any reason when cached result could not be retrieved.
-
-        AttributeError: Occurs when cacher is not defined
-        FileNotFoundError: Occurs when cache_dir is not set or cache files doesn't exist
-        """
-        pass
-
-    if not cached_flag:  # Run all upstream nodes
+    # Check if node flow is blocked:: Typically when node is cached, no
+    # upstream nodes should be executed.
+    if not node.flow_blocked():  # Run all upstream nodes
         for upstream_node in node.iterate_upstream():
             if upstream_node in upstream_nodelist:
                 continue
@@ -45,7 +37,7 @@ def _get_upstream_topology(
     return upstream_nodelist
 
 
-def topological_sort(node: _Node) -> list[_Node]:
+def topological_sort(node: C) -> list[C]:
     """
     Topological sort of the graph.
     Returns the list of operations in order to execute the given node.
@@ -65,7 +57,7 @@ def topological_sort(node: _Node) -> list[_Node]:
     key = []
     pos = []
     ind = 0
-    tsort: list[_Node] = []
+    tsort: list[C] = []
 
     while len(upstream) > 0:
         key.append(upstream[-1])

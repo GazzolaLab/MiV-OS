@@ -24,7 +24,6 @@ class MockExtendable:
         return False
 
     def extend(self, other: "MockExtendable") -> "MockExtendable":
-
         self._value.extend(other.value)
         return self
 
