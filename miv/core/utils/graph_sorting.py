@@ -5,9 +5,9 @@ Topological sorting of the graph.
 __all__ = ["topological_sort"]
 
 from typing import TypeVar
-from ..chainable import ChainingMixin
+from ..protocol import _Chainable
 
-C = TypeVar("C", bound=ChainingMixin)
+C = TypeVar("C", bound=_Chainable)
 
 
 def _get_upstream_topology(

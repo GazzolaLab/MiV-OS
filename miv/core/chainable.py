@@ -5,7 +5,7 @@ Mixin to create chaining structure between objects.
 """
 __all__ = ["ChainingMixin", "node_graph_visualize"]
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, TypeVar, Generic
 from collections.abc import Iterator
 from collections import deque
 from abc import ABC, abstractmethod
@@ -19,8 +19,10 @@ if TYPE_CHECKING:
     import networkx as nx
     from .protocol import _Chainable
 
+C = TypeVar("C", bound="ChainingMixin")
 
-class ChainingMixin(ABC):
+
+class ChainingMixin(ABC, Generic[C]):
     """
     Base mixin to create chaining structure between objects.
 
@@ -29,10 +31,10 @@ class ChainingMixin(ABC):
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
-        self._downstream_list: list[_Chainable] = []
-        self._upstream_list: list[_Chainable] = []
+        self._downstream_list: list[C] = []
+        self._upstream_list: list[C] = []
 
-    def __rshift__(self, right: _Chainable) -> _Chainable:
+    def __rshift__(self, right: C) -> C:
         self.append_downstream(right)
         right.append_upstream(self)
         return right
@@ -46,22 +48,22 @@ class ChainingMixin(ABC):
         self._downstream_list.clear()
         self._upstream_list.clear()
 
-    def disconnect_upstream(self, node: _Chainable) -> None:
+    def disconnect_upstream(self, node: C) -> None:
         self._upstream_list.remove(node)
 
-    def disconnect_downstream(self, node: _Chainable) -> None:
+    def disconnect_downstream(self, node: C) -> None:
         self._downstream_list.remove(node)
 
-    def append_upstream(self, node: _Chainable) -> None:
+    def append_upstream(self, node: C) -> None:
         self._upstream_list.append(node)
 
-    def append_downstream(self, node: _Chainable) -> None:
+    def append_downstream(self, node: C) -> None:
         self._downstream_list.append(node)
 
-    def iterate_downstream(self) -> Iterator[_Chainable]:
+    def iterate_downstream(self) -> Iterator[C]:
         return iter(self._downstream_list)
 
-    def iterate_upstream(self) -> Iterator[_Chainable]:
+    def iterate_upstream(self) -> Iterator[C]:
         return iter(self._upstream_list)
 
     @abstractmethod
@@ -83,7 +85,7 @@ class ChainingMixin(ABC):
 
     def text_visualize_hierarchy(
         self,
-        string_list: list[tuple[int, _Chainable]],
+        string_list: list[tuple[int, C]],
         prefix: str = "|__ ",
     ) -> str:
         """
@@ -91,7 +93,7 @@ class ChainingMixin(ABC):
 
         Parameters
         ----------
-        string_list : list of (int, _Chainable)
+        string_list : list of (int, C)
             List of (depth, node) tuples representing the hierarchical order and tree depth.
         prefix : str, optional
             Prefix displayed before each node when depth > 0, by default "|__ "

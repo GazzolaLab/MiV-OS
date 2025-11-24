@@ -2,7 +2,7 @@ __all__ = [
     "VanillaGeneratorRunner",
 ]
 
-from typing import Any
+from typing import Any, TypeVar, TYPE_CHECKING
 import inspect
 from itertools import islice
 import time
@@ -10,7 +10,11 @@ from collections.abc import Generator
 
 import multiprocessing as mp
 
-from ..protocol import _LazyCallable
+if TYPE_CHECKING:
+    from .operator import GeneratorOperatorMixin
+    from ..protocol import _LazyCallable
+
+C = TypeVar("C", bound="GeneratorOperatorMixin")
 
 
 class VanillaGeneratorRunner:
@@ -21,12 +25,12 @@ class VanillaGeneratorRunner:
     This runner is meant to be used for generator operators.
     """
 
-    def __init__(self, parent) -> None:
+    def __init__(self, parent: C) -> None:
         self.parent = parent
 
     def __call__(
         self,
-        func: _LazyCallable,
+        func: "_LazyCallable",
         inputs: list[Generator[Any, None, None]] | None = None,
     ) -> Generator[Any, None, None]:
         if inputs is None:
@@ -78,7 +82,7 @@ class GeneratorRunnerInMultiprocessing:
 
     def __call__(
         self,
-        func: _LazyCallable,
+        func: "_LazyCallable",
         inputs: list[Generator[Any, None, None]] | None = None,
     ) -> Generator[Any, None, None]:
         if inputs is None:
