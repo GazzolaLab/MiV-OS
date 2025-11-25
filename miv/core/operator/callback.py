@@ -11,25 +11,28 @@ import types
 import inspect
 import os
 import pathlib
+import logging
 
 import matplotlib.pyplot as plt
 
-from miv.core.operator.cachable import (
+from ..loggable import DefaultLoggerMixin
+from .cachable import (
     _CacherProtocol,
     CACHE_POLICY,
 )
 
 
-def execute_callback(logger, callback, *args, **kwargs):
+def execute_callback(
+    logger: logging.Logger, callback: Callable, *args: Any, **kwargs: Any
+) -> None:
     """
     Executes a callback function with optional args/kwargs.
     Logs a warning if an exception occurs.
     """
     try:
-        return callback(*args, **kwargs)
+        callback(*args, **kwargs)
     except Exception as e:
         logger.warning("There was an issue running the following callback: %s", e)
-        return None  # or raise/log/handle as needed
 
 
 # MixinOperators
@@ -56,7 +59,7 @@ def get_methods_from_feature_classes_by_endswith_str(
     return methods
 
 
-class BaseCallbackMixin:
+class BaseCallbackMixin(DefaultLoggerMixin):
     def __init__(
         self,
         *args: Any,
@@ -72,7 +75,7 @@ class BaseCallbackMixin:
         assert self.tag != "", (
             "All operator must have self.tag attribute for identification."
         )
-        self.set_save_path("results")  # FIXME
+        # self.set_save_path("results")  # FIXME
 
         # Callback Flags (to avoid duplicated run)
         self._done_flag_after_run = False
@@ -137,7 +140,7 @@ class BaseCallbackMixin:
             self, "after_run"
         )
         for callback in predefined_callbacks:
-            execute_callback(callback, *args, **kwargs)
+            execute_callback(self.logger, callback, *args, **kwargs)
 
         self._done_flag_after_run = True
 

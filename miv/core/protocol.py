@@ -7,12 +7,9 @@ module/protocol.py files.
 """
 __all__ = ["_Loggable"]
 
-from collections.abc import Callable, Generator, Iterator
+from collections.abc import Iterator
 from typing import Any, Protocol, TypeVar
 import logging
-
-# Lazy-callable function takes generators as input and returns a generator
-_LazyCallable = Callable[[Generator[Any]], Generator[Any]]  # FIXME
 
 
 class _Loggable(Protocol):

@@ -6,7 +6,8 @@ import pathlib
 
 import matplotlib.pyplot as plt
 
-from miv.core.operator.callback import (
+from ..loggable import DefaultLoggerMixin
+from ..operator.callback import (
     get_methods_from_feature_classes_by_startswith_str,
     execute_callback,
 )
@@ -37,7 +38,7 @@ class _GeneratorCallback(Protocol):
     ) -> None: ...
 
 
-class GeneratorCallbackMixin:
+class GeneratorCallbackMixin(DefaultLoggerMixin):
     """
     Additional methods for generator-to-generator operator.
 

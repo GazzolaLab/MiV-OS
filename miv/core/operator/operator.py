@@ -6,6 +6,7 @@ be used to create new operators that conform to required behaviors.
 """
 
 from typing import TYPE_CHECKING, Any, cast
+from abc import abstractmethod
 
 import pathlib
 
@@ -48,8 +49,9 @@ class OperatorMixin(ChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
         # Attribute from upstream
         self.tag: str
 
+    @abstractmethod
     def __call__(self) -> DataTypes:
-        raise NotImplementedError("Please implement __call__ method.")
+        """Execute the operator. Must be implemented by subclasses."""
 
     def __repr__(self) -> str:
         return self.tag

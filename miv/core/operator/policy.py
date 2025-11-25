@@ -115,6 +115,7 @@ class SupportMPIMerge(StrictMPIRunner):
         output = super().__call__(func, inputs)
 
         outputs = self.comm.gather(output, root=self.root)
+        outputs = cast("list[DataTypes]", outputs)
         if self.is_root():
             result = concatenate(outputs)  # Class method
         else:
@@ -134,6 +135,7 @@ class SupportMPIWithoutBroadcast(StrictMPIRunner):
         output = super().__call__(func, inputs)
 
         outputs = self.comm.gather(output, root=self.root)
+        outputs = cast("list[DataTypes]", outputs)
         if self.is_root():
             result = concatenate(outputs)  # Class method
         else:

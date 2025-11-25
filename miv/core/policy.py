@@ -25,7 +25,9 @@ class RunnerBase(ABC):
 
     @abstractmethod
     def __call__(
-        self, func: Callable, inputs: Any | None = None
+        self,
+        func: Callable,
+        inputs: Any | None = None,
     ) -> Generator[Any] | Any:
         pass
 

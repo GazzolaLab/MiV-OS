@@ -2,57 +2,75 @@ __all__ = [
     "VanillaGeneratorRunner",
 ]
 
-from typing import Any, TypeVar, TYPE_CHECKING
-import inspect
+from typing import Any, TypeVar, TYPE_CHECKING, Protocol
 from itertools import islice
 import time
-from collections.abc import Generator
+from collections.abc import Generator, Iterable
 
 import multiprocessing as mp
 
+from ..policy import RunnerBase
+
 if TYPE_CHECKING:
     from .operator import GeneratorOperatorMixin
-    from ..protocol import _LazyCallable
+
+
+# Lazy-callable function type for generator operators.
+# _LazyCallable = Callable[[int, Iterable[Any], ...], Any]
+class _LazyCallable(Protocol):
+    __name__: str
+
+    def __call__(self, idx: int, *args: Iterable[Any]) -> Any: ...
+
 
 C = TypeVar("C", bound="GeneratorOperatorMixin")
 
 
-class VanillaGeneratorRunner:
+class VanillaGeneratorRunner(RunnerBase):
     """Default runner without any modification.
     Simply, the operator will be executed in embarrassingly parallel manner.
     If MPI is available, the operator will be executed in every ranks.
+    (This is different behavior from regular operator VanillaRunner, although
+    it would not create overhead due to the lazy execution strategy.)
 
     This runner is meant to be used for generator operators.
     """
 
     def __init__(self, parent: C) -> None:
         self.parent = parent
+        self.logger = parent.logger
 
     def __call__(
         self,
         func: "_LazyCallable",
-        inputs: list[Generator[Any, None, None]] | None = None,
+        inputs: list[Iterable[Any]] | None = None,
     ) -> Generator[Any, None, None]:
         if inputs is None:
-            inputs = []
-        is_all_generator = all(inspect.isgenerator(v) for v in inputs)
-        if not is_all_generator:
-            result = func(self, *inputs)  # FIXME: this will probably cause issue
-            return result
+
+            def _generator_func() -> Generator[Any, None, None]:
+                yield func(0, *[])
+
+            return _generator_func()
+        else:
+            if not isinstance(inputs, Iterable):
+                raise ValueError("All inputs must be iterables")
+
+            is_all_iterable = all(isinstance(v, Iterable) for v in inputs)
+            if not is_all_iterable:
+                raise ValueError("All inputs must be iterables")
 
         def generator_func(
-            *args: tuple[Generator[Any, None, None], ...],
+            *args: Iterable[Any],
         ) -> Generator[Any, None, None]:
             tasks = zip(*args, strict=False)
             for idx, zip_arg in enumerate(tasks):
                 stime = time.time()
                 result = func(idx, *zip_arg)
-                print(
+                self.logger.info(
                     f"    iter {idx:03d} {self}: {time.time() - stime:.03f}sec",
-                    flush=True,
                 )
                 yield result
-            print("generator-tasks done", flush=True)
+            self.logger.info("generator-tasks done")
 
             # TODO: add lastiter_plot
             # FIXME
@@ -62,38 +80,39 @@ class VanillaGeneratorRunner:
         generator = generator_func(*inputs)
         return generator
 
-        # return func(*inputs)  # type: ignore
-
     def get_run_order(self) -> int:
         return 0
 
 
-class GeneratorRunnerInMultiprocessing:
-    """Default runner without any modification.
-    Simply, the operator will be executed in embarrassingly parallel manner.
-    If MPI is available, the operator will be executed in every ranks.
+class GeneratorRunnerInMultiprocessing(RunnerBase):
+    """Runner for generator operators using multiprocessing."""
 
-    This runner is meant to be used for generator operators.
-    """
-
-    def __init__(self, parent: Any, chunk_size: int = 4) -> None:
+    def __init__(self, parent: C, *, chunk_size: int = 4) -> None:
         self.parent = parent
         self.chunk_size = chunk_size
 
     def __call__(
         self,
         func: "_LazyCallable",
-        inputs: list[Generator[Any, None, None]] | None = None,
+        inputs: list[Iterable[Any]] | None = None,
     ) -> Generator[Any, None, None]:
+        logger = self.parent.logger
         if inputs is None:
-            inputs = []
-        is_all_generator = all(inspect.isgenerator(v) for v in inputs)
-        if not is_all_generator:
-            result = func(self, *inputs)  # FIXME: this will probably cause issue
-            return result
+
+            def _generator_func() -> Generator[Any, None, None]:
+                yield func(0, *[])
+
+            return _generator_func()
+        else:
+            if not isinstance(inputs, Iterable):
+                raise ValueError("All inputs must be iterables")
+
+            is_all_iterable = all(isinstance(v, Iterable) for v in inputs)
+            if not is_all_iterable:
+                raise ValueError("All inputs must be iterables")
 
         def generator_func(
-            *args: tuple[Generator[Any, None, None], ...],
+            *args: Iterable[Any],
         ) -> Generator[Any, None, None]:
             num_workers = self.chunk_size
             istart = 0
@@ -109,22 +128,24 @@ class GeneratorRunnerInMultiprocessing:
                     # results = pool.imap(prox_func, _args)
                     results = pool.starmap(proxy_func, _args)
                 istart += len(_args)
-                print(
+                logger.info(
                     f"completed tasks: {istart}(+{len(_args)}) ({time.time() - stime:.2f}sec)",
-                    flush=True,
                 )
                 _args = []
 
                 stime = time.time()
                 yield from results
-                print(f"external_tasks:  ({time.time() - stime:.2f}sec)", flush=True)
 
-            print("generator-tasks done", flush=True)
+                logger.info(
+                    f"external_tasks:  ({time.time() - stime:.2f}sec)",
+                )
+
+            logger.info("generator-tasks done")
 
             # for idx, zip_arg in enumerate(zip(*args, strict=False)):
             #    stime = time.time()
             #    result = func(self, *zip_arg, idx=idx)
-            # print(f"    iter {idx:03d} {self}: {time.time() - stime:.03f}sec", flush=True)
+            # print(f"    iter {idx:03d} {self}: {time.time() - stime:.03f}sec")
             #    yield result
             # TODO: add lastiter_plot
             # FIXME
@@ -133,8 +154,6 @@ class GeneratorRunnerInMultiprocessing:
 
         generator = generator_func(*inputs)
         return generator
-
-        # return func(*inputs)  # type: ignore
 
     def get_run_order(self) -> int:
         return 0

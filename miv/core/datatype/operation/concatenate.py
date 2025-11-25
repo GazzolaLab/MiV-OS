@@ -32,7 +32,7 @@ def concatenate(
     if head is None:
         head = type(values[0]).empty()
     reduce(lambda acc, val: (acc.extend(val) or acc), values, head)
-    # Equivalent to::
+    # Note: Above lines equivalent to::
     # for value in values:
     #     out.extend(value)
     return head
@@ -43,7 +43,7 @@ if TYPE_CHECKING:
     from miv.core.datatype.events import Events
     from miv.core.datatype.spikestamps import Spikestamps
 
-    _: list[Signal | Spikestamps] = [
+    _: list[Signal | Spikestamps | Events] = [
         Signal.empty(),
         Spikestamps.empty(),
         Events.empty(),

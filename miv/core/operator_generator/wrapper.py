@@ -1,19 +1,20 @@
-from typing import Any
-from collections.abc import Generator, Callable
+from typing import Any, TypeVar
+from collections.abc import Callable
 
-import functools
 
-from .operator import GeneratorOperator
+from .operator import GeneratorOperatorMixin
+
+C = TypeVar("C", bound="GeneratorOperatorMixin")
 
 
 def cache_generator_call(func: Callable) -> Callable:
-    @functools.wraps(func)
+    # @functools.wraps(func)
     def wrapper(
-        self: GeneratorOperator,
+        self: C,
         idx: int,
         *args: Any,
         **kwargs: Any,
-    ) -> Generator | Any | None:
+    ) -> Any:
         tag = "data"
         cacher = self.cacher
         result = func(self, *args, **kwargs)
@@ -42,7 +43,7 @@ def cache_generator_call(func: Callable) -> Callable:
 #    """
 #
 #    def wrapper(
-#        self: GeneratorOperator, *args: Any, **kwargs: Any
+#        self: C, *args: Any, **kwargs: Any
 #    ) -> Generator | Any | None:
 #        is_all_generator = all(inspect.isgenerator(v) for v in args) and all(
 #            inspect.isgenerator(v) for v in kwargs.values()

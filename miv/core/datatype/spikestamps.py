@@ -8,6 +8,7 @@ Spikestamps
 """
 
 from collections.abc import MutableSequence, Sequence, Iterable, Generator
+from typing import overload
 
 import numpy as np
 import quantities as pq
@@ -44,7 +45,17 @@ class Spikestamps(DataNodeMixin, Sequence):
     def __setitem__(self, index: int, item: MutableSequence[float]) -> None:
         self.data[index] = item
 
-    def __getitem__(self, index: int) -> MutableSequence[float]:  # type: ignore[override]
+    @overload
+    def __getitem__(self, index: int) -> np.ndarray: ...
+
+    @overload
+    def __getitem__(self, index: slice) -> Sequence[np.ndarray]: ...
+
+    def __getitem__(self, index: int | slice) -> np.ndarray | Sequence[np.ndarray]:
+        if isinstance(index, slice):
+            return [
+                np.asarray(self.data[i]) for i in range(*index.indices(len(self.data)))
+            ]
         return np.asarray(self.data[index])
 
     def __len__(self) -> int:
@@ -144,14 +155,14 @@ class Spikestamps(DataNodeMixin, Sequence):
         while start_indices < n_intervals:
             if reset_start:
                 view = [
-                    arr[sidx:eidx] - start_time
+                    np.asarray(arr)[sidx:eidx] - start_time
                     for arr, sidx, eidx in zip(
                         self.data, sindices, eindices, strict=False
                     )
                 ]
             else:
                 view = [
-                    arr[sidx:eidx]
+                    np.asarray(arr)[sidx:eidx]
                     for arr, sidx, eidx in zip(
                         self.data, sindices, eindices, strict=False
                     )
@@ -166,8 +177,6 @@ class Spikestamps(DataNodeMixin, Sequence):
                 np.searchsorted(arr, start_indices) for arr in digitized_indices
             ]
             eindices = [np.searchsorted(arr, end_indices) for arr in digitized_indices]
-
-        return True
 
     def select(self, indices: Sequence[int], keepdims: bool = True) -> "Spikestamps":
         """Select channels by indices. The order of the channels will be preserved."""
