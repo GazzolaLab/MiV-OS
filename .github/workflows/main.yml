@@ -15,7 +15,6 @@ jobs:
       matrix:
         python-version: ["3.10", "3.11", "3.12"]
         os: [macos-13, ubuntu-latest]
-        mpi: ["openmpi"] # [ 'mpich', 'openmpi', 'intelmpi']
         include:
           - os: macos-13
             path: ~/Library/Caches/pip
@@ -33,10 +32,6 @@ jobs:
         uses: astral-sh/setup-uv@v7
         with:
           uv-version: latest
-
-      # - uses: mpi4py/setup-mpi@v1
-      #   with:
-      #    mpi: ${{ matrix.mpi }}
 
       - name: Install python
         uses: actions/setup-python@v6
