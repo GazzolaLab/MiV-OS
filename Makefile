@@ -43,6 +43,10 @@ test-all:
 	uv run coverage xml
 	uv run coverage report
 
+.PHONY: view-coverage
+view-coverage:
+	uv run coverage html
+	open htmlcov/index.html
 
 .PHONY: check-codestyle
 check-codestyle:
