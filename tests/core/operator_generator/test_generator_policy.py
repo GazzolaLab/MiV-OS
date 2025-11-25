@@ -120,4 +120,9 @@ def test_generator_runner_runs_function_without_inputs_when_inputs_is_none(runne
         return 42
 
     result = runner(func)
-    assert result == 42
+    # When inputs is None, runner returns a generator that yields the function result
+    assert hasattr(result, "__iter__")
+    assert hasattr(result, "__next__")
+    # Consume the generator to get the actual result
+    actual_result = next(result)
+    assert actual_result == 42
