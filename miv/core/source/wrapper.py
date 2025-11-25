@@ -13,7 +13,7 @@ import os
 import functools
 from joblib import Memory
 
-from ..operator.protocol import _Cachable
+from ..protocol import _Cachable
 
 P = ParamSpec("P")
 R = TypeVar("R")

@@ -11,6 +11,18 @@ from collections.abc import Iterator
 from typing import Any, Protocol, TypeVar
 import logging
 
+from .cachable import _CacherProtocol, CACHE_POLICY
+
+
+class _Cachable(Protocol):
+    """
+    A protocol for cachable behavior.
+    """
+
+    cacher: _CacherProtocol
+
+    def set_caching_policy(self, policy: CACHE_POLICY) -> None: ...
+
 
 class _Loggable(Protocol):
     """

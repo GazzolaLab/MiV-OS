@@ -283,3 +283,50 @@ def test_cached_method_verbose_mode(cls, tmp_path: pathlib.Path) -> None:
     cache_dir = analysis_path / ".cache"
     verbose_cache = list(cache_dir.glob("verbose_function/**/*.pkl"))
     assert len(verbose_cache) > 0
+
+
+def test_cached_method_docstring_example(tmp_path: pathlib.Path) -> None:
+    """
+    Test that the example in cached_method docstring works correctly.
+
+    This test follows the exact example from cached_method docstring:
+    - MyDataLoader class with expensive_computation method
+    - First call computes and caches
+    - Second call returns cached result
+    """
+    from miv.core.source.wrapper import cached_method
+    from miv.core.source.node_mixin import DataLoaderMixin
+
+    class MyDataLoader(DataLoaderMixin):
+        def __init__(self, tmp_path: pathlib.Path):
+            self.data_path = str(tmp_path)
+            self.analysis_path = str(tmp_path)
+            self.tag = "my_data_loader"
+            super().__init__()
+            self.execution_count = 0
+
+        @cached_method(
+            "my_tag"
+        )  # Cache with custom tag. Otherwise, it uses the function name.
+        def expensive_computation(self, x: int) -> int:
+            # This will only be computed once for each unique input
+            self.execution_count += 1
+            return x * x
+
+    loader = MyDataLoader(tmp_path)
+    loader.set_save_path(tmp_path)
+
+    # First call - should compute and cache
+    assert loader.execution_count == 0
+    result1 = loader.expensive_computation(5)  # Computes and caches
+    assert result1 == 25
+    assert loader.execution_count == 1
+
+    # Second call - should return cached result
+    result2 = loader.expensive_computation(5)  # Returns cached result
+    assert result2 == 25
+    assert loader.execution_count == 1  # Should not increment (using cache)
+
+    cache_dir = pathlib.Path(loader.analysis_path) / ".cache"
+    my_tag_cache = list(cache_dir.glob("my_tag/**/*.pkl"))
+    assert len(my_tag_cache) > 0

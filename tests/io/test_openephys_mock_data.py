@@ -13,11 +13,13 @@ def test_create_recording_data_creates_compatible_data(tmpdir, duration_seconds:
     num_channels = 4
     sampling_rate = 30000.0
 
-    data_path, expected_data, expected_timestamps, sampling_rate = create_recording_data(
-        output_dir=str(tmpdir),
-        num_channels=num_channels,
-        duration_seconds=duration_seconds,
-        sampling_rate=sampling_rate,
+    data_path, expected_data, expected_timestamps, sampling_rate = (
+        create_recording_data(
+            output_dir=str(tmpdir),
+            num_channels=num_channels,
+            duration_seconds=duration_seconds,
+            sampling_rate=sampling_rate,
+        )
     )
 
     assert os.path.exists(data_path)
@@ -65,7 +67,9 @@ def test_create_dataset_creates_multiple_recordings_loadable_with_datamanager(tm
     data_manager = DataManager(data_collection_path)
 
     # Verify number of recordings
-    expected_num_recordings = num_record_nodes * num_experiments * num_recordings_per_experiment
+    expected_num_recordings = (
+        num_record_nodes * num_experiments * num_recordings_per_experiment
+    )
     assert len(data_manager) == expected_num_recordings
 
     # Verify each recording is valid and can be loaded

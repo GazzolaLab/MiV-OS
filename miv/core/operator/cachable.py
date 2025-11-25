@@ -5,6 +5,12 @@ Caching implementation for MIV operators.
 
 This module provides DataclassCacher, which is specifically designed for
 operators that use dataclasses for configuration.
+
+Useful wrapper functions for MIV operators.
+
+.. autofunction:: miv.core.source.wrapper.cached_method
+.. autofunction:: miv.core.operator_generator.wrapper.cache_generator_call
+
 """
 __all__ = [
     "DataclassCacher",
@@ -36,13 +42,23 @@ class DataclassCacher(BaseCacher):
     comparison and supports multiple cache files for chunked data.
     """
 
-    @when_policy_is("ON", "MUST", "OVERWRITE")
     def check_cached(self, tag: str = "data", *args: Any, **kwargs: Any) -> bool:
-        if self.policy == "MUST":
+        """
+        Check if the current configuration matches the cached one.
+
+        Handles all policies explicitly:
+        - OFF: Returns False (no cache checking)
+        - MUST: Returns True (assumes cache exists, validated in load_cached)
+        - OVERWRITE: Returns False (always execute)
+        - ON: Checks if cache exists and matches current configuration
+        """
+        if self.policy == "OFF":
+            flag = False
+        elif self.policy == "MUST":
             flag = True
         elif self.policy == "OVERWRITE":
             flag = False
-        else:
+        else:  # ON policy
             current_config = self._compile_configuration_as_dict()
             cached_config = self._load_configuration_from_cache(tag=tag)
             if cached_config is None:
@@ -78,6 +94,11 @@ class DataclassCacher(BaseCacher):
     def load_cached(self, tag: str = "data") -> Generator[Any]:
         paths = glob.glob(self.cache_filename("*", tag=tag))
         paths.sort()
+        # For MUST policy, verify cache actually exists
+        if self.policy == "MUST" and not paths:
+            raise FileNotFoundError(
+                f"MUST policy is used for caching, but cache does not exist in {self.cache_dir}"
+            )
         for path in paths:
             with open(path, "rb") as f:
                 self.parent.logger.info(f"Loading cache from: {path}")

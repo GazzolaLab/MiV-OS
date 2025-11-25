@@ -91,6 +91,11 @@ class OperatorMixin(ChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
             else:
                 output = self.runner(self.__call__, args)
 
+            # Save cache after execution (respects policy via when_policy_is decorator)
+            if output is not None:
+                self.cacher.save_cache(output, tag="data")
+                self.cacher.save_config(tag="data")
+
             # Callback: After-run
             self._callback_after_run(output)
 

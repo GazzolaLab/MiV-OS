@@ -8,8 +8,7 @@ import pathlib
 from abc import abstractmethod
 
 from .policy import RunnerBase
-from ..cachable import _CacherProtocol, CACHE_POLICY
-from ..protocol import _Loggable, _Chainable
+from ..protocol import _Loggable, _Chainable, _Cachable
 from ..datatype import DataTypes
 
 
@@ -25,16 +24,6 @@ class _Runnable(Protocol):
 
     @abstractmethod
     def __call__(self, *args: Any, **kwargs: Any) -> Any: ...
-
-
-class _Cachable(Protocol):
-    """
-    A protocol for cachable behavior.
-    """
-
-    cacher: _CacherProtocol
-
-    def set_caching_policy(self, policy: CACHE_POLICY) -> None: ...
 
 
 class _Node(

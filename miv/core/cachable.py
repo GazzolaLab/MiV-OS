@@ -27,7 +27,7 @@ import shutil
 from miv.utils.formatter import TColors
 
 if TYPE_CHECKING:
-    from .operator.protocol import _Cachable
+    from .protocol import _Cachable
 
 # ON: Always use cache if cache exist. Otherwise, run and save cache.
 # OFF: Never use cache functions, always run. No cache save.
