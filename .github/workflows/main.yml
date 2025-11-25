@@ -82,16 +82,3 @@ jobs:
         if: always()
         run: |
           make check-codestyle
-
-      # Upload coverage to Codecov (use python 3.10 ubuntu-latest)
-      - name: Upload coverage to Codecov (only on 3.10 ubuntu-latest)
-        if: ${{ matrix.os == 'ubuntu-latest' && matrix.python-version == '3.10' }}
-        uses: codecov/codecov-action@v5
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          env_vars: OS,PYTHON
-          fail_ci_if_error: true
-          flags: unittests
-          name: codecov-umbrella
-          verbose: true
-          file: ./coverage.xml

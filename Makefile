@@ -29,9 +29,20 @@ formatting:
 test:
 	uv run pytest -c pyproject.toml --cov=miv/core --cov-report=xml tests
 
-.PHONY: test-mpi
-test-mpi:
-	mpirun -n 4 uv run pytest --with-mpi -c pyproject.toml tests-mpi
+.PHONY: test-all
+test-all:
+	# Clean up any existing coverage files
+	rm -f .coverage .coverage.*
+	# Run MPI tests with parallel coverage
+	mpirun -n 4 uv run coverage run -p -m pytest --with-mpi -c pyproject.toml tests-mpi
+	# Run non-MPI tests with parallel coverage
+	uv run coverage run -p -m pytest -c pyproject.toml tests
+	# Combine all coverage files
+	uv run coverage combine
+	# Generate XML and text reports
+	uv run coverage xml
+	uv run coverage report
+
 
 .PHONY: check-codestyle
 check-codestyle:

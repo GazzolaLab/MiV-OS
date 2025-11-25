@@ -243,6 +243,8 @@ show_missing = true
 
 [tool.coverage.run]
 branch = true
+parallel = true
+source = ["miv/core"]
 omit = [
     "*/.local/*",
 	  "setup.py",

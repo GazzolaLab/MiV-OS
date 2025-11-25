@@ -13,7 +13,7 @@ jobs:
       UV_CACHE_DIR: /tmp/.uv-cache
     strategy:
       matrix:
-        python-version: ["3.10"]
+        python-version: ["3.11"]
         os: [ubuntu-latest]
         mpi: ["openmpi"]
         include:
@@ -61,4 +61,17 @@ jobs:
       - name: Run MPI pytests
         if: always()
         run: |
-          make test-mpi
+          make test-all
+
+      # Upload coverage to Codecov (includes both MPI and non-MPI tests)
+      - name: Upload coverage to Codecov
+        if: always()
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          env_vars: OS,PYTHON
+          fail_ci_if_error: true
+          flags: mpi-tests
+          name: codecov-umbrella
+          verbose: true
+          file: ./coverage.xml
