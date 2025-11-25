@@ -26,7 +26,7 @@ from tqdm import tqdm
 
 from miv.io.intan import rhs
 from miv.core import Signal, Spikestamps
-from miv.core.operator.wrapper import cached_method
+from miv.core.source.wrapper import cached_method
 from miv.io.openephys.data import Data
 
 if TYPE_CHECKING:

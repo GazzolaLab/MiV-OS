@@ -8,7 +8,7 @@ import pathlib
 from abc import abstractmethod
 
 from .policy import RunnerBase
-from .cachable import _CacherProtocol, CACHE_POLICY
+from ..cachable import _CacherProtocol, CACHE_POLICY
 from ..protocol import _Loggable, _Chainable
 from ..datatype import DataTypes
 

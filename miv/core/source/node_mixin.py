@@ -11,7 +11,7 @@ from ..chainable import ChainingMixin
 from ..operator.callback import BaseCallbackMixin
 from ..loggable import DefaultLoggerMixin
 from ..operator.policy import VanillaRunner
-from ..operator.cachable import FunctionalCacher
+from .cachable import FunctionalCacher
 
 if TYPE_CHECKING:
     from ..datatype import DataTypes

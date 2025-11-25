@@ -16,10 +16,7 @@ import logging
 import matplotlib.pyplot as plt
 
 from ..loggable import DefaultLoggerMixin
-from .cachable import (
-    _CacherProtocol,
-    CACHE_POLICY,
-)
+from ..cachable import _CacherProtocol, CACHE_POLICY
 
 
 def execute_callback(

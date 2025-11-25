@@ -6,7 +6,7 @@ import pytest
 from joblib import Memory
 
 from miv.core.source.node_mixin import DataLoaderMixin
-from miv.core.operator.wrapper import cached_method
+from miv.core.source.wrapper import cached_method
 
 
 class MockDataLoader(DataLoaderMixin):

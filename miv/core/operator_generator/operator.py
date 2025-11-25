@@ -7,7 +7,7 @@ from collections.abc import Generator
 if TYPE_CHECKING:
     from ..operator.policy import RunnerBase
 
-from ..operator.cachable import CACHE_POLICY
+from ..cachable import CACHE_POLICY
 from ..operator.operator import OperatorMixin
 from .callback import (
     GeneratorCallbackMixin,
