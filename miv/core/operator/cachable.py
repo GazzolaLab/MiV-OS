@@ -42,32 +42,21 @@ class DataclassCacher(BaseCacher):
     comparison and supports multiple cache files for chunked data.
     """
 
-    def check_cached(self, tag: str = "data", *args: Any, **kwargs: Any) -> bool:
+    def _check_config_matches(
+        self, tag: str = "data", *args: Any, **kwargs: Any
+    ) -> bool:
         """
-        Check if the current configuration matches the cached one.
+        Check if the current dataclass configuration matches the cached one.
 
-        Handles all policies explicitly:
-        - OFF: Returns False (no cache checking)
-        - MUST: Returns True (assumes cache exists, validated in load_cached)
-        - OVERWRITE: Returns False (always execute)
-        - ON: Checks if cache exists and matches current configuration
+        This method is called by BaseCacher.check_cached() for ON policy only.
         """
-        if self.policy == "OFF":
-            flag = False
-        elif self.policy == "MUST":
-            flag = True
-        elif self.policy == "OVERWRITE":
-            flag = False
-        else:  # ON policy
-            current_config = self._compile_configuration_as_dict()
-            cached_config = self._load_configuration_from_cache(tag=tag)
-            if cached_config is None:
-                flag = False
-            else:
-                # Json equality
-                flag = current_config == cached_config
-        self.log_cache_status(flag)
-        return flag
+        current_config = self._compile_configuration_as_dict()
+        cached_config = self._load_configuration_from_cache(tag=tag)
+        if cached_config is None:
+            return False
+        else:
+            # Json equality
+            return current_config == cached_config
 
     def _compile_configuration_as_dict(self) -> dict[Any, Any]:
         config: OrderedDict = dataclasses.asdict(self.parent, dict_factory=OrderedDict)  # type: ignore

@@ -176,12 +176,50 @@ class BaseCacher(ABC):
             msg += TColors.red + "No cache" + TColors.reset
         self.parent.logger.info(msg)
 
-    @abstractmethod
     def check_cached(self, tag: str = "data", *args: Any, **kwargs: Any) -> bool:
         """
         Check if the current configuration matches the cached one.
 
+        Handles all policies explicitly:
+        - OFF: Returns False (no cache checking)
+        - MUST: Returns True (assumes cache exists, validated in load_cached)
+        - OVERWRITE: Returns False (always execute)
+        - ON: Checks if cache exists and matches current configuration via _check_config_matches()
+        """
+        if self.policy == "OFF":
+            flag = False
+        elif self.policy == "MUST":
+            flag = True
+        elif self.policy == "OVERWRITE":
+            flag = False
+        else:  # ON policy
+            flag = self._check_config_matches(tag, *args, **kwargs)
+        self.log_cache_status(flag)
+        return flag
+
+    @abstractmethod
+    def _check_config_matches(
+        self, tag: str = "data", *args: Any, **kwargs: Any
+    ) -> bool:
+        """
+        Check if the current configuration matches the cached configuration.
+
+        This method is called by check_cached() for ON policy only.
         Must be implemented by subclasses.
+
+        Parameters
+        ----------
+        tag : str, default="data"
+            Tag for the cache
+        *args : Any
+            Additional positional arguments (child classes can use these)
+        **kwargs : Any
+            Additional keyword arguments (child classes can use these)
+
+        Returns
+        -------
+        bool
+            True if configuration matches and cache exists, False otherwise
         """
         ...
 

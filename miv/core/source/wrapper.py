@@ -73,7 +73,7 @@ def cached_method(
                 cached_methods[tag] = _func
                 setattr(self, "_cached_methods", cached_methods)  # noqa
             if policy == "MUST":
-                if not cached_methods[tag].check_call_in_cache(*args, **kwargs):  # type: ignore
+                if not cached_methods[tag].check_call_in_cache(self, *args, **kwargs):  # type: ignore
                     raise RuntimeError(
                         f"MUST policy is used for caching, but cache for {tag} does not exist."
                     )

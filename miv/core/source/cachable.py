@@ -67,24 +67,37 @@ class FunctionalCacher(BaseCacher):
             config.update(kwargs)
         return config
 
-    @when_policy_is("ON", "MUST", "OVERWRITE")
     def check_cached(self, params: dict | None = None, tag: str = "data") -> bool:
-        if self.policy == "MUST":
-            flag = True
-        elif self.policy == "OVERWRITE":
-            flag = False
-        else:
-            flag = False  # Start as False, only True if config matches AND file exists
-            if params is not None:
-                current_config = self._compile_parameters_as_dict(params)
-                cached_config = self._load_configuration_from_cache(tag)
+        """
+        Check if the current configuration matches the cached one.
 
-                if cached_config is not None:
-                    # Json equality
-                    flag = current_config == cached_config
-            # Also check that cache file exists
-            flag = flag and os.path.exists(self.cache_filename(0, tag=tag))
-        self.log_cache_status(flag)
+        This method overrides BaseCacher.check_cached() to handle the `params` parameter.
+        It calls the base class method for policy handling.
+        """
+        # Store params for use in _check_config_matches
+        self._current_params = params  # type: ignore[attr-defined]
+        # Call base class which handles policies and calls _check_config_matches for ON policy
+        return super().check_cached(tag=tag)
+
+    def _check_config_matches(
+        self, tag: str = "data", *args: Any, **kwargs: Any
+    ) -> bool:
+        """
+        Check if the current function parameters match the cached configuration.
+
+        This method is called by BaseCacher.check_cached() for ON policy only.
+        """
+        params = getattr(self, "_current_params", None)
+        flag = False  # Start as False, only True if config matches AND file exists
+        if params is not None:
+            current_config = self._compile_parameters_as_dict(params)
+            cached_config = self._load_configuration_from_cache(tag)
+
+            if cached_config is not None:
+                # Json equality
+                flag = current_config == cached_config
+        # Also check that cache file exists
+        flag = flag and os.path.exists(self.cache_filename(0, tag=tag))
         return flag
 
     @when_policy_is("ON", "MUST", "OVERWRITE")
