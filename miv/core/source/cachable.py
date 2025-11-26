@@ -67,17 +67,31 @@ class FunctionalCacher(BaseCacher):
             config.update(kwargs)
         return config
 
-    def check_cached(self, params: dict | None = None, tag: str = "data") -> bool:
+    def check_cached(self, tag: str = "data", *args: Any, **kwargs: Any) -> bool:
         """
         Check if the current configuration matches the cached one.
 
         This method overrides BaseCacher.check_cached() to handle the `params` parameter.
         It calls the base class method for policy handling.
+
+        Parameters
+        ----------
+        tag : str, default="data"
+            Tag for the cache
+        *args : Any
+            Additional positional arguments (unused, for compatibility with base class)
+        **kwargs : Any
+            Additional keyword arguments. May contain 'params' key for function parameters.
         """
+        # Extract params from kwargs if present
+        params = kwargs.pop("params", None)
+        # Ensure tag is not in kwargs to avoid duplicate keyword argument
+        kwargs.pop("tag", None)
         # Store params for use in _check_config_matches
         self._current_params = params  # type: ignore[attr-defined]
         # Call base class which handles policies and calls _check_config_matches for ON policy
-        return super().check_cached(tag=tag)
+        # Note: tag is explicitly passed to match base class signature
+        return super().check_cached(tag, *args, **kwargs)  # type: ignore[misc]
 
     def _check_config_matches(
         self, tag: str = "data", *args: Any, **kwargs: Any
@@ -101,7 +115,21 @@ class FunctionalCacher(BaseCacher):
         return flag
 
     @when_policy_is("ON", "MUST", "OVERWRITE")
-    def save_config(self, params: dict | None = None, tag: str = "data") -> bool:
+    def save_config(self, tag: str = "data", *args: Any, **kwargs: Any) -> bool:
+        """
+        Save the current configuration to cache.
+
+        Parameters
+        ----------
+        tag : str, default="data"
+            Tag for the cache
+        *args : Any
+            Additional positional arguments (unused, for compatibility with base class)
+        **kwargs : Any
+            Additional keyword arguments. May contain 'params' key for function parameters.
+        """
+        # Extract params from kwargs if present
+        params = kwargs.pop("params", None)
         config = self._compile_parameters_as_dict(params)
         os.makedirs(self.cache_dir, exist_ok=True)
         try:
