@@ -1054,13 +1054,15 @@ def test_functional_cacher_save_cache_overwrites_existing_cache_file_when_policy
     result2 = cacher.save_cache(values=test_data2, tag="test_tag")
     assert result2 is True
 
-    # Verify cache file was overwritten (modification time should be newer)
+    # Verify cache file was overwritten (modification time should be newer or equal)
+    # Note: On fast systems, the modification time might be equal if operations
+    # happen within the same timestamp, but the content will still be overwritten.
     mtime_after = cache_file.stat().st_mtime
-    assert mtime_after > mtime_before, (
-        "Cache file should be overwritten (newer modification time)"
+    assert mtime_after >= mtime_before, (
+        "Cache file should be overwritten (modification time should be >= previous time)"
     )
 
-    # Verify the new data is in the cache
+    # Verify the new data is in the cache (this is the real test of overwrite)
     loaded_generator = cacher.load_cached(tag="test_tag")
     loaded_data = next(loaded_generator, None)
     assert loaded_data == test_data2, (
@@ -1118,13 +1120,15 @@ def test_functional_cacher_save_cache_overwrites_existing_cache_file_when_policy
     result = cacher.save_cache(values=test_data2, tag="test_tag")
     assert result is True
 
-    # Verify cache file was overwritten (modification time should be newer)
+    # Verify cache file was overwritten (modification time should be newer or equal)
+    # Note: On fast systems, the modification time might be equal if operations
+    # happen within the same timestamp, but the content will still be overwritten.
     mtime_after = cache_file.stat().st_mtime
-    assert mtime_after > mtime_before, (
-        "Cache file should be overwritten (newer modification time)"
+    assert mtime_after >= mtime_before, (
+        "Cache file should be overwritten (modification time should be >= previous time)"
     )
 
-    # Verify the new data is in the cache
+    # Verify the new data is in the cache (this is the real test of overwrite)
     loaded_generator = cacher.load_cached(tag="test_tag")
     loaded_data = next(loaded_generator, None)
     assert loaded_data == test_data2, (
