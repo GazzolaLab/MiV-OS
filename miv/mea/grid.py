@@ -85,7 +85,7 @@ class GridMEA(MEAMixin, MEAutility.core.MEA):
             value_grid[:, self.grid == idx] = signal[idx][:, None]
         return self.Xn, self.Yn, value_grid
 
-    def get_ixiy(self, channel: int):
+    def get_ixiy(self, channel: int) -> tuple[int, int] | None:
         """Given node index, return grid coordinate indices.
 
         Returns
