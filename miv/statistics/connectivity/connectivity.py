@@ -8,7 +8,7 @@ import itertools
 import logging
 import os
 import pathlib
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 import matplotlib.pyplot as plt
@@ -53,7 +53,7 @@ class DirectedConnectivity(OperatorMixin):
 
     mea: str = None
     channels: list[int] | None = None
-    exclude_channels: list[int] | None = None
+    exclude_channels: list[int] = field(default_factory=list)
     bin_size: float = 0.001
     minimum_count: int = 1
     tag: str = "directional connectivity analysis"
@@ -74,9 +74,6 @@ class DirectedConnectivity(OperatorMixin):
             self.mea_map = mea_map[self.mea]
         else:
             self.mea_map = mea_map["64_intanRHD"]
-
-        if self.exclude_channels is None:  # FIXME: Use dataclass default value
-            self.exclude_channels = []
 
     @cache_call
     def __call__(self, spikestamps: Spikestamps) -> np.ndarray:
@@ -407,7 +404,7 @@ class UndirectedConnectivity(OperatorMixin):
         Random seed. If None, use random seed, by default None
     """
 
-    exclude_channels: list[int] | None = None
+    exclude_channels: list[int] = field(default_factory=list)
     bin_size: float = 0.001
     minimum_count: int = 1
     firing_rate_limit: float = 5e-1
@@ -424,8 +421,6 @@ class UndirectedConnectivity(OperatorMixin):
 
     def __post_init__(self):
         super().__init__()
-        if self.exclude_channels is None:  # FIXME: Use dataclass default value
-            self.exclude_channels = []
 
     @cache_call
     def __call__(self, spikestamps: Spikestamps, mea=None) -> np.ndarray:
