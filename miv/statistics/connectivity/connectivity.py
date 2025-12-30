@@ -176,7 +176,8 @@ class DirectedConnectivity(OperatorMixin):
         )
         if te < H_threshold:
             return 1, 0
-        return 1, te
+        if skip_surrogate:
+            return 1, te
         t_value, p_value = spst.ttest_1samp(surrogate_te_list, te, nan_policy="omit")
         return p_value, te
 
