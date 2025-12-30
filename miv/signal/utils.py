@@ -21,8 +21,14 @@ def downsample_average(
     Returns:
         A tuple (x_ds, y_ds) of numpy arrays, each of length ~max_samples.
     """
+    if max_samples <= 0:
+        raise ValueError("max_samples must be positive")
+
     arr_x = np.asarray(x)
     arr_y = np.asarray(y)
+    if arr_x.shape[0] != arr_y.shape[0]:
+        raise ValueError("x and y must have the same length")
+
     size = arr_x.shape[0]
     if size <= max_samples:
         return arr_x, arr_y
