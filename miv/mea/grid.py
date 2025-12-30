@@ -86,8 +86,15 @@ class GridMEA(MEAMixin, MEAutility.core.MEA):
         return self.Xn, self.Yn, value_grid
 
     def get_ixiy(self, channel: int):
-        # FIXME: ixiy return ys xs
-        """Given node index, return x y coordinate index"""
+        """Given node index, return grid coordinate indices.
+
+        Returns
+        -------
+        tuple[int, int] | None
+            A tuple of (row_index, column_index) for the channel in the grid.
+            Returns None if the channel is not found in the grid.
+            The indices can be used for array indexing: grid[row_index, column_index]
+        """
         if channel not in self.grid:
             return None
         ys, xs = np.where(self.grid == channel)
