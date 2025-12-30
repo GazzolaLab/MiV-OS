@@ -152,7 +152,7 @@ def interspike_intervals(spikes: SpikestampsType):
     return spike_interval
 
 
-def coefficient_variation(self, spikes: SpikestampsType):
+def coefficient_variation(spikes: SpikestampsType) -> float:
     """
     The Coefficient of variation: ratio of interspike standard deviation over mean.
 
@@ -165,7 +165,7 @@ def coefficient_variation(self, spikes: SpikestampsType):
     -------
         coefficient variation : float
     """
-    interspike = self.interspike_intervals()
+    interspike = interspike_intervals(spikes)
     return np.std(interspike) / np.mean(interspike)
 
 
