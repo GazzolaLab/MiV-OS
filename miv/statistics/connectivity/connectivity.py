@@ -520,7 +520,7 @@ class UndirectedConnectivity(OperatorMixin):
             rng.shuffle(surrogate_source)
             for start_index in np.arange(0, source.shape[0] - sublength, stride):
                 end_index = start_index + sublength
-                surr_val = func(
+                surr_val = pairwise_granger(
                     np.stack(
                         [
                             surrogate_source[start_index:end_index],
