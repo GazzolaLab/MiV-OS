@@ -34,7 +34,7 @@ test-all:
 	# Clean up any existing coverage files
 	rm -f .coverage .coverage.*
 	# Run MPI tests with parallel coverage
-	mpirun -n 4 uv run coverage run -p -m pytest --with-mpi -c pyproject.toml tests-mpi
+	mpirun --allow-run-as-root -n 2 uv run coverage run -p -m pytest --with-mpi -c pyproject.toml tests-mpi
 	# Run non-MPI tests with parallel coverage
 	uv run coverage run -p -m pytest -c pyproject.toml tests
 	# Combine all coverage files
