@@ -29,3 +29,24 @@ def test_downsample_average_invalid_max_samples():
 def test_downsample_average_length_mismatch():
     with pytest.raises(ValueError, match="same length"):
         downsample_average([1, 2, 3], [1, 2], max_samples=2)
+
+
+def test_downsample_average_empty_inputs():
+    """Test that downsample_average handles empty inputs correctly."""
+    x = np.array([])
+    y = np.array([])
+    x_ds, y_ds = downsample_average(x, y, max_samples=5)
+    assert len(x_ds) == 0
+    assert len(y_ds) == 0
+    assert isinstance(x_ds, np.ndarray)
+    assert isinstance(y_ds, np.ndarray)
+
+def test_downsample_average_single_element():
+    """Test that downsample_average handles single-element inputs correctly."""
+    x = np.array([5.0])
+    y = np.array([10.0])
+    x_ds, y_ds = downsample_average(x, y, max_samples=5)
+    assert len(x_ds) == 1
+    assert len(y_ds) == 1
+    np.testing.assert_array_equal(x_ds, np.array([5.0]))
+    np.testing.assert_array_equal(y_ds, np.array([10.0]))
