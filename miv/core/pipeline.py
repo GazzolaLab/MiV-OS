@@ -8,8 +8,8 @@ __doc__ = """
 from typing import cast
 from collections.abc import Sequence
 
-import os
 import pathlib
+import shutil
 import time
 
 from miv.core.operator.protocol import _Node
@@ -105,9 +105,17 @@ class Pipeline:
                 print("Pipeline done.", flush=True)
 
         if temporary_directory is not None:
-            os.system(f"cp -rf {temporary_directory}/* {working_directory}/")
-            # import shutil
-            # shutil.move(temporary_directory, working_directory)
+            temp_dir = pathlib.Path(temporary_directory)
+            work_dir = pathlib.Path(working_directory)
+            work_dir.mkdir(parents=True, exist_ok=True)
+
+            # Copy each item from temp_dir to work_dir
+            for item in temp_dir.iterdir():
+                dest = work_dir / item.name
+                if item.is_dir():
+                    shutil.copytree(item, dest, dirs_exist_ok=True)
+                else:
+                    shutil.copy2(item, dest)
 
     def summarize(self) -> str:
         strs = []
