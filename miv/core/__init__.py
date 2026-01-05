@@ -3,6 +3,7 @@ from ..import_helper import getter_upon_call
 
 _submodule_paths_for_alias = {
     "pipeline": ["Pipeline"],
+    "datatype.pure_python": ["PythonDataType", "NumpyDType"],
     "datatype.events": ["Events"],
     "datatype.signal": ["Signal"],
     "datatype.spikestamps": ["Spikestamps"],

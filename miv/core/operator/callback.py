@@ -28,8 +28,10 @@ def execute_callback(
     """
     try:
         callback(*args, **kwargs)
-    except Exception as e:
-        logger.warning("There was an issue running the following callback: %s", e)
+    except Exception:
+        logger.exception(
+            "There was an issue running the following callback. (No exception will be raised during callback.)"
+        )
 
 
 # MixinOperators

@@ -22,6 +22,9 @@ class ValuesMixin(DataNodeMixin, ChainingMixin):
         super().__init__(*args, **kwargs)
         self.data = data
 
+    def output(self) -> PurePythonTypes:
+        return self.data
+
 
 class PythonDataType(ValuesMixin):
     """

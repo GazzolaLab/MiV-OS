@@ -1,4 +1,8 @@
-__doc__ = """"""
+"""Callback mixin for generator operators.
+
+This module provides callback functionality for generator-to-generator operators,
+including plotting callbacks that execute during generator iterations.
+"""
 
 from typing import TYPE_CHECKING, Any, Protocol
 
@@ -53,9 +57,16 @@ class GeneratorCallbackMixin(DefaultLoggerMixin):
         self._done_flag_firstiter_plot = False
 
     def reset_callbacks(self, *args: Any, **kwargs: Any) -> None:
-        super().__init__(*args, **kwargs)
-        self._done_flag_generator_plot = getattr(kwargs, "plot", False)
-        self._done_flag_firstiter_plot = getattr(kwargs, "plot", False)
+        """Reset callback flags.
+
+        Args:
+            *args: Positional arguments (unused, for compatibility).
+            **kwargs: Keyword arguments. If 'plot' is provided, sets both
+                generator_plot and firstiter_plot flags to that value.
+        """
+        plot_flag = kwargs.get("plot", False)
+        self._done_flag_generator_plot = plot_flag
+        self._done_flag_firstiter_plot = plot_flag
 
     def _callback_generator_plot(
         self,
@@ -63,7 +74,7 @@ class GeneratorCallbackMixin(DefaultLoggerMixin):
         output: "DataTypes",
         inputs: tuple["DataTypes", ...] | None = None,
         show: bool = False,
-        save_path: bool | str | pathlib.Path | None = None,
+        save_path: str | pathlib.Path | None = None,
     ) -> None:
         if self._done_flag_generator_plot:
             return
