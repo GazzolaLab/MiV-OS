@@ -27,13 +27,15 @@ C = TypeVar("C", bound="GeneratorOperatorMixin")
 
 
 class VanillaGeneratorRunner(RunnerBase):
-    """Default runner without any modification.
-    Simply, the operator will be executed in embarrassingly parallel manner.
-    If MPI is available, the operator will be executed in every ranks.
+    """Default runner for generator operators without any modification.
+
+    The operator will be executed in an embarrassingly parallel manner.
+    If MPI is available, the operator will be executed in every rank.
     (This is different behavior from regular operator VanillaRunner, although
     it would not create overhead due to the lazy execution strategy.)
 
-    This runner is meant to be used for generator operators.
+    This runner is meant to be used for generator operators that process
+    iterable inputs and yield results incrementally.
     """
 
     def __init__(self, parent: C) -> None:
@@ -85,18 +87,26 @@ class VanillaGeneratorRunner(RunnerBase):
 
 
 class GeneratorRunnerInMultiprocessing(RunnerBase):
-    """Runner for generator operators using multiprocessing."""
+    """Runner for generator operators using multiprocessing.
+
+    This runner processes generator inputs in parallel using multiprocessing,
+    processing items in chunks to balance parallelism and overhead.
+
+    Args:
+        parent: The generator operator instance that owns this runner.
+        chunk_size: Number of items to process in each parallel batch.
+    """
 
     def __init__(self, parent: C, *, chunk_size: int = 4) -> None:
-        self.parent = parent
         self.chunk_size = chunk_size
+        self.parent = parent
+        self.logger = parent.logger
 
     def __call__(
         self,
         func: "_LazyCallable",
         inputs: list[Iterable[Any]] | None = None,
     ) -> Generator[Any, None, None]:
-        logger = self.parent.logger
         if inputs is None:
 
             def _generator_func() -> Generator[Any, None, None]:
@@ -128,7 +138,7 @@ class GeneratorRunnerInMultiprocessing(RunnerBase):
                     # results = pool.imap(prox_func, _args)
                     results = pool.starmap(proxy_func, _args)
                 istart += len(_args)
-                logger.info(
+                self.logger.info(
                     f"completed tasks: {istart}(+{len(_args)}) ({time.time() - stime:.2f}sec)",
                 )
                 _args = []
@@ -136,11 +146,11 @@ class GeneratorRunnerInMultiprocessing(RunnerBase):
                 stime = time.time()
                 yield from results
 
-                logger.info(
+                self.logger.info(
                     f"external_tasks:  ({time.time() - stime:.2f}sec)",
                 )
 
-            logger.info("generator-tasks done")
+            self.logger.info("generator-tasks done")
 
             # for idx, zip_arg in enumerate(zip(*args, strict=False)):
             #    stime = time.time()

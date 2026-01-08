@@ -69,6 +69,7 @@ class BaseCallbackMixin(DefaultLoggerMixin):
         super().__init__(*args, **kwargs)
         self.__cache_directory_name: str = cache_path
         self._cacher: _CacherProtocol = cacher
+        self.skip_plot: bool = False
 
         # Default analysis path
         assert self.tag != "", (
@@ -153,6 +154,9 @@ class BaseCallbackMixin(DefaultLoggerMixin):
         """
         Run all function in this operator that starts with the name 'plot_'.
         """
+        if self.skip_plot:
+            return
+
         if self._done_flag_plot:
             return
 

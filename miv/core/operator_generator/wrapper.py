@@ -1,3 +1,6 @@
+"""Wrapper decorator for generator operator caching and callbacks."""
+
+import functools
 from typing import Any, TypeVar
 from collections.abc import Callable
 
@@ -88,3 +91,4 @@ def cache_generator_call(func: Callable) -> Callable:
 #            return result
 #
 #    return wrapper
+

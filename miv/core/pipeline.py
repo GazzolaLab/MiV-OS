@@ -11,6 +11,9 @@ from collections.abc import Sequence
 import pathlib
 import shutil
 import time
+import sys
+
+from loguru import logger
 
 from miv.core.operator.protocol import _Node
 from miv.core.utils.graph_sorting import topological_sort
@@ -50,7 +53,7 @@ class Pipeline:
         cache_directory: str | pathlib.Path | None = None,
         temporary_directory: str | pathlib.Path | None = None,
         skip_plot: bool = False,
-        verbose: bool = False,  # Use logging
+        verbose: int = 1,
     ) -> None:
         """
         Run the pipeline.
@@ -69,40 +72,59 @@ class Pipeline:
             is limited. Each node can save results to local temporary directory, and then
             collectively moved to working directory. This is only suppored when mpi4py is
             available.
-        verbose : bool, optional
-            If True, the pipeline will log debugging informations. By default False
+        verbose : int, optional
+            Verbosity level. 0: quiet, 1: info, 2: debug.
+            If True, the pipeline will log debugging informations. By default 1
         """
+        # Configure logger
+        logger.remove()
+        if verbose == 0:
+            logger.add(sys.stderr, level="WARNING")
+        elif verbose == 1:
+            logger.add(sys.stderr, level="INFO")
+        else:  # verbose >= 2
+            logger.add(sys.stderr, level="DEBUG")
+
         # Set working directory
         if cache_directory is None:
             cache_directory = working_directory
 
-        # Reset all callbacks
-        for last_node in self.nodes_to_run:
-            for node in topological_sort(last_node):
-                if hasattr(node, "reset_callbacks"):
-                    node.reset_callbacks(plot=skip_plot)
-                if hasattr(node, "set_save_path"):
-                    if temporary_directory is not None:
-                        node.set_save_path(temporary_directory, cache_directory)
-                    else:
-                        node.set_save_path(working_directory, cache_directory)
+        # Setup nodes
+        all_nodes = list(dict.fromkeys(topological_sort(*self.nodes_to_run)))
+        for node in all_nodes:
+            if hasattr(node, "reset_callbacks"):
+                node.reset_callbacks(plot=skip_plot)
+            if hasattr(node, "set_save_path"):
+                if temporary_directory is not None:
+                    node.set_save_path(temporary_directory, cache_directory)
+                else:
+                    node.set_save_path(working_directory, cache_directory)
 
         # Execute
-        for node in self.nodes_to_run:
-            if verbose:
-                stime = time.time()
-                print("Running: ", node, flush=True)
+        logger.info(f"Total {len(all_nodes)} operators to run.")
+        for node in all_nodes:
+            stime = time.time()
+            logger.info(f"Running: {node}")
+
+            is_cached = hasattr(node, "check_cached") and node.check_cached()
+            logger.debug(f"  Cache exists: {is_cached}")
 
             try:
                 node.output()
             except Exception as e:
-                print("  Exception raised: ", node, flush=True)
+                logger.exception(f"  Exception raised while running {node}: {e}")
                 raise e
 
-            if verbose:
-                etime = time.time()
-                print(f"  Finished: {etime - stime:.03f} sec")
-                print("Pipeline done.", flush=True)
+            etime = time.time()
+            logger.info(f"  Finished: {etime - stime:.03f} sec")
+
+            if is_cached and verbose >= 2 and hasattr(node, "output_path"):
+                output_path = pathlib.Path(node.output_path)
+                if output_path.exists():
+                    size = output_path.stat().st_size
+                    logger.debug(f"  Cache size: {size / 1024**2:.3f} MB")
+
+        logger.info("Pipeline done.")
 
         if temporary_directory is not None:
             temp_dir = pathlib.Path(temporary_directory)
