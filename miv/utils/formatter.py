@@ -1,4 +1,6 @@
 class TColors:
+    green = "\x1b[32m"
+    blue = "\x1b[34m"
     grey = "\x1b[38;20m"
     yellow = "\x1b[33;20m"
     red = "\x1b[31;20m"

@@ -15,6 +15,7 @@ import sys
 
 from loguru import logger
 
+from ..utils.formatter import TColors
 from .operator.protocol import _Node
 from .utils.graph_sorting import topological_sort
 from .loggable import configure_logger
@@ -103,10 +104,10 @@ class Pipeline:
         for node in self.nodes_to_run:
             stime = time.time()
             try:
-                _logger.info(f"  Running: {node}")
+                _logger.info(f"┏━━  {TColors.yellow}Running: {node}{TColors.reset}")
                 node.output()
                 etime = time.time()
-                _logger.info(f"  Finished: {etime - stime:.03f} sec")
+                _logger.success(f"┗━━  {TColors.green}Finished: {etime - stime:.04f} sec{TColors.reset}")
             except Exception as e:
                 _logger.exception(f"  Exception raised while running {node}: {e}")
                 raise e
