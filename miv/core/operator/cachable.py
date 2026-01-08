@@ -90,5 +90,5 @@ class DataclassCacher(BaseCacher):
             )
         for path in paths:
             with open(path, "rb") as f:
-                self.parent.logger.info(f"Loading cache from: {path}")
+                self.parent.logger.debug(f"Loading cache from: {path}")
                 yield pkl.load(f)

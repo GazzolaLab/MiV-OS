@@ -10,7 +10,7 @@ from abc import abstractmethod
 
 import pathlib
 
-
+from loguru import logger
 from ..chainable import ChainingMixin
 from ..loggable import DefaultLoggerMixin
 from .cachable import DataclassCacher
@@ -64,11 +64,15 @@ class OperatorMixin(ChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
         Receive input data from each upstream operator.
         Essentially, this method recursively call upstream operators' run() method.
         """
-        return [cast(_Node, node).output() for node in self.iterate_upstream()]
+        ret = []
+        for node in self.iterate_upstream():
+            output = cast(_Node, node).output()
+            ret.append(output)
+        return ret
 
     def flow_blocked(self) -> bool:
         try:
-            return self.cacher.check_cached()
+            return self.cacher.check_cached(skip_log=True)
         except (AttributeError, FileNotFoundError):
             return False
 

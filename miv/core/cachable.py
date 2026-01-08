@@ -169,14 +169,14 @@ class BaseCacher(ABC):
 
     def log_cache_status(self, flag: bool) -> None:
         """Log the cache status."""
-        msg = f"Caching policy: {self.policy} - "
         if flag:
-            msg += "Cache exist"
+            msg = f"Caching policy: {TColors.yellow}{self.policy} - Cache exist{TColors.reset}"
         else:
+            msg = f"Caching policy: {TColors.red}{self.policy}{TColors.reset} - "
             msg += TColors.red + "No cache" + TColors.reset
         self.parent.logger.info(msg)
 
-    def check_cached(self, tag: str = "data", *args: Any, **kwargs: Any) -> bool:
+    def check_cached(self, tag: str = "data", skip_log:bool=False, *args: Any, **kwargs: Any) -> bool:
         """
         Check if the current configuration matches the cached one.
 
@@ -194,7 +194,9 @@ class BaseCacher(ABC):
             flag = False
         else:  # ON policy
             flag = self._check_config_matches(tag, *args, **kwargs)
-        self.log_cache_status(flag)
+        
+        if not skip_log:
+            self.log_cache_status(flag)
         return flag
 
     @abstractmethod
