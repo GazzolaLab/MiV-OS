@@ -65,15 +65,18 @@ def configure_logger(start_tag, verbose: int):  # pragma: no cover
             filter=lambda record: record["level"].name == "DEBUG",
         )
 
+
 class DefaultLoggerMixin:
     tag: str
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         # self.tag is defined in the operator class
-        self._logger = logger.bind(tag=self.tag)
+        if hasattr(self, "tag"):
+            self._logger = logger.bind(tag=self.tag)
+        else:
+            self._logger = logger.bind(tag=self.__class__.__name__)
 
     @property
     def logger(self):
         return self._logger
-
