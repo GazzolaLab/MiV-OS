@@ -8,6 +8,7 @@ Spikestamps
 """
 
 from collections.abc import MutableSequence, Sequence, Iterable, Generator
+from typing import overload
 
 import numpy as np
 import quantities as pq
@@ -15,7 +16,7 @@ import quantities as pq
 import neo
 
 from .signal import Signal
-from ..operator.operator import DataNodeMixin
+from .node_mixin import DataNodeMixin
 
 
 class Spikestamps(DataNodeMixin, Sequence):
@@ -44,7 +45,17 @@ class Spikestamps(DataNodeMixin, Sequence):
     def __setitem__(self, index: int, item: MutableSequence[float]) -> None:
         self.data[index] = item
 
-    def __getitem__(self, index: int) -> MutableSequence[float]:  # type: ignore[override]
+    @overload
+    def __getitem__(self, index: int) -> np.ndarray: ...
+
+    @overload
+    def __getitem__(self, index: slice) -> Sequence[np.ndarray]: ...
+
+    def __getitem__(self, index: int | slice) -> np.ndarray | Sequence[np.ndarray]:
+        if isinstance(index, slice):
+            return [
+                np.asarray(self.data[i]) for i in range(*index.indices(len(self.data)))
+            ]
         return np.asarray(self.data[index])
 
     def __len__(self) -> int:
@@ -126,7 +137,7 @@ class Spikestamps(DataNodeMixin, Sequence):
         t_start: float,
         t_end: float,
         step_size: float,
-        interval: float,
+        duration: float,
         reset_start: bool = False,
     ) -> Generator["Spikestamps", None, None]:
         """
@@ -134,7 +145,7 @@ class Spikestamps(DataNodeMixin, Sequence):
         """
         n_intervals = int(np.ceil((t_end - t_start) / step_size)) + 1
         bins = (np.arange(n_intervals) * step_size) + t_start
-        window_size = int(np.ceil(interval / step_size))
+        window_size = int(np.ceil(duration / step_size))
         digitized_indices = [np.digitize(arr, bins, right=True) for arr in self.data]
 
         start_time = t_start
@@ -144,14 +155,14 @@ class Spikestamps(DataNodeMixin, Sequence):
         while start_indices < n_intervals:
             if reset_start:
                 view = [
-                    arr[sidx:eidx] - start_time
+                    np.asarray(arr)[sidx:eidx] - start_time
                     for arr, sidx, eidx in zip(
                         self.data, sindices, eindices, strict=False
                     )
                 ]
             else:
                 view = [
-                    arr[sidx:eidx]
+                    np.asarray(arr)[sidx:eidx]
                     for arr, sidx, eidx in zip(
                         self.data, sindices, eindices, strict=False
                     )
@@ -167,7 +178,34 @@ class Spikestamps(DataNodeMixin, Sequence):
             ]
             eindices = [np.searchsorted(arr, end_indices) for arr in digitized_indices]
 
-        return True
+    def get_view_intervals(
+        self,
+        intervals: list[float],
+    ) -> Generator["Spikestamps", None, None]:
+        """
+        Get spikestamps view of specified intervals.
+        """
+        num_intervals = len(intervals) - 1
+
+        stacked_spikes_for_each_pattern = {}
+        for nch in range(self.number_of_channels):
+            spikes = self[nch]
+            indices = np.digitize(spikes, bins=intervals)  # sorted order
+            stack = [[] for _ in range(num_intervals)]
+            for v, i in zip(spikes, indices, strict=False):
+                if i == 0 or i == len(intervals):
+                    continue  # out of bounds
+                pattern_start_time = intervals[i - 1]
+                stack[i - 1].append(v - pattern_start_time)
+            stacked_spikes_for_each_pattern[nch] = stack
+
+        for idx in range(num_intervals):
+            view = [
+                stacked_spikes_for_each_pattern[ch][idx]
+                for ch in range(self.number_of_channels)
+            ]
+
+            yield Spikestamps(view)
 
     def select(self, indices: Sequence[int], keepdims: bool = True) -> "Spikestamps":
         """Select channels by indices. The order of the channels will be preserved."""

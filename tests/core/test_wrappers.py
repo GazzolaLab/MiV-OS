@@ -1,6 +1,7 @@
 import pytest
 
-from miv.core.operator.wrapper import cache_call, cached_method
+from miv.core.operator.wrapper import cache_call
+from miv.core.source.wrapper import cached_method
 from miv.core.operator_generator.wrapper import cache_generator_call
 
 

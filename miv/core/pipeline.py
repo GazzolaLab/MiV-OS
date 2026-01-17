@@ -8,12 +8,17 @@ __doc__ = """
 from typing import cast
 from collections.abc import Sequence
 
-import os
 import pathlib
+import shutil
 import time
+import sys
 
-from miv.core.operator.protocol import _Node
-from miv.core.utils.graph_sorting import topological_sort
+from loguru import logger
+
+from ..utils.formatter import TColors
+from .operator.protocol import _Node
+from .utils.graph_sorting import topological_sort
+from .loggable import configure_logger
 
 
 class Pipeline:
@@ -44,13 +49,14 @@ class Pipeline:
             node = cast(Sequence[_Node], node)
             self.nodes_to_run = list(node)
 
+
     def run(
         self,
         working_directory: str | pathlib.Path = "./results",
         cache_directory: str | pathlib.Path | None = None,
         temporary_directory: str | pathlib.Path | None = None,
         skip_plot: bool = False,
-        verbose: bool = False,  # Use logging
+        verbose: int = 1,
     ) -> None:
         """
         Run the pipeline.
@@ -65,14 +71,23 @@ class Pipeline:
         temporary_directory : Optional[Union[str, pathlib.Path]], optional
             If given, files will be saved in temporary directory, and will be moved to
             working directory after. Cache directory is not altered.
-        verbose : bool, optional
-            If True, the pipeline will log debugging informations. By default False
+            This feature is useful when the pipeline is running with MPI but I/O bandwidth
+            is limited. Each node can save results to local temporary directory, and then
+            collectively moved to working directory. This is only suppored when mpi4py is
+            available.
+        verbose : int, optional
+            Verbosity level. 0: quiet, 1: info, 2: debug.
+            If True, the pipeline will log debugging informations. By default 1
         """
+        configure_logger(start_tag="Pipeline", verbose=verbose)
+        _logger = logger.bind(tag="Pipeline")
+
         # Set working directory
         if cache_directory is None:
             cache_directory = working_directory
 
-        # Reset all callbacks
+        # Setup nodes
+        #  Reset all callbacks
         for last_node in self.nodes_to_run:
             for node in topological_sort(last_node):
                 if hasattr(node, "reset_callbacks"):
@@ -83,27 +98,34 @@ class Pipeline:
                     else:
                         node.set_save_path(working_directory, cache_directory)
 
-        # Execute
-        for node in self.nodes_to_run:
-            if verbose:
-                stime = time.time()
-                print("Running: ", node, flush=True)
 
+        # Execute
+        _logger.info(f"Total {len(self.nodes_to_run)} operators to run.")
+        for node in self.nodes_to_run:
+            stime = time.time()
             try:
+                _logger.info(f"┏━━  {TColors.yellow}Running: {node}{TColors.reset}")
                 node.output()
+                etime = time.time()
+                _logger.success(f"┗━━  {TColors.green}Finished: {etime - stime:.04f} sec{TColors.reset}")
             except Exception as e:
-                print("  Exception raised: ", node, flush=True)
+                _logger.exception(f"  Exception raised while running {node}: {e}")
                 raise e
 
-            if verbose:
-                etime = time.time()
-                print(f"  Finished: {etime - stime:.03f} sec")
-                print("Pipeline done.", flush=True)
+        _logger.info("Pipeline done.")
 
         if temporary_directory is not None:
-            os.system(f"cp -rf {temporary_directory}/* {working_directory}/")
-            # import shutil
-            # shutil.move(temporary_directory, working_directory)
+            temp_dir = pathlib.Path(temporary_directory)
+            work_dir = pathlib.Path(working_directory)
+            work_dir.mkdir(parents=True, exist_ok=True)
+
+            # Copy each item from temp_dir to work_dir
+            for item in temp_dir.iterdir():
+                dest = work_dir / item.name
+                if item.is_dir():
+                    shutil.copytree(item, dest, dirs_exist_ok=True)
+                else:
+                    shutil.copy2(item, dest)
 
     def summarize(self) -> str:
         strs = []

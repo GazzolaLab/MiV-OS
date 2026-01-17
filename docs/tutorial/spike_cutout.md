@@ -26,17 +26,15 @@ import numpy as np
 import quantities as pq
 import matplotlib.pyplot as plt
 
-from miv.core.operator import Operator, DataLoader
-from miv.core.pipeline import Pipeline
-from miv.io.openephys import Data, DataManager
-from miv.signal.filter import ButterBandpass, MedianFilter
-from miv.signal.spike import ThresholdCutoff
+from miv.core import Pipeline
+from miv.io.openephys import DataManager
+from miv.signal import ButterBandpass, ThresholdCutoff, ExtractWaveforms
 
 from miv.datasets.openephys_sample import load_data
 
 # Prepare data
-dataset: DataManager = load_data(progbar_disable=True)
-data: DataLoader = dataset[0]
+dataset = load_data(progbar_disable=True)
+data = dataset[0]
 ```
 
 ## Build Pipeline
@@ -46,8 +44,8 @@ We use `bandpass_filter` and the `spike_detection`, using the `ButterBandpass` a
 
 ```{code-cell} ipython3
 # Create operator modules:
-bandpass_filter: Operator = ButterBandpass(lowcut=300, highcut=3000, order=4, tag="bandpass")
-spike_detection: Operator = ThresholdCutoff(cutoff=4.0, dead_time=0.002, tag="spikes")
+bandpass_filter = ButterBandpass(lowcut=300, highcut=3000, order=4, tag="bandpass")
+spike_detection = ThresholdCutoff(cutoff=4.0, dead_time=0.002, tag="spikes")
 ```
 
 We can assign a `tag` to each operator to label it and help visualize the processing steps later.
@@ -60,9 +58,9 @@ It requires a list of channels to extract the spikes from, which we can specify 
 We can also limit the number of spikes to plot using the `plot_n_spikes` parameter.
 
 ```{code-cell} ipython3
-from miv.signal.spike import ExtractWaveforms
+from miv.signal import ExtractWaveforms
 
-extract_waveforms: Operator = ExtractWaveforms(channels=[11, 26, 37, 50], plot_n_spikes=150)
+extract_waveforms = ExtractWaveforms(channels=[11, 26, 37, 50], plot_n_spikes=150)
 ```
 
 With these operators created, we can now build our pipeline by chaining them together using the `>>` operator.
@@ -81,7 +79,9 @@ Notice, `extract_waveform` module takes two inputs: `Signal` and `Spikestamps`, 
 Before proceeding further, let's visualize the data pipeline to ensure the processing order.
 
 ```{code-cell} ipython3
-data.visualize(show=True)
+fig, ax = plt.subplots()
+data.visualize(ax)
+plt.show()
 ```
 
 ## Run Pipeline

@@ -1,6 +1,11 @@
 import numpy as np
 import pytest
 
+try:
+    import pyinform
+except (ImportError, OSError):
+    pytest.skip(allow_module_level=True)
+
 from miv.core import Spikestamps
 from miv.statistics.info_theory import (
     active_information,

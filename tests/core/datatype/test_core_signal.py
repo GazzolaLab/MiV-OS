@@ -26,6 +26,150 @@ def signal_object(signal_data) -> Signal:
     return Signal(data=data, timestamps=timestamps, rate=rate)
 
 
+def test_signal_initialization_with_valid_data():
+    """Test that Signal can be initialized with valid 2D data and timestamps."""
+    data = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
+    timestamps = np.array([0.0, 1.0])
+    rate = 1000.0
+
+    signal = Signal(data=data, timestamps=timestamps, rate=rate)
+
+    assert signal is not None
+    assert np.array_equal(signal.data, data)
+    assert np.array_equal(signal.timestamps, timestamps)
+    assert signal.rate == rate
+    assert signal.shape == (2, 3)
+    assert signal.number_of_channels == 3
+
+
+def test_signal_empty():
+    """Test that Signal.empty() returns empty Signal object with size (1, 0)."""
+    empty_signal = Signal.empty()
+
+    assert empty_signal is not None
+    assert isinstance(empty_signal, Signal)
+    assert empty_signal.shape == (1, 0)
+    assert empty_signal.number_of_channels == 0
+    assert len(empty_signal.timestamps) == 0
+
+
+def test_signal_extend_onto_empty():
+    """Test that extending a Signal onto an empty Signal directly extends it with proper copying."""
+    empty_signal = Signal.empty()
+    other_signal = Signal(
+        data=np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]),
+        timestamps=np.array([0.0, 1.0]),
+        rate=1000.0,
+    )
+
+    original_data = other_signal.data.copy()
+    original_timestamps = other_signal.timestamps.copy()
+
+    empty_signal.extend(other_signal)
+
+    assert np.array_equal(empty_signal.data, other_signal.data)
+    assert np.array_equal(empty_signal.timestamps, other_signal.timestamps)
+    assert empty_signal.rate == other_signal.rate
+    assert empty_signal.shape == other_signal.shape
+    assert empty_signal.number_of_channels == other_signal.number_of_channels
+
+    other_signal.data[0, 0] = 999.0
+    other_signal.timestamps[0] = 999.0
+
+    assert np.array_equal(empty_signal.data, original_data)
+    assert np.array_equal(empty_signal.timestamps, original_timestamps)
+    assert empty_signal.data[0, 0] != 999.0
+    assert empty_signal.timestamps[0] != 999.0
+
+
+def test_signal_extend_with_different_channels_raises_error():
+    """Test that extending a Signal with different number of channels raises an error."""
+    signal1 = Signal(
+        data=np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]),
+        timestamps=np.array([0.0, 1.0]),
+        rate=1000.0,
+    )
+    signal2 = Signal(
+        data=np.array([[7.0, 8.0], [9.0, 10.0]]),
+        timestamps=np.array([2.0, 3.0]),
+        rate=1000.0,
+    )
+
+    assert signal1.number_of_channels == 3
+    assert signal2.number_of_channels == 2
+
+    with pytest.raises(
+        AssertionError, match="Signal must have same number of channels"
+    ):
+        signal1.extend(signal2)
+
+
+def test_signal_extend_with_matching_channels():
+    """Test that extending a Signal with matching channels properly extends the existing Signal."""
+    signal1 = Signal(
+        data=np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]),
+        timestamps=np.array([0.0, 1.0]),
+        rate=1000.0,
+    )
+    signal2 = Signal(
+        data=np.array([[7.0, 8.0, 9.0], [10.0, 11.0, 12.0]]),
+        timestamps=np.array([2.0, 3.0]),
+        rate=1000.0,
+    )
+
+    assert signal1.number_of_channels == 3
+    assert signal2.number_of_channels == 3
+
+    original_signal1_data = signal1.data.copy()
+    original_signal1_timestamps = signal1.timestamps.copy()
+
+    signal1.extend(signal2)
+
+    expected_data = np.array(
+        [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0], [10.0, 11.0, 12.0]]
+    )
+    expected_timestamps = np.array([0.0, 1.0, 2.0, 3.0])
+
+    assert np.array_equal(signal1.data, expected_data)
+    assert np.array_equal(signal1.timestamps, expected_timestamps)
+    assert signal1.rate == 1000.0
+    assert signal1.shape == (4, 3)
+    assert signal1.number_of_channels == 3
+
+    assert np.array_equal(signal2.data, np.array([[7.0, 8.0, 9.0], [10.0, 11.0, 12.0]]))
+    assert np.array_equal(signal2.timestamps, np.array([2.0, 3.0]))
+
+
+def test_signal_validation_invalid_data_wrong_shape():
+    """Test that Signal validation rejects invalid data with wrong shapes."""
+    timestamps = np.array([0.0, 1.0])
+
+    # Test 1D data (should fail - Signal requires 2D array)
+    with pytest.raises(AssertionError, match="Signal must be 2D array"):
+        Signal(data=np.array([1.0, 2.0, 3.0]), timestamps=timestamps)
+
+    # Test 3D data (should fail - Signal requires 2D array)
+    with pytest.raises(AssertionError, match="Signal must be 2D array"):
+        Signal(
+            data=np.array([[[1.0, 2.0], [3.0, 4.0]], [[5.0, 6.0], [7.0, 8.0]]]),
+            timestamps=timestamps,
+        )
+
+    # Test 0D scalar (should fail - Signal requires 2D array)
+    with pytest.raises(AssertionError, match="Signal must be 2D array"):
+        Signal(data=np.array(5.0), timestamps=timestamps)
+
+    # Test empty 1D list (should fail - Signal requires 2D array)
+    with pytest.raises(AssertionError, match="Signal must be 2D array"):
+        Signal(data=[1, 2, 3], timestamps=timestamps)
+
+    # Test valid 2D data should work
+    valid_data = np.array([[1.0, 2.0], [3.0, 4.0]])
+    signal = Signal(data=valid_data, timestamps=timestamps)
+    assert signal is not None
+    assert signal.shape == (2, 2)
+
+
 def test_number_of_channels(signal_object):
     assert signal_object.number_of_channels == 3
 

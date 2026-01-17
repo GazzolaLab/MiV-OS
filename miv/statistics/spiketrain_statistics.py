@@ -5,7 +5,7 @@ from typing import Any
 
 import matplotlib.pyplot as plt
 import numpy as np
-from numba import njit
+from numba import njit, prange
 import quantities as pq
 
 from miv.core import Spikestamps
@@ -152,7 +152,7 @@ def interspike_intervals(spikes: SpikestampsType):
     return spike_interval
 
 
-def coefficient_variation(self, spikes: SpikestampsType):
+def coefficient_variation(spikes: SpikestampsType) -> float:
     """
     The Coefficient of variation: ratio of interspike standard deviation over mean.
 
@@ -165,7 +165,7 @@ def coefficient_variation(self, spikes: SpikestampsType):
     -------
         coefficient variation : float
     """
-    interspike = self.interspike_intervals()
+    interspike = interspike_intervals(spikes)
     return np.std(interspike) / np.mean(interspike)
 
 
@@ -250,10 +250,17 @@ def spike_counts_with_kernel(spiketrain, probe_times, kernel: Callable, batchsiz
 
     return result
 
+@njit(cache=True)
+def _kernel(x, amplitude=2.0, decay_rate=5):
+    # Exponential
+    # return amplitude * np.exp(-decay_rate * x) * decay_rate
+    # Alpha
+    return amplitude * np.exp(-decay_rate * x) * (decay_rate ** 2) * x
 
-@njit(parallel=True)
-def nb_spike_counts_with_kernel(
-    spiketrain, probe_times, kernel: Callable, batchsize=32
+
+@njit(cache=True, parallel=True)
+def decay_spike_counts(
+    spiketrain, probe_times,
 ):
     """
     Both spiketrain and probe_times should be a 1-d array representing time.
@@ -264,25 +271,23 @@ def nb_spike_counts_with_kernel(
         Single-channel spiketrain
     probe_times :
         probe_times
-    kernel :
-        kernel function
     """
     n_spike = spiketrain.size
     n_probe = probe_times.size
     if n_probe == 0:
-        return np.zeros(0)
+        return np.zeros(0, dtype=np.float64)
     if n_spike == 0:
-        return np.zeros_like(probe_times)
+        return np.zeros(probe_times.shape, dtype=np.float64)
 
-    out = np.zeros_like(probe_times)
+    out = np.zeros(probe_times.shape, dtype=np.float64)
 
-    for i in range(n_spike):
+    for i in prange(n_spike):
         s = spiketrain[i]
         # first probe index with t >= s (requires sorted probe_times)
         j0 = np.searchsorted(probe_times, s)
         for j in range(j0, n_probe):
             dt = probe_times[j] - s  # dt >= 0 by construction
-            out[j] += kernel(dt)
+            out[j] += _kernel(dt)
 
     return out
 
@@ -299,20 +304,6 @@ def nb_spike_counts_with_kernel(
     # out += decay_count.sum(axis=0)
 
     # return out
-
-
-def decay_spike_counts(
-    spiketrain, probe_times, amplitude=1.0, decay_rate=5, batchsize=256
-):
-    @njit
-    def _decay_kernel(x):
-        return amplitude * np.exp(-decay_rate * x) * decay_rate
-
-    return nb_spike_counts_with_kernel(
-        np.asarray(spiketrain),
-        probe_times,
-        _decay_kernel,  # , batchsize
-    )
 
 
 def instantaneous_spike_rate(spiketrain, probe_times, window=1, batchsize=32):

@@ -50,7 +50,7 @@ def read_qstring(fid):  # pragma: no cover
     length = int(length / 2)
 
     data = []
-    for i in range(0, length):
+    for _ in range(0, length):
         (c,) = struct.unpack("<H", fid.read(2))
         data.append(c)
 
@@ -187,7 +187,7 @@ def read_header(fid: BinaryIO) -> dict[str, ...]:  # pragma: no cover
         ) = struct.unpack("<hhh", fid.read(6))
 
         if (signal_group_num_channels > 0) and (signal_group_enabled > 0):
-            for signal_channel in range(0, signal_group_num_channels):
+            for _signal_channel in range(0, signal_group_num_channels):
                 new_channel = {
                     "port_name": signal_group_name,
                     "port_prefix": signal_group_prefix,
@@ -988,7 +988,7 @@ def load_file(filename: str) -> tuple[dict[str, ...], bool]:  # pragma: no cover
     else:
         data = []
 
-    # Move variables to result struct.
+    # Move variables to result structure (dictionary).
     result = data_to_result(header, data, data_present)
 
     logger.info(f"Done!  Elapsed time: {time.time() - tic:0.1f} seconds")

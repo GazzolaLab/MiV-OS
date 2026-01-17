@@ -6,25 +6,19 @@ be used to create new operators that conform to required behaviors.
 """
 
 from typing import TYPE_CHECKING, Any, cast
-from collections.abc import Generator
-from typing_extensions import Self
+from abc import abstractmethod
 
 import pathlib
 
-
-from miv.core.operator.cachable import (
-    DataclassCacher,
-    FunctionalCacher,
-)
+from loguru import logger
+from ..chainable import ChainingMixin
+from ..loggable import DefaultLoggerMixin
+from .cachable import DataclassCacher
 from .callback import BaseCallbackMixin
-from .chainable import BaseChainingMixin
-from .loggable import DefaultLoggerMixin
-from .policy import VanillaRunner, _RunnerProtocol
+from .policy import VanillaRunner, RunnerBase
 
 if TYPE_CHECKING:
     from ..datatype import DataTypes
-    from ..datatype.signal import Signal
-    from ..datatype.spikestamps import Spikestamps
     from .protocol import _Node
 
 else:
@@ -32,49 +26,7 @@ else:
     class _Node: ...
 
 
-class DataNodeMixin(BaseChainingMixin, DefaultLoggerMixin):
-    """ """
-
-    data: DataTypes
-
-    def output(self) -> Self:
-        return self
-
-    def run(self) -> Self:
-        return self.output()
-
-
-class DataLoaderMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
-    """ """
-
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        self.runner = VanillaRunner()
-        super().__init__(*args, cacher=FunctionalCacher(self), **kwargs)
-        self._load_param: dict = {}
-
-        # Attribute from upstream
-        self.tag: str
-
-    def __call__(self) -> DataTypes:
-        raise NotImplementedError("Please implement __call__ method.")
-
-    def configure_load(self, **kwargs: Any) -> None:
-        """
-        (Experimental Feature)
-        """
-        self._load_param = kwargs
-
-    def output(self) -> Generator[DataTypes] | Spikestamps | Generator[Signal]:
-        output = self.load(**self._load_param)
-        return output
-
-    def load(
-        self, *args: Any, **kwargs: Any
-    ) -> Generator[DataTypes] | Spikestamps | Generator[Signal]:
-        raise NotImplementedError("load() method must be implemented to be DataLoader.")
-
-
-class OperatorMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
+class OperatorMixin(ChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
     """
     Behavior includes:
         - Whenever "run()" method is executed:
@@ -89,7 +41,7 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
     """
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
-        self.runner: _RunnerProtocol = VanillaRunner()
+        self.runner: RunnerBase = VanillaRunner()
         self.analysis_path = "analysis"
 
         super().__init__(*args, cacher=DataclassCacher(self), **kwargs)
@@ -97,8 +49,9 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
         # Attribute from upstream
         self.tag: str
 
+    @abstractmethod
     def __call__(self) -> DataTypes:
-        raise NotImplementedError("Please implement __call__ method.")
+        """Execute the operator. Must be implemented by subclasses."""
 
     def __repr__(self) -> str:
         return self.tag
@@ -111,7 +64,17 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
         Receive input data from each upstream operator.
         Essentially, this method recursively call upstream operators' run() method.
         """
-        return [cast(_Node, node).output() for node in self.iterate_upstream()]
+        ret = []
+        for node in self.iterate_upstream():
+            output = cast(_Node, node).output()
+            ret.append(output)
+        return ret
+
+    def flow_blocked(self) -> bool:
+        try:
+            return self.cacher.check_cached(skip_log=True)
+        except (AttributeError, FileNotFoundError):
+            return False
 
     def output(self) -> DataTypes:
         """
@@ -131,6 +94,11 @@ class OperatorMixin(BaseChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
                 output = self.runner(self.__call__)
             else:
                 output = self.runner(self.__call__, args)
+
+            # Save cache after execution (respects policy via when_policy_is decorator)
+            if output is not None:
+                self.cacher.save_cache(output, tag="data")
+                self.cacher.save_config(tag="data")
 
             # Callback: After-run
             self._callback_after_run(output)

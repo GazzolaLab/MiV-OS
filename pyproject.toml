@@ -55,6 +55,7 @@ dependencies = [
     "opencv-python>=4.7.0.72",
     "meautility>=1.5.1",
     "joblib>=1.4.2",
+    "loguru>=0.7.3",
 ]
 
 [project.urls]
@@ -91,7 +92,7 @@ algorithmExtension = [
   "rupture>=1.4.5"
 ]
 mpi = [
-  "mpi4py>=4.0.1"
+  "mpi4py>=4.0.3"
 ]
 dev = [
   "ruff>=0.3.4",
@@ -208,6 +209,13 @@ addopts = [
 #  "--doctest-continue-on-failure",
 ]
 
+# Markers for pytest
+markers = [
+  "mpi: marks tests as MPI-related (deselect with '-m \"not mpi\"')",
+  "mpi_xfail: marks tests as expected to fail with MPI",
+  "mpi_fixture: marks fixtures as MPI-related (only used with MPI tests)",
+]
+
 [tool.coverage.report]
 # Regexes for lines to exclude from consideration
 exclude_lines = [
@@ -236,6 +244,8 @@ show_missing = true
 
 [tool.coverage.run]
 branch = true
+parallel = true
+source = ["miv/core"]
 omit = [
     "*/.local/*",
 	  "setup.py",

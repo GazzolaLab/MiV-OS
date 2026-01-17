@@ -1,34 +1,25 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING
 from collections.abc import Generator
 
 
 if TYPE_CHECKING:
-    pass
+    from ..operator.policy import RunnerBase
 
-from ..operator.cachable import CACHE_POLICY
+from ..cachable import CACHE_POLICY
 from ..operator.operator import OperatorMixin
-from ..operator.protocol import _Node
 from .callback import (
     GeneratorCallbackMixin,
-    _GeneratorCallback,
 )
 from .policy import VanillaGeneratorRunner
-
-
-class GeneratorOperator(
-    _Node,
-    _GeneratorCallback,
-    Protocol,
-): ...
 
 
 class GeneratorOperatorMixin(OperatorMixin, GeneratorCallbackMixin):
     def __init__(self) -> None:
         super().__init__()
 
-        self.runner = VanillaGeneratorRunner(self)
+        self.runner: RunnerBase = VanillaGeneratorRunner(self)  # type: ignore[assignment]
 
     def set_caching_policy(self, policy: CACHE_POLICY) -> None:
         self.cacher.policy = policy

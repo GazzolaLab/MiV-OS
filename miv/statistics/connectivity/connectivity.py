@@ -8,7 +8,7 @@ import itertools
 import logging
 import os
 import pathlib
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 import matplotlib.pyplot as plt
@@ -53,7 +53,7 @@ class DirectedConnectivity(OperatorMixin):
 
     mea: str = None
     channels: list[int] | None = None
-    exclude_channels: list[int] | None = None
+    exclude_channels: list[int] = field(default_factory=list)
     bin_size: float = 0.001
     minimum_count: int = 1
     tag: str = "directional connectivity analysis"
@@ -74,9 +74,6 @@ class DirectedConnectivity(OperatorMixin):
             self.mea_map = mea_map[self.mea]
         else:
             self.mea_map = mea_map["64_intanRHD"]
-
-        if self.exclude_channels is None:  # FIXME: Use dataclass default value
-            self.exclude_channels = []
 
     @cache_call
     def __call__(self, spikestamps: Spikestamps) -> np.ndarray:
@@ -179,7 +176,8 @@ class DirectedConnectivity(OperatorMixin):
         )
         if te < H_threshold:
             return 1, 0
-        return 1, te
+        if skip_surrogate:
+            return 1, te
         t_value, p_value = spst.ttest_1samp(surrogate_te_list, te, nan_policy="omit")
         return p_value, te
 
@@ -407,7 +405,7 @@ class UndirectedConnectivity(OperatorMixin):
         Random seed. If None, use random seed, by default None
     """
 
-    exclude_channels: list[int] | None = None
+    exclude_channels: list[int] = field(default_factory=list)
     bin_size: float = 0.001
     minimum_count: int = 1
     firing_rate_limit: float = 5e-1
@@ -424,8 +422,6 @@ class UndirectedConnectivity(OperatorMixin):
 
     def __post_init__(self):
         super().__init__()
-        if self.exclude_channels is None:  # FIXME: Use dataclass default value
-            self.exclude_channels = []
 
     @cache_call
     def __call__(self, spikestamps: Spikestamps, mea=None) -> np.ndarray:
@@ -525,7 +521,7 @@ class UndirectedConnectivity(OperatorMixin):
             rng.shuffle(surrogate_source)
             for start_index in np.arange(0, source.shape[0] - sublength, stride):
                 end_index = start_index + sublength
-                surr_val = func(
+                surr_val = pairwise_granger(
                     np.stack(
                         [
                             surrogate_source[start_index:end_index],
@@ -579,7 +575,7 @@ class UndirectedConnectivity(OperatorMixin):
         im = ax.imshow(connectivity_metric_matrix, cmap="gray_r", vmin=0)
         ax.set_xlabel("Target")
         ax.set_ylabel("Source")
-        ax.set_title("Transfer Entropy")
+        ax.set_title("Connectivity")
         plt.colorbar(im, ax=ax)
 
         if save_path is not None:
@@ -598,9 +594,9 @@ class UndirectedConnectivity(OperatorMixin):
         # Plot values in heatmap
         fig, ax = plt.subplots(figsize=(12, 12))
         ax.hist(connectivity_metric_matrix, bins=30)
-        ax.set_xlabel("transfer entropy")
+        ax.set_xlabel("connectivity")
         ax.set_ylabel("count")
-        ax.set_title("Transfer Entropy Histogram")
+        ax.set_title("Connectivity Histogram")
 
         if save_path is not None:
             plt.savefig(os.path.join(save_path, "te_histogram.png"))

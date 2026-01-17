@@ -11,6 +11,8 @@ __pycache__/
 # Docs
 **/_toctree/*
 
+WIP.md
+
 # Distribution / packaging
 .Python
 build/

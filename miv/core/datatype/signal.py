@@ -14,13 +14,12 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from ..operator.operator import DataNodeMixin
-from ..operator.policy import SupportMultiprocessing
+from .node_mixin import DataNodeMixin
 from miv.typing import SignalType, SpikestampsType
 
 
 @dataclass
-class Signal(SupportMultiprocessing, DataNodeMixin):
+class Signal(DataNodeMixin):
     """
     Contiguous array of raw signal type.
 
@@ -41,9 +40,13 @@ class Signal(SupportMultiprocessing, DataNodeMixin):
         assert len(self.data.shape) == 2, "Signal must be 2D array"
 
     @classmethod
-    def empty(clf, number_of_channels: int) -> "Signal":
+    def empty(clf) -> "Signal":
+        """
+        Return an empty Signal object with size (1, 0).
+        Number of channels is 0.
+        """
         return clf(
-            data=[[] for _ in range(number_of_channels)],
+            data=[[]],
             timestamps=[],
         )
 
@@ -88,7 +91,14 @@ class Signal(SupportMultiprocessing, DataNodeMixin):
 
     def extend(self, value: "Signal") -> None:
         """Append a signal to the end of the existing signal."""
-        self.extend_signal(value.data, value.timestamps)
+        # If this Signal is empty, directly extend (replace) with the other Signal
+        # and ensure data and timestamps are properly copied
+        if self.number_of_channels == 0:
+            self.data = value.data.copy()
+            self.timestamps = value.timestamps.copy()
+            self.rate = value.rate
+        else:
+            self.extend_signal(value.data, value.timestamps)
 
     def prepend_signal(self, data: np.ndarray, time: SpikestampsType) -> None:
         """Prepend a signal to the end of the existing signal."""

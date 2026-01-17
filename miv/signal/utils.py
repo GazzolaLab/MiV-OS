@@ -12,6 +12,7 @@ def downsample_average(
     the returned length is approximately max_samples.
 
     If len(x) <= max_samples, returns the original data as numpy arrays.
+    If x and y are empty, returns empty numpy arrays.
 
     Args:
         x: Sequence of numeric values (e.g. list or 1D array).
@@ -20,9 +21,24 @@ def downsample_average(
 
     Returns:
         A tuple (x_ds, y_ds) of numpy arrays, each of length ~max_samples.
+        If inputs are empty, returns empty arrays.
+
+    Raises:
+        ValueError: If max_samples is not positive, or if x and y have different lengths.
     """
+    if max_samples <= 0:
+        raise ValueError("max_samples must be positive")
+
     arr_x = np.asarray(x)
     arr_y = np.asarray(y)
+    
+    # Handle empty inputs explicitly
+    if arr_x.shape[0] == 0:
+        return arr_x, arr_y
+    
+    if arr_x.shape[0] != arr_y.shape[0]:
+        raise ValueError("x and y must have the same length")
+
     size = arr_x.shape[0]
     if size <= max_samples:
         return arr_x, arr_y

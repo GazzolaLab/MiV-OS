@@ -26,7 +26,7 @@ from tqdm import tqdm
 
 from miv.io.intan import rhs
 from miv.core import Signal, Spikestamps
-from miv.core.operator.wrapper import cached_method
+from miv.core.source.wrapper import cached_method
 from miv.io.openephys.data import Data
 
 if TYPE_CHECKING:
@@ -211,7 +211,7 @@ class DataIntan(Data):
         for filename in tqdm(files, disable=not progress_bar):
             result, data_present = rhs.load_file(filename)
             assert data_present, f"Data does not present: {filename=}."
-            assert not hasattr(result, name), f"No {name} in the file ({filename=})."
+            assert name in result, f"No {name} in the file ({filename=})."
 
             signal = np.asarray(result[name]).T
 
@@ -613,7 +613,7 @@ class DataIntanTriggered(DataIntan):
         ):
             result, data_present = rhs.load_file(filename)
             assert data_present, f"Data does not present: {filename=}."
-            assert not hasattr(result, name), f"No {name} in the file ({filename=})."
+            assert name in result, f"No {name} in the file ({filename=})."
 
             signal = np.asarray(result[name])
             if total != signal.shape[0]:

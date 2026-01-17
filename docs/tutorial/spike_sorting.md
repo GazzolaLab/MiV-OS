@@ -33,10 +33,9 @@ import numpy as np
 import quantities as pq
 import matplotlib.pyplot as plt
 
-from miv.core.pipeline import Pipeline
-from miv.io.openephys import Data, DataManager
-from miv.signal.filter import ButterBandpass
-from miv.signal.spike import ThresholdCutoff, ExtractWaveforms
+from miv.core import Pipeline
+from miv.io.openephys import DataManager
+from miv.signal import ButterBandpass, ThresholdCutoff, ExtractWaveforms
 
 from miv.datasets.openephys_sample import load_data
 
@@ -58,7 +57,9 @@ data >> bandpass_filter >> spike_detection
 bandpass_filter >> extract_waveforms
 spike_detection >> extract_waveforms
 
-data.visualize(show=True)
+fig, ax = plt.subplots()
+data.visualize(ax)
+plt.show()
 ```
 
 ## Build Operator
@@ -71,7 +72,7 @@ The mixin `OperatorMixin` provides most of the necessary variables and methods t
 
 ```{code-cell} ipython3
 from dataclasses import dataclass
-from miv.core.operator import OperatorMixin
+from miv.core import OperatorMixin
 
 @dataclass
 class CutoutShape(OperatorMixin):
@@ -93,7 +94,9 @@ class CutoutShape(OperatorMixin):
 cutout_shape = CutoutShape()
 extract_waveforms >> cutout_shape
 
-data.visualize(show=True)
+fig, ax = plt.subplots()
+data.visualize(ax)
+plt.show()
 ```
 
 The operator `CutoutShape` will print out the shape of the cutouts.
@@ -204,7 +207,9 @@ class PCAClustering(OperatorMixin):
 cluster = PCAClustering()
 extract_waveforms >> cluster
 
-data.visualize(show=True, seed=150)
+fig, ax = plt.subplots()
+data.visualize(ax, seed=150)
+plt.show()
 ```
 
 ## Run Pipeline

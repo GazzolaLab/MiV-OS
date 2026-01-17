@@ -15,7 +15,6 @@ jobs:
       matrix:
         python-version: ["3.10", "3.11", "3.12"]
         os: [macos-13, ubuntu-latest]
-        mpi: ["openmpi"] # [ 'mpich', 'openmpi', 'intelmpi']
         include:
           - os: macos-13
             path: ~/Library/Caches/pip
@@ -27,16 +26,12 @@ jobs:
       run:
         shell: bash
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v7
         with:
           uv-version: latest
-
-      # - uses: mpi4py/setup-mpi@v1
-      #   with:
-      #    mpi: ${{ matrix.mpi }}
 
       - name: Install python
         uses: actions/setup-python@v6
@@ -45,7 +40,7 @@ jobs:
 
       - name: Load cached venv
         id: cached-dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ env.UV_CACHE_DIR }}
           key: uv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('uv.lock') }}
@@ -87,16 +82,3 @@ jobs:
         if: always()
         run: |
           make check-codestyle
-
-      # Upload coverage to Codecov (use python 3.10 ubuntu-latest)
-      - name: Upload coverage to Codecov (only on 3.10 ubuntu-latest)
-        if: ${{ matrix.os == 'ubuntu-latest' && matrix.python-version == '3.10' }}
-        uses: codecov/codecov-action@v5
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          env_vars: OS,PYTHON
-          fail_ci_if_error: true
-          flags: unittests
-          name: codecov-umbrella
-          verbose: true
-          file: ./coverage.xml

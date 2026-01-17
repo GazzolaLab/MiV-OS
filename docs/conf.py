@@ -1,21 +1,6 @@
-# Configuration file for the Sphinx documentation builder.
-#
-# This file only contains a selection of the most common options. For a full
-# list see the documentation:
-# https://www.sphinx-doc.org/en/master/usage/configuration.html
-
-# -- Path setup --------------------------------------------------------------
-
-# If extensions (or modules to document with autodoc) are in another directory,
-# add these directories to sys.path here. If the directory is relative to the
-# documentation root, use os.path.abspath to make it absolute, like shown here.
-#
-
-from typing import Any, Dict
-
 import os
 import sys
-from urllib.request import urlretrieve
+# from urllib.request import urlretrieve
 
 sys.path.insert(0, os.path.abspath("../"))
 
@@ -24,7 +9,7 @@ from miv import get_version
 # -- Project information -----------------------------------------------------
 
 project = "Mind-in-Vitro"
-copyright = "2023, GazzolaLab"
+copyright = "2025, GazzolaLab"
 author = "Gazzola Lab"
 
 # The full version, including alpha/beta/rc tags
@@ -128,7 +113,7 @@ html_theme_options = {
         }
     ],
     # Sidebar Configuraion
-    "left_sidebar_end": [],
+    # "left_sidebar_end": [],
     # Theme (https://help.farbox.com/pygments.html)
     # "pygment_light_style": "default",
     # "pygment_dark_style": "native",

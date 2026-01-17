@@ -13,7 +13,7 @@ install-dev:
 
 .PHONY: install-all
 install-all:
-	uv sync --all-extras --no-extra mpi --dev
+	uv sync --all-extras --no-extra mpi --dev --all-groups
 
 .PHONY: pre-commit-install
 pre-commit-install:
@@ -22,12 +22,31 @@ pre-commit-install:
 #* Formatters
 .PHONY: formatting
 formatting:
-	uv run ruff format --config pyproject.toml miv
+	uv run ruff format --config pyproject.toml miv tests examples
 
 #* Linting
 .PHONY: test
 test:
-	uv run pytest -c pyproject.toml --cov=miv/core --cov-report=xml
+	uv run pytest -c pyproject.toml --cov=miv/core --cov-report=xml tests
+
+.PHONY: test-all
+test-all:
+	# Clean up any existing coverage files
+	rm -f .coverage .coverage.*
+	# Run MPI tests with parallel coverage
+	mpirun --allow-run-as-root -n 2 uv run coverage run -p -m pytest --with-mpi -c pyproject.toml tests-mpi
+	# Run non-MPI tests with parallel coverage
+	uv run coverage run -p -m pytest -c pyproject.toml tests
+	# Combine all coverage files
+	uv run coverage combine
+	# Generate XML and text reports
+	uv run coverage xml
+	uv run coverage report
+
+.PHONY: view-coverage
+view-coverage:
+	uv run coverage html
+	open htmlcov/index.html
 
 .PHONY: check-codestyle
 check-codestyle:

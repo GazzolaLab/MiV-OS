@@ -22,7 +22,7 @@ def test_spikestamps_setitem():
 
     # Test that we can set the value of an existing element
     s[0] = [7, 8, 9]
-    assert s[0] == [7, 8, 9]
+    np.testing.assert_array_equal(s[0], [7, 8, 9])
 
     # Test that an IndexError is raised if the index is out of range
     with pytest.raises(IndexError):
