@@ -1,0 +1,1 @@
+from .operator_manipulation import append_method
