@@ -80,3 +80,22 @@ class DefaultLoggerMixin:
     @property
     def logger(self):
         return self._logger
+
+    def __getstate__(self) -> dict:
+        """Custom pickle state that excludes the logger."""
+        state = self.__dict__.copy()
+        # Remove logger-related attributes that can't be pickled
+        state.pop("_logger", None)
+        return state
+
+    def __setstate__(self, state: dict) -> None:
+        """Restore state after unpickling and reinitialize logger."""
+        self.__dict__.update(state)
+        # Reinitialize logger after unpickling
+        if hasattr(self, "tag"):
+            from loguru import logger
+            self._logger = logger.bind(tag=self.tag)
+        else:
+            from loguru import logger
+            self._logger = logger.bind(tag=self.__class__.__name__)
+

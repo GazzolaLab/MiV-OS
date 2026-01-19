@@ -36,7 +36,7 @@ def test_execute_callback_handles_exceptions_gracefully():
     result = execute_callback(logger, failing_callback)
 
     assert result is None
-    logger.warning.assert_called_once()
+    logger.exception.assert_called_once()
 
 
 def test_execute_callback_logs_error_message():
@@ -52,9 +52,9 @@ def test_execute_callback_logs_error_message():
     result = execute_callback(logger, failing_callback)
 
     assert result is None
-    logger.warning.assert_called_once()
+    logger.exception.assert_called_once()
     # Check that the error message is included in the log call
-    call_args = logger.warning.call_args
+    call_args = logger.exception.call_args
     assert "callback" in call_args[0][0].lower() or "issue" in call_args[0][0].lower()
 
 
@@ -93,4 +93,4 @@ def test_execute_callback_does_not_stop_execution():
     assert result2 is None
     assert result3 is None
     assert execution_count == 3
-    assert logger.warning.call_count == 3
+    assert logger.exception.call_count == 3

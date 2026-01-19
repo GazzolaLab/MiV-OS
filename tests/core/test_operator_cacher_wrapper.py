@@ -4,6 +4,7 @@ import os
 import pathlib
 import pickle as pkl
 from dataclasses import dataclass
+from unittest.mock import patch
 
 import numpy as np
 import pytest
@@ -132,20 +133,29 @@ def test_must_policy_raises_error_when_cache_not_exists(
 
 
 def test_check_cached_logs_when_policy_is_off(
-    mock_operator: MockOperator, caplog
+    mock_operator: MockOperator,
 ) -> None:
     """Test that check_cached() logs cache status even when policy is OFF."""
     mock_operator.cacher.policy = "OFF"
 
-    caplog.set_level(logging.INFO)
-    result = mock_operator.cacher.check_cached()
-    assert result is False
+    # Mock the logger to verify it's called
+    log_calls = []
+    original_info = mock_operator.logger.info
 
-    log_messages = [record.message for record in caplog.records]
-    assert any(
-        "Caching policy" in msg or "OFF" in msg or "No cache" in msg
-        for msg in log_messages
-    ), f"Expected cache status log for OFF policy, but got: {log_messages}"
+    def mock_info(msg):
+        log_calls.append(msg)
+        return original_info(msg)
+
+    with patch.object(mock_operator.logger, "info", side_effect=mock_info):
+        result = mock_operator.cacher.check_cached()
+        assert result is False
+
+        # Verify that logging was called with the expected message
+        assert len(log_calls) > 0, "Expected log message to be called"
+        assert any(
+            "Caching policy" in msg or "OFF" in msg or "No cache" in msg
+            for msg in log_calls
+        ), f"Expected cache status log for OFF policy, but got: {log_calls}"
 
 
 def test_must_policy_retrieves_from_cache(mock_operator: MockOperator) -> None:
