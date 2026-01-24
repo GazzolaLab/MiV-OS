@@ -6,8 +6,13 @@ on:
   pull_request:
     branches: ["**"]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build_and_test:
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.user.login != 'dependabot[bot]' }}
     runs-on: ${{ matrix.os }}
     env:
       UV_CACHE_DIR: /tmp/.uv-cache
@@ -34,6 +39,7 @@ jobs:
           uv-version: latest
 
       - name: Install python
+        id: setup-python
         uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
