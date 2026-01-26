@@ -191,7 +191,7 @@ class Spikestamps(DataNodeMixin, Sequence):
         for nch in range(self.number_of_channels):
             spikes = self[nch]
             indices = np.digitize(spikes, bins=intervals)  # sorted order
-            stack = [[] for _ in range(num_intervals)]
+            stack: list[list[float]] = [[] for _ in range(num_intervals)]
             for v, i in zip(spikes, indices, strict=False):
                 if i == 0 or i == len(intervals):
                     continue  # out of bounds

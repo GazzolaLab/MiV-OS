@@ -14,7 +14,7 @@ from loguru import logger
 SEPERATOR = " :: "
 
 
-def configure_logger(start_tag, verbose: int):  # pragma: no cover
+def configure_logger(start_tag: str, verbose: int) -> None:  # pragma: no cover
     # TODO: Redirect I/O stream to txt
     # Configure logger
     logger.remove()
@@ -78,7 +78,7 @@ class DefaultLoggerMixin:
             self._logger = logger.bind(tag=self.__class__.__name__)
 
     @property
-    def logger(self):
+    def logger(self) -> Any:
         return self._logger
 
     def __getstate__(self) -> dict:

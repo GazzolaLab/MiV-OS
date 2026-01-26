@@ -4,6 +4,7 @@ from typing import TypeAlias, Any
 from collections.abc import Generator, Iterator
 
 import numpy as np
+from typing_extensions import Self
 
 from .node_mixin import DataNodeMixin
 from ..chainable import ChainingMixin
@@ -22,8 +23,8 @@ class ValuesMixin(DataNodeMixin, ChainingMixin):
         super().__init__(*args, **kwargs)
         self.data = data
 
-    def output(self) -> PurePythonTypes:
-        return self.data
+    def output(self) -> Self:
+        return self
 
 
 class PythonDataType(ValuesMixin):
