@@ -17,7 +17,7 @@ Python analysis and computing framework developed for [Mind-in-Vitro(MiV)][link-
 ## Installation
 [![PyPI version][badge-pypi]][link-pypi]
 
-MiV-OS is compatible with Python 3.8+. The easiest way to install is using python installation package (PIP)
+MiV-OS is compatible with Python 3.10+. The easiest way to install is using python installation package (PIP)
 
 ~~~bash
 $ pip install MiV-OS
