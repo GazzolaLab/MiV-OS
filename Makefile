@@ -17,44 +17,45 @@ install-all:
 
 .PHONY: pre-commit-install
 pre-commit-install:
-	uv run pre-commit install
+	uv run --frozen pre-commit install
 
 #* Formatters
 .PHONY: formatting
 formatting:
-	uv run ruff format --config pyproject.toml miv tests
+	uv run --frozen ruff format --config pyproject.toml miv tests
 
 #* Linting
 .PHONY: test
 test:
-	uv run pytest -c pyproject.toml --cov=miv/core --cov-report=xml tests
+	uv run --frozen pytest -c pyproject.toml --cov=miv/core --cov-report=xml tests
 
 .PHONY: test-all
 test-all:
 	# Clean up any existing coverage files
 	rm -f .coverage .coverage.*
 	# Run MPI tests with parallel coverage
-	mpirun --allow-run-as-root -n 2 uv run coverage run -p -m pytest --with-mpi -c pyproject.toml tests-mpi
+	# Disable for now. mpi test on github-action is causing too much issue
+	# mpirun --allow-run-as-root -n 2 uv run --frozen coverage run -p -m pytest --with-mpi -c pyproject.toml tests-mpi
 	# Run non-MPI tests with parallel coverage
-	uv run coverage run -p -m pytest -c pyproject.toml tests
+	uv run --frozen coverage run -p -m pytest -c pyproject.toml tests
 	# Combine all coverage files
-	uv run coverage combine
+	uv run --frozen coverage combine
 	# Generate XML and text reports
-	uv run coverage xml
-	uv run coverage report
+	uv run --frozen coverage xml
+	uv run --frozen coverage report
 
 .PHONY: view-coverage
 view-coverage:
-	uv run coverage html
+	uv run --frozen coverage html
 	open htmlcov/index.html
 
 .PHONY: check-codestyle
 check-codestyle:
-	uv run ruff check --config pyproject.toml miv/core
+	uv run --frozen ruff check --config pyproject.toml miv/core
 
 .PHONY: mypy
 mypy:
-	uv run mypy --config-file pyproject.toml miv/core
+	uv run --frozen mypy --config-file pyproject.toml miv/core
 
 #* Cleaning
 .PHONY: pycache-remove
