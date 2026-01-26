@@ -10,14 +10,14 @@ include = ["miv"]
 
 [project]
 name = "MiV-OS"
-version = "0.3.3"
+version = "0.4.0"
 description = "Python software for analysis and computing framework used in MiV project."
 readme = "README.md"
 authors = [
     {name = "skim0119", email = "skim0119@gmail.com"}
 ]
 license = {text = "MIT"}
-requires-python = ">=3.10,<=3.12"
+requires-python = ">=3.10,<=3.14"
 classifiers = [
   "Development Status :: 4 - Beta",
   "Intended Audience :: Science/Research",
@@ -28,6 +28,8 @@ classifiers = [
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
 ]
 keywords = ["neuroscience", "statistics", "data-analysis", "electrophysiology", "neurophysiology"]
 dependencies = [
@@ -92,7 +94,7 @@ algorithmExtension = [
   "rupture>=1.4.5"
 ]
 mpi = [
-  "mpi4py>=4.0.3"
+  "mpi4py"
 ]
 dev = [
   "ruff>=0.3.4",
@@ -124,6 +126,7 @@ lint.select = [
 ]
 lint.ignore = [
     "B901",  # strict on zip
+    "F401",  # unused import
     "F403",  # 'from module import *' used; unable to detect undefined names
     "E203",  # whitespace before ':'
     "E266",  # too many leading '#' for block comment
