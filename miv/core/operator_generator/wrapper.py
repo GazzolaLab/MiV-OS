@@ -91,4 +91,3 @@ def cache_generator_call(func: Callable) -> Callable:
 #            return result
 #
 #    return wrapper
-

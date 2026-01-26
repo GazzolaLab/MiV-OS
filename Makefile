@@ -22,7 +22,7 @@ pre-commit-install:
 #* Formatters
 .PHONY: formatting
 formatting:
-	uv run ruff format --config pyproject.toml miv tests examples
+	uv run ruff format --config pyproject.toml miv tests
 
 #* Linting
 .PHONY: test

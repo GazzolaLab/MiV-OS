@@ -49,7 +49,6 @@ class Pipeline:
             node = cast(Sequence[_Node], node)
             self.nodes_to_run = list(node)
 
-
     def run(
         self,
         working_directory: str | pathlib.Path = "./results",
@@ -98,7 +97,6 @@ class Pipeline:
                     else:
                         node.set_save_path(working_directory, cache_directory)
 
-
         # Execute
         _logger.info(f"Total {len(self.nodes_to_run)} operators to run.")
         for node in self.nodes_to_run:
@@ -107,7 +105,9 @@ class Pipeline:
                 _logger.info(f"┏━━  {TColors.yellow}Running: {node}{TColors.reset}")
                 node.output()
                 etime = time.time()
-                _logger.success(f"┗━━  {TColors.green}Finished: {etime - stime:.04f} sec{TColors.reset}")
+                _logger.success(
+                    f"┗━━  {TColors.green}Finished: {etime - stime:.04f} sec{TColors.reset}"
+                )
             except Exception as e:
                 _logger.exception(f"  Exception raised while running {node}: {e}")
                 raise e

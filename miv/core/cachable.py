@@ -176,7 +176,9 @@ class BaseCacher(ABC):
             msg += TColors.red + "No cache" + TColors.reset
         self.parent.logger.info(msg)
 
-    def check_cached(self, tag: str = "data", skip_log:bool=False, *args: Any, **kwargs: Any) -> bool:
+    def check_cached(
+        self, tag: str = "data", skip_log: bool = False, *args: Any, **kwargs: Any
+    ) -> bool:
         """
         Check if the current configuration matches the cached one.
 
@@ -194,7 +196,7 @@ class BaseCacher(ABC):
             flag = False
         else:  # ON policy
             flag = self._check_config_matches(tag, *args, **kwargs)
-        
+
         if not skip_log:
             self.log_cache_status(flag)
         return flag

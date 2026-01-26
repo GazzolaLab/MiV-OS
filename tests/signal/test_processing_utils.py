@@ -41,6 +41,7 @@ def test_downsample_average_empty_inputs():
     assert isinstance(x_ds, np.ndarray)
     assert isinstance(y_ds, np.ndarray)
 
+
 def test_downsample_average_single_element():
     """Test that downsample_average handles single-element inputs correctly."""
     x = np.array([5.0])

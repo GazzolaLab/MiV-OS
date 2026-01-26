@@ -1,6 +1,4 @@
-__all__ = [
-    "SignalPlot"
-]
+__all__ = ["SignalPlot"]
 
 
 import csv
@@ -74,29 +72,31 @@ class SignalPlot(OperatorMixin):
 
             for idx in range(n_terms):
                 start_time = idx * term + t0
-                end_time = (idx+1) * term + t0
-                
+                end_time = (idx + 1) * term + t0
+
                 # Find start and end indices using searchsorted (more efficient for sorted arrays)
                 start_idx = np.searchsorted(timestamps, start_time)
                 end_idx = np.searchsorted(timestamps, end_time)
-                
+
                 # Get the segment data
                 segment_timestamps = timestamps[start_idx:end_idx]
                 segment_signal = signal[start_idx:end_idx]
-                
+
                 # Downsample to 128 points
                 n_points = 128
                 downsampled_timestamps, downsampled_signal = downsample_average(
                     segment_timestamps, segment_signal, n_points
                 )
-                
+
                 # Create new figure for each segment
                 fig, ax = plt.subplots(1, 1, figsize=(8, 6))
                 ax.plot(downsampled_timestamps, downsampled_signal)
                 ax.set_xlabel("Time (sec)")
-                ax.set_title(f"Signal ch: {channel}, {start_time:.03f} - {end_time:.03f} sec")
+                ax.set_title(
+                    f"Signal ch: {channel}, {start_time:.03f} - {end_time:.03f} sec"
+                )
                 ax.set_xlim(timestamps[start_idx], timestamps[start_idx] + term)
-                
+
                 if save_path is not None:
                     plt.savefig(
                         os.path.join(_save_path, f"signal_{idx:03d}.png"),

@@ -250,17 +250,19 @@ def spike_counts_with_kernel(spiketrain, probe_times, kernel: Callable, batchsiz
 
     return result
 
+
 @njit(cache=True)
 def _kernel(x, amplitude=2.0, decay_rate=5):
     # Exponential
     # return amplitude * np.exp(-decay_rate * x) * decay_rate
     # Alpha
-    return amplitude * np.exp(-decay_rate * x) * (decay_rate ** 2) * x
+    return amplitude * np.exp(-decay_rate * x) * (decay_rate**2) * x
 
 
 @njit(cache=True, parallel=True)
 def decay_spike_counts(
-    spiketrain, probe_times,
+    spiketrain,
+    probe_times,
 ):
     """
     Both spiketrain and probe_times should be a 1-d array representing time.

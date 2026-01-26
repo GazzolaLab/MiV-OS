@@ -31,11 +31,11 @@ def downsample_average(
 
     arr_x = np.asarray(x)
     arr_y = np.asarray(y)
-    
+
     # Handle empty inputs explicitly
     if arr_x.shape[0] == 0:
         return arr_x, arr_y
-    
+
     if arr_x.shape[0] != arr_y.shape[0]:
         raise ValueError("x and y must have the same length")
 

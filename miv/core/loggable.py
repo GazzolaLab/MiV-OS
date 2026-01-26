@@ -94,8 +94,9 @@ class DefaultLoggerMixin:
         # Reinitialize logger after unpickling
         if hasattr(self, "tag"):
             from loguru import logger
+
             self._logger = logger.bind(tag=self.tag)
         else:
             from loguru import logger
-            self._logger = logger.bind(tag=self.__class__.__name__)
 
+            self._logger = logger.bind(tag=self.__class__.__name__)

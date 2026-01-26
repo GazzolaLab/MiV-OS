@@ -56,7 +56,7 @@ class Downsample(GeneratorOperatorMixin):
             timestamps=downsampled_timestamps,
             rate=self.target_rate,
         )
+
     def __post_init__(self):
         super().__init__()
         # self.cacher.policy = "OFF"
-
