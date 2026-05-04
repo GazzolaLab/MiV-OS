@@ -1,9 +1,11 @@
-"""Wrapper decorator for generator operator caching and callbacks."""
+"""Wrapper decorator for generator operators (legacy signature adapter)."""
+
+from __future__ import annotations
 
 import functools
+import warnings
 from typing import Any, TypeVar
 from collections.abc import Callable
-
 
 from .operator import GeneratorOperatorMixin
 
@@ -11,83 +13,37 @@ C = TypeVar("C", bound="GeneratorOperatorMixin")
 
 
 def cache_generator_call(func: Callable) -> Callable:
-    # @functools.wraps(func)
+    """
+    Adapt the generator runner's ``(idx, *chunk_inputs)`` call to ``__call__(*chunk_inputs)``.
+
+    .. deprecated::
+        Per-chunk cache writes and generator plots run from
+        :meth:`~miv.core.operator_generator.operator.GeneratorOperatorMixin.output`.
+        Keep this decorator only while migrating subclasses; it will be removed in
+        a future release.
+
+    A :exc:`DeprecationWarning` is emitted on the **first** call to each wrapped
+    method so importing operators stays quiet until work runs.
+    """
+
+    @functools.wraps(func)
     def wrapper(
         self: C,
         idx: int,
         *args: Any,
         **kwargs: Any,
     ) -> Any:
-        tag = "data"
-        cacher = self.cacher
-        result = func(self, *args, **kwargs)
-        if result is not None:
-            cacher.save_cache(result, idx=idx, tag=tag)
-            if idx == 0:
-                cacher.save_config(tag=tag)  # config saved only once
+        if not getattr(wrapper, "_cg_deprecation_warned", False):  # pragma: no cover
+            warnings.warn(
+                "cache_generator_call is deprecated: GeneratorOperatorMixin.output() "
+                "now applies persist_cacher_result and generator/first-iter plot "
+                "callbacks per chunk. This decorator only strips idx from __call__ "
+                "until subclasses are updated; remove @cache_generator_call when ready.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            wrapper._cg_deprecation_warned = True  # type: ignore[attr-defined]
 
-        # Plotting  # FIXME: Somehow move it in operator mixin?
-        self._callback_generator_plot(idx, result, args, save_path=self.analysis_path)
-        if idx == 0:
-            self._callback_firstiter_plot(result, args, save_path=self.analysis_path)
-
-        return result
+        return func(self, *args, **kwargs)
 
     return wrapper
-
-
-# def cache_generator_call(func: Callable) -> Callable:
-#    """
-#    Cache the methods of the operator.
-#    It is special case for the generator in-out stream.
-#    Save the cache in the cacher object with appropriate tag.
-#
-#    If inputs are not all generators, it will run regular function.
-#    """
-#
-#    def wrapper(
-#        self: C, *args: Any, **kwargs: Any
-#    ) -> Generator | Any | None:
-#        is_all_generator = all(inspect.isgenerator(v) for v in args) and all(
-#            inspect.isgenerator(v) for v in kwargs.values()
-#        )
-#
-#        tag = "data"
-#        cacher = self.cacher
-#
-#        if is_all_generator:
-#
-#            def generator_func(*args: tuple[Generator, ...]) -> Generator:
-#                for idx, zip_arg in enumerate(zip(*args, strict=False)):
-#                    stime = time.time()
-#                    result = func(self, *zip_arg, **kwargs)
-#                    # print(f"    iter {idx:03d} {self}: {time.time() - stime:.03f}sec", flush=True)
-#                    if result is not None:
-#                        # In case the module does not return anything
-#                        cacher.save_cache(result, idx, tag=tag)
-#                    self._callback_generator_plot(
-#                        idx, result, zip_arg, save_path=self.analysis_path
-#                    )
-#                    if idx == 0:
-#                        self._callback_firstiter_plot(
-#                            result, zip_arg, save_path=self.analysis_path
-#                        )
-#                    yield result
-#                cacher.save_config(tag=tag)
-#                # TODO: add lastiter_plot
-#                # FIXME
-#                self._done_flag_generator_plot = True
-#                self._done_flag_firstiter_plot = True
-#
-#            generator = generator_func(*args, *kwargs.values())
-#            return generator
-#        else:
-#            result = func(self, *args, **kwargs)
-#            if result is None:
-#                # In case the module does not return anything
-#                return None
-#            cacher.save_cache(result, tag=tag)
-#            cacher.save_config(tag=tag)
-#            return result
-#
-#    return wrapper

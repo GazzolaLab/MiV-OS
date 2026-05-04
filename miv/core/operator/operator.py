@@ -13,6 +13,7 @@ import pathlib
 from loguru import logger
 from ..chainable import ChainingMixin
 from ..loggable import DefaultLoggerMixin
+from ..cache_write import persist_cacher_result
 from .cachable import DataclassCacher
 from .callback import BaseCallbackMixin
 from .policy import VanillaRunner, RunnerBase
@@ -95,10 +96,9 @@ class OperatorMixin(ChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
             else:
                 output = self.runner(self.__call__, args)
 
-            # Save cache after execution (respects policy via when_policy_is decorator)
-            if output is not None:
-                self.cacher.save_cache(output, tag="data")
-                self.cacher.save_config(tag="data")
+            # Save cache after execution (shared seam with generator operators;
+            # policy enforced inside cacher via when_policy_is)
+            persist_cacher_result(self.cacher, output, tag="data")
 
             # Callback: After-run
             self._callback_after_run(output)

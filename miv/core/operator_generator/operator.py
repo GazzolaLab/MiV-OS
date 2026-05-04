@@ -1,28 +1,53 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-from collections.abc import Generator
+import itertools
+from typing import Any
+from collections.abc import Generator, Iterable
 
-
-if TYPE_CHECKING:
-    from ..operator.policy import RunnerBase
-
+from ..cache_write import persist_cacher_result
 from ..cachable import CACHE_POLICY
 from ..operator.operator import OperatorMixin
 from .callback import (
     GeneratorCallbackMixin,
 )
-from .policy import VanillaGeneratorRunner
+from .policy import StreamChunkAlignedGeneratorRunner, VanillaGeneratorRunner
 
 
 class GeneratorOperatorMixin(OperatorMixin, GeneratorCallbackMixin):
     def __init__(self) -> None:
         super().__init__()
 
-        self.runner: RunnerBase = VanillaGeneratorRunner(self)  # type: ignore[assignment]
+        self.runner: StreamChunkAlignedGeneratorRunner = VanillaGeneratorRunner(self)
 
     def set_caching_policy(self, policy: CACHE_POLICY) -> None:
         self.cacher.policy = policy
+
+    @staticmethod
+    def _tee_upstream_args(
+        args: list[Iterable[Any]],
+    ) -> tuple[list[Iterable[Any]], list[Iterable[Any]]]:
+        """Fork each upstream iterable so the runner and plot/callback zip stay aligned."""
+        tees = [itertools.tee(a, 2) for a in args]
+        return [t[0] for t in tees], [t[1] for t in tees]
+
+    def _wrap_streaming_chunk_side_effects(
+        self,
+        gen: Generator[Any, None, None],
+        upstream_args: list[Iterable[Any]],
+    ) -> Generator[Any, None, None]:
+        """Persist each chunk and run generator plot hooks (lockstep stream runners only)."""
+        tasks = zip(*upstream_args, strict=True)
+
+        for idx, (result, zip_arg) in enumerate(zip(gen, tasks, strict=True)):
+            persist_cacher_result(self.cacher, result, chunk_index=idx, tag="data")
+            self._callback_generator_plot(
+                idx, result, zip_arg, save_path=self.analysis_path
+            )
+            if idx == 0:
+                self._callback_firstiter_plot(
+                    result, zip_arg, save_path=self.analysis_path
+                )
+            yield result
 
     def output(self) -> Generator:
         """
@@ -43,7 +68,11 @@ class GeneratorOperatorMixin(OperatorMixin, GeneratorCallbackMixin):
             assert len(args) > 0, (
                 "No data received from upstream. Generator-operator must receive other generators from upstream."
             )
-            output = self.runner(self.__call__, args)
+            args_for_runner, args_for_callbacks = self._tee_upstream_args(args)
+            raw_output = self.runner(self.__call__, args_for_runner)
+            output = self._wrap_streaming_chunk_side_effects(
+                raw_output, args_for_callbacks
+            )
 
             # Callback: After-run
             self._callback_after_run(output)

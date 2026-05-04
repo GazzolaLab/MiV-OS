@@ -4,6 +4,11 @@ from miv.core.operator.wrapper import cache_call
 from miv.core.source.wrapper import cached_method
 from miv.core.operator_generator.wrapper import cache_generator_call
 
+# Decorator warnings at @apply time when tests define wrapped helpers
+pytestmark = pytest.mark.filterwarnings(
+    "ignore:cache_generator_call is deprecated:DeprecationWarning:miv.core.operator_generator.wrapper"
+)
+
 
 class GeneratorPlotMixin:
     # TODO: This is a temporary solution to avoid issue. calling generator_plot in wrapper should be reconsidered
@@ -137,25 +142,21 @@ class FooClassV2(MockObjectWithCache):
 
 
 def test_wrap_generator_cache(mock_object_with_cache, tmp_path):
+    """
+    Direct calls to a @cache_generator_call user method no longer write through
+    cacher; streaming persist runs from GeneratorOperatorMixin.output() (see
+    test_generator_operator_caching).
+    """
     @cache_generator_call
     def foo(self, x, y):
         return x + y
 
-    def bar():
-        yield 1
-        yield 2
-        yield 3
-
     idx = 0
     assert foo(mock_object_with_cache, idx, 3, 4) == 7
-    for v in mock_object_with_cache.cacher.load_cached():
-        assert v == 0  # mock cache only saves zero. (above)
 
-    # Test cache_generator_call
+    # Test cache_generator_call adapter only (idx stripped from __call__)
     a = FooClassV2(tmp_path)
     assert a(idx, 12, 13) == 25
-    for v in a.cacher.load_cached():
-        assert v == 0  # mock cache only saves zero. (above)
 
     # Test cached_method
     a = FooClassV2(tmp_path)

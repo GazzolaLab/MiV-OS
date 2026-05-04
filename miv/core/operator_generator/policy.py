@@ -1,7 +1,10 @@
 __all__ = [
+    "StreamChunkAlignedGeneratorRunner",
     "VanillaGeneratorRunner",
+    "GeneratorRunnerInMultiprocessing",
 ]
 
+from abc import ABC
 from typing import Any, TypeVar, TYPE_CHECKING, Protocol
 from itertools import islice
 import time
@@ -26,7 +29,22 @@ class _LazyCallable(Protocol):
 C = TypeVar("C", bound="GeneratorOperatorMixin")
 
 
-class VanillaGeneratorRunner(RunnerBase):
+class StreamChunkAlignedGeneratorRunner(RunnerBase, ABC):
+    """Base for generator runners that align with *streaming* ``output()`` wrapping.
+
+    :class:`GeneratorOperatorMixin` can interleave **per-chunk** cache writes and
+    generator plot callbacks with the runner by zipping the runner’s generator
+    with the same **tee**’d upstream iterables that the runner consumed. That
+    only works when this runner yields **one** result per row of
+    ``zip(*upstream_iterables)`` in order.
+
+    Subclass this when implementing that contract; use plain :class:`RunnerBase`
+    for other strategies (e.g. batched multiprocessing) until an equivalent
+    wrapper exists.
+    """
+
+
+class VanillaGeneratorRunner(StreamChunkAlignedGeneratorRunner):
     """Default runner for generator operators without any modification.
 
     The operator will be executed in an embarrassingly parallel manner.
