@@ -78,6 +78,39 @@ This creates a dependency graph where `operator1` is upstream of `operator2`, et
 - `plot_*`: Methods called for visualization (can be skipped with `skip_plot=True` passed to `Pipeline`)
 - Callbacks can be dynamically added using the `<<` operator
 
+#### Adding callbacks: `OperatorMixin` vs `OperatorGeneratorMixin`
+
+Use callback name prefixes to register post-processing hooks:
+
+- `OperatorMixin` (scalar output):
+  - `after_run_*` receives the operator output.
+  - `plot_*` receives `(output, inputs, show=False, save_path=None)`.
+- `OperatorGeneratorMixin` (streaming output):
+  - `generator_plot_*` runs for each yielded chunk and receives
+    `(output, inputs, show=False, save_path=None, index=<iter>)`.
+  - `firstiter_plot_*` runs on the first yielded chunk and receives
+    `(output, inputs, show=False, save_path=None)`.
+
+```python
+# Scalar operator callbacks
+class MyScalarOp(...):
+    def after_run_report(self, output):
+        ...
+
+    def plot_summary(self, output, inputs, show=False, save_path=None):
+        ...
+
+# Generator operator callbacks
+class MyGeneratorOp(...):
+    def generator_plot_trace(self, output, inputs, show=False, save_path=None, index=0):
+        ...
+
+    def firstiter_plot_preview(self, output, inputs, show=False, save_path=None):
+        ...
+```
+
+You can also attach external functions with `<<`; naming still controls when they run.
+
 **Runner Policies**: Different execution strategies for parallelization:
 
 - `VanillaRunner`: Default sequential execution (supports MPI broadcast if available)
