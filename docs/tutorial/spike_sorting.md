@@ -65,17 +65,16 @@ plt.show()
 ## Build Operator
 
 As an example, let's build a simple operator that will print out the shape of the cutouts.
-The easiest way to build an operator is to make `dataclass` and inherit the `OperatorMixin` class.
-The `OperatorMixin` allow us to use the `dataclass` object as a part of a `Pipeline`.
+The easiest way to build an operator is to make a `dataclass` and inherit **`EagerOpNodeBase`** (legacy name **`OperatorMixin`** — same class).
 
-The mixin `OperatorMixin` provides most of the necessary variables and methods to build an operator, except for the `tag`. The `tag` is used to identify the operator, and use to name the output files and directory. To initialize the operator, we will use the `__post_init__` method.
+**`EagerOpNodeBase`** provides most of the necessary variables and methods to build an operator, except for the `tag`. The `tag` is used to identify the operator, and use to name the output files and directory. To initialize the operator, we will use the `__post_init__` method.
 
 ```{code-cell} ipython3
 from dataclasses import dataclass
-from miv.core import OperatorMixin
+from miv.core import EagerOpNodeBase
 
 @dataclass
-class CutoutShape(OperatorMixin):
+class CutoutShape(EagerOpNodeBase):
     tag = "cutout shape"
 
     def __post_init__(self):
@@ -125,7 +124,7 @@ from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 
 @dataclass
-class PCAClustering(OperatorMixin):
+class PCAClustering(EagerOpNodeBase):
     n_clusters: int = 3
     n_pca_components: int = 2
     tag = "pca clustering"

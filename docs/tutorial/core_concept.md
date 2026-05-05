@@ -20,7 +20,7 @@ Each nodes are isolated, and they can be chained to form a graph of data process
 Some node may only have input (upstream) connections, and they are called `end nodes`, such as plotter or visualizer nodes that does not produce any output.
 Generally, a node can form both upstream and downstream connections, where operator are in charge of processing the data and producing the output.
 
-```{mermaid]
+```mermaid
 graph LR
     Data("Data Node")
     Operator("Operator Node")
@@ -29,13 +29,13 @@ graph LR
     Operator -- ">>" --> End
 ```
 
-This diagram illustrates how a data node (such as `Spikestamps` or `IONode`) can be chained to an operator node using the `>>` operator in MiV-OS pipelines.
+This diagram illustrates how a data node (such as `Spikestamps` or a loader node) can be chained to an operator node using the `>>` operator in MiV-OS pipelines.
 
 ## Core Module
 
-The `core` module provides the foundational tools for building data processing pipelines. To build custom nodes, an operator mixin is provided for each type.
+The `core` module provides the foundational tools for building data processing pipelines. To build custom nodes, subclass the appropriate **node base** from `miv.core` (see root **`CONTEXT.md`** for the full glossary). Older examples may use legacy `*Mixin` names for the same classes; **`CONTEXT.md`** lists the preferred **`*NodeBase`** imports.
 
-### Datatype (Source)
+### Datatype (data nodes)
 
 Extended data types that inherit from native Python or NumPy types with additional functionality for electrophysiology data.
 
@@ -51,11 +51,11 @@ Extended data types that inherit from native Python or NumPy types with addition
   - Represents discrete events in time
   - Can be binned into Signal format
 
-All datatypes inherit from `DataNodeMixin`, which provides chaining capabilities and makes them compatible with the pipeline system.
+Built-in datatypes subclass **`DataNodeBase`** (legacy name **`DataNodeMixin`**), which provides chaining and pipeline compatibility.
 
-### OperatorMixin
+### EagerOpNodeBase (non-streaming operators)
 
-The `OperatorMixin` is a mixin to create general purpose `node` that can be used in a pipeline. Operators are composed of several features that provide multiple capabilities.
+**`EagerOpNodeBase`** is the base class for general-purpose **eager** (non-streaming) operators: each run produces one full result from **`output()`**. (Legacy name **`OperatorMixin`** — same class.)
 
 **Chaining**: Operators can be chained using the `>>` operator:
 
@@ -78,30 +78,32 @@ This creates a dependency graph where `operator1` is upstream of `operator2`, et
 - `plot_*`: Methods called for visualization (can be skipped with `skip_plot=True` passed to `Pipeline`)
 - Callbacks can be dynamically added using the `<<` operator
 
-#### Adding callbacks: `OperatorMixin` vs `OperatorGeneratorMixin`
+#### Adding callbacks: `EagerOpNodeBase` vs `StreamOpNodeBase`
 
 Use callback name prefixes to register post-processing hooks:
 
-- `OperatorMixin` (scalar output):
+- **`EagerOpNodeBase`** (single `output()`):
   - `after_run_*` receives the operator output.
   - `plot_*` receives `(output, inputs, show=False, save_path=None)`.
-- `OperatorGeneratorMixin` (streaming output):
+- **`StreamOpNodeBase`** (streaming `output()`):
   - `generator_plot_*` runs for each yielded chunk and receives
     `(output, inputs, show=False, save_path=None, index=<iter>)`.
   - `firstiter_plot_*` runs on the first yielded chunk and receives
     `(output, inputs, show=False, save_path=None)`.
 
 ```python
-# Scalar operator callbacks
-class MyScalarOp(...):
+from miv.core import EagerOpNodeBase, StreamOpNodeBase
+
+# Eager operator callbacks
+class MyEagerOp(EagerOpNodeBase):
     def after_run_report(self, output):
         ...
 
     def plot_summary(self, output, inputs, show=False, save_path=None):
         ...
 
-# Generator operator callbacks
-class MyGeneratorOp(...):
+# Streaming operator callbacks
+class MyStreamOp(StreamOpNodeBase):
     def generator_plot_trace(self, output, inputs, show=False, save_path=None, index=0):
         ...
 
@@ -117,15 +119,18 @@ You can also attach external functions with `<<`; naming still controls when the
 - `StrictMPIRunner`: MPI-based execution where each rank processes independently
 - `SupportMPIMerge`: MPI execution with automatic result merging
 
-### OperatorGeneratorMixin
+### StreamOpNodeBase (streaming operators)
 
-Specialized operators for generator-based processing. Most of the features are similar to `OperatorMixin`, but with additional features for generator-based processing.
-Generator operators are useful for processing data streams or when operations naturally yield multiple results.
+**`StreamOpNodeBase`** is the base class for operators whose **`output()`** is a **generator** (chunked / streaming results). (Legacy name **`GeneratorOperatorMixin`** — same class.)
 
-**Runner Policies**: Different execution strategies for parallelization:
+Most behavior matches eager operators, but streaming paths use generator-specific runners and per-chunk cache writes. When results are **not** loaded from cache, a streaming operator **must** receive **upstream** iterable inputs (the implementation requires at least one upstream for the streaming execution path).
 
-- `VanillaGeneratorRunner`: Default sequential execution (supports MPI broadcast if available)
-- `MultiprocessingGeneratorRunner`: Parallel execution using Python multiprocessing
+**Runner Policies**:
+
+- `VanillaGeneratorRunner`: Default sequential execution over zipped upstream iterables (MPI behavior differs from `VanillaRunner` on eager nodes; see module docstrings)
+- `GeneratorRunnerInMultiprocessing`: Parallel batches via `multiprocessing` (does not use the same chunk-alignment contract as `VanillaGeneratorRunner`; see `miv.core.operator_generator.policy`)
+
+The **`@cache_generator_call`** decorator is **deprecated**; prefer the current **`StreamOpNodeBase`** / **`__call__`** patterns described in **`CONTEXT.md`**.
 
 ## Pipeline
 
