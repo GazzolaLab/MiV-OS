@@ -13,13 +13,13 @@ import pathlib
 from ..chainable import ChainingMixin
 from ..cache_write import persist_cacher_result
 from .cachable import DataclassCacher
-from .callback import BaseCallbackMixin
+from .callback import ScalarCallbackMixin
 from .policy import VanillaRunner, RunnerBase
 
 from ..datatype import DataTypes
 
 
-class OperatorMixin(ChainingMixin, BaseCallbackMixin):
+class OperatorMixin(ChainingMixin, ScalarCallbackMixin):
     """
     Behavior includes:
         - Whenever "run()" method is executed:
@@ -82,10 +82,10 @@ class OperatorMixin(ChainingMixin, BaseCallbackMixin):
             persist_cacher_result(self.cacher, output, tag="data")
 
             # Callback: After-run
-            self._callback_after_run(output)
+            self._callback("after_run", output)
 
             # Plotting: Only happened when cache is not called
-            self._callback_plot(output, args, show=False)
+            self._callback("plot", output, args, show=False)
 
         return output
 
@@ -106,5 +106,5 @@ class OperatorMixin(ChainingMixin, BaseCallbackMixin):
 
         # Plotting: Only happened when cache is not called
         args = self.receive()  # Receive data from upstream
-        self._done_flag_plot = False  # FIXME
-        self._callback_plot(output, args, show=show, save_path=save_path)
+        self.set_callback_done("plot", False)  # FIXME
+        self._callback("plot", output, args, show=show, save_path=save_path)

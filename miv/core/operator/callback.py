@@ -1,178 +1,37 @@
-__doc__ = """
-Implementation for callback features that will be mixed in operator class.
-"""
-__all__ = ["BaseCallbackMixin"]
+"""Scalar-operator callback groups (``after_run``, ``plot_``)."""
 
-from typing import Any
-from collections.abc import Callable
-from typing_extensions import Self
+from __future__ import annotations
 
-import types
-import inspect
-import os
-import pathlib
-import logging
+from typing import Any, ClassVar
 
-import matplotlib.pyplot as plt
-
-from ..loggable import DefaultLoggerMixin
-from ..cachable import _CacherProtocol, CACHE_POLICY
+from ..callback import BaseCallbackMixin
 
 
-def execute_callback(
-    logger: logging.Logger, callback: Callable, *args: Any, **kwargs: Any
-) -> None:
-    """
-    Executes a callback function with optional args/kwargs.
-    Logs a warning if an exception occurs.
-    """
-    try:
-        callback(*args, **kwargs)
-    except Exception:
-        logger.exception(
-            "There was an issue running the following callback. (No exception will be raised during callback.)"
-        )
+def _prepare_after_run_local(
+    _self: Any, args: tuple[Any, ...], kw: dict[str, Any]
+) -> tuple[tuple[Any, ...], dict[str, Any]]:
+    return args, kw
 
 
-# MixinOperators
-def get_methods_from_feature_classes_by_startswith_str(
-    cls: Any, method_name: str
-) -> list[Callable]:
-    methods = [
-        getattr(cls, k)
-        for k in dir(cls)
-        if k.startswith(method_name) and callable(getattr(cls, k))
-    ]
-    return methods
+def _prepare_plot_local(
+    self: Any, args: tuple[Any, ...], kw: dict[str, Any]
+) -> tuple[tuple[Any, ...], dict[str, Any]]:
+    output = args[0] if args else None
+    inputs = args[1] if len(args) > 1 else None
+    show = kw.get("show", False)
+    save_path = kw.get("save_path")
+    if save_path is None:
+        save_path = self.analysis_path
+    if isinstance(inputs, list) and len(inputs) == 1:
+        inputs = inputs[0]
+    return (output, inputs), {"show": show, "save_path": save_path}
 
 
-# MixinOperators
-def get_methods_from_feature_classes_by_endswith_str(
-    cls: Any, method_name: str
-) -> list[Callable]:
-    methods = [
-        getattr(cls, k)
-        for k in dir(cls)
-        if k.endswith(method_name) and callable(getattr(cls, k))
-    ]
-    return methods
+class ScalarCallbackMixin(BaseCallbackMixin):
+    """Mixin for scalar operators: ``after_run`` + ``plot`` hook groups."""
 
-
-class BaseCallbackMixin(DefaultLoggerMixin):
-    def __init__(
-        self,
-        *args: Any,
-        cacher: _CacherProtocol,
-        cache_path: str = ".cache",
-        **kwargs: Any,
-    ) -> None:
-        super().__init__(*args, **kwargs)
-        self.__cache_directory_name: str = cache_path
-        self._cacher: _CacherProtocol = cacher
-        self.skip_plot: bool = False
-
-        # Default analysis path
-        assert self.tag != "", (
-            "All operator must have self.tag attribute for identification."
-        )
-        # self.set_save_path("results")  # FIXME
-
-        # Callback Flags (to avoid duplicated run)
-        self._done_flag_after_run = False
-        self._done_flag_plot = False
-
-        # Attribute from upstream
-        self.tag: str
-
-    @property
-    def cacher(self) -> _CacherProtocol:
-        return self._cacher
-
-    @cacher.setter
-    def cacher(self, value: _CacherProtocol) -> None:
-        # FIXME:
-        policy = self._cacher.policy
-        cache_dir = self._cacher.cache_dir
-        self._cacher = value
-        self._cacher.policy = policy
-        self._cacher.cache_dir = cache_dir
-
-    def set_caching_policy(self, policy: CACHE_POLICY) -> None:
-        self.cacher.policy = policy
-
-    def reset_callbacks(self, *, after_run: bool = False, plot: bool = False) -> None:
-        self._done_flag_after_run = after_run
-        self._done_flag_plot = plot
-
-    def __lshift__(self, right: Callable) -> Self:
-        # Dynamically add new function into an operator instance
-        if inspect.getfullargspec(right)[0][0] == "self":
-            setattr(self, right.__name__, types.MethodType(right, self))
-        else:
-            # Add new function into as attribute
-            setattr(self, right.__name__, right)
-        return self
-
-    def set_save_path(
-        self,
-        path: str | pathlib.Path,
-        cache_path: str | pathlib.Path | None = None,
-    ) -> None:
-        if cache_path is None:
-            cache_path = path
-
-        # Set analysis path
-        self.analysis_path = os.path.join(path, self.tag.replace(" ", "_"))
-        # Set cache path
-        _cache_path = os.path.join(
-            cache_path, self.tag.replace(" ", "_"), self.__cache_directory_name
-        )
-        self.cacher.cache_dir = _cache_path
-
-        # Make directory  # Not sure if this needs to be done here
-        os.makedirs(self.analysis_path, exist_ok=True)
-
-    def _callback_after_run(self, *args: Any, **kwargs: Any) -> None:
-        if self._done_flag_after_run:
-            return
-
-        predefined_callbacks = get_methods_from_feature_classes_by_startswith_str(
-            self, "after_run"
-        )
-        for callback in predefined_callbacks:
-            execute_callback(self.logger, callback, *args, **kwargs)
-
-        self._done_flag_after_run = True
-
-    def _callback_plot(
-        self,
-        output: Any | None,
-        inputs: list | None = None,
-        show: bool = False,
-        save_path: str | pathlib.Path | None = None,
-    ) -> None:
-        """
-        Run all function in this operator that starts with the name 'plot_'.
-        """
-        if self.skip_plot:
-            return
-
-        if self._done_flag_plot:
-            return
-
-        if save_path is None:
-            save_path = self.analysis_path
-
-        # If input is single-argument, strip the list
-        if isinstance(inputs, list) and len(inputs) == 1:
-            inputs = inputs[0]
-
-        plotters = get_methods_from_feature_classes_by_startswith_str(self, "plot_")
-        for plotter in plotters:
-            execute_callback(
-                self.logger, plotter, output, inputs, show=show, save_path=save_path
-            )
-        if not show:
-            plt.close("all")
-
-        self._done_flag_plot = True
+    _callback_group_names: ClassVar[tuple[str, ...]] = ("after_run", "plot")
+    _callback_group_argument_transforms = {
+        "after_run": _prepare_after_run_local,
+        "plot": _prepare_plot_local,
+    }

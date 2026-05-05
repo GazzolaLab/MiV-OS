@@ -74,8 +74,7 @@ class _Node(_Chainable[Any], Protocol):
 
     Matches :func:`miv.core.utils.graph_sorting.topological_sort` (chainable +
     ``flow_blocked``) and :meth:`miv.core.pipeline.Pipeline.run` (``output`` on
-    sink nodes). Optional hooks like ``set_save_path`` / ``reset_callbacks`` are
-    duck-typed at runtime and are not part of this protocol.
+    sink nodes).
     """
 
     def output(self) -> Any: ...

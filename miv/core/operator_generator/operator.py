@@ -3,9 +3,11 @@ from __future__ import annotations
 import itertools
 from typing import Any
 from collections.abc import Generator, Iterable
+from abc import abstractmethod
 
 from ..cache_write import persist_cacher_result
 from ..chainable import ChainingMixin
+from ..datatype import DataTypes
 from ..operator.cachable import DataclassCacher
 from ..operator.policy import RunnerBase, VanillaRunner
 from .callback import GeneratorCallbackMixin
@@ -21,6 +23,10 @@ class GeneratorOperatorMixin(ChainingMixin, GeneratorCallbackMixin):
 
         self.tag: str
         self.runner = VanillaGeneratorRunner(self)
+
+    @abstractmethod
+    def __call__(self) -> Generator[DataTypes] | DataTypes:
+        """Execute the operator. Must be implemented by subclasses."""
 
     def __repr__(self) -> str:
         return self.tag
@@ -52,12 +58,21 @@ class GeneratorOperatorMixin(ChainingMixin, GeneratorCallbackMixin):
 
         for idx, (result, zip_arg) in enumerate(zip(gen, tasks, strict=True)):
             persist_cacher_result(self.cacher, result, chunk_index=idx, tag="data")
-            self._callback_generator_plot(
-                idx, result, zip_arg, save_path=self.analysis_path
+            self._callback(
+                "generator_plot",
+                idx,
+                result,
+                zip_arg,
+                save_path=self.analysis_path,
+                set_done=False,
             )
             if idx == 0:
-                self._callback_firstiter_plot(
-                    result, zip_arg, save_path=self.analysis_path
+                self._callback(
+                    "firstiter_plot",
+                    result,
+                    zip_arg,
+                    save_path=self.analysis_path,
+                    set_done=False,
                 )
             yield result
 

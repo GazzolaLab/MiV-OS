@@ -8,8 +8,7 @@ from typing import TYPE_CHECKING, Any
 from collections.abc import Generator
 
 from ..chainable import ChainingMixin
-from ..operator.callback import BaseCallbackMixin
-from ..loggable import DefaultLoggerMixin
+from ..callback import BaseCallbackMixin
 from ..operator.policy import VanillaRunner
 from .cachable import FunctionalCacher
 
@@ -19,7 +18,7 @@ if TYPE_CHECKING:
     from ..datatype.spikestamps import Spikestamps
 
 
-class DataLoaderMixin(ChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
+class DataLoaderMixin(ChainingMixin, BaseCallbackMixin):
     """ """
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:

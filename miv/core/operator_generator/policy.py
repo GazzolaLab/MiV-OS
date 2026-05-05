@@ -94,8 +94,8 @@ class VanillaGeneratorRunner(StreamChunkAlignedGeneratorRunner):
 
             # TODO: add lastiter_plot
             # FIXME
-            self.parent._done_flag_generator_plot = True
-            self.parent._done_flag_firstiter_plot = True
+            self.parent.set_callback_done("generator_plot", True)
+            self.parent.set_callback_done("firstiter_plot", True)
 
         generator = generator_func(*inputs)
         return generator
@@ -177,8 +177,8 @@ class GeneratorRunnerInMultiprocessing(RunnerBase):
             #    yield result
             # TODO: add lastiter_plot
             # FIXME
-            self.parent._done_flag_generator_plot = True
-            self.parent._done_flag_firstiter_plot = True
+            self.parent.set_callback_done("generator_plot", True)
+            self.parent.set_callback_done("firstiter_plot", True)
 
         generator = generator_func(*inputs)
         return generator

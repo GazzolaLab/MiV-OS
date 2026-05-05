@@ -75,7 +75,7 @@ This creates a dependency graph where `operator1` is upstream of `operator2`, et
 **Callbacks**: Support for custom callbacks:
 
 - `after_run_*`: Methods called after operator execution
-- `plot_*`: Methods called for visualization (can be skipped with `skip_plot=True`)
+- `plot_*`: Methods called for visualization (can be skipped with `skip_plot=True` passed to `Pipeline`)
 - Callbacks can be dynamically added using the `<<` operator
 
 **Runner Policies**: Different execution strategies for parallelization:

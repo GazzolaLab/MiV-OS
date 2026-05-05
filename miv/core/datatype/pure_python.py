@@ -61,6 +61,7 @@ class GeneratorType(ChainingMixin):
     def output(self) -> Generator:
         yield from self.iterator
 
+    # Deprecated
     def run(self, **kwargs: Any) -> Generator:
         yield from self.output()
 

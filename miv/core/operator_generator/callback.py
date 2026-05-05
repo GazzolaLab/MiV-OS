@@ -4,95 +4,51 @@ This module provides callback functionality for generator-to-generator operators
 including plotting callbacks that execute during generator iterations.
 """
 
-from typing import TYPE_CHECKING, Any
+from __future__ import annotations
 
-import pathlib
+from typing import Any, ClassVar
 
-import matplotlib.pyplot as plt
+from ..callback import BaseCallbackMixin
 
-from ..operator.callback import (
-    BaseCallbackMixin,
-    get_methods_from_feature_classes_by_startswith_str,
-    execute_callback,
-)
 
-if TYPE_CHECKING:
-    from miv.core.datatype import DataTypes
+def _prepare_generator_plot_local(
+    _self: Any, args: tuple[Any, ...], kw: dict[str, Any]
+) -> tuple[tuple[Any, ...], dict[str, Any]]:
+    iter_index = args[0]
+    output = args[1] if len(args) > 1 else None
+    inputs = args[2] if len(args) > 2 else None
+    show = kw.get("show", False)
+    save_path = kw.get("save_path")
+    return (output, inputs), {
+        "show": show,
+        "save_path": save_path,
+        "index": iter_index,
+    }
+
+
+def _prepare_firstiter_plot_local(
+    _self: Any, args: tuple[Any, ...], kw: dict[str, Any]
+) -> tuple[tuple[Any, ...], dict[str, Any]]:
+    output = args[0] if args else None
+    inputs = args[1] if len(args) > 1 else None
+    show = kw.get("show", False)
+    save_path = kw.get("save_path")
+    return (output, inputs), {"show": show, "save_path": save_path}
 
 
 class GeneratorCallbackMixin(BaseCallbackMixin):
     """
-    Callback stack for generator-to-generator operators (extends scalar operator callbacks).
+    Streaming plot hook groups: ``generator_plot``, ``firstiter_plot``.
 
-    `generator_plot` method plots during each iteration of generator.
-    The function take `show` and `save_path` arguments similar to `plot` method.
+    Call :meth:`~miv.core.callback.BaseCallbackMixin._callback` with those names.
+    :class:`~miv.core.operator_generator.operator.GeneratorOperatorMixin` only.
     """
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        super().__init__(*args, **kwargs)
-
-        self._done_flag_generator_plot = False
-        self._done_flag_firstiter_plot = False
-
-    def reset_callbacks(self, *args: Any, **kwargs: Any) -> None:
-        """Reset callback flags.
-
-        Args:
-            *args: Positional arguments (unused, for compatibility).
-            **kwargs: Keyword arguments. If 'plot' is provided, sets both
-                generator_plot and firstiter_plot flags to that value.
-        """
-        plot_flag = kwargs.get("plot", False)
-        self._done_flag_generator_plot = plot_flag
-        self._done_flag_firstiter_plot = plot_flag
-
-    def _callback_generator_plot(
-        self,
-        iter_index: int,
-        output: "DataTypes",
-        inputs: tuple["DataTypes", ...] | None = None,
-        show: bool = False,
-        save_path: str | pathlib.Path | None = None,
-    ) -> None:
-        if self._done_flag_generator_plot:
-            return
-
-        plotters_for_generator_out = get_methods_from_feature_classes_by_startswith_str(
-            self, "generator_plot_"
-        )
-        for plotter in plotters_for_generator_out:
-            execute_callback(
-                self.logger,
-                plotter,
-                output,
-                inputs,
-                show=show,
-                save_path=save_path,
-                index=iter_index,
-            )
-        plt.close("all")
-
-    def _callback_firstiter_plot(
-        self,
-        output: "DataTypes",
-        inputs: tuple["DataTypes", ...] | None = None,
-        show: bool = False,
-        save_path: str | pathlib.Path | None = None,
-    ) -> None:
-        if self._done_flag_firstiter_plot:
-            return
-
-        plotters_for_generator_out = get_methods_from_feature_classes_by_startswith_str(
-            self, "firstiter_plot_"
-        )
-
-        for plotter in plotters_for_generator_out:
-            execute_callback(
-                self.logger,
-                plotter,
-                output,
-                inputs,
-                show=show,
-                save_path=save_path,
-            )
-        plt.close("all")
+    _callback_group_names: ClassVar[tuple[str, ...]] = (
+        "generator_plot",
+        "firstiter_plot",
+    )
+    _callback_group_argument_transforms = {
+        "generator_plot": _prepare_generator_plot_local,
+        "firstiter_plot": _prepare_firstiter_plot_local,
+    }

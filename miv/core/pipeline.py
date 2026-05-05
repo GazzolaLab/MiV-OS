@@ -89,8 +89,8 @@ class Pipeline:
         #  Reset all callbacks
         for last_node in self.nodes_to_run:
             for node in topological_sort(last_node):
-                if hasattr(node, "reset_callbacks"):
-                    node.reset_callbacks(plot=skip_plot)
+                if hasattr(node, "set_callback_done"):
+                    node.set_callback_done("plot", skip_plot)
                 if hasattr(node, "set_save_path"):
                     if temporary_directory is not None:
                         node.set_save_path(temporary_directory, cache_directory)
