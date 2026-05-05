@@ -5,7 +5,7 @@ This module includes a basic core protocols used in many place throughout.
 the library. For specific behaviors, protocols will be specified in the
 module/protocol.py files.
 """
-__all__ = ["_Loggable"]
+__all__ = ["_Loggable", "_Node"]
 
 from collections.abc import Iterator
 from typing import Any, Protocol, TypeVar
@@ -17,6 +17,8 @@ from .cachable import _CacherProtocol, CACHE_POLICY
 class _Cachable(Protocol):
     """
     A protocol for cachable behavior.
+
+    The node is cachable, simply if it has a cacher.
     """
 
     cacher: _CacherProtocol
@@ -64,3 +66,16 @@ class _Chainable(Protocol[C]):
     def iterate_downstream(self) -> Iterator[C]: ...
 
     def flow_blocked(self) -> bool: ...
+
+
+class _Node(_Chainable[Any], Protocol):
+    """
+    Minimal graph vertex the pipeline can schedule and execute.
+
+    Matches :func:`miv.core.utils.graph_sorting.topological_sort` (chainable +
+    ``flow_blocked``) and :meth:`miv.core.pipeline.Pipeline.run` (``output`` on
+    sink nodes). Optional hooks like ``set_save_path`` / ``reset_callbacks`` are
+    duck-typed at runtime and are not part of this protocol.
+    """
+
+    def output(self) -> Any: ...

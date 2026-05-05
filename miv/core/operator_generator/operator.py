@@ -73,10 +73,5 @@ class GeneratorOperatorMixin(OperatorMixin, GeneratorCallbackMixin):
             output = self._wrap_streaming_chunk_side_effects(
                 raw_output, args_for_callbacks
             )
-
-            # Callback: After-run
-            self._callback_after_run(output)
-
-            # Plotting: Only happened when cache is not called
-            self._callback_plot(output, args, show=False)
+            # after_run / plot_* run per chunk inside _wrap_streaming_chunk_side_effects
         return output

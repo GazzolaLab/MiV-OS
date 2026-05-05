@@ -16,7 +16,7 @@ import sys
 from loguru import logger
 
 from ..utils.formatter import TColors
-from .operator.protocol import _Node
+from .protocol import _Node
 from .utils.graph_sorting import topological_sort
 from .loggable import configure_logger
 

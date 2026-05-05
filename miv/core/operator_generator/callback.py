@@ -20,28 +20,6 @@ if TYPE_CHECKING:
     from miv.core.datatype import DataTypes
 
 
-class _GeneratorCallback(Protocol):
-    _done_flag_generator_plot: bool
-    _done_flag_firstiter_plot: bool
-
-    def _callback_generator_plot(
-        self,
-        iter_index: int,
-        output: "DataTypes",
-        inputs: tuple["DataTypes", ...] | None = None,
-        show: bool = False,
-        save_path: str | pathlib.Path | None = None,
-    ) -> None: ...
-
-    def _callback_firstiter_plot(
-        self,
-        output: "DataTypes",
-        inputs: tuple["DataTypes", ...] | None = None,
-        show: bool = False,
-        save_path: str | pathlib.Path | None = None,
-    ) -> None: ...
-
-
 class GeneratorCallbackMixin(DefaultLoggerMixin):
     """
     Additional methods for generator-to-generator operator.

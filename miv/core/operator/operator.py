@@ -18,13 +18,8 @@ from .cachable import DataclassCacher
 from .callback import BaseCallbackMixin
 from .policy import VanillaRunner, RunnerBase
 
-if TYPE_CHECKING:
-    from ..datatype import DataTypes
-    from .protocol import _Node
-
-else:
-
-    class _Node: ...
+from ..datatype import DataTypes
+from ..protocol import _Node
 
 
 class OperatorMixin(ChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
@@ -47,7 +42,7 @@ class OperatorMixin(ChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
 
         super().__init__(*args, cacher=DataclassCacher(self), **kwargs)
 
-        # Attribute from upstream
+        # Attribute from parent
         self.tag: str
 
     @abstractmethod
