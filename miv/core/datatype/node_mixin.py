@@ -4,7 +4,6 @@ __doc__ = """
 Base mixin for datatype classes that provides chaining capabilities and makes them
 compatible with the pipeline system.
 """
-__all__ = ["DataNodeMixin"]
 
 from typing import TYPE_CHECKING, Any
 from typing_extensions import Self
@@ -35,3 +34,6 @@ class DataNodeMixin(ChainingMixin, DefaultLoggerMixin):
 
     def run(self) -> Self:
         return self.output()
+
+
+DataNodeBase = DataNodeMixin

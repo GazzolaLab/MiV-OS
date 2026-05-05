@@ -49,3 +49,6 @@ class DataLoaderMixin(ChainingMixin, BaseCallbackMixin):
         self, *args: Any, **kwargs: Any
     ) -> Generator[DataTypes] | Spikestamps | Generator[Signal]:
         raise NotImplementedError("load() method must be implemented to be DataLoader.")
+
+
+SourceNodeBase = DataLoaderMixin

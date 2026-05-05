@@ -102,3 +102,6 @@ class GeneratorOperatorMixin(ChainingMixin, GeneratorCallbackMixin):
             )
             # after_run / plot_* run per chunk inside _wrap_streaming_chunk_side_effects
         return output
+
+
+StreamOpNodeBase = GeneratorOperatorMixin

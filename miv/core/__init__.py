@@ -7,12 +7,15 @@ _submodule_paths_for_alias = {
     "datatype.events": ["Events"],
     "datatype.signal": ["Signal"],
     "datatype.spikestamps": ["Spikestamps"],
-    "datatype.node_mixin": ["DataNodeMixin"],
-    "operator.operator": ["OperatorMixin"],
+    "datatype.node_mixin": ["DataNodeBase", "DataNodeMixin"],
+    "operator.operator": ["EagerOpNodeBase", "OperatorMixin"],
     "operator.wrapper": ["cache_call"],
     "source.wrapper": ["cached_method"],
-    "operator_generator.operator": ["GeneratorOperatorMixin"],
+    "operator_generator.operator": [
+        "GeneratorOperatorMixin",
+        "StreamOpNodeBase",
+    ],
     "operator_generator.wrapper": ["cache_generator_call"],
-    "source.node_mixin": ["DataLoaderMixin"],
+    "source.node_mixin": ["DataLoaderMixin", "SourceNodeBase"],
 }
 __getattr__ = getter_upon_call(__name__, _submodule_paths_for_alias)

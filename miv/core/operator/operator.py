@@ -108,3 +108,6 @@ class OperatorMixin(ChainingMixin, ScalarCallbackMixin):
         args = self.receive()  # Receive data from upstream
         self.set_callback_done("plot", False)  # FIXME
         self._callback("plot", output, args, show=show, save_path=save_path)
+
+
+EagerOpNodeBase = OperatorMixin
