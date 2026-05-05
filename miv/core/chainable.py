@@ -5,7 +5,7 @@ Mixin to create chaining structure between objects.
 """
 __all__ = ["ChainingMixin", "node_graph_visualize"]
 
-from typing import TYPE_CHECKING, Any, TypeVar, Generic
+from typing import TYPE_CHECKING, Any, TypeVar, Generic, cast
 from collections.abc import Iterator
 from collections import deque
 from abc import ABC, abstractmethod
@@ -14,6 +14,7 @@ import itertools
 
 import matplotlib.pyplot as plt
 
+from .protocol import _Node
 
 if TYPE_CHECKING:
     import networkx as nx
@@ -26,7 +27,10 @@ class ChainingMixin(ABC, Generic[C]):
     """
     Base mixin to create chaining structure between objects.
 
-    Need further implementation of: output, tag
+    Subclasses must implement :meth:`flow_blocked`, and provide ``output`` /
+    ``tag`` as needed for their role in the graph.
+
+    :meth:`receive` returns each upstream node's ``output()`` in link order.
     """
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
@@ -76,6 +80,10 @@ class ChainingMixin(ABC, Generic[C]):
         Returns:
             True if flow is blocked, False otherwise.
         """
+
+    def receive(self) -> list[Any]:
+        """Return each upstream node's ``output()`` in upstream list order."""
+        return [cast(_Node, node).output() for node in self.iterate_upstream()]
 
     def visualize(self, ax: plt.Axes, seed: int = 200) -> nx.DiGraph:
         """

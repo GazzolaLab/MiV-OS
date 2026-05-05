@@ -5,22 +5,34 @@ from typing import Any
 from collections.abc import Generator, Iterable
 
 from ..cache_write import persist_cacher_result
-from ..cachable import CACHE_POLICY
-from ..operator.operator import OperatorMixin
-from .callback import (
-    GeneratorCallbackMixin,
-)
+from ..chainable import ChainingMixin
+from ..operator.cachable import DataclassCacher
+from ..operator.policy import RunnerBase, VanillaRunner
+from .callback import GeneratorCallbackMixin
 from .policy import StreamChunkAlignedGeneratorRunner, VanillaGeneratorRunner
 
 
-class GeneratorOperatorMixin(OperatorMixin, GeneratorCallbackMixin):
-    def __init__(self) -> None:
-        super().__init__()
+class GeneratorOperatorMixin(ChainingMixin, GeneratorCallbackMixin):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        self.runner: RunnerBase = VanillaRunner()
+        self.analysis_path = "analysis"
 
-        self.runner: StreamChunkAlignedGeneratorRunner = VanillaGeneratorRunner(self)
+        super().__init__(*args, cacher=DataclassCacher(self), **kwargs)
 
-    def set_caching_policy(self, policy: CACHE_POLICY) -> None:
-        self.cacher.policy = policy
+        self.tag: str
+        self.runner = VanillaGeneratorRunner(self)
+
+    def __repr__(self) -> str:
+        return self.tag
+
+    def __str__(self) -> str:
+        return self.tag
+
+    def flow_blocked(self) -> bool:
+        try:
+            return self.cacher.check_cached(skip_log=True)
+        except (AttributeError, FileNotFoundError):
+            return False
 
     @staticmethod
     def _tee_upstream_args(

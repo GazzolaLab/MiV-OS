@@ -5,24 +5,21 @@ Here, we define the behavior of basic operator class, and useful mixin classes t
 be used to create new operators that conform to required behaviors.
 """
 
-from typing import TYPE_CHECKING, Any, cast
+from typing import Any
 from abc import abstractmethod
 
 import pathlib
 
-from loguru import logger
 from ..chainable import ChainingMixin
-from ..loggable import DefaultLoggerMixin
 from ..cache_write import persist_cacher_result
 from .cachable import DataclassCacher
 from .callback import BaseCallbackMixin
 from .policy import VanillaRunner, RunnerBase
 
 from ..datatype import DataTypes
-from ..protocol import _Node
 
 
-class OperatorMixin(ChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
+class OperatorMixin(ChainingMixin, BaseCallbackMixin):
     """
     Behavior includes:
         - Whenever "run()" method is executed:
@@ -45,32 +42,21 @@ class OperatorMixin(ChainingMixin, BaseCallbackMixin, DefaultLoggerMixin):
         # Attribute from parent
         self.tag: str
 
-    @abstractmethod
-    def __call__(self) -> DataTypes:
-        """Execute the operator. Must be implemented by subclasses."""
-
     def __repr__(self) -> str:
         return self.tag
 
     def __str__(self) -> str:
         return self.tag
 
-    def receive(self) -> list[DataTypes]:
-        """
-        Receive input data from each upstream operator.
-        Essentially, this method recursively call upstream operators' run() method.
-        """
-        ret = []
-        for node in self.iterate_upstream():
-            output = cast(_Node, node).output()
-            ret.append(output)
-        return ret
-
     def flow_blocked(self) -> bool:
         try:
             return self.cacher.check_cached(skip_log=True)
         except (AttributeError, FileNotFoundError):
             return False
+
+    @abstractmethod
+    def __call__(self) -> DataTypes:
+        """Execute the operator. Must be implemented by subclasses."""
 
     def output(self) -> DataTypes:
         """

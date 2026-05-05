@@ -4,14 +4,14 @@ This module provides callback functionality for generator-to-generator operators
 including plotting callbacks that execute during generator iterations.
 """
 
-from typing import TYPE_CHECKING, Any, Protocol
+from typing import TYPE_CHECKING, Any
 
 import pathlib
 
 import matplotlib.pyplot as plt
 
-from ..loggable import DefaultLoggerMixin
 from ..operator.callback import (
+    BaseCallbackMixin,
     get_methods_from_feature_classes_by_startswith_str,
     execute_callback,
 )
@@ -20,16 +20,16 @@ if TYPE_CHECKING:
     from miv.core.datatype import DataTypes
 
 
-class GeneratorCallbackMixin(DefaultLoggerMixin):
+class GeneratorCallbackMixin(BaseCallbackMixin):
     """
-    Additional methods for generator-to-generator operator.
+    Callback stack for generator-to-generator operators (extends scalar operator callbacks).
 
     `generator_plot` method plots during each iteration of generator.
     The function take `show` and `save_path` arguments similar to `plot` method.
     """
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
 
         self._done_flag_generator_plot = False
         self._done_flag_firstiter_plot = False
