@@ -25,6 +25,20 @@ from miv.mea import mea_map
 from miv.statistics.spiketrain_statistics import firing_rates
 
 
+def _pairwise_granger_scalar(sig: np.ndarray, order: int) -> float:
+    """Return a single float from elephant's ``pairwise_granger`` (API may return ``Causality`` or ndarray)."""
+    try:
+        val = pairwise_granger(sig, order)
+    except ValueError:
+        return 0.0
+    if hasattr(val, "total_interdependence"):
+        return float(val.total_interdependence)
+    arr = np.asarray(val).ravel()
+    if arr.size == 0:
+        return 0.0
+    return float(arr[0])
+
+
 # self MPI-able
 @dataclass
 class DirectedConnectivity(OperatorMixin):
@@ -167,7 +181,7 @@ class DirectedConnectivity(OperatorMixin):
             return 1, 0
         source = binned_spiketrain[sid]
         target = binned_spiketrain[tid]
-        te, surrogate_te_list = DirectedConnectivity._surrogate_t_test(
+        te, surrogate_te_list = UndirectedConnectivity._surrogate_t_test(
             source,
             target,
             skip_surrogate=skip_surrogate,
@@ -499,13 +513,9 @@ class UndirectedConnectivity(OperatorMixin):
         )
 
         sig = np.stack([source, target], axis=-1)
-        try:
-            val = pairwise_granger(sig, order)
-        except ValueError:
-            val = [0.0, 0.0]
-            # val = [np.nan, np.nan]
+        val = _pairwise_granger_scalar(sig, order)
 
-        surrogate_vals = []
+        surrogate_vals: list[float] = []
         if skip_surrogate:
             return val, surrogate_vals
 
@@ -521,17 +531,14 @@ class UndirectedConnectivity(OperatorMixin):
             rng.shuffle(surrogate_source)
             for start_index in np.arange(0, source.shape[0] - sublength, stride):
                 end_index = start_index + sublength
-                surr_val = pairwise_granger(
-                    np.stack(
-                        [
-                            surrogate_source[start_index:end_index],
-                            target[start_index:end_index],
-                        ],
-                        axis=-1,
-                    ),
-                    order,
+                surr_sig = np.stack(
+                    [
+                        surrogate_source[start_index:end_index],
+                        target[start_index:end_index],
+                    ],
+                    axis=-1,
                 )
-                surrogate_vals.append(surr_val)
+                surrogate_vals.append(_pairwise_granger_scalar(surr_sig, order))
 
         return val, surrogate_vals
 

@@ -1,26 +1,10 @@
 from __future__ import annotations
 
 __doc__ = """
+Open Ephys I/O: :class:`Data` (single recording) and :class:`DataManager` (experiment folder).
 
-Data Manager (OpenEphys)
-########################
-
-.. autoclass:: DataManager
-   :members:
-
-Module (OpenEphys)
-##################
-
-.. Note::
-    We expect the data structure to follow the default format
-    exported from OpenEphys system:
-    `format <https://open-ephys.atlassian.net/wiki/spaces/OEW/pages/491632/Data+format>`_.
-
-.. currentmodule:: miv.io.openephys.data
-
-.. autoclass:: Data
-   :members:
-
+We expect the on-disk layout to follow the default format exported from Open Ephys;
+see the `Open Ephys data format <https://open-ephys.atlassian.net/wiki/spaces/OEW/pages/491632/Data+format>`_.
 """
 
 __all__ = ["Data", "DataManager"]

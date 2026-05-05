@@ -66,6 +66,10 @@ autodoc_default_options = {
     "exclude-members": "__weakref__",
     "show-inheritance": True,
 }
+# PEP 604 unions in attribute lines (e.g. ``list[int] | None``) confuse docutils if inlined as prose.
+autodoc_typehints = "signature"
+# Optional runtime dependency; tutorials mention MPI but do not execute mpi4py during build.
+autodoc_mock_imports = ["mpi4py"]
 autosectionlabel_prefix_document = True
 autosummary_generate = True
 autosummary_generate_overwrite = False

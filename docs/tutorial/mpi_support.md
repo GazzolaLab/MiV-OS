@@ -12,9 +12,13 @@ To use MPI functionality and `mpi4py`.
 ### Basic MPI Usage
 
 ```python
+# Requires: pip install mpi4py  (also install an MPI implementation, e.g. Open MPI)
+from mpi4py import MPI
+
 # from miv.io.openephys import Data
 from miv.io.intan import DataIntan as Data
 from miv.core.pipeline import Pipeline
+from miv.core.operator.policy import SupportMPIMerge
 from miv.signal.filter import ButterBandpass
 from miv.signal.spike import ThresholdCutoff
 
