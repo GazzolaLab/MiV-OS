@@ -24,6 +24,10 @@ pre-commit-install:
 formatting:
 	uv run --frozen ruff format --config pyproject.toml miv tests
 
+.PHONY: check-codestyle
+check-codestyle:
+	uv run --frozen ruff check --config pyproject.toml miv/core
+
 #* Linting
 .PHONY: test
 test:
@@ -48,10 +52,6 @@ test-all:
 view-coverage:
 	uv run --frozen coverage html
 	open htmlcov/index.html
-
-.PHONY: check-codestyle
-check-codestyle:
-	uv run --frozen ruff check --config pyproject.toml miv/core
 
 .PHONY: mypy
 mypy:

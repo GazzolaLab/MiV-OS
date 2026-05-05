@@ -1,7 +1,8 @@
-from typing import Any, Callable, Type
+from typing import Any
+from collections.abc import Callable
 
 
-def append_method(cls: Type[Any], func: Callable[..., Any]) -> None:
+def append_method(cls: type[Any], func: Callable[..., Any]) -> None:
     def method(self: object, *args: Any, **kwargs: Any) -> Any:
         return func(*args, **kwargs)
 

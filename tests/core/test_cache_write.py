@@ -20,9 +20,7 @@ class RecordingCacher:
         self.calls.append(("save_cache", (value, idx, tag), {}))
         return True
 
-    def save_config(
-        self, tag: str = "data", *args: Any, **kwargs: Any
-    ) -> bool:
+    def save_config(self, tag: str = "data", *args: Any, **kwargs: Any) -> bool:
         self.calls.append(("save_config", (tag,), dict(kwargs)))
         return True
 
@@ -54,16 +52,12 @@ def test_persist_forwards_save_config_kwargs_on_first_chunk_only() -> None:
     """Source-style :class:`~miv.core.source.cachable.FunctionalCacher` uses ``params`` for config."""
     c = RecordingCacher()
     params = ((), {"x": 1})
-    persist_cacher_result(
-        c, "payload", chunk_index=0, tag="data", params=params
-    )
+    persist_cacher_result(c, "payload", chunk_index=0, tag="data", params=params)
     assert c.calls == [
         ("save_cache", ("payload", 0, "data"), {}),
         ("save_config", ("data",), {"params": params}),
     ]
 
     c2 = RecordingCacher()
-    persist_cacher_result(
-        c2, "chunk", chunk_index=3, tag="data", params=params
-    )
+    persist_cacher_result(c2, "chunk", chunk_index=3, tag="data", params=params)
     assert c2.calls == [("save_cache", ("chunk", 3, "data"), {})]

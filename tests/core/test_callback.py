@@ -104,7 +104,9 @@ def test_base_callback_cacher_setter_preserves_policy_and_cache_dir():
 
         def __init__(self) -> None:
             self.tag = "mock-callback-node"
-            super().__init__(cacher=SimpleNamespace(policy="ON", cache_dir="/tmp/cache-a"))
+            super().__init__(
+                cacher=SimpleNamespace(policy="ON", cache_dir="/tmp/cache-a")
+            )
 
     node = MockCallbackNode()
     replacement = SimpleNamespace(policy="OFF", cache_dir="/tmp/cache-b")

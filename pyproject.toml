@@ -97,8 +97,8 @@ mpi = [
   "mpi4py"
 ]
 dev = [
-  "ruff>=0.3.4",
-  "mypy>=1.12.1",
+  "ruff",
+  "mypy",
   "mypy-extensions>=1.0.0",
   "pre-commit>=3.0.4",
   "pydocstyle>=6.1.1",

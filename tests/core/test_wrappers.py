@@ -146,6 +146,7 @@ def test_wrap_generator_cache(mock_object_with_cache, tmp_path):
     cacher; streaming persist runs from GeneratorOperatorMixin.output() (see
     test_generator_operator_caching).
     """
+
     @cache_generator_call
     def foo(self, x, y):
         return x + y
