@@ -3,6 +3,7 @@ Tests for OperatorMixin.
 """
 
 import pytest
+from unittest.mock import Mock
 
 from miv.core.operator.operator import OperatorMixin
 
@@ -31,3 +32,31 @@ def test_operator_mixin_can_be_used_as_mixin():
     assert operator.tag == "test operator"
     assert hasattr(operator, "runner")
     assert hasattr(operator, "cacher")
+
+
+def test_operator_flow_blocked_returns_false_on_missing_cache_files():
+    """flow_blocked should gracefully handle cacher lookup failures."""
+
+    class MockOperator(OperatorMixin):
+        tag: str = "test operator"
+
+        def __call__(self):
+            return "result"
+
+    operator = MockOperator()
+    operator.cacher.check_cached = Mock(side_effect=FileNotFoundError)  # type: ignore[attr-defined]
+    assert operator.flow_blocked() is False
+
+
+def test_operator_flow_blocked_returns_false_on_attribute_error():
+    """flow_blocked should return False when cacher access raises AttributeError."""
+
+    class MockOperator(OperatorMixin):
+        tag: str = "test operator"
+
+        def __call__(self):
+            return "result"
+
+    operator = MockOperator()
+    operator.cacher.check_cached = Mock(side_effect=AttributeError)  # type: ignore[attr-defined]
+    assert operator.flow_blocked() is False

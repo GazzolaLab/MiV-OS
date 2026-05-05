@@ -11,12 +11,12 @@ pytestmark = pytest.mark.filterwarnings(
 
 
 class GeneratorPlotMixin:
-    # TODO: This is a temporary solution to avoid issue. calling generator_plot in wrapper should be reconsidered
-    def _callback_generator_plot(self, *args, **kwargs):
-        pass
+    """Minimal mocks: no-op streaming plot groups if something invokes ``_callback``."""
 
-    def _callback_firstiter_plot(self, *args, **kwargs):
-        pass
+    def _callback(self, name: str, *args, **kwargs):
+        if name in ("generator_plot", "firstiter_plot"):
+            return
+        raise NotImplementedError(name)
 
 
 class MockObjectWithoutCache(GeneratorPlotMixin):
@@ -44,7 +44,6 @@ class MockObjectWithoutCache(GeneratorPlotMixin):
 
     def __init__(self, tmp_path):
         self.cacher = self.MockCacher()
-        self.skip_plot = True
         self.analysis_path = tmp_path
 
 

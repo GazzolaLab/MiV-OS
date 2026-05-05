@@ -4,8 +4,9 @@ Tests for callback functionality in operators.
 
 import pytest
 from unittest.mock import Mock, MagicMock
+from types import SimpleNamespace
 
-from miv.core.operator.callback import execute_callback
+from miv.core.callback import BaseCallbackMixin, execute_callback
 
 
 def test_execute_callback_executes_successfully():
@@ -94,3 +95,22 @@ def test_execute_callback_does_not_stop_execution():
     assert result3 is None
     assert execution_count == 3
     assert logger.exception.call_count == 3
+
+
+def test_base_callback_cacher_setter_preserves_policy_and_cache_dir():
+    class MockCallbackNode(BaseCallbackMixin):
+        _callback_group_names = ()
+        _callback_group_argument_transforms = {}
+
+        def __init__(self) -> None:
+            self.tag = "mock-callback-node"
+            super().__init__(cacher=SimpleNamespace(policy="ON", cache_dir="/tmp/cache-a"))
+
+    node = MockCallbackNode()
+    replacement = SimpleNamespace(policy="OFF", cache_dir="/tmp/cache-b")
+
+    node.cacher = replacement  # type: ignore[assignment]
+
+    assert node.cacher is replacement
+    assert node.cacher.policy == "ON"
+    assert node.cacher.cache_dir == "/tmp/cache-a"

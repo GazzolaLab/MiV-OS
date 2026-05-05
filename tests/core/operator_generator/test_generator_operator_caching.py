@@ -46,3 +46,17 @@ def test_mock_operator_caching(
     # When cache value is used, plotting should not be executed
     assert mock_generator_plot_test1.call_count == 0
     assert mock_firstiter_plot_test1.call_count == 0
+
+
+def test_generator_operator_flow_blocked_returns_false_on_lookup_error():
+    """Generator flow_blocked should return False when cacher lookup raises."""
+    mock_operator = MockGeneratorOperatorModule()
+    mock_operator.cacher.check_cached = MagicMock(side_effect=AttributeError())
+    assert mock_operator.flow_blocked() is False
+
+
+def test_generator_operator_flow_blocked_returns_false_on_missing_cache_files():
+    """Generator flow_blocked should return False when cache file lookup fails."""
+    mock_operator = MockGeneratorOperatorModule()
+    mock_operator.cacher.check_cached = MagicMock(side_effect=FileNotFoundError())
+    assert mock_operator.flow_blocked() is False

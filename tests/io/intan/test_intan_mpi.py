@@ -1971,8 +1971,8 @@ def test_mpi_with_configure_load_pipeline_execution(mock_data_intan, mock_mpi_co
     # Mock required attributes for Pipeline
     if not hasattr(mock_data_intan, "_upstream_list"):
         mock_data_intan._upstream_list = []
-    if not hasattr(mock_data_intan, "reset_callbacks"):
-        mock_data_intan.reset_callbacks = MagicMock()
+    if not hasattr(mock_data_intan, "set_callback_done"):
+        mock_data_intan.set_callback_done = MagicMock()
 
     # Configure load with MPI communicator
     mock_data_intan.configure_load(mpi_comm=mock_mpi_comm)
@@ -2018,8 +2018,8 @@ def test_mpi_with_configure_load_parameter_persistence(mock_data_intan, mock_mpi
     # Mock required attributes for Pipeline
     if not hasattr(mock_data_intan, "_upstream_list"):
         mock_data_intan._upstream_list = []
-    if not hasattr(mock_data_intan, "reset_callbacks"):
-        mock_data_intan.reset_callbacks = MagicMock()
+    if not hasattr(mock_data_intan, "set_callback_done"):
+        mock_data_intan.set_callback_done = MagicMock()
 
     # Configure load with MPI communicator
     mock_data_intan.configure_load(mpi_comm=mock_mpi_comm)
