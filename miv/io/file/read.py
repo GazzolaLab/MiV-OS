@@ -53,6 +53,7 @@ def read(
     data["_NUMBER_OF_CONTAINERS_"] = infile.attrs["_NUMBER_OF_CONTAINERS_"]
 
     ncontainers = data["_NUMBER_OF_CONTAINERS_"]
+    file_ncontainers = ncontainers
 
     # Determine if only a subset of the data should be read
     subset_: None | list[int] = None
@@ -150,6 +151,11 @@ def read(
                     # map on to the same locations for any counters
                     lo = subset_[0]
                     hi = subset_[1]
+                elif dataset.shape[0] == file_ncontainers:
+                    # MiV signal exports store one (possibly multidimensional)
+                    # value per container rather than flattening sample axes.
+                    lo = subset_[0]
+                    hi = subset_[1]
                 elif index_name_ is not None:
                     lo = full_file_indices[index_name_][0]
                     hi = full_file_indices[index_name_][-1]
@@ -179,7 +185,7 @@ def select_datasets(
     # Only keep select data from file, if we have specified datasets
     if groups is not None:
         if isinstance(groups, str):
-            groups = list(groups)
+            groups = [groups]
 
         # Count backwards because we'll be removing stuff as we go.
         i = len(datasets) - 1
