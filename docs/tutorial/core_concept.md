@@ -1,145 +1,37 @@
-# Concepts
+# Core overview
 
-## Core Idea
+**`miv.core`** is the graph layer: **lazy** linking with **`>>`**, **`output()`**, **cache policies**, and **`Pipeline`** orchestration. This section of the tutorial is split into short pages so you can read what you need without one long document.
 
-The `MiV-OS` is a community-base project that aims to provide a set of tools for the analysis of the electropysiology recordings. We are always welcome to new contributors, and we are always looking for new ideas.
+**Vocabulary:** terms like **`EagerOpNodeBase`**, **upstream**, **cache policy** are defined in the repo root **`CONTEXT.md`**. Prefer **`*NodeBase`** imports in new code; legacy **`*Mixin`** names are the same classes.
 
-The amount of data that can be collected from electrophysiology experiments is increasing exponentially, while the amount of time that a researcher can spend on the analysis of the data is limited. Unfortunately, this limitation is often due to the lack of tools that can be adapted and automated for an individual experiments. We aims to bridge this gap by providing a set of pipelining tools and templates that can be customized and extended for any purposed experiments.
+---
 
-Key features and developing philosophy evolves around followings concepts:
+## What to read next
 
-1. Easy pipeline construction and visualization
-2. Automatic caching the data processing to avoid re-computation of the expensive operations
-3. Lazy operation run to adapt different parallelization paradigms, for both multiprocessing and MPI.
-4. Modular and customizable design to adapt varying data format and experimental protocols.
+| Page | Contents |
+| ---- | -------- |
+| **[Quickstart](core_quickstart.md)** | Lazy graphs, **`Pipeline.run`**, minimal **`EagerOpNodeBase`** example, **`tag`**. |
+| **[Data types & loaders](core_datatypes_loaders.md)** | **`Signal`**, **`Spikestamps`**, **`Events`**, and **`SourceNodeBase`** / **`load()`**. |
+| **[Pipeline behavior & hooks](core_pipeline_hooks.md)** | Multiple **upstream** nodes, **`output()`** vs **`__call__`**, **`Pipeline.run`** options, callbacks & plotting. |
+| **[Advanced core](core_advanced.md)** | **`StreamOpNodeBase`**, generators vs **`Pipeline.run`**, cache / JSON fields, temp dirs, runners. |
 
-### Chaining and Graph-based Data Flow
+---
 
-The pipeline system in `MiV-OS` aims lazy execution and loading: each operators are constructed as a standalone object, and heavy operations are only executed when output is requested explicitly.
-Each nodes are isolated, and they can be chained to form a graph of data processing. Some nodes, like IO or Data, only makes output (downstream) connections, using `>>` operator. They are called `source nodes`.
-Some node may only have input (upstream) connections, and they are called `end nodes`, such as plotter or visualizer nodes that does not produce any output.
-Generally, a node can form both upstream and downstream connections, where operator are in charge of processing the data and producing the output.
+## Reference diagram
 
-```mermaid
+```{mermaid}
 graph LR
-    Data("Data Node")
-    Operator("Operator Node")
-    End("End Node")
-    Data -- ">>" --> Operator
-    Operator -- ">>" --> End
+    Data("Data / source node")
+    Op("Eager operator")
+    End("Sink (often eager)")
+    Data -- ">>" --> Op
+    Op -- ">>" --> End
 ```
 
-This diagram illustrates how a data node (such as `Spikestamps` or a loader node) can be chained to an operator node using the `>>` operator in MiV-OS pipelines.
+---
 
-## Core Module
+## Other tutorials
 
-The `core` module provides the foundational tools for building data processing pipelines. To build custom nodes, subclass the appropriate **node base** from `miv.core` (see root **`CONTEXT.md`** for the full glossary). Older examples may use legacy `*Mixin` names for the same classes; **`CONTEXT.md`** lists the preferred **`*NodeBase`** imports.
-
-### Datatype (data nodes)
-
-Extended data types that inherit from native Python or NumPy types with additional functionality for electrophysiology data.
-
-- **Signal**: A 2D array representing continuous signal data with timestamps
-  - Data shape: `[signal_length, number_of_channels]`
-  - Includes timestamps and sampling rate
-
-- **Spikestamps**: A list of arrays representing spike times for each channel
-  - Each channel contains an array of spike timestamps
-  - Supports channel-wise operations and binning
-
-- **Events**: A list of event timestamps
-  - Represents discrete events in time
-  - Can be binned into Signal format
-
-Built-in datatypes subclass **`DataNodeBase`** (legacy name **`DataNodeMixin`**), which provides chaining and pipeline compatibility.
-
-### EagerOpNodeBase (non-streaming operators)
-
-**`EagerOpNodeBase`** is the base class for general-purpose **eager** (non-streaming) operators: each run produces one full result from **`output()`**. (Legacy name **`OperatorMixin`** — same class.)
-
-**Chaining**: Operators can be chained using the `>>` operator:
-
-```python
-operator1 >> operator2 >> operator3
-```
-
-This creates a dependency graph where `operator1` is upstream of `operator2`, etc.
-
-**Caching**: Automatic result caching with configurable policies.
-
-- `ON`: Use cache if available, otherwise compute and save (default)
-- `OFF`: Never use cache, always compute
-- `MUST`: Must use cache, raise error if not available
-- `OVERWRITE`: Always compute and overwrite existing cache
-
-**Callbacks**: Support for custom callbacks:
-
-- `after_run_*`: Methods called after operator execution
-- `plot_*`: Methods called for visualization (can be skipped with `skip_plot=True` passed to `Pipeline`)
-- Callbacks can be dynamically added using the `<<` operator
-
-#### Adding callbacks: `EagerOpNodeBase` vs `StreamOpNodeBase`
-
-Use callback name prefixes to register post-processing hooks:
-
-- **`EagerOpNodeBase`** (single `output()`):
-  - `after_run_*` receives the operator output.
-  - `plot_*` receives `(output, inputs, show=False, save_path=None)`.
-- **`StreamOpNodeBase`** (streaming `output()`):
-  - `generator_plot_*` runs for each yielded chunk and receives
-    `(output, inputs, show=False, save_path=None, index=<iter>)`.
-  - `firstiter_plot_*` runs on the first yielded chunk and receives
-    `(output, inputs, show=False, save_path=None)`.
-
-```python
-from miv.core import EagerOpNodeBase, StreamOpNodeBase
-
-# Eager operator callbacks
-class MyEagerOp(EagerOpNodeBase):
-    def after_run_report(self, output):
-        ...
-
-    def plot_summary(self, output, inputs, show=False, save_path=None):
-        ...
-
-# Streaming operator callbacks
-class MyStreamOp(StreamOpNodeBase):
-    def generator_plot_trace(self, output, inputs, show=False, save_path=None, index=0):
-        ...
-
-    def firstiter_plot_preview(self, output, inputs, show=False, save_path=None):
-        ...
-```
-
-You can also attach external functions with `<<`; naming still controls when they run.
-
-**Runner Policies**: Different execution strategies for parallelization:
-
-- `VanillaRunner`: Default sequential execution (supports MPI broadcast if available)
-- `StrictMPIRunner`: MPI-based execution where each rank processes independently
-- `SupportMPIMerge`: MPI execution with automatic result merging
-
-### StreamOpNodeBase (streaming operators)
-
-**`StreamOpNodeBase`** is the base class for operators whose **`output()`** is a **generator** (chunked / streaming results). (Legacy name **`GeneratorOperatorMixin`** — same class.)
-
-Most behavior matches eager operators, but streaming paths use generator-specific runners and per-chunk cache writes. When results are **not** loaded from cache, a streaming operator **must** receive **upstream** iterable inputs (the implementation requires at least one upstream for the streaming execution path).
-
-**Runner Policies**:
-
-- `VanillaGeneratorRunner`: Default sequential execution over zipped upstream iterables (MPI behavior differs from `VanillaRunner` on eager nodes; see module docstrings)
-- `GeneratorRunnerInMultiprocessing`: Parallel batches via `multiprocessing` (does not use the same chunk-alignment contract as `VanillaGeneratorRunner`; see `miv.core.operator_generator.policy`)
-
-The **`@cache_generator_call`** decorator is **deprecated**; prefer the current **`StreamOpNodeBase`** / **`__call__`** patterns described in **`CONTEXT.md`**.
-
-## Pipeline
-
-The `Pipeline` class orchestrates the execution of operator graphs:
-
-- Automatic Topological Sorting: Determines execution order based on operator dependencies
-- Cache-Aware Execution: Skips operators with valid cached results
-- Flexible Execution: Can run single nodes or multiple independent nodes
-- Directory Management: Supports separate working, cache, and temporary directories
-- Visualization: Can summarize execution order for debugging
-
-The pipeline automatically resets callbacks for all nodes, sets save paths for all nodes, executes nodes in dependency order (topological sort), and handles errors and provides verbose logging.
+- **`CONTEXT.md`** — full glossary and **`miv.core` module map**.
+- **[Spike sorting](spike_sorting.md)** — longer exercise using **`EagerOpNodeBase`**.
+- **[MPI support](mpi_support.md)** — optional MPI / IO notes.

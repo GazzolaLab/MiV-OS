@@ -7,6 +7,10 @@ Tutorial
 
    installation
    core_concept
+   core_quickstart
+   core_datatypes_loaders
+   core_pipeline_hooks
+   core_advanced
 
 .. toctree::
    :maxdepth: 2
