@@ -77,9 +77,9 @@ Pipeline([readout, baks, branching, connectivity, rank, radius]).run(
 )
 ```
 
-The complete analysis and dataset description are staged on the
-[`pub/RC-KT` publication branch][link-rc-kt-demo]. The integration PR will be
-merged and the dataset released upon publication.
+The code is available on the [`pub/RC-KT` publication branch][link-rc-kt-demo].
+Its integration PR will be merged into `main`, and the accompanying dataset
+released, upon publication.
 
 ## Contribution
 
