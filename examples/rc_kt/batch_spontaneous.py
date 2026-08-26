@@ -131,6 +131,21 @@ def _write_table(output_dir: Path, results: list[dict[str, Any]]) -> None:
             writer.writerow(
                 {**{key: row[key] for key in fields[:5]}, **row["headline_metrics"]}
             )
+    if rows:
+        import matplotlib.pyplot as plt
+
+        figure, axes = plt.subplots(1, 3, figsize=(12, 4))
+        metrics = ("branching_ratio", "normalized_kernel_rank", "transfer_entropy_mean")
+        for axis, metric in zip(axes, metrics, strict=True):
+            axis.bar(
+                [row["id"] for row in rows],
+                [row["headline_metrics"][metric] for row in rows],
+            )
+            axis.set_title(metric.replace("_", " "))
+            axis.tick_params(axis="x", rotation=90)
+        figure.tight_layout()
+        figure.savefig(target.parent / "cohort_preflight.png", dpi=180)
+        plt.close(figure)
 
 
 def main() -> None:

@@ -265,6 +265,41 @@ def _write_table(output_dir: Path, results: list[dict[str, Any]]) -> None:
                         **row["headline_metrics"],
                     }
                 )
+    curve_target = target.parent / "learning_curves.csv"
+    with curve_target.open("w", newline="") as stream:
+        writer = csv.DictWriter(
+            stream, fieldnames=["id", "training_fraction", "balanced_accuracy"]
+        )
+        writer.writeheader()
+        for row in results:
+            if row["status"] != "ok":
+                continue
+            for fraction, score in row["learning_curve"].items():
+                writer.writerow(
+                    {
+                        "id": row["id"],
+                        "training_fraction": fraction,
+                        "balanced_accuracy": score,
+                    }
+                )
+    rows = [row for row in results if row["status"] == "ok"]
+    if rows:
+        import matplotlib.pyplot as plt
+
+        figure, axis = plt.subplots(figsize=(7, 4))
+        for row in rows:
+            axis.plot(
+                list(row["learning_curve"]),
+                list(row["learning_curve"].values()),
+                marker="o",
+                label=row["id"],
+            )
+        axis.set_xlabel("Student training fraction")
+        axis.set_ylabel("Balanced accuracy")
+        axis.legend()
+        figure.tight_layout()
+        figure.savefig(target.parent / "cohort_learning_curves.png", dpi=180)
+        plt.close(figure)
 
 
 def main() -> None:

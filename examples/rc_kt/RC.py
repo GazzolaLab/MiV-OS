@@ -128,6 +128,28 @@ def _write_table(output_dir: Path, results: list[dict[str, Any]]) -> None:
                     **row["headline_metrics"],
                 }
             )
+    rows = [row for row in results if row["status"] == "ok"]
+    if rows:
+        import matplotlib.pyplot as plt
+
+        figure, axis = plt.subplots(figsize=(7, 4))
+        for network_id in sorted({row["network_id"] for row in rows}):
+            network = sorted(
+                (row for row in rows if row["network_id"] == network_id),
+                key=lambda row: row["elapsed_hours"],
+            )
+            axis.plot(
+                [row["elapsed_hours"] for row in network],
+                [row["headline_metrics"]["balanced_accuracy"] for row in network],
+                marker="o",
+                label=network_id,
+            )
+        axis.set_xlabel("Elapsed time (hours)")
+        axis.set_ylabel("Balanced accuracy")
+        axis.legend()
+        figure.tight_layout()
+        figure.savefig(target.parent / "longitudinal_performance.png", dpi=180)
+        plt.close(figure)
 
 
 def main() -> None:
