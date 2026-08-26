@@ -28,6 +28,59 @@ $ pip install MiV-OS
 
 Documentation of the package is available [here][link-docs-status]
 
+## Published demo
+
+The RC–KT publication analysis is expressed as a branched MiV pipeline:
+
+```python
+from miv.core import Pipeline
+from miv.io.file import ImportSignal
+from miv.signal import ButterBandpass, ThresholdCutoff
+from miv.statistics import BayesianAdaptiveKernelSmoother
+from miv.statistics.connectivity import DirectedConnectivity
+from miv.statistics.criticality import BranchingRatio
+from miv.statistics.reservoir import (
+    ExponentialSpikeEncoder,
+    KernelRank,
+    RidgeReadout,
+    SpectralRadius,
+    StimulusTrializer,
+)
+
+ephys = ImportSignal("recording.h5", group="Ephys")
+stimulus = ImportSignal("recording.h5", group="Stimulus")
+bandpass = ButterBandpass(lowcut=400, highcut=1500)
+spikes = ThresholdCutoff(cutoff=5.0)
+trials = StimulusTrializer()
+encoding = ExponentialSpikeEncoder(decay_rate=5.0)
+readout = RidgeReadout(random_state=0)
+
+ephys >> bandpass >> spikes
+spikes >> trials
+stimulus >> trials
+trials >> encoding >> readout
+
+baks = BayesianAdaptiveKernelSmoother()
+branching = BranchingRatio()
+connectivity = DirectedConnectivity()
+rank = KernelRank()
+radius = SpectralRadius(random_state=0)
+
+spikes >> baks
+spikes >> branching
+spikes >> connectivity
+encoding >> rank
+encoding >> radius
+
+Pipeline([readout, baks, branching, connectivity, rank, radius]).run(
+    working_directory="results/rc_kt"
+)
+```
+
+The complete analysis and dataset description are staged on the
+[`pub/RC-KT` publication branch][link-rc-kt-demo]. The integration PR will be
+merged and the dataset released upon publication.
+
 ## Contribution
 
 If you would like to participate, please read our [contribution guideline](CONTRIBUTING.md)
@@ -49,10 +102,19 @@ The development of MiV-OS is lead by the [Gazzola Lab][link-lab-website] at the 
 }
 ```
 
-We ask that any publications which use MiV-OS package to cite the following papers:
+```
+@misc{Kim2026RC-KT,
+    title={Computing with Living Neurons: Chaos-Controlled Reservoir Computing with Knowledge Transplant},
+    author={Seung Hyun Kim and Zhi Dou and Gaurav Upadhyay and Anay Pattanaik and Leo Maslov and Lav Varshney and John Beggs and Howard Gritton and Mattia Gazzola},
+    year={2026},
+    eprint={2604.02552},
+    archivePrefix={arXiv},
+    primaryClass={cs.NE},
+    url={https://arxiv.org/abs/2604.02552},
+}
+```
 
-```
-```
+We ask that any publications which use MiV-OS package to cite the above papers.
 
 ## Developers ✨
 _Names arranged alphabetically_
@@ -72,6 +134,7 @@ _Names arranged alphabetically_
 [link-pypi]: https://badge.fury.io/py/MiV-OS
 [link-pepy-download-count]: https://pepy.tech/project/MiV-OS
 [link-codecov]: https://codecov.io/gh/GazzolaLab/MiV-OS
+[link-rc-kt-demo]: https://github.com/GazzolaLab/MiV-OS/tree/pub/RC-KT/examples/rc_kt
 
 [//]: # (Collection of Badges)
 
