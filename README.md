@@ -77,9 +77,9 @@ Pipeline([readout, baks, branching, connectivity, rank, radius]).run(
 )
 ```
 
-The complete analysis and dataset description are staged on the
-[`pub/RC-KT` publication branch][link-rc-kt-demo]. The integration PR will be
-merged and the dataset released upon publication.
+The code is available on the [`pub/RC-KT` publication branch][link-rc-kt-demo]
+and tracked in [draft integration PR #589][link-rc-kt-pr]. The PR will be
+merged into `main`, and the accompanying dataset released, upon publication.
 
 ## Contribution
 
@@ -135,6 +135,7 @@ _Names arranged alphabetically_
 [link-pepy-download-count]: https://pepy.tech/project/MiV-OS
 [link-codecov]: https://codecov.io/gh/GazzolaLab/MiV-OS
 [link-rc-kt-demo]: https://github.com/GazzolaLab/MiV-OS/tree/pub/RC-KT/examples/rc_kt
+[link-rc-kt-pr]: https://github.com/GazzolaLab/MiV-OS/pull/589
 
 [//]: # (Collection of Badges)
 
