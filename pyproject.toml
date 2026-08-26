@@ -2,6 +2,9 @@
 requires = ["hatchling>=1.0.0"]
 build-backend = "hatchling.build"
 
+[tool.hatch.metadata]
+allow-direct-references = true
+
 [tool.hatch.build.targets.wheel]
 packages = ["miv"]
 
@@ -95,6 +98,10 @@ algorithmExtension = [
 ]
 mpi = [
   "mpi4py"
+]
+rc-kt = [
+  "miv-state-space @ git+https://github.com/skim0119/MiV-State-Embedding.git@feat/rc-kt-hgpfa",
+  "parsl>=2024.12.16",
 ]
 dev = [
   "ruff",
