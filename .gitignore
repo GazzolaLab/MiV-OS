@@ -212,6 +212,7 @@ TODO.md
 
 # data files
 *.dat
+examples/rc_kt/data/*
 
 # Operating System Files
 *.DS_Store

@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/GazzolaLab/MiV-OS/examples/rc_kt/manifest.schema.json",
+  "title": "RC-KT recording manifest",
+  "type": "object",
+  "required": ["schema_version", "recordings"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "recordings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "path", "source_format", "network_id", "cohort", "category", "elapsed_hours", "role", "stimulus_channel", "channel_map", "expert_id", "student_id", "included"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "path": {"type": "string", "minLength": 1},
+          "source_path": {"type": ["string", "null"]},
+          "source_format": {"enum": ["miv-h5", "intan-rhs", "open-ephys"]},
+          "network_id": {"type": "string"},
+          "cohort": {"type": "string"},
+          "category": {"type": "string"},
+          "elapsed_hours": {"type": "number", "minimum": 0},
+          "role": {"enum": ["spontaneous", "rc", "expert_candidate", "student"]},
+          "stimulus_channel": {"type": ["integer", "null"], "minimum": 0},
+          "channel_map": {"type": ["string", "array", "null"]},
+          "expert_id": {"type": ["string", "null"]},
+          "student_id": {"type": ["string", "null"]},
+          "included": {"type": "boolean"},
+          "notes": {"type": "string"}
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": false
+}

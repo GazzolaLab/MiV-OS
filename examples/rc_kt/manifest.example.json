@@ -1,0 +1,70 @@
+{
+  "schema_version": "1.0",
+  "recordings": [
+    {
+      "id": "network-01-spontaneous-0h",
+      "path": "spontaneous/network-01-spontaneous-0h.h5",
+      "source_path": "/absolute/path/to/raw/intan-recording",
+      "source_format": "miv-h5",
+      "network_id": "network-01",
+      "cohort": "representative",
+      "category": "preflight",
+      "elapsed_hours": 0,
+      "role": "spontaneous",
+      "stimulus_channel": null,
+      "channel_map": "64_intanRHD",
+      "expert_id": null,
+      "student_id": null,
+      "included": true,
+      "notes": "Replace paths and identifiers; filenames never establish pairings."
+    },
+    {
+      "id": "network-01-rc-12h",
+      "path": "rc_12hrs/network-01-rc-12h.h5",
+      "source_path": "/absolute/path/to/raw/open-ephys-recording",
+      "source_format": "miv-h5",
+      "network_id": "network-01",
+      "cohort": "representative",
+      "category": "rc",
+      "elapsed_hours": 12,
+      "role": "rc",
+      "stimulus_channel": 0,
+      "channel_map": "64_intanRHD",
+      "expert_id": null,
+      "student_id": null,
+      "included": true
+    },
+    {
+      "id": "student-01",
+      "path": "students/student-01.h5",
+      "source_path": null,
+      "source_format": "miv-h5",
+      "network_id": "network-02",
+      "cohort": "representative",
+      "category": "student",
+      "elapsed_hours": 0,
+      "role": "student",
+      "stimulus_channel": 0,
+      "channel_map": "64_intanRHD",
+      "expert_id": "expert-01",
+      "student_id": "student-01",
+      "included": true
+    },
+    {
+      "id": "expert-01",
+      "path": "kt_expert_candidates/expert-01.h5",
+      "source_path": null,
+      "source_format": "miv-h5",
+      "network_id": "network-03",
+      "cohort": "representative",
+      "category": "expert",
+      "elapsed_hours": 12,
+      "role": "expert_candidate",
+      "stimulus_channel": 0,
+      "channel_map": "64_intanRHD",
+      "expert_id": "expert-01",
+      "student_id": "student-01",
+      "included": true
+    }
+  ]
+}
