@@ -1574,7 +1574,7 @@ requires-dist = [
     { name = "machinable", specifier = ">=4.0" },
     { name = "matplotlib", specifier = ">=3.5.2" },
     { name = "meautility", specifier = ">=1.5.1" },
-    { name = "miv-state-space", marker = "extra == 'rc-kt'", git = "https://github.com/skim0119/MiV-State-Embedding.git?rev=v0.2.0" },
+    { name = "miv-state-space", marker = "extra == 'rc-kt'", git = "https://github.com/skim0119/MiV-State-Embedding.git?rev=feat%2Frc-kt-hgpfa" },
     { name = "mpi4py", marker = "extra == 'mpi'" },
     { name = "mypy", marker = "extra == 'dev'" },
     { name = "mypy-extensions", marker = "extra == 'dev'", specifier = ">=1.0.0" },
@@ -1620,7 +1620,7 @@ provides-extras = ["docs", "experiment", "sortingextension", "algorithmextension
 [[package]]
 name = "miv-state-space"
 version = "0.2.0"
-source = { git = "https://github.com/skim0119/MiV-State-Embedding.git?rev=v0.2.0#ec5da50a710eda6242b4fa845717f554d31e44b0" }
+source = { git = "https://github.com/skim0119/MiV-State-Embedding.git?rev=feat%2Frc-kt-hgpfa#42eac2e78165f2c196616bfbffc19b813769cd8c" }
 dependencies = [
     { name = "miv-os" },
     { name = "numba" },

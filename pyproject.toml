@@ -100,7 +100,7 @@ mpi = [
   "mpi4py"
 ]
 rc-kt = [
-  "miv-state-space @ git+https://github.com/skim0119/MiV-State-Embedding.git@v0.2.0",
+  "miv-state-space @ git+https://github.com/skim0119/MiV-State-Embedding.git@feat/rc-kt-hgpfa",
   "parsl>=2024.12.16",
 ]
 dev = [
