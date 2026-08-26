@@ -8,6 +8,7 @@ from miv.core import Signal, Spikestamps
 from miv.statistics import (
     BayesianAdaptiveKernelSmoother,
     ExponentialSpikeEncoder,
+    FixedDurationTrializer,
     KernelRank,
     KnowledgeTransfer,
     KnowledgeTransferInput,
@@ -15,6 +16,7 @@ from miv.statistics import (
     RidgeReadout,
     SpectralRadius,
     StimulusTrializer,
+    TTLPulseDecoder,
 )
 from miv.statistics.connectivity.connectivity import (
     _discrete_transfer_entropy,
@@ -43,6 +45,9 @@ def test_trializer_and_exponential_encoder() -> None:
     batch = StimulusTrializer(minimum_rest=0.5)(spikes, stimulus)
 
     np.testing.assert_array_equal(batch.labels, [2, 3])
+    decoded = TTLPulseDecoder(minimum_rest=0.5)(stimulus)
+    split_batch = FixedDurationTrializer()(spikes, decoded)
+    np.testing.assert_array_equal(split_batch.labels, batch.labels)
     encoded = ExponentialSpikeEncoder(decay_rate=5.0, sample_rate=10.0)(batch)
     assert encoded.states.shape == (2, 10, 2)
     assert encoded.states[0, 2, 0] > 0
