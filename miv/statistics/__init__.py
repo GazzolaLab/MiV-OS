@@ -44,7 +44,9 @@ _submodule_paths_for_alias = {
         "instantaneous_spike_rate",
     ],
     "reservoir": [
+        "DecodedStimulus",
         "ExponentialSpikeEncoder",
+        "FixedDurationTrializer",
         "KernelRank",
         "KernelRankResult",
         "KnowledgeTransfer",
@@ -56,6 +58,7 @@ _submodule_paths_for_alias = {
         "SpectralRadius",
         "SpectralRadiusResult",
         "StimulusTrializer",
+        "TTLPulseDecoder",
         "TrialBatch",
     ],
 }

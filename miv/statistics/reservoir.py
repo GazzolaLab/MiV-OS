@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 import numpy as np
 from numpy.typing import NDArray
@@ -23,6 +23,16 @@ class TrialBatch:
     starts: NDArray[np.float64]
     duration: float
     channel_order: tuple[int, ...]
+
+
+@dataclass
+class DecodedStimulus:
+    """Decoded temporal pulse patterns and their trial start times."""
+
+    starts: NDArray[np.float64]
+    labels: NDArray[np.int_]
+    pulse_times: NDArray[np.float64]
+    stimulus_channel: int
 
 
 @dataclass
@@ -94,25 +104,24 @@ class KnowledgeTransferResult:
 
 
 @dataclass
-class StimulusTrializer(EagerOpNodeBase):
-    """Decode pulse-count patterns from a digital stimulus signal."""
+class TTLPulseDecoder(EagerOpNodeBase):
+    """Decode each TTL pulse cluster as a pulse-count stimulus label."""
 
-    trial_duration: float = 1.0
     stimulus_duration: float = 0.9
     stimulus_channel: int = 0
     threshold: float = 0.5
     minimum_rest: float = 0.5
-    algorithm_version: str = "rc-kt-trializer-v1"
-    tag: str = field(default="stimulus trializer", init=False)
+    algorithm_version: str = "rc-kt-ttl-decoder-v1"
+    tag: str = "TTL pulse decoder"
 
     def __post_init__(self) -> None:
-        if not 0 < self.stimulus_duration <= self.trial_duration:
-            raise ValueError("stimulus_duration must be within the trial")
+        if self.stimulus_duration <= 0:
+            raise ValueError("stimulus_duration must be positive")
         if self.minimum_rest <= 0:
             raise ValueError("minimum_rest must be positive")
         super().__init__()
 
-    def __call__(self, spikes: Spikestamps, stimulus: Signal) -> TrialBatch:
+    def __call__(self, stimulus: Signal) -> DecodedStimulus:
         values = np.asarray(stimulus.data)
         if values.ndim == 2:
             values = values[:, self.stimulus_channel]
@@ -124,11 +133,8 @@ class StimulusTrializer(EagerOpNodeBase):
 
         gaps = np.diff(pulse_times, prepend=-np.inf)
         starts = pulse_times[gaps >= self.minimum_rest]
-        trials: list[Spikestamps] = []
         labels: list[int] = []
-        valid_starts: list[float] = []
         for start in starts:
-            stop = start + self.trial_duration
             count = int(
                 np.count_nonzero(
                     (pulse_times >= start)
@@ -137,21 +143,90 @@ class StimulusTrializer(EagerOpNodeBase):
             )
             if count == 0:
                 continue
+            labels.append(count)
+        return DecodedStimulus(
+            starts=np.asarray(starts, dtype=np.float64),
+            labels=np.asarray(labels, dtype=np.int_),
+            pulse_times=pulse_times,
+            stimulus_channel=self.stimulus_channel,
+        )
+
+
+@dataclass
+class FixedDurationTrializer(EagerOpNodeBase):
+    """Extract fixed-duration spike windows, optionally from decoded TTL starts."""
+
+    trial_duration: float = 1.0
+    stride: float | None = None
+    algorithm_version: str = "rc-kt-fixed-trializer-v1"
+    tag: str = "fixed duration trializer"
+
+    def __post_init__(self) -> None:
+        if self.trial_duration <= 0:
+            raise ValueError("trial_duration must be positive")
+        if self.stride is not None and self.stride <= 0:
+            raise ValueError("stride must be positive")
+        super().__init__()
+
+    def __call__(
+        self, spikes: Spikestamps, decoded: DecodedStimulus | None = None
+    ) -> TrialBatch:
+        if decoded is None:
+            first = float(spikes.get_first_spikestamp())
+            last = float(spikes.get_last_spikestamp())
+            step = self.trial_duration if self.stride is None else self.stride
+            starts = np.arange(first, last - self.trial_duration + step, step)
+            labels = np.zeros(starts.size, dtype=np.int_)
+        else:
+            starts = decoded.starts
+            labels = decoded.labels
+        trials: list[Spikestamps] = []
+        valid_labels: list[int] = []
+        valid_starts: list[float] = []
+        for start, label in zip(starts, labels, strict=True):
+            stop = start + self.trial_duration
             relative = []
             for channel in spikes:
                 selected = channel[(channel >= start) & (channel < stop)] - start
                 relative.append(selected.tolist())
             trials.append(Spikestamps(relative))
-            labels.append(count)
+            valid_labels.append(int(label))
             valid_starts.append(float(start))
         if not trials:
-            raise ValueError("TTL edges did not produce any complete trials")
+            raise ValueError("no fixed-duration trials could be constructed")
         return TrialBatch(
             trials=trials,
-            labels=np.asarray(labels, dtype=np.int_),
+            labels=np.asarray(valid_labels, dtype=np.int_),
             starts=np.asarray(valid_starts),
             duration=self.trial_duration,
             channel_order=tuple(range(spikes.number_of_channels)),
+        )
+
+
+@dataclass
+class StimulusTrializer(EagerOpNodeBase):
+    """Compatibility operator combining TTL decoding and trialization."""
+
+    trial_duration: float = 1.0
+    stimulus_duration: float = 0.9
+    stimulus_channel: int = 0
+    threshold: float = 0.5
+    minimum_rest: float = 0.5
+    algorithm_version: str = "rc-kt-trializer-v1"
+    tag: str = "stimulus trializer"
+
+    def __post_init__(self) -> None:
+        super().__init__()
+
+    def __call__(self, spikes: Spikestamps, stimulus: Signal) -> TrialBatch:
+        decoded = TTLPulseDecoder(
+            stimulus_duration=self.stimulus_duration,
+            stimulus_channel=self.stimulus_channel,
+            threshold=self.threshold,
+            minimum_rest=self.minimum_rest,
+        )(stimulus)
+        return FixedDurationTrializer(trial_duration=self.trial_duration)(
+            spikes, decoded
         )
 
 
@@ -162,7 +237,7 @@ class ExponentialSpikeEncoder(EagerOpNodeBase):
     decay_rate: float = 5.0
     sample_rate: float = 500.0
     algorithm_version: str = "rc-kt-exponential-v1"
-    tag: str = field(default="exponential spike encoder", init=False)
+    tag: str = "exponential spike encoder"
 
     def __post_init__(self) -> None:
         if self.decay_rate <= 0 or self.sample_rate <= 0:
@@ -205,7 +280,7 @@ class KernelRank(EagerOpNodeBase):
     cutoff: float = 0.99
     channel_count: int | None = None
     algorithm_version: str = "rc-kt-kernel-rank-v1"
-    tag: str = field(default="kernel rank", init=False)
+    tag: str = "kernel rank"
 
     def __post_init__(self) -> None:
         if not 0 < self.cutoff <= 1:
@@ -232,7 +307,7 @@ class SpectralRadius(EagerOpNodeBase):
     epochs: int = 300
     random_state: int = 0
     algorithm_version: str = "rc-kt-spectral-radius-v1"
-    tag: str = field(default="spectral radius", init=False)
+    tag: str = "spectral radius"
 
     def __post_init__(self) -> None:
         if not 0 < self.leak_rate <= 1:
@@ -310,7 +385,7 @@ class RidgeReadout(EagerOpNodeBase):
     cv: int = 10
     random_state: int = 0
     algorithm_version: str = "rc-kt-ridge-readout-v1"
-    tag: str = field(default="ridge readout", init=False)
+    tag: str = "ridge readout"
 
     def __post_init__(self) -> None:
         super().__init__()
@@ -371,7 +446,7 @@ class KnowledgeTransfer(EagerOpNodeBase):
     alignment_alpha: float = 1.0e-6
     prior_alpha: float = 1.0
     algorithm_version: str = "rc-kt-knowledge-transfer-v1"
-    tag: str = field(default="knowledge transfer", init=False)
+    tag: str = "knowledge transfer"
 
     def __post_init__(self) -> None:
         if any(size <= 0 for size in self.band_dimensions):
@@ -413,7 +488,9 @@ class KnowledgeTransfer(EagerOpNodeBase):
 
 
 __all__ = [
+    "DecodedStimulus",
     "ExponentialSpikeEncoder",
+    "FixedDurationTrializer",
     "KernelRank",
     "KernelRankResult",
     "KnowledgeTransfer",
@@ -425,5 +502,6 @@ __all__ = [
     "SpectralRadius",
     "SpectralRadiusResult",
     "StimulusTrializer",
+    "TTLPulseDecoder",
     "TrialBatch",
 ]
