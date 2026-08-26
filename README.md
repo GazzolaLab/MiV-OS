@@ -30,7 +30,7 @@ Documentation of the package is available [here][link-docs-status]
 
 ## Published demo
 
-The analysis pipeline and demonstration of RC–KT results are built upon a MiV-OS pipeline, to support, reuse, and adapt in other dataset:
+The analysis pipeline and demonstration of RC–KT results are built upon a MiV-OS pipeline, to support, reproduce, reuse, and adapt in other dataset:
 
 ```python
 from miv.core import Pipeline
