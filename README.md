@@ -30,50 +30,51 @@ Documentation of the package is available [here][link-docs-status]
 
 ## Published demo
 
-The RC–KT publication analysis is expressed as a branched MiV pipeline:
+The analysis pipeline and demonstration of RC–KT results are built upon MiV-OS
+pipelines so they can be reproduced, reused, and adapted to other datasets. The
+imports are shared by the three analysis graphs below:
 
 ```python
 from miv.core import Pipeline
 from miv.io.file import ImportSignal
 from miv.signal import ButterBandpass, ThresholdCutoff
-from miv.statistics import BayesianAdaptiveKernelSmoother
+from miv.statistics import (
+    BayesianAdaptiveKernelSmoother,
+    ExponentialSpikeEncoder,
+    FixedDurationTrializer,
+    KernelRank,
+    SpectralRadius,
+)
 from miv.statistics.connectivity import DirectedConnectivity
 from miv.statistics.criticality import BranchingRatio
-from miv.statistics.reservoir import (
-    ExponentialSpikeEncoder,
-    KernelRank,
-    RidgeReadout,
-    SpectralRadius,
-    StimulusTrializer,
-)
+```
 
+### Statistical diagnostics
+
+```python
 ephys = ImportSignal("recording.h5", group="Ephys")
-stimulus = ImportSignal("recording.h5", group="Stimulus")
 bandpass = ButterBandpass(lowcut=400, highcut=1500)
 spikes = ThresholdCutoff(cutoff=5.0)
-trials = StimulusTrializer()
-encoding = ExponentialSpikeEncoder(decay_rate=5.0)
-readout = RidgeReadout(random_state=0)
 
 ephys >> bandpass >> spikes
-spikes >> trials
-stimulus >> trials
-trials >> encoding >> readout
 
-baks = BayesianAdaptiveKernelSmoother()
+baks = BayesianAdaptiveKernelSmoother(sample_rate=100.0)
 branching = BranchingRatio()
-connectivity = DirectedConnectivity()
+connectivity = DirectedConnectivity(seed=0)
+diagnostic_trials = FixedDurationTrializer(trial_duration=1.0)
+diagnostic_states = ExponentialSpikeEncoder(decay_rate=5.0)
 rank = KernelRank()
 radius = SpectralRadius(random_state=0)
 
 spikes >> baks
 spikes >> branching
 spikes >> connectivity
-encoding >> rank
-encoding >> radius
+spikes >> diagnostic_trials >> diagnostic_states
+diagnostic_states >> rank
+diagnostic_states >> radius
 
-Pipeline([readout, baks, branching, connectivity, rank, radius]).run(
-    working_directory="results/rc_kt"
+Pipeline([baks, branching, connectivity, rank, radius]).run(
+    working_directory="results/statistical_diagnostics"
 )
 ```
 
