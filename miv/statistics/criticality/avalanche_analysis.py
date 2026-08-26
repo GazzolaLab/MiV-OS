@@ -456,3 +456,17 @@ class BranchingRatio(OperatorMixin):
             else float(np.mean(counts[1:][valid] / counts[:-1][valid]))
         )
         return BranchingRatioResult(ratio, transitions, self.bin_size)
+
+    def plot_branching_ratio(self, result, inputs, show=False, save_path=None):
+        fig, axis = plt.subplots(figsize=(4, 4))
+        axis.bar(["branching ratio"], [result.ratio], color="tab:blue")
+        axis.axhline(1.0, color="black", linestyle="--", label="critical")
+        axis.set_ylabel("Mean descendant / ancestor activity")
+        axis.set_title(f"{result.valid_transitions} valid transitions")
+        axis.legend()
+        fig.tight_layout()
+        if save_path is not None:
+            fig.savefig(os.path.join(save_path, "branching_ratio_scalar.png"), dpi=180)
+        if show:
+            plt.show()
+        plt.close(fig)

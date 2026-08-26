@@ -15,7 +15,9 @@ __all__ = [
 ]
 
 from dataclasses import dataclass, field
+import os
 
+import matplotlib.pyplot as plt
 import numpy as np
 import scipy.special as sps
 from numba import njit
@@ -132,13 +134,9 @@ class BayesianAdaptiveKernelSmoother(EagerOpNodeBase):
 
     def __call__(self, spikestamps: Spikestamps) -> BAKSResult:
         start = (
-            spikestamps.get_first_spikestamp()
-            if self.t_start is None
-            else self.t_start
+            spikestamps.get_first_spikestamp() if self.t_start is None else self.t_start
         )
-        end = (
-            spikestamps.get_last_spikestamp() if self.t_end is None else self.t_end
-        )
+        end = spikestamps.get_last_spikestamp() if self.t_end is None else self.t_end
         if end <= start:
             raise ValueError("BAKS requires a positive time interval")
         probe_times = np.arange(start, end, 1.0 / self.sample_rate)
@@ -156,3 +154,25 @@ class BayesianAdaptiveKernelSmoother(EagerOpNodeBase):
             alpha=self.alpha,
             beta_rule="n_spikes**(4/5)" if self.beta is None else str(self.beta),
         )
+
+    def plot_firing_rates(self, result, inputs, show=False, save_path=None):
+        fig, axis = plt.subplots(figsize=(9, 4))
+        for rate in result.firing_rates:
+            axis.plot(result.probe_times, rate, alpha=0.25, linewidth=0.8)
+        axis.plot(
+            result.probe_times,
+            np.nanmean(result.firing_rates, axis=0),
+            color="black",
+            linewidth=2,
+            label="channel mean",
+        )
+        axis.set_xlabel("Time (s)")
+        axis.set_ylabel("Firing rate (Hz)")
+        axis.set_title("Bayesian adaptive kernel smoothing")
+        axis.legend()
+        fig.tight_layout()
+        if save_path is not None:
+            fig.savefig(os.path.join(save_path, "baks_firing_rates.png"), dpi=180)
+        if show:
+            plt.show()
+        plt.close(fig)
