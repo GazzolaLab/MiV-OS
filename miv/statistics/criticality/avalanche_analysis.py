@@ -211,6 +211,7 @@ class AvalancheAnalysis(OperatorMixin):
     tag: str = "avalanche criticality analysis"
 
     progress_bar: bool = False
+    algorithm_version: str = "rc-kt-avalanche-v1"
 
     @cache_call
     def __call__(self, inputs):
