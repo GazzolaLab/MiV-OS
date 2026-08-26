@@ -77,8 +77,8 @@ Pipeline([readout, baks, branching, connectivity, rank, radius]).run(
 )
 ```
 
-The complete analysis and dataset description are staged on the
-[`pub/RC-KT` publication branch][link-rc-kt-demo]. The integration PR will be
+The demo and dataset description are prepared in the branch:
+[`pub/RC-KT`][link-rc-kt-demo]. The integration PR [#589](https://github.com/GazzolaLab/MiV-OS/pull/589) will be
 merged and the dataset released upon publication.
 
 ## Contribution
