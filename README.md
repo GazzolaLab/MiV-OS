@@ -42,9 +42,11 @@ from miv.statistics import (
     BayesianAdaptiveKernelSmoother,
     ExponentialSpikeEncoder,
     FixedDurationTrializer,
+    GPFALatentProjector,
     KernelRank,
     KnowledgeTransfer,
     KnowledgeTransferInputBuilder,
+    KnowledgeTransferTrialSelector,
     RidgeReadout,
     SpectralRadius,
     TTLPulseDecoder,
@@ -109,15 +111,26 @@ Pipeline(readout).run(working_directory="results/rc")
 expert_gpfa = HierarchicalGPFA(random_state=0)
 student_gpfa = HierarchicalGPFA(random_state=0)
 kt_input = KnowledgeTransferInputBuilder()
-transplant = KnowledgeTransfer(
-    expert_gpfa=expert_gpfa,
-    student_gpfa=student_gpfa,
-    band_dimensions=(3, 3, 3),
-)
+expert_trial_stream = KnowledgeTransferTrialSelector("expert")
+student_trial_stream = KnowledgeTransferTrialSelector("student")
+expert_features = GPFALatentProjector(9, "expert")
+student_features = GPFALatentProjector(9, "student")
+expert_readout = RidgeReadout(random_state=0)
+transplant = KnowledgeTransfer(band_dimensions=(3, 3, 3))
 
 expert_trials >> kt_input
 student_trials >> kt_input
-kt_input >> transplant
+kt_input >> expert_trial_stream >> expert_gpfa
+kt_input >> student_trial_stream >> student_gpfa
+expert_gpfa >> student_gpfa  # serial dependency: freeze expert kernels
+expert_gpfa >> expert_features
+kt_input >> expert_features
+student_gpfa >> student_features
+kt_input >> student_features
+expert_features >> expert_readout
+expert_features >> transplant
+student_features >> transplant
+expert_readout >> transplant
 
 Pipeline(transplant).run(working_directory="results/kt_rc")
 
