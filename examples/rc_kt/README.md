@@ -20,9 +20,11 @@ Pipeline(ridge_readout).run(output_dir, cache_dir)
 
 `batch_spontaneous.py` branches spike detection into BAKS/activity QC, branching
 ratio, shuffled-ISI transfer entropy, and encoded-state kernel-rank/spectral-radius
-analysis. `KT.py` builds expert and student trial graphs, learns the expert GPFA
-kernel parameters, freezes them for the student observation fit, and evaluates
-immediate transplant, scratch, and prior-centered refinement.
+analysis. `KT.py` pairs expert and student responses to the shared experimental
+input and keeps trial selection, expert GPFA, frozen-kernel student GPFA, latent
+projection, expert readout, and transplant as explicit MiV nodes with independent
+caches and callbacks. The terminal transplant result supports immediate transfer,
+scratch comparison, and prior-centered refinement.
 
 ## Data manifest
 

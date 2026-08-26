@@ -45,16 +45,16 @@ def _discrete_transfer_entropy(source: np.ndarray, target: np.ndarray) -> float:
     source = np.asarray(source, dtype=np.int64)
     target = np.asarray(target, dtype=np.int64)
     if source.shape != target.shape or source.ndim != 1:
-        raise ValueError("source and target must be equal-length one-dimensional arrays")
+        raise ValueError(
+            "source and target must be equal-length one-dimensional arrays"
+        )
     if source.size < 2:
         return 0.0
     joint: dict[tuple[int, int, int], int] = {}
     history: dict[tuple[int, int], int] = {}
     target_joint: dict[tuple[int, int], int] = {}
     target_history: dict[int, int] = {}
-    for x_now, y_now, y_next in zip(
-        source[:-1], target[:-1], target[1:], strict=True
-    ):
+    for x_now, y_now, y_next in zip(source[:-1], target[:-1], target[1:], strict=True):
         key = (int(y_next), int(y_now), int(x_now))
         joint[key] = joint.get(key, 0) + 1
         hist_key = (int(y_now), int(x_now))
@@ -194,7 +194,8 @@ class DirectedConnectivity(OperatorMixin):
         pairs = [
             (i, j)
             for i, j in itertools.product(range(n_nodes), range(n_nodes))
-            if i not in self.exclude_channels and j not in self.exclude_channels
+            if i not in self.exclude_channels
+            and j not in self.exclude_channels
             and i != j
         ]
         func = functools.partial(
@@ -351,13 +352,17 @@ class DirectedConnectivity(OperatorMixin):
             Show plot, by default False
 
         """
-        return
         if show:
-            logging.warning(
+            self.logger.warning(
                 "show is not supported for node-wise connectivity plot. Plots will be saved only, if save_path is specified."
             )
             show = False
         if save_path is None:
+            return
+        if self.mea_map is None:
+            self.logger.warning(
+                "node-wise connectivity plots require an explicit MEA geometry"
+            )
             return
         adj_matrix = result["adjacency_matrix"]
         connectivity_metric_matrix = result["connectivity_matrix"]

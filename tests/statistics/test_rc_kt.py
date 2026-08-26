@@ -1,21 +1,27 @@
 from __future__ import annotations
 
 import math
+from dataclasses import dataclass
+from pathlib import Path
+from types import SimpleNamespace
+from typing import Any
 
 import numpy as np
 
-from miv.core import Signal, Spikestamps
+from miv.core import EagerOpNodeBase, Pipeline, Signal, Spikestamps
 from miv.statistics import (
     BayesianAdaptiveKernelSmoother,
     ExponentialSpikeEncoder,
     FixedDurationTrializer,
+    GPFALatentProjector,
     KernelRank,
     KnowledgeTransfer,
     KnowledgeTransferInput,
+    KnowledgeTransferInputBuilder,
+    KnowledgeTransferTrialSelector,
     ReservoirStateResult,
     RidgeReadout,
     SpectralRadius,
-    StimulusTrializer,
     TTLPulseDecoder,
 )
 from miv.statistics.connectivity.connectivity import (
@@ -24,6 +30,37 @@ from miv.statistics.connectivity.connectivity import (
 )
 from miv.statistics.criticality import BranchingRatio
 from miv.statistics.reservoir import TrialBatch
+
+
+@dataclass(eq=False)
+class _BatchSource(EagerOpNodeBase):
+    batch: TrialBatch
+    tag: str = "test batch source"
+
+    def __post_init__(self) -> None:
+        super().__init__()
+
+    def __call__(self) -> TrialBatch:
+        return self.batch
+
+
+@dataclass(eq=False)
+class _FakeGPFA(EagerOpNodeBase):
+    features: np.ndarray
+    tag: str
+
+    def __post_init__(self) -> None:
+        self.expert_reference: Any | None = None
+        super().__init__()
+
+    def __call__(self, trials, expert=None):
+        assert len(trials) == self.features.shape[0]
+        self.expert_reference = expert
+        return SimpleNamespace(
+            trajectories=[row[:, None] for row in self.features],
+            timescales=np.ones(self.features.shape[1]),
+            kernel_parameters_learned=expert is None,
+        )
 
 
 def test_baks_uses_beta_term() -> None:
@@ -42,12 +79,9 @@ def test_trializer_and_exponential_encoder() -> None:
         ttl[np.searchsorted(timestamps, pulse)] = 1.0
     stimulus = Signal(ttl[:, None], timestamps, 100.0)
     spikes = Spikestamps([[0.15, 1.15], [0.25, 1.25]])
-    batch = StimulusTrializer(minimum_rest=0.5)(spikes, stimulus)
-
-    np.testing.assert_array_equal(batch.labels, [2, 3])
     decoded = TTLPulseDecoder(minimum_rest=0.5)(stimulus)
-    split_batch = FixedDurationTrializer()(spikes, decoded)
-    np.testing.assert_array_equal(split_batch.labels, batch.labels)
+    batch = FixedDurationTrializer()(spikes, decoded)
+    np.testing.assert_array_equal(batch.labels, [2, 3])
     encoded = ExponentialSpikeEncoder(decay_rate=5.0, sample_rate=10.0)(batch)
     assert encoded.states.shape == (2, 10, 2)
     assert encoded.states[0, 2, 0] > 0
@@ -138,6 +172,128 @@ def test_knowledge_transfer_and_prior_centered_limits() -> None:
     )
     expected, *_ = np.linalg.lstsq(student, targets, rcond=None)
     np.testing.assert_allclose(unregularized.refined_weights, expected, atol=1.0e-8)
+
+
+def test_modular_knowledge_transfer_pipeline_uses_one_paired_input(tmp_path) -> None:
+    labels = np.repeat([1, 2], 20)
+    expert_features = np.column_stack(
+        [
+            labels == 1,
+            labels == 2,
+            0.5 * (labels == 1),
+            0.5 * (labels == 2),
+        ]
+    ).astype(float)
+    student_features = expert_features @ np.diag([0.5, 0.5, 2.0, 2.0])
+    empty_trials = [Spikestamps([[]]) for _ in labels]
+    expert_batch = TrialBatch(empty_trials, labels, np.arange(labels.size), 1.0, (0,))
+    student_batch = TrialBatch(
+        empty_trials.copy(), labels.copy(), np.arange(labels.size), 1.0, (0,)
+    )
+    expert_source = _BatchSource(expert_batch, tag="expert trials")
+    student_source = _BatchSource(student_batch, tag="student trials")
+    paired_input = KnowledgeTransferInputBuilder()
+    expert_trials = KnowledgeTransferTrialSelector("expert")
+    student_trials = KnowledgeTransferTrialSelector("student")
+    expert_gpfa = _FakeGPFA(expert_features, "expert GPFA")
+    student_gpfa = _FakeGPFA(student_features, "student GPFA")
+    expert_projector = GPFALatentProjector(4, "expert")
+    student_projector = GPFALatentProjector(4, "student")
+    readout = RidgeReadout(alphas=(1.0e-6,), cv=2, random_state=0)
+    transplant = KnowledgeTransfer(band_dimensions=(2, 2))
+    nodes = (
+        expert_source,
+        student_source,
+        paired_input,
+        expert_trials,
+        student_trials,
+        expert_gpfa,
+        student_gpfa,
+        expert_projector,
+        student_projector,
+        readout,
+        transplant,
+    )
+    for node in nodes:
+        node.set_caching_policy("OFF")
+
+    expert_source >> paired_input
+    student_source >> paired_input
+    paired_input >> expert_trials >> expert_gpfa
+    paired_input >> student_trials >> student_gpfa
+    expert_gpfa >> student_gpfa
+    expert_gpfa >> expert_projector
+    paired_input >> expert_projector
+    student_gpfa >> student_projector
+    paired_input >> student_projector
+    expert_projector >> readout
+    expert_projector >> transplant
+    student_projector >> transplant
+    readout >> transplant
+
+    Pipeline(transplant).run(tmp_path, skip_plot=False)
+    result = transplant.output()
+
+    assert student_gpfa.expert_reference is not None
+    np.testing.assert_array_equal(result.labels, labels)
+    assert result.expert_readout is not None
+    assert result.transplanted_weights.shape == (4, 2)
+    assert (tmp_path / "expert_GPFA_latent_projector/latent_features.png").is_file()
+    assert (tmp_path / "ridge_readout/confusion_matrix.png").is_file()
+    assert (tmp_path / "knowledge_transfer/knowledge_transfer_alignment.png").is_file()
+
+
+def test_standalone_operator_callbacks_write_diagnostics(tmp_path) -> None:
+    timestamps = np.arange(0.0, 2.0, 0.01)
+    ttl_values = np.zeros_like(timestamps)
+    for pulse in (0.1, 0.2, 1.1, 1.2, 1.3):
+        ttl_values[np.searchsorted(timestamps, pulse)] = 1.0
+    stimulus = Signal(ttl_values[:, None], timestamps, 100.0)
+    spikes = Spikestamps([[0.15, 0.25, 1.15], [0.35, 1.25]])
+
+    decoder = TTLPulseDecoder(minimum_rest=0.5)
+    decoded = decoder(stimulus)
+    trializer = FixedDurationTrializer()
+    trials = trializer(spikes, decoded)
+    encoder = ExponentialSpikeEncoder(decay_rate=5.0, sample_rate=10.0)
+    states = encoder(trials)
+    baks = BayesianAdaptiveKernelSmoother(sample_rate=2.0, t_start=0.0, t_end=2.0)
+    baks_result = baks(spikes)
+    rank = KernelRank()
+    rank_result = rank(states)
+    radius = SpectralRadius(epochs=3, random_state=0)
+    radius_result = radius(states)
+    branching = BranchingRatio(bin_size=0.1)
+    branching_result = branching(spikes)
+
+    callbacks = (
+        (decoder, decoder.plot_decoded_patterns, decoded, "decoded_patterns.png"),
+        (
+            trializer,
+            trializer.plot_trial_spike_counts,
+            trials,
+            "trial_spike_counts.png",
+        ),
+        (encoder, encoder.plot_encoded_states, states, "encoded_states.png"),
+        (baks, baks.plot_firing_rates, baks_result, "baks_firing_rates.png"),
+        (rank, rank.plot_singular_values, rank_result, "kernel_rank_spectrum.png"),
+        (
+            radius,
+            radius.plot_fit_diagnostics,
+            radius_result,
+            "spectral_radius_fit.png",
+        ),
+        (
+            branching,
+            branching.plot_branching_ratio,
+            branching_result,
+            "branching_ratio_scalar.png",
+        ),
+    )
+    for operator, callback, result, filename in callbacks:
+        operator.set_save_path(tmp_path)
+        callback(result, None, save_path=operator.analysis_path)
+        assert (Path(operator.analysis_path) / filename).is_file()
 
 
 def test_spectral_radius_fit_is_deterministic() -> None:

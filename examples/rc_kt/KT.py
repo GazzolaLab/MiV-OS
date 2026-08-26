@@ -6,46 +6,15 @@ from __future__ import annotations
 import argparse
 import csv
 import time
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 
-from miv.core import EagerOpNodeBase
-
 try:
     from .common import load_manifest, resolve_recording_path, run_tasks, write_summary
 except ImportError:  # direct script execution
     from common import load_manifest, resolve_recording_path, run_tasks, write_summary
-
-
-@dataclass
-class TrialList(EagerOpNodeBase):
-    """Expose the trial spikestamps from a fixed-duration trial batch."""
-
-    tag: str = "GPFA trial list"
-
-    def __post_init__(self) -> None:
-        super().__init__()
-
-    def __call__(self, batch):
-        return batch.trials
-
-
-def _latent_features(trajectories: list[np.ndarray]) -> np.ndarray:
-    features = []
-    for trajectory in trajectories:
-        value = np.asarray(trajectory)
-        if value.ndim != 2:
-            raise ValueError("GPFA trajectories must be matrices")
-        if value.shape[0] == 9:
-            features.append(value[:, -1])
-        elif value.shape[1] == 9:
-            features.append(value[-1])
-        else:
-            raise ValueError("expected nine-dimensional GPFA trajectories")
-    return np.asarray(features)
 
 
 def analyze_pair(task: dict[str, Any]) -> dict[str, Any]:
@@ -69,8 +38,11 @@ def analyze_pair(task: dict[str, Any]) -> dict[str, Any]:
         from miv.signal.spike import ThresholdCutoff
         from miv.statistics import (
             FixedDurationTrializer,
+            GPFALatentProjector,
             KnowledgeTransfer,
             KnowledgeTransferInput,
+            KnowledgeTransferInputBuilder,
+            KnowledgeTransferTrialSelector,
             ReservoirStateResult,
             RidgeReadout,
             TTLPulseDecoder,
@@ -97,48 +69,51 @@ def analyze_pair(task: dict[str, Any]) -> dict[str, Any]:
             trials = FixedDurationTrializer(
                 trial_duration=1.0, tag=f"{prefix} trializer"
             )
-            trial_list = TrialList(tag=f"{prefix} GPFA trial list")
             ephys >> bandpass >> spikes
             stimulus >> decoder
             spikes >> trials
             decoder >> trials
-            trials >> trial_list
-            return trials, trial_list
+            return trials
 
-        expert_trials, expert_list = graph(expert_entry, "expert")
-        student_trials, student_list = graph(student_entry, "student")
+        expert_trials = graph(expert_entry, "expert")
+        student_trials = graph(student_entry, "student")
         expert_gpfa = HierarchicalGPFA(random_state=task["seed"])
         student_gpfa = HierarchicalGPFA(random_state=task["seed"])
-        expert_list >> expert_gpfa
-        student_list >> student_gpfa
-        expert_gpfa >> student_gpfa
-        Pipeline(student_gpfa).run(output, cache, skip_plot=True, verbose=1)
+        paired_input = KnowledgeTransferInputBuilder()
+        expert_trial_stream = KnowledgeTransferTrialSelector("expert")
+        student_trial_stream = KnowledgeTransferTrialSelector("student")
+        expert_projector = GPFALatentProjector(9, "expert")
+        student_projector = GPFALatentProjector(9, "student")
+        expert_readout_node = RidgeReadout(random_state=task["seed"])
+        transplant = KnowledgeTransfer(band_dimensions=(3, 3, 3))
 
+        expert_trials >> paired_input
+        student_trials >> paired_input
+        paired_input >> expert_trial_stream >> expert_gpfa
+        paired_input >> student_trial_stream >> student_gpfa
+        expert_gpfa >> student_gpfa
+        expert_gpfa >> expert_projector
+        paired_input >> expert_projector
+        student_gpfa >> student_projector
+        paired_input >> student_projector
+        expert_projector >> expert_readout_node
+        expert_projector >> transplant
+        student_projector >> transplant
+        expert_readout_node >> transplant
+        Pipeline(transplant).run(output, cache, skip_plot=True, verbose=1)
+
+        transfer = transplant.output()
         expert_result = expert_gpfa.output()
         student_result = student_gpfa.output()
-        expert_features = _latent_features(expert_result.trajectories)
-        student_features = _latent_features(student_result.trajectories)
-        expert_labels = expert_trials.output().labels
-        student_labels = student_trials.output().labels
-        paired = min(expert_features.shape[0], student_features.shape[0])
-        expert_states = ReservoirStateResult(
-            states=expert_features[:, None, :],
-            labels=expert_labels,
-            probe_times=np.asarray([0.0]),
-            channel_order=tuple(range(9)),
-            decay_rate=0.0,
-        )
-        expert_readout = RidgeReadout(random_state=task["seed"])(expert_states)
+        expert_features = expert_projector.output().readout_features
+        student_features = student_projector.output().readout_features
+        student_labels = transfer.labels
+        expert_readout = expert_readout_node.output()
+        if student_labels is None or expert_features.shape != student_features.shape:
+            raise RuntimeError("knowledge transfer graph returned incomplete output")
         classes = expert_readout.classes
         if not np.all(np.isin(np.unique(student_labels), classes)):
             raise ValueError("expert and student trial labels do not match")
-        transfer = KnowledgeTransfer(band_dimensions=(3, 3, 3))(
-            KnowledgeTransferInput(
-                expert_latent=expert_features[:paired],
-                student_latent=student_features[:paired],
-                expert_weights=expert_readout.weights[:-1],
-            )
-        )
         train_idx, test_idx = train_test_split(
             np.arange(student_labels.size),
             test_size=0.3,
@@ -146,7 +121,9 @@ def analyze_pair(task: dict[str, Any]) -> dict[str, Any]:
             stratify=student_labels,
         )
         immediate_predictions = expert_readout.classes[
-            np.argmax(student_features[test_idx] @ transfer.transplanted_weights, axis=1)
+            np.argmax(
+                student_features[test_idx] @ transfer.transplanted_weights, axis=1
+            )
         ]
         immediate_score = balanced_accuracy_score(
             student_labels[test_idx], immediate_predictions
@@ -166,12 +143,12 @@ def analyze_pair(task: dict[str, Any]) -> dict[str, Any]:
         one_hot = np.eye(classes.size)[np.searchsorted(classes, student_labels)]
         for fraction in fractions:
             count = max(1, int(train_idx.size * fraction))
-            selected = train_idx[train_idx < paired][:count]
+            selected = train_idx[:count]
             if selected.size == 0:
-                raise ValueError("no paired student trials are available for refinement")
-            refined = KnowledgeTransfer(
-                band_dimensions=(3, 3, 3), prior_alpha=1.0
-            )(
+                raise ValueError(
+                    "no paired student trials are available for refinement"
+                )
+            refined = KnowledgeTransfer(band_dimensions=(3, 3, 3), prior_alpha=1.0)(
                 KnowledgeTransferInput(
                     expert_latent=expert_features[selected],
                     student_latent=student_features[selected],
@@ -211,14 +188,18 @@ def analyze_pair(task: dict[str, Any]) -> dict[str, Any]:
                 "refined_balanced_accuracy": refined_scores[-1],
                 "expert_kernel_frozen_for_student": not student_result.kernel_parameters_learned,
             },
-            "learning_curve": dict(zip(fractions.tolist(), refined_scores, strict=True)),
+            "learning_curve": dict(
+                zip(fractions.tolist(), refined_scores, strict=True)
+            ),
         }
     except Exception as error:
         return {"id": pair_id, "status": "failed", "error": repr(error)}
 
 
 def _pair_tasks(manifest: dict[str, Any], args: argparse.Namespace):
-    included = {entry["id"]: entry for entry in manifest["recordings"] if entry["included"]}
+    included = {
+        entry["id"]: entry for entry in manifest["recordings"] if entry["included"]
+    }
     tasks = []
     for student in included.values():
         if student["role"] != "student":
