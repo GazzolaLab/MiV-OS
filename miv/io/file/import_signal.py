@@ -2,6 +2,7 @@ __all__ = ["ImportSignal"]
 
 from collections.abc import Generator
 
+import numpy as np
 
 from miv.core import Signal
 from miv.core.source.node_mixin import DataLoaderMixin
@@ -31,10 +32,13 @@ class ImportSignal(DataLoaderMixin):
 
         for i in range(num_container):
             miv_file.unpack(container, data, i)
+            rate = np.asarray(container[f"{self.group}/Rate"]).reshape(-1)
+            if rate.size == 0:
+                raise ValueError(f"container {i} has no sampling rate")
             signal = Signal(
                 data=container[f"{self.group}/Data"],
                 timestamps=container[f"{self.group}/Timestamps"],
-                rate=container[f"{self.group}/Rate"],
+                rate=float(rate[0]),
             )
             self.logger.info(
                 f"{i}-container | {signal.data.shape=}, {signal.timestamps.shape=}, {signal.rate=}"
