@@ -2,6 +2,9 @@
 requires = ["hatchling>=1.0.0"]
 build-backend = "hatchling.build"
 
+[tool.hatch.metadata]
+allow-direct-references = true
+
 [tool.hatch.build.targets.wheel]
 packages = ["miv"]
 
