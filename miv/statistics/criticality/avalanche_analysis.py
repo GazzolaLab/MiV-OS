@@ -6,7 +6,7 @@ Avalanche Analysis
 import logging
 import os
 from collections import defaultdict
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -238,8 +238,11 @@ class AvalancheAnalysis(OperatorMixin):
                 branching_ratio[idx] = 0.0
             else:
                 mask = shape[:-1] > 1e-5
+                transitions = int(np.count_nonzero(mask))
                 branching_ratio[idx] = (
-                    np.sum(shape[1:][mask] / shape[:-1][mask]) / size[idx]
+                    0.0
+                    if transitions == 0
+                    else np.sum(shape[1:][mask] / shape[:-1][mask]) / transitions
                 )
 
         return durations, size, branching_ratio, avalanches, bin_size
@@ -420,3 +423,35 @@ class AvalancheAnalysis(OperatorMixin):
         if show:
             plt.show()
         plt.close(fig)
+
+
+@dataclass
+class BranchingRatioResult:
+    ratio: float
+    valid_transitions: int
+    bin_size: float
+
+
+@dataclass
+class BranchingRatio(OperatorMixin):
+    """Estimate the mean population branching ratio over valid transitions."""
+
+    bin_size: float = 0.002
+    algorithm_version: str = "rc-kt-branching-ratio-v1"
+    tag: str = field(default="branching ratio", init=False)
+
+    def __post_init__(self) -> None:
+        if self.bin_size <= 0:
+            raise ValueError("bin_size must be positive")
+        super().__init__()
+
+    def __call__(self, spikestamps: Spikestamps) -> BranchingRatioResult:
+        counts = spikestamps.binning(self.bin_size, return_count=True).data.sum(axis=1)
+        valid = counts[:-1] > 0
+        transitions = int(np.count_nonzero(valid))
+        ratio = (
+            0.0
+            if transitions == 0
+            else float(np.mean(counts[1:][valid] / counts[:-1][valid]))
+        )
+        return BranchingRatioResult(ratio, transitions, self.bin_size)
