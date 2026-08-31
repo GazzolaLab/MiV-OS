@@ -15,6 +15,13 @@ install-dev:
 install-all:
 	uv sync --all-extras --no-extra mpi --dev --all-groups
 
+# The rc-kt extra temporarily points at a private feature branch. Keep CI on
+# public dependencies until miv-state-space is published or made accessible to
+# unauthenticated runners.
+.PHONY: install-ci
+install-ci:
+	uv sync --all-extras --no-extra mpi --no-extra rc-kt --dev --all-groups
+
 .PHONY: pre-commit-install
 pre-commit-install:
 	uv run --frozen pre-commit install
