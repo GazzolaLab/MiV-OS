@@ -1,5 +1,5 @@
 <div align='center'>
-<h1> MiV-OS: Spike Analysis and Computing Framework </h1>
+<h1> MiV-OS: Composable Data Analysis Pipelines </h1>
 
 [![License][badge-LICENSE]][link-LICENSE]
 [![Release pypi][badge-pypi]][link-pypi]
@@ -12,7 +12,25 @@
 
 ---
 
-Python analysis and computing framework developed for [Mind-in-Vitro(MiV)][link-project-website] project.
+MiV-OS is a Python framework for turning data analysis into an explicit,
+reusable pipeline. It began in the [Mind in Vitro][link-project-website]
+project, where electrophysiology recordings must move through many connected
+steps, but its core model is not tied to one experiment or data type.
+
+Instead of making a script responsible for both *what the analysis means* and
+*how every step should run*, MiV-OS represents an analysis as a graph of small
+operators. The graph can be inspected, branched into several results, cached,
+and adapted as the data or computing environment changes.
+
+- **Compose** loaders and transformations into a readable analysis graph.
+- **Reuse** a scientific step in another pipeline without copying its control flow.
+- **Scale deliberately** with caching, streaming operators, and alternative runners.
+- **Keep results explainable** by preserving the path from source data to outcome.
+
+Electrophysiology is the package's first and richest collection of tools—not a
+requirement for using the framework. Start with [About MiV-OS][link-about-miv-os]
+for the design philosophy, or go directly to the [core
+quickstart][link-core-quickstart] to build a small pipeline.
 
 ## Installation
 [![PyPI version][badge-pypi]][link-pypi]
@@ -26,7 +44,9 @@ $ pip install MiV-OS
 ## Documentation
 [![Documentation Status][badge-docs-status]][link-docs-status]
 
-Documentation of the package is available [here][link-docs-status]
+The [documentation][link-docs-status] is arranged as a gradual tour: begin
+with the purpose and core model, build a first graph, then explore practical
+guides, electrophysiology tools, advanced execution, and the API reference.
 
 ## Published demo
 
@@ -130,6 +150,8 @@ _Names arranged alphabetically_
 [link-lab-website]: http://mattia-lab.com/
 [link-project-website]: https://mindinvitro.illinois.edu/
 [link-docs-status]: https://miv-os.readthedocs.io/en/latest/?badge=latest
+[link-about-miv-os]: https://miv-os.readthedocs.io/en/latest/about.html
+[link-core-quickstart]: https://miv-os.readthedocs.io/en/latest/tutorial/core_quickstart.html
 [link-CI]: https://github.com/GazzolaLab/MiV-OS/actions
 [link-LICENSE]: https://opensource.org/licenses/MIT
 [link-pypi]: https://badge.fury.io/py/MiV-OS

@@ -1,9 +1,13 @@
 Tutorial
 ========
 
+Begin with the shape of a MiV-OS analysis, then build one. The first pages form
+a short guided route; later pages introduce each capability when the graph
+needs it. Experienced users can enter at any page.
+
 .. toctree::
    :maxdepth: 2
-   :caption: How to Start
+   :caption: First visit
 
    installation
    core_concept
@@ -14,7 +18,7 @@ Tutorial
 
 .. toctree::
    :maxdepth: 2
-   :caption: Good Exercises
+   :caption: Learn by building
 
    signal_processing
    custom_callbacks
@@ -23,7 +27,7 @@ Tutorial
 
 .. toctree::
    :maxdepth: 2
-   :caption: Experimental Features
+   :caption: Specialized execution
 
    mpi_support
 

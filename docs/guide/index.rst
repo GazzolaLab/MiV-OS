@@ -1,7 +1,14 @@
 How-To Guide
 ============
 
-Here we provide number of example scripts using `MiV` tools. Some examples provide additional files or links to published paper for a complete description. Examples are written to serve as a starting template for customized usages.
+The guides are the working collection of MiV-OS: focused examples you can
+browse by scientific question, data format, or task. Each page is meant to be
+entered independently and adapted, rather than read in order as a course.
+
+Analysis guides show how existing tools are assembled to answer a question.
+Data guides begin closer to the source—sample datasets, file structures, and
+recording formats. Some pages include companion files or links to publications
+for the full scientific context.
 
 .. toctree::
    :maxdepth: 2

@@ -1,8 +1,27 @@
 # Core overview
 
-**`miv.core`** is the graph layer: **lazy** linking with **`>>`**, **`output()`**, **cache policies**, and **`Pipeline`** orchestration. This section of the tutorial is split into short pages so you can read what you need without one long document.
+**`miv.core`** is the graph layer: **lazy** linking with **`>>`**, **`output()`**, **cache policies**, and **`Pipeline`** orchestration. This section translates the ideas in [About MiV-OS](../about.md) into the objects you use in code. It is split into short pages so you can read what you need without one long document.
 
-**Vocabulary:** terms like **`EagerOpNodeBase`**, **upstream**, **cache policy** are defined in the repo root **`CONTEXT.md`**. Prefer **`*NodeBase`** imports in new code; legacy **`*Mixin`** names are the same classes.
+## Why represent an analysis as a graph?
+
+Suppose one cleaned signal feeds spike detection, a visualization, and a
+quality check. In a procedural script, reuse is implicit: it depends on the
+order of statements and the variables still in scope. In MiV-OS, reuse is part
+of the model. One upstream node can feed several downstream nodes, and each
+terminal result tells the pipeline which dependencies it needs.
+
+This gives the framework three useful boundaries:
+
+- **nodes** describe data sources or scientific transformations;
+- **edges** describe dependencies and shared paths; and
+- **the pipeline** chooses terminal outcomes and coordinates their execution.
+
+Caching, callbacks, streaming, and runners build on those boundaries. They do
+not change what the analysis means; they change how its graph is operated.
+
+The next pages introduce terms such as **`EagerOpNodeBase`**, **upstream**, and
+**cache policy** where they first become useful. Prefer **`*NodeBase`** imports
+in new code; legacy **`*Mixin`** names refer to the same classes.
 
 ---
 
@@ -17,13 +36,13 @@
 
 ---
 
-## Reference diagram
+## The smallest useful shape
 
 ```{mermaid}
 graph LR
-    Data("Data / source node")
-    Op("Eager operator")
-    End("Sink (often eager)")
+    Data("Data or source node")
+    Op("Transformation")
+    End("Requested result")
     Data -- ">>" --> Op
     Op -- ">>" --> End
 ```
@@ -32,6 +51,5 @@ graph LR
 
 ## Other tutorials
 
-- **`CONTEXT.md`** — full glossary and **`miv.core` module map**.
 - **[Spike sorting](spike_sorting.md)** — longer exercise using **`EagerOpNodeBase`**.
 - **[MPI support](mpi_support.md)** — optional MPI / IO notes.

@@ -1,22 +1,30 @@
-Mind-in-Vitro Open Software
-===========================
+MiV-OS
+======
 
-**MiV-OS** is a *free* and *open-source* software project for the post-processing and analysis of **mind-in-vitro** project.
+Data analysis often begins as a straight line: load something, transform it,
+inspect the result. As an investigation grows, that line becomes a network of
+shared steps, alternative measurements, expensive computations, and results
+that must still be understandable months later.
 
-The software is developed and maintained by the Gazzola Lab at the University of Illinois at Urbana-Champaign. For more information on the projects and what we work on, visit our `website <https://mindinvitro.illinois.edu>`_.
+**MiV-OS is a Python framework for making that network explicit.** An analysis
+is assembled from small operators connected as a graph. The graph describes
+the scientific path from data to result; caching, streaming, callbacks, and
+runners control how that path is carried out.
 
-Contribution
-------------
+MiV-OS grew from the `Mind in Vitro <https://mindinvitro.illinois.edu>`_
+project and has a rich collection of electrophysiology tools. You do not need
+to work in electrophysiology to use its central idea: analysis should remain
+composable, inspectable, and adaptable as a question or dataset changes.
 
-Any contribution to this project is welcome! If you are interested or have any questions, please don't hesitate to contact us.
-If you are interested in contributing to this project, we prepared contribution guideline `here <https://github.com/GazzolaLab/MiV-OS/blob/main/CONTRIBUTING.md>`_.
+Begin in :doc:`about` for the philosophy and a map of the documentation.
+If you already know what you need, choose a room below and enter directly.
 
 
 .. toctree::
    :maxdepth: 2
    :caption: Overview
 
-   MiV-Shared-Docs/overview/index
+   about
    tutorial/index
    guide/index
    api/index
@@ -27,6 +35,14 @@ If you are interested in contributing to this project, we prepared contribution 
    :caption: Architecture
 
    adr/0001-streaming-dag-execution-and-cache-replay
+
+Contributing
+------------
+
+MiV-OS is free and open source, developed and maintained by the Gazzola Lab at
+the University of Illinois Urbana-Champaign. Questions, corrections, examples,
+and code contributions are welcome; see the `contribution guide
+<https://github.com/GazzolaLab/MiV-OS/blob/main/CONTRIBUTING.md>`_ to begin.
 
 Indices and tables
 ==================
