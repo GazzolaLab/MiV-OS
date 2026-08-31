@@ -8,19 +8,26 @@ References
 [1] Ahmadi N, Constandinou TG, Bouganis CS (2018) Estimation of neuronal firing rate using Bayesian Adaptive Kernel Smoother (BAKS). PLOS ONE 13(11): e0206794. https://doi.org/10.1371/journal.pone.0206794
 [2] https://github.com/nurahmadi/BAKS
 """
-__all__ = ["bayesian_adaptive_kernel_smoother"]
+__all__ = [
+    "BAKSResult",
+    "BayesianAdaptiveKernelSmoother",
+    "bayesian_adaptive_kernel_smoother",
+]
 
-import time
+from dataclasses import dataclass, field
+import os
 
+import matplotlib.pyplot as plt
 import numpy as np
 import scipy.special as sps
 from numba import njit
+from tqdm import tqdm
 
-from miv.core import Spikestamps
+from miv.core import EagerOpNodeBase, Spikestamps
 
 
 def bayesian_adaptive_kernel_smoother(
-    spikestamps, probe_time, alpha=4, progress_bar=False
+    spikestamps, probe_time, alpha=4, beta=None, progress_bar=False
 ):
     """
     Bayesian Adaptive Kernel Smoother (BAKS)
@@ -33,6 +40,8 @@ def bayesian_adaptive_kernel_smoother(
         time at which the firing rate is estimated. Typically, we assume the number of probe_time is much smaller than the number of spikes events.
     alpha : float, optional
         shape parameter, by default 4
+    beta : float, optional
+        Scale parameter. By default each channel uses ``n_spikes ** (4 / 5)``.
 
     Returns
     -------
@@ -52,7 +61,10 @@ def bayesian_adaptive_kernel_smoother(
         if n_spikes == 0:
             continue
 
-        ratio = _numba_ratio_func(probe_time, spiketimes, alpha)
+        channel_beta = n_spikes ** (4.0 / 5.0) if beta is None else beta
+        if channel_beta <= 0:
+            raise ValueError("beta must be positive")
+        ratio = _numba_ratio_func(probe_time, spiketimes, alpha, channel_beta)
         hs[channel] = (sps.gamma(alpha) / sps.gamma(alpha + 0.5)) * ratio
 
         firing_rate, firing_rate_for_spike = _numba_firing_rate(
@@ -63,150 +75,104 @@ def bayesian_adaptive_kernel_smoother(
 
 
 @njit(parallel=False)
-def _numba_ratio_func(probe_time, spiketimes, alpha):
+def _numba_ratio_func(probe_time, spiketimes, alpha, beta):
     # alpha = 1: spike rate contribute up to 1000 sec
     # alpha = 4: spike rate contribute up to 10 sec
 
-    n_spikes = spiketimes.shape[0]
     n_time = probe_time.shape[0]
-    sum_numerator = np.zeros(n_time)
-    sum_denominator = np.zeros(n_time)
-
-    diff_lim = 10 ** (4.5 / (alpha + 0.5))
-    spike_start_indices = np.searchsorted(spiketimes, probe_time - diff_lim)
-    spike_end_indices = np.searchsorted(spiketimes, probe_time + diff_lim)
+    ratio = np.zeros(n_time)
 
     for j in range(n_time):
-        # for i in range(n_spikes):
-        _spiketimes = spiketimes[spike_start_indices[j] : spike_end_indices[j]]
-
-        val = (np.square(probe_time[j] - _spiketimes) / 2) ** (-alpha)
-        # print(val.shape, val.min(), val.max())
-        sum_numerator[j] = val.sum()
-        val = (np.square(probe_time[j] - _spiketimes) / 2) ** (-alpha - 0.5)
-        sum_denominator[j] = val.sum()
-
-        # for i in range(spike_start_indices[j], spike_end_indices[j]):
-        #     val = ((probe_time[j] - spiketimes[i]) ** 2) / 2
-        #     sum_numerator[j] += val ** (-alpha)
-        #     sum_denominator[j] += val ** (-alpha - 0.5)
-    ratio = sum_numerator / (sum_denominator + 1e-14)
+        scale = np.square(probe_time[j] - spiketimes) / 2 + 1.0 / beta
+        minimum = np.min(scale)
+        normalized = scale / minimum
+        numerator = np.sum(normalized ** (-alpha))
+        denominator = np.sum(normalized ** (-alpha - 0.5))
+        ratio[j] = np.sqrt(minimum) * numerator / denominator
     return ratio
 
 
 @njit(parallel=False)
 def _numba_firing_rate(spiketimes, probe_time, h):
-    std = 5
     n_spikes = spiketimes.shape[0]
     n_time = probe_time.shape[0]
     firing_rate = np.zeros((n_time, n_spikes))
-    # stime = np.searchsorted(spiketimes, probe_time - std * h * 2)
-    # etime = np.searchsorted(spiketimes, probe_time + std * h * 2)
-    # for j in prange(n_time):
-
     for j in range(n_time):
-        # for i in range(stime[j], etime[j]):
         for i in range(n_spikes):
             firing_rate[j, i] = (1 / (np.sqrt(2 * np.pi) * h[j])) * np.exp(
-                -(((probe_time[j] - spiketimes[i]) / (2 * h[j])) ** 2)
+                -0.5 * ((probe_time[j] - spiketimes[i]) / h[j]) ** 2
             )
     return firing_rate.sum(axis=1), firing_rate
 
 
-if __name__ == "__main__":
-    import time
+@dataclass
+class BAKSResult:
+    probe_times: np.ndarray
+    bandwidths: np.ndarray
+    firing_rates: np.ndarray
+    alpha: float
+    beta_rule: str
 
-    from miv.core import Spikestamps
 
-    from numba import set_num_threads
+@dataclass
+class BayesianAdaptiveKernelSmoother(EagerOpNodeBase):
+    """MiV operator for Bayesian adaptive kernel smoothing."""
 
-    set_num_threads(4)
+    alpha: float = 4.0
+    beta: float | None = None
+    sample_rate: float = 500.0
+    t_start: float | None = None
+    t_end: float | None = None
+    progress_bar: bool = False
+    algorithm_version: str = "rc-kt-baks-v1"
+    tag: str = field(default="bayesian adaptive kernel smoother", init=False)
 
-    seed = 0
-    np.random.seed(seed)
+    def __post_init__(self) -> None:
+        if self.alpha <= 0 or self.sample_rate <= 0:
+            raise ValueError("alpha and sample_rate must be positive")
+        super().__init__()
 
-    def original_imple(a, L=5):
-        num = a ** (-L)
-        den = a ** (-L - 0.5)
-        ratio = num.sum() / den.sum()
-        return ratio
+    def __call__(self, spikestamps: Spikestamps) -> BAKSResult:
+        start = (
+            spikestamps.get_first_spikestamp() if self.t_start is None else self.t_start
+        )
+        end = spikestamps.get_last_spikestamp() if self.t_end is None else self.t_end
+        if end <= start:
+            raise ValueError("BAKS requires a positive time interval")
+        probe_times = np.arange(start, end, 1.0 / self.sample_rate)
+        bandwidths, rates = bayesian_adaptive_kernel_smoother(
+            spikestamps,
+            probe_times,
+            alpha=self.alpha,
+            beta=self.beta,
+            progress_bar=self.progress_bar,
+        )
+        return BAKSResult(
+            probe_times=probe_times,
+            bandwidths=bandwidths,
+            firing_rates=rates,
+            alpha=self.alpha,
+            beta_rule="n_spikes**(4/5)" if self.beta is None else str(self.beta),
+        )
 
-    def stable_ratio(a, L=5):
-        # Find the maximum element in a to normalize
-        a_min = np.min(a)
-
-        # Compute the normalized terms
-        normalized_numerator_terms = (a / a_min) ** (-L)
-        normalized_denominator_terms = (a / a_min) ** (-L - 0.5)
-
-        # Calculate the sums
-        numerator = np.sum(normalized_numerator_terms)
-        denominator = np.sum(normalized_denominator_terms)
-
-        # Compute the final stable ratio
-        ratio = np.sqrt(a_min) * (numerator / denominator)
-
-        return ratio
-
-    # Test cases
-    test_cases = [
-        np.array([1.0, 2.0, 3.0]),
-        np.array([1e10, 1e5, 1e3]),
-        np.array([0.1, 0.5, 0.9]),
-        np.array([1.5, 2.5, 3.5]),
-        np.array([1e-3, 1e-5, 1e-10]),
-        np.geomspace(1e-40, 1e40, 100),
-    ]
-
-    # Run the test cases and display results
-    for a in test_cases:
-        prev_out = original_imple(a)
-        stable_out = stable_ratio(a)
-        print(prev_out, stable_out)
-    sys.exit()
-
-    t = 30
-    num_channels = 8
-    total_time = 600  # seconds
-    N = 80 * total_time  # Number of spikes
-    n_evaluation_points = int(total_time)
-    evaluation_points = np.linspace(0, total_time, n_evaluation_points)
-
-    spikestamps = [
-        np.sort(np.random.random(N)) * total_time for _ in range(num_channels)
-    ]
-    spikestamps = Spikestamps(spikestamps)
-
-    stime = time.time()
-    alpha = 4.0
-    hs, firing_rates = bayesian_adaptive_kernel_smoother(
-        spikestamps, evaluation_points, alpha=alpha
-    )
-    etime = time.time()
-    # print(alpha, beta)
-
-    std = hs[0][0] * 3
-
-    # print(hs)
-    # print(firing_rates)
-
-    # fig, (ax1, ax2, ax3) = plt.subplots(3, 1, sharex=True)
-    # # plt.plot(evaluation_points, firing_rates[0])
-    # ax1.eventplot(spikestamps[0], color="k")
-    # ax1.axvline(t, color="r", linestyle="--")
-    # ax1.axvspan(t - std, t + std, color="r", alpha=0.5)
-
-    # ax2.plot(spikestamps[0], firing_rate_for_spike[0][0])
-    # ax2.axvline(t, color="r", linestyle="--")
-    # ax2.axvspan(t - std, t + std, color="r", alpha=0.5)
-
-    # ax3.plot(spikestamps[0], np.cumsum(firing_rate_for_spike[0][0]))
-    # ax3.axvline(t, color="r", linestyle="--")
-    # ax3.axvspan(t - std, t + std, color="r", alpha=0.5)
-
-    # plt.figure()
-    # plt.plot(evaluation_points, firing_rates[0])
-
-    # plt.show()
-
-    print(f"Elapsed time: {etime - stime:.4f} seconds")
+    def plot_firing_rates(self, result, inputs, show=False, save_path=None):
+        fig, axis = plt.subplots(figsize=(9, 4))
+        for rate in result.firing_rates:
+            axis.plot(result.probe_times, rate, alpha=0.25, linewidth=0.8)
+        axis.plot(
+            result.probe_times,
+            np.nanmean(result.firing_rates, axis=0),
+            color="black",
+            linewidth=2,
+            label="channel mean",
+        )
+        axis.set_xlabel("Time (s)")
+        axis.set_ylabel("Firing rate (Hz)")
+        axis.set_title("Bayesian adaptive kernel smoothing")
+        axis.legend()
+        fig.tight_layout()
+        if save_path is not None:
+            fig.savefig(os.path.join(save_path, "baks_firing_rates.png"), dpi=180)
+        if show:
+            plt.show()
+        plt.close(fig)

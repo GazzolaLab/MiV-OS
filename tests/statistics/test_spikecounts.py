@@ -35,11 +35,15 @@ def test_decay_spike_counts(spiketrain, probe_times):
     result = decay_spike_counts(spiketrain, probe_times)
     print(repr(result))
 
-    # Expected values calculated with hardcoded amplitude=2.0, decay_rate=5
-    # The function uses: amplitude * exp(-decay_rate * x) * (decay_rate^2) * x
-    # Using actual output values with appropriate tolerance for floating point precision
+    # Causal RC-KT kernel: rho * exp(-rho * tau), rho=5.
     expected = np.array(
-        [0.000000e00, 3.368973e-01, 3.687070e00, 6.518185e-02, 6.730513e-07]
+        [
+            0.0,
+            5.0 * np.exp(-5.0 * (2.5 - 1.5)),
+            sum(5.0 * np.exp(-5.0 * (5.0 - spike)) for spike in spiketrain[:4]),
+            sum(5.0 * np.exp(-5.0 * (7.5 - spike)) for spike in spiketrain),
+            sum(5.0 * np.exp(-5.0 * (10.0 - spike)) for spike in spiketrain),
+        ]
     )
     assert isinstance(result, np.ndarray)
     assert result.shape == probe_times.shape

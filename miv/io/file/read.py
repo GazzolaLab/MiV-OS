@@ -48,11 +48,13 @@ def read(
     data["_LIST_OF_DATASETS_"] = []
     data["_GROUPS_"] = []
     data["_MAP_DATASETS_TO_GROUPS_"] = {}
+    data["_CONTAINER_SHAPED_DATASETS_"] = []
 
     # Get the number of containers
     data["_NUMBER_OF_CONTAINERS_"] = infile.attrs["_NUMBER_OF_CONTAINERS_"]
 
     ncontainers = data["_NUMBER_OF_CONTAINERS_"]
+    file_ncontainers = ncontainers
 
     # Determine if only a subset of the data should be read
     subset_: None | list[int] = None
@@ -143,11 +145,18 @@ def read(
         if isinstance(dataset, h5py.Dataset):
             dataset_name = name
             group_name = dataset.attrs.get("_GROUP_", None)
+            if dataset.shape[0] == file_ncontainers:
+                data["_CONTAINER_SHAPED_DATASETS_"].append(dataset_name)
 
             if subset_ is not None:
                 if IS_COUNTER:
                     # If this is a counter, then the subset indices
                     # map on to the same locations for any counters
+                    lo = subset_[0]
+                    hi = subset_[1]
+                elif dataset.shape[0] == file_ncontainers:
+                    # MiV signal exports store one (possibly multidimensional)
+                    # value per container rather than flattening sample axes.
                     lo = subset_[0]
                     hi = subset_[1]
                 elif index_name_ is not None:
@@ -179,7 +188,7 @@ def select_datasets(
     # Only keep select data from file, if we have specified datasets
     if groups is not None:
         if isinstance(groups, str):
-            groups = list(groups)
+            groups = [groups]
 
         # Count backwards because we'll be removing stuff as we go.
         i = len(datasets) - 1
@@ -304,17 +313,15 @@ def unpack(
             container[key] = data[key][n]
 
         elif "INDEX" not in key:
-            # indexkey = data["_MAP_DATASETS_TO_INDEX_"][key]
-            numkey = data["_MAP_DATASETS_TO_COUNTERS_"][key]
-
-            # if len(data[indexkey]) > 0:
-            #     index = data[indexkey][n]
-
-            if len(data[numkey]) > 0:
-                # TODO: Figure out which one would be correct
-                # nobjs = data[numkey][n]
-                # container[key] = data[key][index : index + nobjs]
+            if key in data["_CONTAINER_SHAPED_DATASETS_"]:
                 container[key] = data[key][n]
+                continue
+            indexkey = data["_MAP_DATASETS_TO_INDEX_"][key]
+            numkey = data["_MAP_DATASETS_TO_COUNTERS_"][key]
+            if len(data[numkey]) > 0:
+                index = data[indexkey][n]
+                nobjs = data[numkey][n]
+                container[key] = data[key][index : index + nobjs]
 
 
 def get_ncontainers_in_file(
