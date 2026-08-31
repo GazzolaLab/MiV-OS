@@ -57,7 +57,7 @@ jobs:
 
       - name: Install and activate the project
         run: |
-          make install-all
+          make install-ci
           uv cache prune --ci
           source .venv/bin/activate
 

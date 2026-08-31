@@ -4,7 +4,11 @@ from typing import no_type_check
 from ..import_helper import getter_upon_call
 
 _submodule_paths_for_alias = {
-    "baks": ["bayesian_adaptive_kernel_smoother"],
+    "baks": [
+        "BAKSResult",
+        "BayesianAdaptiveKernelSmoother",
+        "bayesian_adaptive_kernel_smoother",
+    ],
     "burst": ["burst_detection", "burst_array"],
     "info_theory": [
         "probability_distribution",
@@ -38,6 +42,26 @@ _submodule_paths_for_alias = {
         "spike_counts_with_kernel",
         "decay_spike_counts",
         "instantaneous_spike_rate",
+    ],
+    "reservoir": [
+        "DecodedStimulus",
+        "ExponentialSpikeEncoder",
+        "FixedDurationTrializer",
+        "GPFALatentProjector",
+        "KernelRank",
+        "KernelRankResult",
+        "KnowledgeTransfer",
+        "KnowledgeTransferInput",
+        "KnowledgeTransferInputBuilder",
+        "KnowledgeTransferResult",
+        "KnowledgeTransferTrialSelector",
+        "ReservoirStateResult",
+        "RidgeReadout",
+        "RidgeReadoutResult",
+        "SpectralRadius",
+        "SpectralRadiusResult",
+        "TTLPulseDecoder",
+        "TrialBatch",
     ],
 }
 __getattr__ = getter_upon_call(__name__, _submodule_paths_for_alias)

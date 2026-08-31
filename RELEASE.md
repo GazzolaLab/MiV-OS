@@ -1,3 +1,25 @@
+# Release Note (version 0.5.0)
+
+## RC-KT numerical migration
+
+Version 0.5.0 intentionally changes several numerical results used by the
+RC-KT publication workflow:
+
+- BAKS now includes the Bayesian beta term, uses the standard Gaussian
+  exponent, and evaluates its bandwidth ratio with stable scaling.
+- `decay_spike_counts` now evaluates the causal kernel
+  `rho * exp(-rho * tau)`; callers relying on the previous alpha-shaped
+  kernel must update expected amplitudes.
+- avalanche branching ratios divide by the number of valid temporal
+  transitions rather than avalanche channel count.
+- `DirectedConnectivity` reports pairwise transfer entropy and uses an
+  empirical shuffled-ISI bootstrap p-value instead of applying a t-test to
+  the former connectivity statistic.
+
+The affected operators include an `algorithm_version` field in their cache
+identity. Existing cached results must not be compared across the 0.5.0
+boundary without regeneration.
+
 # Release Note (v0.3.0-beta.0)
 
 ## What's Changed

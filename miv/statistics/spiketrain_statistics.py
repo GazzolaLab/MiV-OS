@@ -252,20 +252,16 @@ def spike_counts_with_kernel(spiketrain, probe_times, kernel: Callable, batchsiz
 
 
 @njit(cache=True)
-def _kernel(x, amplitude=2.0, decay_rate=5):
-    # Exponential
-    # return amplitude * np.exp(-decay_rate * x) * decay_rate
-    # Alpha
-    return amplitude * np.exp(-decay_rate * x) * (decay_rate**2) * x
-
-
-@njit(cache=True, parallel=True)
 def decay_spike_counts(
     spiketrain,
     probe_times,
+    decay_rate=5.0,
+    amplitude=1.0,
 ):
-    """
-    Both spiketrain and probe_times should be a 1-d array representing time.
+    """Apply a causal exponential kernel to a single-channel spike train.
+
+    The kernel is ``amplitude * decay_rate * exp(-decay_rate * tau)`` for
+    ``tau >= 0``. Its default is the RC-KT kernel ``rho * exp(-rho * tau)``.
 
     Parameters
     ----------
@@ -273,7 +269,13 @@ def decay_spike_counts(
         Single-channel spiketrain
     probe_times :
         probe_times
+    decay_rate : float
+        Positive exponential decay rate in inverse seconds.
+    amplitude : float
+        Multiplicative kernel amplitude.
     """
+    if decay_rate <= 0:
+        raise ValueError("decay_rate must be positive")
     n_spike = spiketrain.size
     n_probe = probe_times.size
     if n_probe == 0:
@@ -283,13 +285,13 @@ def decay_spike_counts(
 
     out = np.zeros(probe_times.shape, dtype=np.float64)
 
-    for i in prange(n_spike):
+    for i in range(n_spike):
         s = spiketrain[i]
         # first probe index with t >= s (requires sorted probe_times)
         j0 = np.searchsorted(probe_times, s)
         for j in range(j0, n_probe):
             dt = probe_times[j] - s  # dt >= 0 by construction
-            out[j] += _kernel(dt)
+            out[j] += amplitude * decay_rate * np.exp(-decay_rate * dt)
 
     return out
 

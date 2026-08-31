@@ -39,6 +39,79 @@ def _pairwise_granger_scalar(sig: np.ndarray, order: int) -> float:
     return float(arr[0])
 
 
+def _discrete_transfer_entropy(source: np.ndarray, target: np.ndarray) -> float:
+    """Plug-in estimate of one-step transfer entropy in bits."""
+
+    source = np.asarray(source, dtype=np.int64)
+    target = np.asarray(target, dtype=np.int64)
+    if source.shape != target.shape or source.ndim != 1:
+        raise ValueError(
+            "source and target must be equal-length one-dimensional arrays"
+        )
+    if source.size < 2:
+        return 0.0
+    joint: dict[tuple[int, int, int], int] = {}
+    history: dict[tuple[int, int], int] = {}
+    target_joint: dict[tuple[int, int], int] = {}
+    target_history: dict[int, int] = {}
+    for x_now, y_now, y_next in zip(source[:-1], target[:-1], target[1:], strict=True):
+        key = (int(y_next), int(y_now), int(x_now))
+        joint[key] = joint.get(key, 0) + 1
+        hist_key = (int(y_now), int(x_now))
+        history[hist_key] = history.get(hist_key, 0) + 1
+        target_key = (int(y_next), int(y_now))
+        target_joint[target_key] = target_joint.get(target_key, 0) + 1
+        target_history[int(y_now)] = target_history.get(int(y_now), 0) + 1
+    total = source.size - 1
+    value = 0.0
+    for (y_next, y_now, x_now), count in joint.items():
+        conditional_xy = count / history[(y_now, x_now)]
+        conditional_y = target_joint[(y_next, y_now)] / target_history[y_now]
+        value += (count / total) * np.log2(conditional_xy / conditional_y)
+    return float(max(value, 0.0))
+
+
+def _shuffle_interspike_intervals(
+    source: np.ndarray, rng: np.random.Generator
+) -> np.ndarray:
+    spike_indices = np.flatnonzero(source)
+    surrogate = np.zeros_like(source)
+    if spike_indices.size < 2:
+        return surrogate
+    intervals = np.diff(spike_indices)
+    rng.shuffle(intervals)
+    reconstructed = np.concatenate(
+        [spike_indices[:1], spike_indices[0] + np.cumsum(intervals)]
+    )
+    reconstructed = reconstructed[reconstructed < source.size]
+    surrogate[reconstructed] = 1
+    return surrogate
+
+
+@dataclass
+class DirectedConnectivityResult:
+    adjacency_matrix: np.ndarray
+    transfer_entropy: np.ndarray
+    p_values: np.ndarray
+    connection_ratio: float
+    channel_order: tuple[int, ...]
+    seed: int
+    bin_size: float
+    surrogate_count: int
+    algorithm_version: str
+
+    def __getitem__(self, key: str):
+        """Retain compatibility with existing connectivity plotting helpers."""
+
+        aliases = {
+            "adjacency_matrix": self.adjacency_matrix,
+            "connectivity_matrix": self.transfer_entropy,
+            "p_values": self.p_values,
+            "connection_ratio": self.connection_ratio,
+        }
+        return aliases[key]
+
+
 # self MPI-able
 @dataclass
 class DirectedConnectivity(OperatorMixin):
@@ -76,21 +149,22 @@ class DirectedConnectivity(OperatorMixin):
     skip_surrogate: bool = False
 
     # Surrogate parameters
-    surrogate_N: int = 30
+    surrogate_N: int = 100
     p_threshold: float = 0.05
     H_threshold: float = 1e-2
-    seed: int = None
+    seed: int = 0
     num_proc: int = 1
+    algorithm_version: str = "rc-kt-transfer-entropy-v1"
 
     def __post_init__(self):
         super().__init__()
         if isinstance(self.mea, str):
             self.mea_map = mea_map[self.mea]
         else:
-            self.mea_map = mea_map["64_intanRHD"]
+            self.mea_map = None
 
     @cache_call
-    def __call__(self, spikestamps: Spikestamps) -> np.ndarray:
+    def __call__(self, spikestamps: Spikestamps) -> DirectedConnectivityResult:
         """__call__.
 
         Parameters
@@ -115,11 +189,14 @@ class DirectedConnectivity(OperatorMixin):
         connectivity_metric_matrix = np.zeros(
             [n_nodes, n_nodes], dtype=np.float64
         )  # source -> target
+        p_value_matrix = np.ones([n_nodes, n_nodes], dtype=np.float64)
 
         pairs = [
             (i, j)
             for i, j in itertools.product(range(n_nodes), range(n_nodes))
-            if i not in self.exclude_channels and j not in self.exclude_channels
+            if i not in self.exclude_channels
+            and j not in self.exclude_channels
+            and i != j
         ]
         func = functools.partial(
             self._get_connection_info,
@@ -149,16 +226,22 @@ class DirectedConnectivity(OperatorMixin):
             i, j = pair
             adj_matrix[i, j] = result[0] < self.p_threshold
             connectivity_metric_matrix[i, j] = result[1]
+            p_value_matrix[i, j] = result[0]
 
-        connection_ratio = adj_matrix.sum() / adj_matrix.ravel().shape[0]
+        eligible = max(len(pairs), 1)
+        connection_ratio = adj_matrix.sum() / eligible
 
-        info = {
-            "adjacency_matrix": adj_matrix,
-            "connectivity_matrix": connectivity_metric_matrix,
-            "connection_ratio": connection_ratio,
-        }
-
-        return info
+        return DirectedConnectivityResult(
+            adjacency_matrix=adj_matrix,
+            transfer_entropy=connectivity_metric_matrix,
+            p_values=p_value_matrix,
+            connection_ratio=float(connection_ratio),
+            channel_order=channels,
+            seed=self.seed,
+            bin_size=self.bin_size,
+            surrogate_count=self.surrogate_N,
+            algorithm_version=self.algorithm_version,
+        )
 
     @staticmethod
     def _get_connection_info(
@@ -177,22 +260,28 @@ class DirectedConnectivity(OperatorMixin):
         sid, tid = pair
         if sid == tid:
             return 1, 0
-        if channels[sid] not in mea or channels[tid] not in mea:
-            return 1, 0
+        if mea is not None:
+            if channels[sid] not in mea or channels[tid] not in mea:
+                return 1, 0
         source = binned_spiketrain[sid]
         target = binned_spiketrain[tid]
-        te, surrogate_te_list = UndirectedConnectivity._surrogate_t_test(
-            source,
-            target,
-            skip_surrogate=skip_surrogate,
-            surrogate_N=surrogate_N,
-            seed=seed,
-        )
+        te = _discrete_transfer_entropy(source, target)
         if te < H_threshold:
             return 1, 0
         if skip_surrogate:
-            return 1, te
-        t_value, p_value = spst.ttest_1samp(surrogate_te_list, te, nan_policy="omit")
+            return 0, te
+        rng = np.random.default_rng(
+            np.random.SeedSequence([seed, int(channels[sid]), int(channels[tid])])
+        )
+        surrogate_te_list = [
+            _discrete_transfer_entropy(
+                _shuffle_interspike_intervals(source, rng), target
+            )
+            for _ in range(surrogate_N)
+        ]
+        p_value = (1 + np.count_nonzero(np.asarray(surrogate_te_list) >= te)) / (
+            surrogate_N + 1
+        )
         return p_value, te
 
     def plot_adjacency_matrix(self, result, inputs, save_path=None, show=False):
@@ -263,13 +352,17 @@ class DirectedConnectivity(OperatorMixin):
             Show plot, by default False
 
         """
-        return
         if show:
-            logging.warning(
+            self.logger.warning(
                 "show is not supported for node-wise connectivity plot. Plots will be saved only, if save_path is specified."
             )
             show = False
         if save_path is None:
+            return
+        if self.mea_map is None:
+            self.logger.warning(
+                "node-wise connectivity plots require an explicit MEA geometry"
+            )
             return
         adj_matrix = result["adjacency_matrix"]
         connectivity_metric_matrix = result["connectivity_matrix"]

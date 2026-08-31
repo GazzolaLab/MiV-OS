@@ -36,7 +36,7 @@ imports are shared by the three analysis graphs below:
 
 ```python
 from miv.core import Pipeline
-from miv.io.file import ImportSignal
+from miv.io import ImportSignal
 from miv.signal import ButterBandpass, ThresholdCutoff
 from miv.statistics import (
     BayesianAdaptiveKernelSmoother,
