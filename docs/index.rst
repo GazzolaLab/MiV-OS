@@ -22,6 +22,12 @@ If you are interested in contributing to this project, we prepared contribution 
    api/index
    discussion/index
 
+.. toctree::
+   :maxdepth: 1
+   :caption: Architecture
+
+   adr/0001-streaming-dag-execution-and-cache-replay
+
 Indices and tables
 ==================
 

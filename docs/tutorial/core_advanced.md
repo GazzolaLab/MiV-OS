@@ -20,6 +20,23 @@ If the **terminal** node is streaming, **`output()`** and **iterate** (or **`lis
 
 When **not** using cache, **`StreamOpNodeBase`** expects **at least one upstream** iterable on the streaming path (see implementation **`assert`**).
 
+### Fan-out and cache replay
+
+`Pipeline([first_sink, second_sink])` runs terminals in list order. If both
+terminals pull from the same `StreamOpNodeBase`, an eager first sink that fully
+drains the stream writes its chunks to disk. With cache policy **`ON`**, the
+second sink then replays those files rather than recomputing the shared stream.
+
+This is disk replay, not an in-memory broadcast. It is only reliable after the
+earlier branch reaches end-of-stream. Cache configuration is currently written
+with the first chunk and there is no completion marker, so stopping iteration
+early can leave a partial cache that looks valid. **`MUST`** has the same
+limitation, and **`OVERWRITE`** does not remove stale higher-indexed chunks from
+an earlier, longer run.
+
+See **[ADR-0001](../adr/0001-streaming-dag-execution-and-cache-replay.md)**
+for the tested guarantees, cache-policy table, and remaining gaps.
+
 ---
 
 ## 2. Decorators: `@cache_call` and deprecated `@cache_generator_call`
@@ -60,3 +77,4 @@ If **`temporary_directory`** is set, nodes may write under that tree during **`r
 
 - **`CONTEXT.md`** — glossary and **`miv.core` map**.
 - **[Core overview](core_concept.md)** — diagram and section index.
+- **[ADR-0001](../adr/0001-streaming-dag-execution-and-cache-replay.md)** — streaming pull, fan-out, and cache replay contract.

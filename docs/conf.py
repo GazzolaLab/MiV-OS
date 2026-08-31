@@ -57,6 +57,7 @@ exclude_patterns = [
     "README.md",  # File reserved to explain how documentationing works.
     "_build",
     "**.ipynb_checkpoints",
+    "agents/**",  # Internal Codex guidance, not user-facing package documentation.
 ]
 
 autodoc_default_options = {
