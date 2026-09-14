@@ -757,30 +757,26 @@ files = [
 
 [[package]]
 name = "dtaidistance"
-version = "2.4.0"
+version = "2.5.0"
 description = "Distance measures for time series (Dynamic Time Warping, fast C implementation)"
 optional = false
 python-versions = ">=3.8"
 groups = ["sortingextension"]
 files = [
-    {file = "dtaidistance-2.4.0-cp311-cp311-macosx_10_9_universal2.whl", hash = "sha256:b7e054baadcd4ae54ec87b0ecb0d9aa0d41682ccc376ffd9b57ee29ff5e615f4"},
-    {file = "dtaidistance-2.4.0-cp311-cp311-macosx_15_0_arm64.whl", hash = "sha256:3838dbcc0a9b5f513aa5f1a158ac82f924651a163801cb63f5dc6c1999e6e6b6"},
-    {file = "dtaidistance-2.4.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:bc756c0b305f72357aae2c48d52f6c80a651c43b06dfb740bfaf76a3fd97a114"},
-    {file = "dtaidistance-2.4.0-cp311-cp311-win_amd64.whl", hash = "sha256:b17f853aa274bf02e00f9461013ec50882d7ea093587c126c74f38b119f5a1dc"},
-    {file = "dtaidistance-2.4.0-cp312-cp312-macosx_10_13_universal2.whl", hash = "sha256:64d54f910b53cd7a56b215e06d2b24b22090af836102d48558d3e9569ded2b66"},
-    {file = "dtaidistance-2.4.0-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:3afb229f4524f8bbf835a5dc3e07abcee9b6b9c6af4f14436cad19639102243c"},
-    {file = "dtaidistance-2.4.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:349d6765e10ddbb5e22e937cf1bc42394f5f8d36bc127f8af24a0cd0259f4804"},
-    {file = "dtaidistance-2.4.0-cp312-cp312-win_amd64.whl", hash = "sha256:6ab9431a5b66aafd37ab4dfcfe563b66694ed192019c1632d2de7a431a883bcd"},
-    {file = "dtaidistance-2.4.0-cp313-cp313-macosx_10_13_universal2.whl", hash = "sha256:4cf41f3edcc4c1b94ebbc1de029ee9b58da28f33f7bf3af89212cc05e35ec8f1"},
-    {file = "dtaidistance-2.4.0-cp313-cp313-macosx_15_0_arm64.whl", hash = "sha256:94b841d6575e3ad715b4e213f0f04de25e23c2da3ac21ee9c6775b38f5bdfecf"},
-    {file = "dtaidistance-2.4.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:b0f2a65628aea82175e7f8c5e96faf5372c933ed40e2e39a84957d8fe305158d"},
-    {file = "dtaidistance-2.4.0-cp313-cp313-win_amd64.whl", hash = "sha256:b8c9ef4c7270d1a192e8f1b481c2e10e63c33c6e7edfc507acac7f3fdc19949f"},
-    {file = "dtaidistance-2.4.0-cp314-cp314-macosx_10_15_universal2.whl", hash = "sha256:bda9849cd22800cd8b3c6abf29574db241458823814cd37302d01df99474175a"},
-    {file = "dtaidistance-2.4.0-cp314-cp314-macosx_26_0_arm64.whl", hash = "sha256:b5aa878c57f779cb9e141c0b4b1bc6b5be9c1721b349d153758112854a1b24cf"},
-    {file = "dtaidistance-2.4.0-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:a2d7d26b9023788f62e5f245db5b78b68aacde67e5aeaa75906ce7ddb251da7f"},
-    {file = "dtaidistance-2.4.0-cp314-cp314-win_amd64.whl", hash = "sha256:3a35f2957bbf50b068b0b90f5cc9b442bf9b2a90b855e713811b8badf89a668d"},
-    {file = "dtaidistance-2.4.0-cp314-cp314t-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:e083a5163c780a5b711d970c190d3eca83ebc0ec86e453e6f56d63b1d6d78139"},
-    {file = "dtaidistance-2.4.0.tar.gz", hash = "sha256:bd4066800254fbd5b620e6462bb759c9d85b79ac2080b354cedc901f446b6c82"},
+    {file = "dtaidistance-2.5.0-cp311-cp311-macosx_10_9_universal2.whl", hash = "sha256:309e81c1d40cd58fe44b98ad9e1df32a3619b088efbceabad39d8a224ad67b38"},
+    {file = "dtaidistance-2.5.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:c0eedfc7b2b36355c773d728de7627cac63ce559b9030cbdbe0ea3cc99ec0e86"},
+    {file = "dtaidistance-2.5.0-cp311-cp311-win_amd64.whl", hash = "sha256:dae562857e4b17f230f2cc8731ca25f0c11f80dd74f5d8269b2c20442125c0a0"},
+    {file = "dtaidistance-2.5.0-cp312-cp312-macosx_10_13_universal2.whl", hash = "sha256:78583aa688f33b39dc748bbd90e5808c188e7d25c5a1a9e8807e8f9d55899cee"},
+    {file = "dtaidistance-2.5.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:0a4f2d9273a08e1fa442b300e29ee098dac03ea1b3f2d0cca7488b011e5e4c8d"},
+    {file = "dtaidistance-2.5.0-cp312-cp312-win_amd64.whl", hash = "sha256:08e9b79390857196e85a4d221f3e3f16731649967d21257fc9e6b0a30fa63f70"},
+    {file = "dtaidistance-2.5.0-cp313-cp313-macosx_10_13_universal2.whl", hash = "sha256:af2939c7641e999066e298deffbddb7daed476da1548298531044fef803d4bee"},
+    {file = "dtaidistance-2.5.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:ea7ecaa462e481ca6b38a65584b2a1a2e860d8d77acd850eb9a7ee9839ff6b16"},
+    {file = "dtaidistance-2.5.0-cp313-cp313-win_amd64.whl", hash = "sha256:587ea58049509abe477f443950a60cb03c0f02b11fdb6aa6d62555e0d192c769"},
+    {file = "dtaidistance-2.5.0-cp314-cp314-macosx_10_15_universal2.whl", hash = "sha256:2767e613aff51602fafa9d1598f5f638403d2800091b7e18df32809b9786c29d"},
+    {file = "dtaidistance-2.5.0-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:b85c43d3eb5e099ea5f2f5284d18c154ac488fdcb56d33c658dd562b640cd986"},
+    {file = "dtaidistance-2.5.0-cp314-cp314-win_amd64.whl", hash = "sha256:83a1571828abfa4921ead903a89aee084e1c752e7610de1be165b3d634b391a6"},
+    {file = "dtaidistance-2.5.0-cp314-cp314t-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:59e9b31b443a2d64f96dc82e7aa4160d750510126aa58b9d3f96c74b0c2ef928"},
+    {file = "dtaidistance-2.5.0.tar.gz", hash = "sha256:4a87f5023d41e6b4e14b9e4001f3c316393e2b6be3f5efd776129cfcc701b4af"},
 ]
 
 [package.dependencies]
@@ -788,7 +784,7 @@ numpy = "*"
 
 [package.extras]
 all = ["numpy", "pandas", "scipy"]
-dev = ["matplotlib (>=3.0.0)", "numpy", "pytest", "pytest-benchmark", "pytest-env", "scipy", "sphinx", "sphinx_rtd_theme"]
+dev = ["Cython", "matplotlib (>=3.0.0)", "numpy", "pandas", "pytest", "pytest-benchmark", "pytest-env", "scipy", "setuptools", "sphinx", "sphinx_rtd_theme", "wheel", "wurlitzer"]
 numpy = ["numpy", "pandas", "scipy"]
 tests = ["pytest", "pytest-benchmark"]
 viz = ["matplotlib (>=3.0.0)"]
