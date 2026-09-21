@@ -757,26 +757,26 @@ files = [
 
 [[package]]
 name = "dtaidistance"
-version = "2.5.0"
+version = "2.5.1"
 description = "Distance measures for time series (Dynamic Time Warping, fast C implementation)"
 optional = false
 python-versions = ">=3.8"
 groups = ["sortingextension"]
 files = [
-    {file = "dtaidistance-2.5.0-cp311-cp311-macosx_10_9_universal2.whl", hash = "sha256:309e81c1d40cd58fe44b98ad9e1df32a3619b088efbceabad39d8a224ad67b38"},
-    {file = "dtaidistance-2.5.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:c0eedfc7b2b36355c773d728de7627cac63ce559b9030cbdbe0ea3cc99ec0e86"},
-    {file = "dtaidistance-2.5.0-cp311-cp311-win_amd64.whl", hash = "sha256:dae562857e4b17f230f2cc8731ca25f0c11f80dd74f5d8269b2c20442125c0a0"},
-    {file = "dtaidistance-2.5.0-cp312-cp312-macosx_10_13_universal2.whl", hash = "sha256:78583aa688f33b39dc748bbd90e5808c188e7d25c5a1a9e8807e8f9d55899cee"},
-    {file = "dtaidistance-2.5.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:0a4f2d9273a08e1fa442b300e29ee098dac03ea1b3f2d0cca7488b011e5e4c8d"},
-    {file = "dtaidistance-2.5.0-cp312-cp312-win_amd64.whl", hash = "sha256:08e9b79390857196e85a4d221f3e3f16731649967d21257fc9e6b0a30fa63f70"},
-    {file = "dtaidistance-2.5.0-cp313-cp313-macosx_10_13_universal2.whl", hash = "sha256:af2939c7641e999066e298deffbddb7daed476da1548298531044fef803d4bee"},
-    {file = "dtaidistance-2.5.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:ea7ecaa462e481ca6b38a65584b2a1a2e860d8d77acd850eb9a7ee9839ff6b16"},
-    {file = "dtaidistance-2.5.0-cp313-cp313-win_amd64.whl", hash = "sha256:587ea58049509abe477f443950a60cb03c0f02b11fdb6aa6d62555e0d192c769"},
-    {file = "dtaidistance-2.5.0-cp314-cp314-macosx_10_15_universal2.whl", hash = "sha256:2767e613aff51602fafa9d1598f5f638403d2800091b7e18df32809b9786c29d"},
-    {file = "dtaidistance-2.5.0-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:b85c43d3eb5e099ea5f2f5284d18c154ac488fdcb56d33c658dd562b640cd986"},
-    {file = "dtaidistance-2.5.0-cp314-cp314-win_amd64.whl", hash = "sha256:83a1571828abfa4921ead903a89aee084e1c752e7610de1be165b3d634b391a6"},
-    {file = "dtaidistance-2.5.0-cp314-cp314t-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:59e9b31b443a2d64f96dc82e7aa4160d750510126aa58b9d3f96c74b0c2ef928"},
-    {file = "dtaidistance-2.5.0.tar.gz", hash = "sha256:4a87f5023d41e6b4e14b9e4001f3c316393e2b6be3f5efd776129cfcc701b4af"},
+    {file = "dtaidistance-2.5.1-cp311-cp311-macosx_10_9_universal2.whl", hash = "sha256:c168801c078dbe7de730c0afdbf0973b03d9521cc37e9f5095e39c2b407d4011"},
+    {file = "dtaidistance-2.5.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:74faaa81cef6c3d193f921672e2ab832a66d8ed0d7de3126fdb44d6606a4bb4b"},
+    {file = "dtaidistance-2.5.1-cp311-cp311-win_amd64.whl", hash = "sha256:019226688c14d6cf9dbfe82cfcb97d5a5c85d17abaac5f35ec8accff56659f94"},
+    {file = "dtaidistance-2.5.1-cp312-cp312-macosx_10_13_universal2.whl", hash = "sha256:1b93b9ef4238d28c5762da54a70a423e2084e2172293ae523641404f7280234b"},
+    {file = "dtaidistance-2.5.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:f483b59eadb65ff63df9180cbf5d00cfc25fc0690c029422594532fda38a349b"},
+    {file = "dtaidistance-2.5.1-cp312-cp312-win_amd64.whl", hash = "sha256:35096eeb2e43d85df342c53cc9f3481c9068b7e720aff2ec0534eea5ce3b9e2a"},
+    {file = "dtaidistance-2.5.1-cp313-cp313-macosx_10_13_universal2.whl", hash = "sha256:f05d3de0b4515b106a79be1eaabf752b7e9e3b2bdf70ba09d7b3e38d329c38fd"},
+    {file = "dtaidistance-2.5.1-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:177efa614e40b83bd1b2a5554dcbeb4976211e86d84a411347cb6218256551d5"},
+    {file = "dtaidistance-2.5.1-cp313-cp313-win_amd64.whl", hash = "sha256:411b966f14a5f3ed773b149f23006ed9e0f37bcf288f4b67f887d917349fba61"},
+    {file = "dtaidistance-2.5.1-cp314-cp314-macosx_10_15_universal2.whl", hash = "sha256:4ed72751a6068ee5dc245698e75cef01553690ef1735f9465932a1dea4a9734b"},
+    {file = "dtaidistance-2.5.1-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:4c9a983abf55094271ecbb86f5ce0ae1845ff6b1b77a273c3924227fd42009db"},
+    {file = "dtaidistance-2.5.1-cp314-cp314-win_amd64.whl", hash = "sha256:fadb86d38cb8434c83a9d36d45d98c57cf910103c8f0350406df87988a147ee6"},
+    {file = "dtaidistance-2.5.1-cp314-cp314t-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:5c9f1ddec4e3becd6d15f2294706d2c63f868c0b85d10a937e72a41e475e25ba"},
+    {file = "dtaidistance-2.5.1.tar.gz", hash = "sha256:707c7d323bafa4f5e835f15b6e3410fe628e5076506cb67248049e90a18e3a18"},
 ]
 
 [package.dependencies]
