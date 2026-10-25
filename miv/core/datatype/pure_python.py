@@ -1,10 +1,9 @@
 __all__ = ["PythonDataType", "NumpyDType", "GeneratorType"]
 
-from typing import TypeAlias, Any
+from typing import TypeAlias, Any, Self
 from collections.abc import Generator, Iterator
 
 import numpy as np
-from typing_extensions import Self
 
 from .node_mixin import DataNodeMixin
 from ..chainable import ChainingMixin

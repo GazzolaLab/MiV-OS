@@ -9,9 +9,8 @@ from __future__ import annotations
 
 __all__ = ["BaseCallbackMixin"]
 
-from typing import Any, ClassVar
+from typing import Any, ClassVar, Self
 from collections.abc import Callable
-from typing_extensions import Self
 
 import types
 import inspect
