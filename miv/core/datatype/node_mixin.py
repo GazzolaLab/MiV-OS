@@ -5,8 +5,7 @@ Base mixin for datatype classes that provides chaining capabilities and makes th
 compatible with the pipeline system.
 """
 
-from typing import TYPE_CHECKING, Any
-from typing_extensions import Self
+from typing import TYPE_CHECKING, Any, Self
 
 from ..chainable import ChainingMixin
 from ..loggable import DefaultLoggerMixin

@@ -40,10 +40,10 @@ First **create the fork repository and clone** to your local machine.
 
 2. Virtual python workspace: `conda`, `pyenv`, or `venv`.
 
-We recommend using python version above 3.8.0.
+We recommend using Python 3.11 or newer.
 
 ```bash
-conda create -n miv-dev python=3.10.8
+conda create -n miv-dev python=3.11
 conda activate miv-dev
 ```
 

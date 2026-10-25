@@ -24,7 +24,7 @@ We highly recommend using `conda <https://docs.conda.io/en/latest/>`_ to manage 
 
 .. code-block:: bash
 
-    conda create --name miv python=3.10.3
+    conda create --name miv python=3.11
     conda activate myenv
     pip install MiV-OS
 
