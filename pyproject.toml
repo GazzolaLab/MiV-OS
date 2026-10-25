@@ -116,6 +116,12 @@ dev = [
   "pytest-mpi>=0.6"
 ]
 
+[tool.uv]
+override-dependencies = [
+  # Parsl still caps filelock at <4; its FileLock usage works with 4.x.
+  "filelock>=4.2.1,<5",
+]
+
 
 
 [tool.ruff]
