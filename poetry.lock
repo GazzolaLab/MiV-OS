@@ -4476,25 +4476,29 @@ test = ["covdefaults (>=2.3)", "coverage (>=7.2.7)", "coverage-enable-subprocess
 
 [[package]]
 name = "viziphant"
-version = "0.4.0"
-description = "Viziphant is a package for the visualization of the analysisresults of electrophysiology data in Python"
+version = "0.4.1"
+description = "Viziphant is a package for the visualization of the analysis results of electrophysiology data in Python"
 optional = false
-python-versions = "*"
+python-versions = ">=3.8"
 groups = ["main"]
 files = [
-    {file = "viziphant-0.4.0.tar.gz", hash = "sha256:ae8c3df517d7781c184086909fad95f30c093534cfb35b74eadf330fa144e336"},
+    {file = "viziphant-0.4.1-py3-none-any.whl", hash = "sha256:8a22bb85b034f3a05785104a095259ba39cfeafc398c6011f4e1594c9b473b4b"},
+    {file = "viziphant-0.4.1.tar.gz", hash = "sha256:ae9a83ce889cbee51914085fc4318131ba1e56f523e0c1fbc4c51cf487c86a9a"},
 ]
 
 [package.dependencies]
-bokeh = ">=3.0.0"
 elephant = ">=0.9.0"
 holoviews = ">=1.16.0"
-matplotlib = ">=3.3.2"
+matplotlib = ">=3.6"
 neo = ">=0.9.0"
 networkx = ">=3.0.0"
 numpy = ">=1.19.5"
 quantities = ">=0.14.1"
 seaborn = ">=0.9.0"
+
+[package.extras]
+docs = ["elephant[extras] (>=0.9.0)", "numpydoc (>=1.1.0)", "sphinx (>=3.3.0)", "sphinx-tabs (>=1.1.13)", "sphinxcontrib-bibtex (>1.0.0)"]
+tests = ["elephant[extras]", "pytest"]
 
 [[package]]
 name = "wcwidth"
