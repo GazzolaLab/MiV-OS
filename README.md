@@ -36,17 +36,24 @@ imports are shared by the three analysis graphs below:
 
 ```python
 from miv.core import Pipeline
-from miv.io.file import ImportSignal
+from miv.io import ImportSignal
 from miv.signal import ButterBandpass, ThresholdCutoff
 from miv.statistics import (
     BayesianAdaptiveKernelSmoother,
     ExponentialSpikeEncoder,
     FixedDurationTrializer,
+    GPFALatentProjector,
     KernelRank,
+    KnowledgeTransfer,
+    KnowledgeTransferInputBuilder,
+    KnowledgeTransferTrialSelector,
+    RidgeReadout,
     SpectralRadius,
+    TTLPulseDecoder,
 )
 from miv.statistics.connectivity import DirectedConnectivity
 from miv.statistics.criticality import BranchingRatio
+from miv_state_space import HierarchicalGPFA
 ```
 
 ### Statistical diagnostics
@@ -76,6 +83,58 @@ diagnostic_states >> radius
 Pipeline([baks, branching, connectivity, rank, radius]).run(
     working_directory="results/statistical_diagnostics"
 )
+```
+
+### Reservoir computing
+
+```python
+stimulus = ImportSignal("recording.h5", group="Stimulus")
+decoder = TTLPulseDecoder(stimulus_channel=0)
+trials = FixedDurationTrializer(trial_duration=1.0)
+encoding = ExponentialSpikeEncoder(decay_rate=5.0)
+readout = RidgeReadout(random_state=0)
+
+stimulus >> decoder
+spikes >> trials
+decoder >> trials
+trials >> encoding >> readout
+
+Pipeline(readout).run(working_directory="results/rc")
+```
+
+### Knowledge-transplanted reservoir computing
+
+```python
+# ``expert_trials`` and ``student_trials`` are the paired outputs of the
+# corresponding import, filtering, detection, and trialization graphs shown
+# in examples/rc_kt/KT.py.
+expert_gpfa = HierarchicalGPFA(random_state=0)
+student_gpfa = HierarchicalGPFA(random_state=0)
+kt_input = KnowledgeTransferInputBuilder()
+expert_trial_stream = KnowledgeTransferTrialSelector("expert")
+student_trial_stream = KnowledgeTransferTrialSelector("student")
+expert_features = GPFALatentProjector(9, "expert")
+student_features = GPFALatentProjector(9, "student")
+expert_readout = RidgeReadout(random_state=0)
+transplant = KnowledgeTransfer(band_dimensions=(3, 3, 3))
+
+expert_trials >> kt_input
+student_trials >> kt_input
+kt_input >> expert_trial_stream >> expert_gpfa
+kt_input >> student_trial_stream >> student_gpfa
+expert_gpfa >> student_gpfa  # serial dependency: freeze expert kernels
+expert_gpfa >> expert_features
+kt_input >> expert_features
+student_gpfa >> student_features
+kt_input >> student_features
+expert_features >> expert_readout
+expert_features >> transplant
+student_features >> transplant
+expert_readout >> transplant
+
+Pipeline(transplant).run(working_directory="results/kt_rc")
+
+kt_result = transplant.output()
 ```
 
 The code is available on the [`pub/RC-KT` publication branch][link-rc-kt-demo]
